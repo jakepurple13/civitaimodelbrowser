@@ -171,11 +171,12 @@ private fun ModelItem(
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
+    val imageModel = remember { models.modelVersions.randomOrNull()?.images?.randomOrNull() }
     CoverCard(
-        imageUrl = remember { models.modelVersions.randomOrNull()?.images?.randomOrNull()?.url.orEmpty() },
+        imageUrl = remember { imageModel?.url.orEmpty() },
         name = models.name,
         type = models.type,
-        isNsfw = models.nsfw,
+        isNsfw = models.nsfw || imageModel?.nsfw != "None",
         showNsfw = showNsfw,
         blurStrength = blurStrength,
         onClick = onClick,

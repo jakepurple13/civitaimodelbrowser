@@ -4,6 +4,7 @@ package com.programmersbox.common
 
 import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideOutHorizontally
+import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.remember
@@ -28,25 +29,27 @@ internal fun App(
         LocalNavController provides navController,
         LocalDataStore provides viewModel.dataStore
     ) {
-        NavHost(
-            navigator = navController,
-            initialRoute = Screen.List.routeId,
-            navTransition = NavTransition(
-                createTransition = slideInHorizontally { it },
-                destroyTransition = slideOutHorizontally { it },
-                resumeTransition = slideInHorizontally { -it },
-                pauseTransition = slideOutHorizontally { -it },
-            )
-        ) {
-            scene(Screen.List.routeId) { CivitAiScreen(network) }
-            scene(Screen.Detail.routeId) {
-                CivitAiDetailScreen(
-                    network = network,
-                    id = it.path<String>("modelId"),
-                    onShareClick = onShareClick
+        Surface {
+            NavHost(
+                navigator = navController,
+                initialRoute = Screen.List.routeId,
+                navTransition = NavTransition(
+                    createTransition = slideInHorizontally { it },
+                    destroyTransition = slideOutHorizontally { it },
+                    resumeTransition = slideInHorizontally { -it },
+                    pauseTransition = slideOutHorizontally { -it },
                 )
+            ) {
+                scene(Screen.List.routeId) { CivitAiScreen(network) }
+                scene(Screen.Detail.routeId) {
+                    CivitAiDetailScreen(
+                        network = network,
+                        id = it.path<String>("modelId"),
+                        onShareClick = onShareClick
+                    )
+                }
+                scene(Screen.Settings.routeId) { SettingsScreen() }
             }
-            scene(Screen.Settings.routeId) { SettingsScreen() }
         }
     }
 }

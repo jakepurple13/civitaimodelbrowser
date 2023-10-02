@@ -110,7 +110,8 @@ fun CivitAiDetailScreen(
                             TopAppBar(
                                 title = {
                                     Text("Last Update at: " + simpleDateTimeFormatter.format(version.updatedAt.toEpochMilliseconds()))
-                                }
+                                },
+                                windowInsets = WindowInsets(0.dp)
                             )
                         }
                         items(version.images) { images ->

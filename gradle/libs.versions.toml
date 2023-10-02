@@ -1,0 +1,34 @@
+[versions]
+kotlin-version = "1.9.10"
+agp-version = "7.3.0"
+compose-version = "1.5.1"
+ktor-version = "2.3.4"
+kotlinx-datetime = "0.4.1"
+datastore-version = "1.1.0-alpha05"
+paging-version = "3.3.0-alpha02"
+kamel-image = "0.7.3"
+kotlinx-coroutines-core = "1.7.3"
+precompose = "1.5.4"
+
+[plugins]
+android-application = { id = "com.android.application", version.ref = "agp.version" }
+android-library = { id = "com.android.library", version.ref = "agp.version" }
+kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin.version" }
+
+[libraries]
+androidx-appcompat = { module = "androidx.appcompat:appcompat", version = "1.6.1" }
+androidx-core = { module = "androidx.core:core-ktx", version = "1.12.0" }
+androidx-activity-compose = "androidx.activity:activity-compose:1.7.2"
+datastore-core = { module = "androidx.datastore:datastore-core", version.ref = "datastore.version" }
+datastore-preferences = { module = "androidx.datastore:datastore-preferences-core", version.ref = "datastore.version" }
+paging-runtime = { module = "androidx.paging:paging-common", version.ref = "paging.version" }
+paging-compose = { module = "androidx.paging:paging-compose", version.ref = "paging.version" }
+ktor-core = { module = "io.ktor:ktor-client-core", version.ref = "ktor.version" }
+ktor-jvm = { module = "io.ktor:ktor-client-okhttp", version.ref = "ktor.version" }
+ktor-content-negotiation = { module = "io.ktor:ktor-client-content-negotiation", version.ref = "ktor.version" }
+ktor-serialization = { module = "io.ktor:ktor-serialization-kotlinx-json", version.ref = "ktor.version" }
+kotlinx-datetime = { module = "org.jetbrains.kotlinx:kotlinx-datetime", version.ref = "kotlinx-datetime" }
+kamel-image = { module = "media.kamel:kamel-image", version.ref = "kamel-image" }
+kotlinx-coroutines-core = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", version.ref = "kotlinx-coroutines-core" }
+precompose-viewmodel = { module = "moe.tlaster:precompose-viewmodel", version.ref = "precompose" }
+precompose = { module = "moe.tlaster:precompose", version.ref = "precompose" }

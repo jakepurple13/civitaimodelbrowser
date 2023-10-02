@@ -43,6 +43,11 @@ fun CivitAiScreen(
     val dataStore = LocalDataStore.current
     val showNsfw by remember { dataStore.showNsfw.flow }.collectAsStateWithLifecycle(false)
     val blurStrength by remember { dataStore.hideNsfwStrength.flow }.collectAsStateWithLifecycle(6f)
+
+    val pullToRefreshState = rememberPullRefreshState(
+        refreshing = lazyPagingItems.loadState.refresh == LoadState.Loading,
+        onRefresh = { lazyPagingItems.refresh() }
+    )
     Scaffold(
         topBar = {
             TopAppBar(
@@ -69,56 +74,68 @@ fun CivitAiScreen(
         },
         modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection)
     ) { padding ->
-        LazyVerticalGrid(
-            columns = adaptiveGridCell(),
-            contentPadding = padding,
-            verticalArrangement = Arrangement.spacedBy(4.dp),
-            horizontalArrangement = Arrangement.spacedBy(4.dp),
+        Box(
             modifier = Modifier
-                .padding(4.dp)
-                .fillMaxSize()
+                .padding(padding)
+                .pullRefresh(pullToRefreshState)
         ) {
-            if (lazyPagingItems.loadState.refresh == LoadState.Loading) {
-                item(
-                    span = { GridItemSpan(maxLineSpan) }
-                ) {
-                    Text(
-                        text = "Waiting for items to load from the backend",
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .wrapContentWidth(Alignment.CenterHorizontally)
-                    )
-                }
-            }
-
-            items(
-                count = lazyPagingItems.itemCount,
-                contentType = lazyPagingItems.itemContentType()
+            LazyVerticalGrid(
+                columns = adaptiveGridCell(),
+                //contentPadding = padding,
+                verticalArrangement = Arrangement.spacedBy(4.dp),
+                horizontalArrangement = Arrangement.spacedBy(4.dp),
+                modifier = Modifier
+                    .padding(4.dp)
+                    .fillMaxSize()
             ) {
-                lazyPagingItems[it]?.let { models ->
-                    ModelItem(
-                        models = models,
-                        onClick = {
-                            navController.navigate(Screen.Detail.routeId.replace("{modelId}", models.id.toString()))
-                        },
-                        showNsfw = showNsfw,
-                        blurStrength = blurStrength.dp,
-                        modifier = Modifier.animateItemPlacement()
-                    )
+                if (lazyPagingItems.loadState.refresh == LoadState.Loading) {
+                    item(
+                        span = { GridItemSpan(maxLineSpan) }
+                    ) {
+                        Text(
+                            text = "Waiting for items to load from the backend",
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .wrapContentWidth(Alignment.CenterHorizontally)
+                        )
+                    }
+                }
+
+                items(
+                    count = lazyPagingItems.itemCount,
+                    contentType = lazyPagingItems.itemContentType(),
+                ) {
+                    lazyPagingItems[it]?.let { models ->
+                        ModelItem(
+                            models = models,
+                            onClick = {
+                                navController.navigate(Screen.Detail.routeId.replace("{modelId}", models.id.toString()))
+                            },
+                            showNsfw = showNsfw,
+                            blurStrength = blurStrength.dp,
+                            modifier = Modifier.animateItemPlacement()
+                        )
+                    }
+                }
+
+                if (lazyPagingItems.loadState.append == LoadState.Loading) {
+                    item(
+                        span = { GridItemSpan(maxLineSpan) }
+                    ) {
+                        CircularProgressIndicator(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .wrapContentWidth(Alignment.CenterHorizontally)
+                        )
+                    }
                 }
             }
 
-            if (lazyPagingItems.loadState.append == LoadState.Loading) {
-                item(
-                    span = { GridItemSpan(maxLineSpan) }
-                ) {
-                    CircularProgressIndicator(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .wrapContentWidth(Alignment.CenterHorizontally)
-                    )
-                }
-            }
+            PullRefreshIndicator(
+                refreshing = lazyPagingItems.loadState.refresh == LoadState.Loading,
+                state = pullToRefreshState,
+                modifier = Modifier.align(Alignment.TopCenter)
+            )
         }
     }
 }

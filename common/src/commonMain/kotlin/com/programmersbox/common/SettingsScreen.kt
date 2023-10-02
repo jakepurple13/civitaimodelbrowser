@@ -3,19 +3,26 @@ package com.programmersbox.common
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import kotlinx.coroutines.launch
+import moe.tlaster.precompose.flow.collectAsStateWithLifecycle
 import kotlin.math.roundToInt
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SettingsScreen() {
-    val showNsfw = remember { DataStore.showNsfw }
-    val hideNsfwStrength = remember { DataStore.hideNsfwStrength }
+    val dataStore = LocalDataStore.current
+    val showNsfw = remember { dataStore.showNsfw }
+    val hideNsfwStrength = remember { dataStore.hideNsfwStrength }
     val navController = LocalNavController.current
     val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
     val scope = rememberCoroutineScope()
@@ -34,9 +41,11 @@ fun SettingsScreen() {
         }
     ) { padding ->
         Column(
-            modifier = Modifier.padding(padding)
+            modifier = Modifier
+                .verticalScroll(rememberScrollState())
+                .padding(padding)
         ) {
-            val isNsfwEnabled by showNsfw.flow.collectAsState(false)
+            val isNsfwEnabled by showNsfw.flow.collectAsStateWithLifecycle(false)
             ListItem(
                 headlineContent = { Text("Show NSFW Content?") },
                 trailingContent = {
@@ -48,7 +57,7 @@ fun SettingsScreen() {
                 supportingContent = {
                     AnimatedVisibility(!isNsfwEnabled) {
                         Column {
-                            val nsfwBlurStrength by hideNsfwStrength.flow.collectAsState(6f)
+                            val nsfwBlurStrength by hideNsfwStrength.flow.collectAsStateWithLifecycle(6f)
                             Text("Strength: ${nsfwBlurStrength.roundToInt()}")
                             Slider(
                                 value = nsfwBlurStrength,

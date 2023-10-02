@@ -4,10 +4,12 @@ import android.app.Activity
 import android.content.Intent
 import android.os.Build
 import android.os.Bundle
+import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.SideEffect
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalView
@@ -20,6 +22,7 @@ class MainActivity : PreComposeActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         WindowCompat.setDecorFitsSystemWindows(window, false)
+        enableEdgeToEdge()
         setContent {
             CustomMaterialTheme {
                 UIShow(
@@ -34,7 +37,8 @@ class MainActivity : PreComposeActivity() {
                                 null
                             )
                         )
-                    }
+                    },
+                    producePath = { filesDir.resolve("androidx.preferences_pb").absolutePath }
                 )
             }
         }
@@ -60,8 +64,8 @@ fun CustomMaterialTheme(
     if (!view.isInEditMode) {
         SideEffect {
             val activity = view.context as Activity
-            activity.window.statusBarColor = colorScheme.primary.toArgb()
-            WindowCompat.getInsetsController(activity.window, view).isAppearanceLightStatusBars = darkTheme
+            activity.window.statusBarColor = Color.Transparent.toArgb()
+            WindowCompat.getInsetsController(activity.window, view).isAppearanceLightStatusBars = !darkTheme
         }
     }
 

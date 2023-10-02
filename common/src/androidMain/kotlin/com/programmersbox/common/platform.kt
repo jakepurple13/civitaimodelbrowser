@@ -9,6 +9,7 @@ public actual fun getPlatformName(): String {
 @Composable
 public fun UIShow(
     onShareClick: (String) -> Unit,
+    producePath: () -> String,
 ) {
-    App(onShareClick)
+    App(onShareClick, producePath)
 }

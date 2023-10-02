@@ -31,6 +31,12 @@ android {
         getByName("release") {
             isMinifyEnabled = false
         }
+
+        create("beta") {
+            initWith(getByName("debug"))
+            matchingFallbacks.add("debug")
+            isDebuggable = false
+        }
     }
 }
 

@@ -15,7 +15,8 @@ fun main() = application {
                         .setContents(StringSelection(link), null)
                     it.beep()
                 }
-            }
+            },
+            producePath = { "androidx.preferences_pb" }
         )
     }
 }

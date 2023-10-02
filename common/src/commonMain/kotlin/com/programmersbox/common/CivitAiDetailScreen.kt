@@ -40,8 +40,9 @@ fun CivitAiDetailScreen(
     val viewModel = viewModel { CivitAiDetailViewModel(network, id) }
     val navController = LocalNavController.current
     val simpleDateTimeFormatter = remember { SimpleDateFormat("MM/dd/yy HH:mm", Locale.getDefault()) }
-    val showNsfw by remember { DataStore.showNsfw.flow }.collectAsStateWithLifecycle(false)
-    val nsfwBlurStrength by remember { DataStore.hideNsfwStrength.flow }.collectAsStateWithLifecycle(6f)
+    val dataStore = LocalDataStore.current
+    val showNsfw by remember { dataStore.showNsfw.flow }.collectAsStateWithLifecycle(false)
+    val nsfwBlurStrength by remember { dataStore.hideNsfwStrength.flow }.collectAsStateWithLifecycle(6f)
 
     when (val model = viewModel.models) {
         is DetailViewState.Content -> {

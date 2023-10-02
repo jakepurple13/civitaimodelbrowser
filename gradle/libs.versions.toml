@@ -18,7 +18,7 @@ kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin.ve
 [libraries]
 androidx-appcompat = { module = "androidx.appcompat:appcompat", version = "1.6.1" }
 androidx-core = { module = "androidx.core:core-ktx", version = "1.12.0" }
-androidx-activity-compose = "androidx.activity:activity-compose:1.7.2"
+androidx-activity-compose = "androidx.activity:activity-compose:1.8.0-rc01"
 datastore-core = { module = "androidx.datastore:datastore-core", version.ref = "datastore.version" }
 datastore-preferences = { module = "androidx.datastore:datastore-preferences-core", version.ref = "datastore.version" }
 datastore-core-okio = { group = "androidx.datastore", name = "datastore-core-okio", version.ref = "datastore.version" }

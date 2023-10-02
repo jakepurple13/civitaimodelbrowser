@@ -13,7 +13,6 @@ import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -24,10 +23,12 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.paging.LoadState
 import io.kamel.image.KamelImage
 import io.kamel.image.asyncPainterResource
+import moe.tlaster.precompose.flow.collectAsStateWithLifecycle
 import moe.tlaster.precompose.viewmodel.viewModel
 
 @OptIn(ExperimentalFoundationApi::class, ExperimentalMaterial3Api::class)
@@ -39,7 +40,9 @@ fun CivitAiScreen(
     val navController = LocalNavController.current
     val lazyPagingItems = viewModel.pager.collectAsLazyPagingItems()
     val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior()
-    val showNsfw by remember { DataStore.showNsfw.flow }.collectAsState(false)
+    val dataStore = LocalDataStore.current
+    val showNsfw by remember { dataStore.showNsfw.flow }.collectAsStateWithLifecycle(false)
+    val blurStrength by remember { dataStore.hideNsfwStrength.flow }.collectAsStateWithLifecycle(6f)
     Scaffold(
         topBar = {
             TopAppBar(
@@ -99,6 +102,7 @@ fun CivitAiScreen(
                             navController.navigate(Screen.Detail.routeId.replace("{modelId}", models.id.toString()))
                         },
                         showNsfw = showNsfw,
+                        blurStrength = blurStrength.dp,
                         modifier = Modifier.animateItemPlacement()
                     )
                 }
@@ -123,6 +127,7 @@ fun CivitAiScreen(
 private fun ModelItem(
     models: Models,
     showNsfw: Boolean,
+    blurStrength: Dp,
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -132,6 +137,7 @@ private fun ModelItem(
         type = models.type,
         isNsfw = models.nsfw,
         showNsfw = showNsfw,
+        blurStrength = blurStrength,
         onClick = onClick,
         modifier = modifier.size(
             width = ComposableUtils.IMAGE_WIDTH,
@@ -147,6 +153,7 @@ fun CoverCard(
     type: ModelType,
     isNsfw: Boolean,
     showNsfw: Boolean,
+    blurStrength: Dp,
     modifier: Modifier = Modifier,
     onClick: () -> Unit = {},
 ) {
@@ -171,7 +178,7 @@ fun CoverCard(
                     .matchParentSize()
                     .let {
                         if (!showNsfw && isNsfw) {
-                            it.blur(DataStore.hideNsfwStrength.flow.collectAsState(6f).value.dp)
+                            it.blur(blurStrength)
                         } else {
                             it
                         }

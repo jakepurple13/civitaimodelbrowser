@@ -8,13 +8,16 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowUpward
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.blur
@@ -28,6 +31,7 @@ import androidx.compose.ui.unit.dp
 import androidx.paging.LoadState
 import io.kamel.image.KamelImage
 import io.kamel.image.asyncPainterResource
+import kotlinx.coroutines.launch
 import moe.tlaster.precompose.flow.collectAsStateWithLifecycle
 import moe.tlaster.precompose.viewmodel.viewModel
 
@@ -44,6 +48,8 @@ fun CivitAiScreen(
     val showNsfw by remember { dataStore.showNsfw.flow }.collectAsStateWithLifecycle(false)
     val blurStrength by remember { dataStore.hideNsfwStrength.flow }.collectAsStateWithLifecycle(6f)
 
+    val scope = rememberCoroutineScope()
+    val lazyGridState = rememberLazyGridState()
     val pullToRefreshState = rememberPullRefreshState(
         refreshing = lazyPagingItems.loadState.refresh == LoadState.Loading,
         onRefresh = { lazyPagingItems.refresh() }
@@ -52,6 +58,11 @@ fun CivitAiScreen(
         topBar = {
             TopAppBar(
                 title = { Text("CivitAi Model Browser") },
+                navigationIcon = {
+                    IconButton(
+                        onClick = { lazyPagingItems.refresh() },
+                    ) { Icon(Icons.Default.Refresh, null) }
+                },
                 actions = {
                     IconButton(
                         onClick = { navController.navigate(Screen.Settings.routeId) }
@@ -67,8 +78,8 @@ fun CivitAiScreen(
                 },
                 floatingActionButton = {
                     FloatingActionButton(
-                        onClick = { lazyPagingItems.refresh() },
-                    ) { Icon(Icons.Default.Refresh, null) }
+                        onClick = { scope.launch { lazyGridState.animateScrollToItem(0) } },
+                    ) { Icon(Icons.Default.ArrowUpward, null) }
                 }
             )
         },
@@ -80,8 +91,8 @@ fun CivitAiScreen(
                 .pullRefresh(pullToRefreshState)
         ) {
             LazyVerticalGrid(
+                state = lazyGridState,
                 columns = adaptiveGridCell(),
-                //contentPadding = padding,
                 verticalArrangement = Arrangement.spacedBy(4.dp),
                 horizontalArrangement = Arrangement.spacedBy(4.dp),
                 modifier = Modifier
@@ -104,6 +115,7 @@ fun CivitAiScreen(
                 items(
                     count = lazyPagingItems.itemCount,
                     contentType = lazyPagingItems.itemContentType(),
+                    key = lazyPagingItems.itemKey { it.id }
                 ) {
                     lazyPagingItems[it]?.let { models ->
                         ModelItem(
@@ -129,10 +141,21 @@ fun CivitAiScreen(
                         )
                     }
                 }
+
+                (lazyPagingItems.loadState.append as? LoadState.Error)?.let { state ->
+                    item(
+                        span = { GridItemSpan(maxLineSpan) }
+                    ) {
+                        Column {
+                            Text("Something went wrong! Please try again!")
+                            Text(state.error.stackTraceToString())
+                        }
+                    }
+                }
             }
 
             PullRefreshIndicator(
-                refreshing = lazyPagingItems.loadState.refresh == LoadState.Loading,
+                refreshing = lazyPagingItems.loadState.refresh == LoadState.Loading || lazyPagingItems.loadState.append == LoadState.Loading,
                 state = pullToRefreshState,
                 modifier = Modifier.align(Alignment.TopCenter)
             )

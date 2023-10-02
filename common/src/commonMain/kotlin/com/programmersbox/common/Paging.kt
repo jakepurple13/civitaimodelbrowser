@@ -1,9 +1,7 @@
 package com.programmersbox.common
 
-import androidx.paging.*
-import kotlinx.datetime.Clock
-import java.io.IOException
-import kotlin.time.Duration.Companion.hours
+import androidx.paging.PagingSource
+import androidx.paging.PagingState
 
 class CivitBrowserPagingSource(
     private val network: Network,
@@ -21,23 +19,24 @@ class CivitBrowserPagingSource(
     override suspend fun load(params: LoadParams<Int>): LoadResult<Int, Models> {
         val page = params.key ?: 1
 
-        val response = network.getModels(
+        return network.getModels(
             page = page.coerceAtLeast(1),
             perPage = perPage
-        )
-            .onFailure { it.printStackTrace() }
-            .getOrNull()
+        ).fold(
+            onSuccess = { response ->
+                val prevKey = page.takeIf { it > 1 }?.minus(1)
 
-        val prevKey = page.takeIf { it > 1 }?.minus(1)
+                // This API defines that it's out of data when a page returns empty. When out of
+                // data, we return `null` to signify no more pages should be loaded
+                val nextKey = if (response.items.isNotEmpty()) page + 1 else null
 
-        // This API defines that it's out of data when a page returns empty. When out of
-        // data, we return `null` to signify no more pages should be loaded
-        val nextKey = if (!response?.items.isNullOrEmpty()) page + 1 else null
-
-        return LoadResult.Page(
-            data = response?.items.orEmpty(),
-            prevKey = prevKey,
-            nextKey = nextKey
+                LoadResult.Page(
+                    data = response.items,
+                    prevKey = prevKey,
+                    nextKey = nextKey
+                )
+            },
+            onFailure = { LoadResult.Error(it) }
         )
     }
 }

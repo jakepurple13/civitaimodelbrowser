@@ -13,3 +13,5 @@ public fun UIShow(
 ) {
     App(onShareClick, producePath)
 }
+
+internal actual fun getPagingPlaceholderKey(index: Int): Any = index

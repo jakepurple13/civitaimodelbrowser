@@ -115,7 +115,7 @@ fun CivitAiScreen(
                 items(
                     count = lazyPagingItems.itemCount,
                     contentType = lazyPagingItems.itemContentType(),
-                    key = lazyPagingItems.itemKey { it.id }
+                    key = lazyPagingItems.itemKeyIndexed { model, index -> "${model.id}$index" }
                 ) {
                     lazyPagingItems[it]?.let { models ->
                         ModelItem(

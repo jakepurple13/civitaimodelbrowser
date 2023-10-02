@@ -273,3 +273,17 @@ public fun <T : Any> LazyPagingItems<T>.itemKey(
         }
     }
 }
+
+@Suppress("PrimitiveInLambda")
+public fun <T : Any> LazyPagingItems<T>.itemKeyIndexed(
+    key: ((item: @JvmSuppressWildcards T, index: Int) -> Any)? = null,
+): (index: Int) -> Any {
+    return { index ->
+        if (key == null) {
+            getPagingPlaceholderKey(index)
+        } else {
+            val item = peek(index)
+            if (item == null) getPagingPlaceholderKey(index) else key(item, index)
+        }
+    }
+}

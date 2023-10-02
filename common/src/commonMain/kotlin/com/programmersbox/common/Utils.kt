@@ -8,8 +8,8 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 
 object ComposableUtils {
-    const val IMAGE_WIDTH_PX = 360
-    const val IMAGE_HEIGHT_PX = 480
+    const val IMAGE_WIDTH_PX = 360 * 1.5f
+    const val IMAGE_HEIGHT_PX = 480 * 1.5f
     val IMAGE_WIDTH @Composable get() = with(LocalDensity.current) { IMAGE_WIDTH_PX.toDp() }
     val IMAGE_HEIGHT @Composable get() = with(LocalDensity.current) { IMAGE_HEIGHT_PX.toDp() }
 }

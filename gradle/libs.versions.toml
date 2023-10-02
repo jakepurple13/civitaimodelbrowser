@@ -21,6 +21,7 @@ androidx-core = { module = "androidx.core:core-ktx", version = "1.12.0" }
 androidx-activity-compose = "androidx.activity:activity-compose:1.7.2"
 datastore-core = { module = "androidx.datastore:datastore-core", version.ref = "datastore.version" }
 datastore-preferences = { module = "androidx.datastore:datastore-preferences-core", version.ref = "datastore.version" }
+datastore-core-okio = { group = "androidx.datastore", name = "datastore-core-okio", version.ref = "datastore.version" }
 paging-runtime = { module = "androidx.paging:paging-common", version.ref = "paging.version" }
 paging-compose = { module = "androidx.paging:paging-compose", version.ref = "paging.version" }
 ktor-core = { module = "io.ktor:ktor-client-core", version.ref = "ktor.version" }

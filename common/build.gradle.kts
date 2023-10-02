@@ -32,6 +32,7 @@ kotlin {
                 api(libs.ktor.content.negotiation)
                 api(libs.ktor.serialization)
                 api(libs.datastore.core)
+                api(libs.datastore.core.okio)
                 api(libs.datastore.preferences)
                 api(libs.paging.runtime)
                 //api(libs.paging.compose)

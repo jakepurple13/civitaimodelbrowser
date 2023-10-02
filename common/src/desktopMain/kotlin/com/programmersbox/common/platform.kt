@@ -7,6 +7,8 @@ public actual fun getPlatformName(): String {
 }
 
 @Composable
-public fun UIShow() {
-    App()
+public fun UIShow(
+    onShareClick: (String) -> Unit,
+) {
+    App(onShareClick)
 }

@@ -1,5 +1,6 @@
 package com.programmersbox.common
 
+import kotlinx.datetime.Instant
 import kotlinx.serialization.Serializable
 
 @Serializable
@@ -40,8 +41,8 @@ data class ModelVersion(
     val id: Long,
     val modelId: Long,
     val name: String,
-    val createdAt: String,
-    val updatedAt: String,
+    val createdAt: Instant,
+    val updatedAt: Instant,
     val trainedWords: List<String>,
     val baseModel: String,
     val baseModelType: String?,
@@ -53,11 +54,11 @@ data class ModelVersion(
 
 @Serializable
 data class ModelImage(
-    val id: String,
+    val id: String? = "",
     val url: String,
     val nsfw: String,
     val width: Int,
-    val height: Int
+    val height: Int,
 )
 
 @Serializable

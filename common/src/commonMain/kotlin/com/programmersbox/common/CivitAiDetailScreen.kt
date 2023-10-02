@@ -1,0 +1,209 @@
+@file:Suppress("INLINE_FROM_HIGHER_PLATFORM")
+
+package com.programmersbox.common
+
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.grid.GridItemSpan
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.OpenInBrowser
+import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material.icons.filled.Share
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.blur
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalUriHandler
+import androidx.compose.ui.unit.dp
+import io.kamel.image.KamelImage
+import io.kamel.image.asyncPainterResource
+import kotlinx.coroutines.launch
+import moe.tlaster.precompose.flow.collectAsStateWithLifecycle
+import moe.tlaster.precompose.viewmodel.ViewModel
+import moe.tlaster.precompose.viewmodel.viewModel
+import moe.tlaster.precompose.viewmodel.viewModelScope
+import java.text.SimpleDateFormat
+import java.util.*
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun CivitAiDetailScreen(
+    network: Network,
+    id: String?,
+    onShareClick: (String) -> Unit,
+) {
+    val viewModel = viewModel { CivitAiDetailViewModel(network, id) }
+    val navController = LocalNavController.current
+    val simpleDateTimeFormatter = remember { SimpleDateFormat("MM/dd/yy HH:mm", Locale.getDefault()) }
+    val showNsfw by remember { DataStore.showNsfw.flow }.collectAsStateWithLifecycle(false)
+    val nsfwBlurStrength by remember { DataStore.hideNsfwStrength.flow }.collectAsStateWithLifecycle(6f)
+
+    when (val model = viewModel.models) {
+        is DetailViewState.Content -> {
+            Scaffold(
+                topBar = {
+                    TopAppBar(
+                        title = { Text(model.models.name) },
+                        navigationIcon = {
+                            IconButton(
+                                onClick = { navController.popBackStack() }
+                            ) { Icon(Icons.Default.ArrowBack, null) }
+                        },
+                        actions = {
+                            IconButton(
+                                onClick = { onShareClick(viewModel.modelUrl) }
+                            ) { Icon(Icons.Default.Share, null) }
+
+                            val uriHandler = LocalUriHandler.current
+                            IconButton(
+                                onClick = { uriHandler.openUri(viewModel.modelUrl) }
+                            ) { Icon(Icons.Default.OpenInBrowser, null) }
+
+                            IconButton(
+                                onClick = { navController.navigate(Screen.Settings.routeId) }
+                            ) { Icon(Icons.Default.Settings, null) }
+                        }
+                    )
+                }
+            ) { paddingValues ->
+                LazyVerticalGrid(
+                    columns = adaptiveGridCell(),
+                    contentPadding = paddingValues,
+                    verticalArrangement = Arrangement.spacedBy(4.dp),
+                    horizontalArrangement = Arrangement.spacedBy(4.dp),
+                    modifier = Modifier
+                        .padding(bottom = 4.dp)
+                        .fillMaxSize()
+                ) {
+                    item(
+                        span = { GridItemSpan(maxLineSpan) }
+                    ) {
+                        ListItem(
+                            overlineContent = { Text(model.models.type.name) },
+                            headlineContent = { Text(model.models.name) },
+                            supportingContent = { Text(model.models.description.orEmpty()) },
+                            trailingContent = {
+                                if (model.models.nsfw) {
+                                    ElevatedAssistChip(
+                                        label = { Text("NSFW") },
+                                        onClick = {},
+                                        colors = AssistChipDefaults.elevatedAssistChipColors(
+                                            disabledLabelColor = MaterialTheme.colorScheme.error,
+                                            disabledContainerColor = MaterialTheme.colorScheme.surface
+                                        ),
+                                        enabled = false,
+                                    )
+                                }
+                            }
+                        )
+                    }
+                    model.models.modelVersions.forEach { version ->
+                        item(
+                            span = { GridItemSpan(maxLineSpan) }
+                        ) {
+                            TopAppBar(
+                                title = {
+                                    Text("Last Update at: " + simpleDateTimeFormatter.format(version.updatedAt.toEpochMilliseconds()))
+                                }
+                            )
+                        }
+                        items(version.images) { images ->
+                            Surface(
+                                tonalElevation = 4.dp,
+                                shape = MaterialTheme.shapes.medium,
+                                modifier = Modifier.size(
+                                    width = ComposableUtils.IMAGE_WIDTH,
+                                    height = ComposableUtils.IMAGE_HEIGHT
+                                )
+                            ) {
+                                Box(
+                                    modifier = Modifier.fillMaxSize(),
+                                    contentAlignment = Alignment.Center
+                                ) {
+                                    KamelImage(
+                                        resource = asyncPainterResource(images.url),
+                                        onLoading = {
+                                            CircularProgressIndicator(
+                                                progress = animateFloatAsState(
+                                                    targetValue = it,
+                                                    label = ""
+                                                ).value
+                                            )
+                                        },
+                                        contentScale = ContentScale.FillBounds,
+                                        contentDescription = null,
+                                        modifier = Modifier.let {
+                                            if (!showNsfw && images.nsfw != "None") {
+                                                it.blur(nsfwBlurStrength.dp)
+                                            } else {
+                                                it
+                                            }
+                                        }
+                                    )
+
+                                    if (images.nsfw != "None") {
+                                        ElevatedAssistChip(
+                                            label = { Text("NSFW") },
+                                            onClick = {},
+                                            colors = AssistChipDefaults.elevatedAssistChipColors(
+                                                disabledLabelColor = MaterialTheme.colorScheme.error,
+                                                disabledContainerColor = MaterialTheme.colorScheme.surface
+                                            ),
+                                            enabled = false,
+                                            modifier = Modifier
+                                                .padding(horizontal = 4.dp)
+                                                .align(Alignment.TopEnd)
+                                        )
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        DetailViewState.Error -> {
+
+        }
+
+        DetailViewState.Loading -> {
+            Box(
+                contentAlignment = Alignment.Center,
+                modifier = Modifier.fillMaxSize()
+            ) {
+                CircularProgressIndicator()
+            }
+        }
+    }
+}
+
+class CivitAiDetailViewModel(
+    private val network: Network,
+    id: String?,
+) : ViewModel() {
+    val modelUrl = "https://civitai.com/models/$id"
+    var models by mutableStateOf<DetailViewState>(DetailViewState.Loading)
+
+    init {
+        viewModelScope.launch {
+            models = id?.let { network.fetchModel(it) }
+                ?.onFailure { it.printStackTrace() }
+                ?.fold(
+                    onSuccess = { DetailViewState.Content(it) },
+                    onFailure = { DetailViewState.Error }
+                ) ?: DetailViewState.Error
+        }
+    }
+}
+
+sealed class DetailViewState {
+    data object Loading : DetailViewState()
+    data object Error : DetailViewState()
+    data class Content(val models: Models) : DetailViewState()
+}

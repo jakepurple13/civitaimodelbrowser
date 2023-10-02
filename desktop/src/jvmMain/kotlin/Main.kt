@@ -1,17 +1,22 @@
-import androidx.compose.ui.window.Window
 import androidx.compose.ui.window.application
-import androidx.compose.foundation.isSystemInDarkTheme
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.darkColorScheme
-import androidx.compose.material3.lightColorScheme
 import com.programmersbox.common.Network
 import com.programmersbox.common.UIShow
 import kotlinx.coroutines.runBlocking
-import moe.tlaster.precompose.PreComposeWindow
+import java.awt.Toolkit
+import java.awt.datatransfer.StringSelection
 
 fun main() = application {
     WindowWithBar(onCloseRequest = ::exitApplication) {
-        UIShow()
+        UIShow(
+            onShareClick = { link ->
+                Toolkit.getDefaultToolkit().also {
+                    it
+                        .systemClipboard
+                        .setContents(StringSelection(link), null)
+                    it.beep()
+                }
+            }
+        )
     }
 }
 

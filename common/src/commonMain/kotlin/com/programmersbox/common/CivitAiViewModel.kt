@@ -7,7 +7,7 @@ import moe.tlaster.precompose.viewmodel.ViewModel
 import moe.tlaster.precompose.viewmodel.viewModelScope
 
 class CivitAiViewModel(
-    private val network: Network = Network()
+    network: Network,
 ): ViewModel() {
 
     val pager = Pager(

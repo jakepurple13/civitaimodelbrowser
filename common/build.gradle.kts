@@ -28,6 +28,7 @@ kotlin {
                 api(compose.foundation)
                 api(compose.materialIconsExtended)
                 api(compose.material3)
+                api(compose.components.resources)
                 api(libs.ktor.core)
                 api(libs.ktor.content.negotiation)
                 api(libs.ktor.serialization)
@@ -75,6 +76,8 @@ kotlin {
 android {
     compileSdk = 34
     sourceSets["main"].manifest.srcFile("src/androidMain/AndroidManifest.xml")
+    sourceSets["main"].res.srcDirs("src/androidMain/res")
+    sourceSets["main"].resources.srcDirs("src/commonMain/resources")
     defaultConfig {
         minSdk = 24
         targetSdk = 34

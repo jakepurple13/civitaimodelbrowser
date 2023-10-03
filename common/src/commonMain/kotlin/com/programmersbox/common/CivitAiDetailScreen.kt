@@ -5,6 +5,7 @@ package com.programmersbox.common
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
@@ -31,6 +32,8 @@ import moe.tlaster.precompose.flow.collectAsStateWithLifecycle
 import moe.tlaster.precompose.viewmodel.ViewModel
 import moe.tlaster.precompose.viewmodel.viewModel
 import moe.tlaster.precompose.viewmodel.viewModelScope
+import org.jetbrains.compose.resources.ExperimentalResourceApi
+import org.jetbrains.compose.resources.painterResource
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -185,6 +188,7 @@ fun CivitAiDetailScreen(
     }
 }
 
+@OptIn(ExperimentalResourceApi::class)
 @Composable
 private fun ImageCard(
     images: ModelImage,
@@ -216,6 +220,13 @@ private fun ImageCard(
                             targetValue = it,
                             label = ""
                         ).value
+                    )
+                },
+                onFailure = {
+                    Image(
+                        painter = painterResource("civitai_logo.png"),
+                        contentDescription = null,
+                        modifier = Modifier.fillMaxSize()
                     )
                 },
                 contentScale = ContentScale.FillBounds,

@@ -4,6 +4,7 @@ package com.programmersbox.common
 
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.grid.GridItemSpan
@@ -34,6 +35,8 @@ import io.kamel.image.asyncPainterResource
 import kotlinx.coroutines.launch
 import moe.tlaster.precompose.flow.collectAsStateWithLifecycle
 import moe.tlaster.precompose.viewmodel.viewModel
+import org.jetbrains.compose.resources.ExperimentalResourceApi
+import org.jetbrains.compose.resources.painterResource
 
 @OptIn(ExperimentalFoundationApi::class, ExperimentalMaterial3Api::class)
 @Composable
@@ -187,6 +190,7 @@ private fun ModelItem(
     )
 }
 
+@OptIn(ExperimentalResourceApi::class)
 @Composable
 fun CoverCard(
     imageUrl: String,
@@ -212,6 +216,13 @@ fun CoverCard(
                 resource = asyncPainterResource(imageUrl),
                 onLoading = {
                     CircularProgressIndicator(progress = animateFloatAsState(targetValue = it, label = "").value)
+                },
+                onFailure = {
+                    Image(
+                        painter = painterResource("civitai_logo.png"),
+                        contentDescription = null,
+                        modifier = Modifier.fillMaxSize()
+                    )
                 },
                 contentScale = ContentScale.FillBounds,
                 contentDescription = name,

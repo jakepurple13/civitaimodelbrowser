@@ -67,11 +67,12 @@ fun SettingsScreen() {
                 ListItem(
                     headlineContent = { Text("Strength: ${nsfwBlurStrength.roundToInt()}") },
                     supportingContent = {
+                        val range = 5f..100f
                         Slider(
                             value = nsfwBlurStrength,
                             onValueChange = { scope.launch { hideNsfwStrength.update(it) } },
-                            steps = 5,
-                            valueRange = 5f..10f
+                            steps = (range.endInclusive - range.start).roundToInt(),
+                            valueRange = range
                         )
                     }
                 )

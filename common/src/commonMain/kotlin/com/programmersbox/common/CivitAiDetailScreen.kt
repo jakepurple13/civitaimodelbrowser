@@ -172,7 +172,19 @@ fun CivitAiDetailScreen(
         }
 
         DetailViewState.Error -> {
-
+            Surface {
+                Box(
+                    contentAlignment = Alignment.Center,
+                    modifier = Modifier.fillMaxSize()
+                ) {
+                    Column {
+                        Text("Something went wrong")
+                        Button(
+                            onClick = viewModel::loadData
+                        ) { Text("Try Again") }
+                    }
+                }
+            }
         }
 
         DetailViewState.Loading -> {
@@ -340,13 +352,18 @@ private fun SheetContent(image: ModelImage) {
 
 class CivitAiDetailViewModel(
     private val network: Network,
-    id: String?,
+    private val id: String?,
 ) : ViewModel() {
     val modelUrl = "https://civitai.com/models/$id"
     var models by mutableStateOf<DetailViewState>(DetailViewState.Loading)
 
     init {
+        loadData()
+    }
+
+    fun loadData() {
         viewModelScope.launch {
+            models = DetailViewState.Loading
             models = id?.let { network.fetchModel(it) }
                 ?.onFailure { it.printStackTrace() }
                 ?.fold(

@@ -37,7 +37,10 @@ class CivitBrowserPagingSource(
                     nextKey = nextKey
                 )
             },
-            onFailure = { LoadResult.Error(it) }
+            onFailure = {
+                it.printStackTrace()
+                LoadResult.Error(it)
+            }
         )
     }
 }

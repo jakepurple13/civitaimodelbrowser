@@ -9,6 +9,9 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.text.selection.SelectionContainer
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
@@ -47,6 +50,16 @@ fun CivitAiDetailScreen(
 
     when (val model = viewModel.models) {
         is DetailViewState.Content -> {
+            var sheetDetails by remember { mutableStateOf<ModelImage?>(null) }
+
+            sheetDetails?.let { sheetModel ->
+                SheetDetails(
+                    sheetDetails = sheetModel,
+                    onDismiss = { sheetDetails = null },
+                    content = { SheetContent(it) }
+                )
+            }
+
             val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior()
             Scaffold(
                 topBar = {
@@ -81,9 +94,7 @@ fun CivitAiDetailScreen(
                     contentPadding = paddingValues,
                     verticalArrangement = Arrangement.spacedBy(4.dp),
                     horizontalArrangement = Arrangement.spacedBy(4.dp),
-                    modifier = Modifier
-                        .padding(bottom = 4.dp)
-                        .fillMaxSize()
+                    modifier = Modifier.fillMaxSize()
                 ) {
                     item(
                         span = { GridItemSpan(maxLineSpan) }
@@ -144,7 +155,8 @@ fun CivitAiDetailScreen(
                             ImageCard(
                                 images = images,
                                 showNsfw = showNsfw,
-                                nsfwBlurStrength = nsfwBlurStrength
+                                nsfwBlurStrength = nsfwBlurStrength,
+                                onClick = { sheetDetails = images }
                             )
                         }
                     }
@@ -174,6 +186,7 @@ private fun ImageCard(
     images: ModelImage,
     showNsfw: Boolean,
     nsfwBlurStrength: Float,
+    onClick: () -> Unit,
 ) {
     Surface(
         tonalElevation = 4.dp,
@@ -181,6 +194,7 @@ private fun ImageCard(
         border = if (images.nsfw != "None")
             BorderStroke(1.dp, MaterialTheme.colorScheme.error)
         else null,
+        onClick = onClick,
         modifier = Modifier.size(
             width = ComposableUtils.IMAGE_WIDTH,
             height = ComposableUtils.IMAGE_HEIGHT
@@ -224,6 +238,86 @@ private fun ImageCard(
                         .padding(horizontal = 4.dp)
                         .align(Alignment.TopEnd)
                 )
+            }
+        }
+    }
+}
+
+@Composable
+private fun SheetContent(image: ModelImage) {
+    SelectionContainer {
+        Column(
+            modifier = Modifier.verticalScroll(rememberScrollState())
+        ) {
+            KamelImage(
+                resource = asyncPainterResource(image.url),
+                onLoading = {
+                    CircularProgressIndicator(
+                        progress = animateFloatAsState(
+                            targetValue = it,
+                            label = ""
+                        ).value
+                    )
+                },
+                contentScale = ContentScale.FillWidth,
+                contentDescription = null
+            )
+            if (image.nsfw != "None") {
+                Row(
+                    horizontalArrangement = Arrangement.spacedBy(4.dp),
+                    modifier = Modifier.padding(horizontal = 4.dp)
+                ) {
+                    ElevatedAssistChip(
+                        label = { Text("NSFW") },
+                        onClick = {},
+                        colors = AssistChipDefaults.elevatedAssistChipColors(
+                            disabledLabelColor = MaterialTheme.colorScheme.error,
+                            disabledContainerColor = MaterialTheme.colorScheme.surface
+                        ),
+                        enabled = false,
+                        border = AssistChipDefaults.assistChipBorder(
+                            disabledBorderColor = MaterialTheme.colorScheme.error,
+                            borderWidth = 1.dp
+                        ),
+                    )
+
+                    ElevatedAssistChip(
+                        label = { Text(image.nsfw) },
+                        onClick = {},
+                        colors = AssistChipDefaults.elevatedAssistChipColors(
+                            disabledLabelColor = MaterialTheme.colorScheme.error,
+                            disabledContainerColor = MaterialTheme.colorScheme.surface
+                        ),
+                        enabled = false,
+                        border = AssistChipDefaults.assistChipBorder(
+                            disabledBorderColor = MaterialTheme.colorScheme.error,
+                            borderWidth = 1.dp
+                        ),
+                    )
+                }
+            }
+            image.meta?.let { meta ->
+                Column(
+                    modifier = Modifier.padding(4.dp)
+                ) {
+                    meta.model?.let { Text("Model: $it") }
+                    Divider()
+                    meta.prompt?.let { Text("Prompt: $it") }
+                    Divider()
+                    meta.negativePrompt?.let { Text("Negative Prompt: $it") }
+                    Divider()
+                    meta.seed?.let { Text("Seed: $it") }
+                    Divider()
+                    meta.sampler?.let { Text("Sampler: $it") }
+                    Divider()
+                    meta.steps?.let { Text("Steps: $it") }
+                    Divider()
+                    meta.clipSkip?.let { Text("Clip Skip: $it") }
+                    Divider()
+                    meta.size?.let { Text("Size: $it") }
+                    Divider()
+                    meta.cfgScale?.let { Text("Cfg Scale: $it") }
+                }
             }
         }
     }

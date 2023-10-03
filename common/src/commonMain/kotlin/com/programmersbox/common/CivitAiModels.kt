@@ -1,6 +1,7 @@
 package com.programmersbox.common
 
 import kotlinx.datetime.Instant
+import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import org.jsoup.Jsoup
 
@@ -64,6 +65,23 @@ data class ModelImage(
     val nsfw: String,
     val width: Int,
     val height: Int,
+    val meta: ImageMeta? = null,
+)
+
+@Serializable
+data class ImageMeta(
+    @SerialName("Size")
+    val size: String? = null,
+    val seed: Long? = null,
+    @SerialName("Model")
+    val model: String? = null,
+    val steps: Long? = null,
+    val prompt: String? = null,
+    val sampler: String? = null,
+    val cfgScale: Double? = null,
+    @SerialName("Clip skip")
+    val clipSkip: String? = null,
+    val negativePrompt: String? = null,
 )
 
 @Serializable

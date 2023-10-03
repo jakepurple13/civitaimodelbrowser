@@ -2,6 +2,8 @@ package com.programmersbox.common
 
 import android.os.Parcel
 import android.os.Parcelable
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.runtime.Composable
 
 public actual fun getPlatformName(): String {
@@ -37,5 +39,19 @@ private data class PagingPlaceholderKey(private val index: Int) : Parcelable {
 
                 override fun newArray(size: Int) = arrayOfNulls<PagingPlaceholderKey?>(size)
             }
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+internal actual fun SheetDetails(
+    sheetDetails: ModelImage,
+    onDismiss: () -> Unit,
+    content: @Composable (ModelImage) -> Unit,
+) {
+    ModalBottomSheet(
+        onDismissRequest = onDismiss
+    ) {
+        content(sheetDetails)
     }
 }

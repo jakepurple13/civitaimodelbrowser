@@ -43,6 +43,7 @@ android {
 dependencies {
     implementation(project(":common"))
     implementation(libs.androidx.activity.compose)
+    implementation(libs.androidx.browser)
 }
 
 tasks.register("BuildAndRun") {

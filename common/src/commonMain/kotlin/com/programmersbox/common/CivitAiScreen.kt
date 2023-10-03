@@ -275,6 +275,10 @@ fun CoverCard(
                         disabledContainerColor = MaterialTheme.colorScheme.surface
                     ),
                     enabled = false,
+                    border = AssistChipDefaults.assistChipBorder(
+                        disabledBorderColor = MaterialTheme.colorScheme.error,
+                        borderWidth = 1.dp
+                    ),
                     modifier = Modifier
                         .padding(horizontal = 4.dp)
                         .align(Alignment.TopEnd)

@@ -2,21 +2,22 @@
 
 package com.programmersbox.common
 
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material.icons.filled.OpenInBrowser
-import androidx.compose.material.icons.filled.Settings
-import androidx.compose.material.icons.filled.Share
+import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.blur
+import androidx.compose.ui.draw.rotate
+import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.unit.dp
@@ -46,6 +47,7 @@ fun CivitAiDetailScreen(
 
     when (val model = viewModel.models) {
         is DetailViewState.Content -> {
+            val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior()
             Scaffold(
                 topBar = {
                     TopAppBar(
@@ -68,9 +70,11 @@ fun CivitAiDetailScreen(
                             IconButton(
                                 onClick = { navController.navigate(Screen.Settings.routeId) }
                             ) { Icon(Icons.Default.Settings, null) }
-                        }
+                        },
+                        scrollBehavior = scrollBehavior
                     )
-                }
+                },
+                modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection)
             ) { paddingValues ->
                 LazyVerticalGrid(
                     columns = adaptiveGridCell(),
@@ -85,9 +89,9 @@ fun CivitAiDetailScreen(
                         span = { GridItemSpan(maxLineSpan) }
                     ) {
                         ListItem(
-                            overlineContent = { Text(model.models.type.name) },
+                            leadingContent = { Text(model.models.type.name) },
                             headlineContent = { Text(model.models.name) },
-                            supportingContent = { Text(model.models.description.orEmpty()) },
+                            supportingContent = { Text(model.models.parsedDescription()) },
                             trailingContent = {
                                 if (model.models.nsfw) {
                                     ElevatedAssistChip(
@@ -103,67 +107,45 @@ fun CivitAiDetailScreen(
                             }
                         )
                     }
+
                     model.models.modelVersions.forEach { version ->
                         item(
                             span = { GridItemSpan(maxLineSpan) }
                         ) {
-                            TopAppBar(
-                                title = {
-                                    Text("Last Update at: " + simpleDateTimeFormatter.format(version.updatedAt.toEpochMilliseconds()))
-                                },
-                                windowInsets = WindowInsets(0.dp)
-                            )
-                        }
-                        items(version.images) { images ->
-                            Surface(
-                                tonalElevation = 4.dp,
-                                shape = MaterialTheme.shapes.medium,
-                                modifier = Modifier.size(
-                                    width = ComposableUtils.IMAGE_WIDTH,
-                                    height = ComposableUtils.IMAGE_HEIGHT
-                                )
-                            ) {
-                                Box(
-                                    modifier = Modifier.fillMaxSize(),
-                                    contentAlignment = Alignment.Center
-                                ) {
-                                    KamelImage(
-                                        resource = asyncPainterResource(images.url),
-                                        onLoading = {
-                                            CircularProgressIndicator(
-                                                progress = animateFloatAsState(
-                                                    targetValue = it,
-                                                    label = ""
-                                                ).value
+                            var showMoreInfo by remember { mutableStateOf(false) }
+                            Column {
+                                TopAppBar(
+                                    title = { Text("Version: ${version.name}") },
+                                    actions = {
+                                        IconButton(
+                                            onClick = { showMoreInfo = !showMoreInfo }
+                                        ) {
+                                            Icon(
+                                                Icons.Filled.ArrowDropDown,
+                                                null,
+                                                Modifier.rotate(if (showMoreInfo) 180f else 0f)
                                             )
-                                        },
-                                        contentScale = ContentScale.FillBounds,
-                                        contentDescription = null,
-                                        modifier = Modifier.let {
-                                            if (!showNsfw && images.nsfw != "None") {
-                                                it.blur(nsfwBlurStrength.dp)
-                                            } else {
-                                                it
-                                            }
                                         }
+                                    },
+                                    windowInsets = WindowInsets(0.dp)
+                                )
+                                AnimatedVisibility(showMoreInfo) {
+                                    ListItem(
+                                        headlineContent = {
+                                            Text("Last Update at: " + simpleDateTimeFormatter.format(version.updatedAt.toEpochMilliseconds()))
+                                        },
+                                        supportingContent = version.parsedDescription()?.let { { Text(it) } }
                                     )
-
-                                    if (images.nsfw != "None") {
-                                        ElevatedAssistChip(
-                                            label = { Text("NSFW") },
-                                            onClick = {},
-                                            colors = AssistChipDefaults.elevatedAssistChipColors(
-                                                disabledLabelColor = MaterialTheme.colorScheme.error,
-                                                disabledContainerColor = MaterialTheme.colorScheme.surface
-                                            ),
-                                            enabled = false,
-                                            modifier = Modifier
-                                                .padding(horizontal = 4.dp)
-                                                .align(Alignment.TopEnd)
-                                        )
-                                    }
                                 }
                             }
+                        }
+
+                        items(version.images) { images ->
+                            ImageCard(
+                                images = images,
+                                showNsfw = showNsfw,
+                                nsfwBlurStrength = nsfwBlurStrength
+                            )
                         }
                     }
                 }
@@ -182,6 +164,66 @@ fun CivitAiDetailScreen(
                 ) {
                     CircularProgressIndicator()
                 }
+            }
+        }
+    }
+}
+
+@Composable
+private fun ImageCard(
+    images: ModelImage,
+    showNsfw: Boolean,
+    nsfwBlurStrength: Float,
+) {
+    Surface(
+        tonalElevation = 4.dp,
+        shape = MaterialTheme.shapes.medium,
+        border = if (images.nsfw != "None")
+            BorderStroke(1.dp, MaterialTheme.colorScheme.error)
+        else null,
+        modifier = Modifier.size(
+            width = ComposableUtils.IMAGE_WIDTH,
+            height = ComposableUtils.IMAGE_HEIGHT
+        )
+    ) {
+        Box(
+            modifier = Modifier.fillMaxSize(),
+            contentAlignment = Alignment.Center
+        ) {
+            KamelImage(
+                resource = asyncPainterResource(images.url),
+                onLoading = {
+                    CircularProgressIndicator(
+                        progress = animateFloatAsState(
+                            targetValue = it,
+                            label = ""
+                        ).value
+                    )
+                },
+                contentScale = ContentScale.FillBounds,
+                contentDescription = null,
+                modifier = Modifier.let {
+                    if (!showNsfw && images.nsfw != "None") {
+                        it.blur(nsfwBlurStrength.dp)
+                    } else {
+                        it
+                    }
+                }
+            )
+
+            if (images.nsfw != "None") {
+                ElevatedAssistChip(
+                    label = { Text("NSFW") },
+                    onClick = {},
+                    colors = AssistChipDefaults.elevatedAssistChipColors(
+                        disabledLabelColor = MaterialTheme.colorScheme.error,
+                        disabledContainerColor = MaterialTheme.colorScheme.surface
+                    ),
+                    enabled = false,
+                    modifier = Modifier
+                        .padding(horizontal = 4.dp)
+                        .align(Alignment.TopEnd)
+                )
             }
         }
     }

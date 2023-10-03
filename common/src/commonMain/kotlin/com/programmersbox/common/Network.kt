@@ -31,7 +31,10 @@ class Network {
         }
     }
 
-    suspend fun getModels(page: Int, perPage: Int = 20) = runCatching {
+    suspend fun getModels(
+        page: Int,
+        perPage: Int = 20,
+    ) = runCatching {
         client.get("models?page=$page&sort=Newest&limit=$perPage&nsfw=true") {
             contentType(ContentType.Application.Json)
         }.body<CivitAi>()

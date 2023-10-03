@@ -22,12 +22,13 @@ import kotlin.math.roundToInt
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SettingsScreen() {
-    val dataStore = LocalDataStore.current
-    val showNsfw = remember { dataStore.showNsfw }
-    val hideNsfwStrength = remember { dataStore.hideNsfwStrength }
     val navController = LocalNavController.current
     val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
     val scope = rememberCoroutineScope()
+
+    val dataStore = LocalDataStore.current
+    val showNsfw = remember { dataStore.showNsfw }
+    val hideNsfwStrength = remember { dataStore.hideNsfwStrength }
 
     Scaffold(
         topBar = {
@@ -50,6 +51,7 @@ fun SettingsScreen() {
                 .padding(padding)
         ) {
             val isNsfwEnabled by showNsfw.flow.collectAsStateWithLifecycle(false)
+
             ListItem(
                 headlineContent = { Text("Show NSFW Content?") },
                 trailingContent = {
@@ -57,22 +59,24 @@ fun SettingsScreen() {
                         checked = isNsfwEnabled,
                         onCheckedChange = { scope.launch { showNsfw.update(it) } }
                     )
-                },
-                supportingContent = {
-                    AnimatedVisibility(!isNsfwEnabled) {
-                        Column {
-                            val nsfwBlurStrength by hideNsfwStrength.flow.collectAsStateWithLifecycle(6f)
-                            Text("Strength: ${nsfwBlurStrength.roundToInt()}")
-                            Slider(
-                                value = nsfwBlurStrength,
-                                onValueChange = { scope.launch { hideNsfwStrength.update(it) } },
-                                steps = 5,
-                                valueRange = 5f..10f
-                            )
-                        }
-                    }
                 }
             )
+
+            AnimatedVisibility(!isNsfwEnabled) {
+                val nsfwBlurStrength by hideNsfwStrength.flow.collectAsStateWithLifecycle(6f)
+                ListItem(
+                    headlineContent = { Text("Strength: ${nsfwBlurStrength.roundToInt()}") },
+                    supportingContent = {
+                        Slider(
+                            value = nsfwBlurStrength,
+                            onValueChange = { scope.launch { hideNsfwStrength.update(it) } },
+                            steps = 5,
+                            valueRange = 5f..10f
+                        )
+                    }
+                )
+            }
+            Divider()
             //https://github.com/civitai/civitai/wiki/REST-API-Reference
         }
     }

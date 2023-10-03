@@ -2,6 +2,7 @@ package com.programmersbox.common
 
 import kotlinx.datetime.Instant
 import kotlinx.serialization.Serializable
+import org.jsoup.Jsoup
 
 @Serializable
 data class CivitAi(
@@ -22,7 +23,9 @@ data class Models(
     val allowDifferentLicense: Boolean,
     val tags: List<String>,
     val modelVersions: List<ModelVersion>,
-)
+) {
+    fun parsedDescription() = Jsoup.parse(description.orEmpty()).text()
+}
 
 @Serializable
 enum class ModelType {
@@ -50,7 +53,9 @@ data class ModelVersion(
     val description: String?,
     val images: List<ModelImage>,
     val downloadUrl: String,
-)
+) {
+    fun parsedDescription() = description?.let { Jsoup.parse(it).text() }
+}
 
 @Serializable
 data class ModelImage(

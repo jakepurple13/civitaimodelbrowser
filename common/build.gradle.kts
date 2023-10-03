@@ -41,6 +41,7 @@ kotlin {
                 api(libs.kotlinx.coroutines.core)
                 api(libs.precompose)
                 api(libs.precompose.viewmodel)
+                api(libs.jsoup)
             }
         }
 

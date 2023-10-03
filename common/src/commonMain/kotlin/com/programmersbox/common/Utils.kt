@@ -15,9 +15,18 @@ object ComposableUtils {
 }
 
 @Composable
-fun adaptiveGridCell(): GridCells = CustomAdaptive(ComposableUtils.IMAGE_WIDTH)
+fun adaptiveGridCell(
+    minSize: Dp = ComposableUtils.IMAGE_WIDTH,
+    minCount: Int = 1,
+): GridCells = CustomAdaptive(
+    minSize = minSize,
+    minCount = minCount
+)
 
-class CustomAdaptive(private val minSize: Dp) : GridCells {
+class CustomAdaptive(
+    private val minSize: Dp,
+    private val minCount: Int = 1,
+) : GridCells {
     init {
         require(minSize > 0.dp)
     }
@@ -27,7 +36,7 @@ class CustomAdaptive(private val minSize: Dp) : GridCells {
         spacing: Int,
     ): List<Int> {
         val count = maxOf((availableSize + spacing) / (minSize.roundToPx() + spacing), 1) + 1
-        return calculateCellsCrossAxisSizeImpl(availableSize, count, spacing)
+        return calculateCellsCrossAxisSizeImpl(availableSize, count.coerceAtLeast(minCount), spacing)
     }
 
     override fun hashCode(): Int {

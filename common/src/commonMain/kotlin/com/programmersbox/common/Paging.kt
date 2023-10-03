@@ -6,6 +6,7 @@ import androidx.paging.PagingState
 class CivitBrowserPagingSource(
     private val network: Network,
     private val perPage: Int = 20,
+    private val includeNsfw: Boolean = true,
 ) : PagingSource<Int, Models>() {
 
     override val keyReuseSupported: Boolean get() = true
@@ -21,7 +22,7 @@ class CivitBrowserPagingSource(
 
         return network.getModels(
             page = page.coerceAtLeast(1),
-            perPage = perPage
+            perPage = perPage,
         ).fold(
             onSuccess = { response ->
                 val prevKey = page.takeIf { it > 1 }?.minus(1)

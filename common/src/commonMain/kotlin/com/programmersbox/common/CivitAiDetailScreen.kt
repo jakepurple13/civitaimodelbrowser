@@ -21,6 +21,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.blur
 import androidx.compose.ui.draw.rotate
+import androidx.compose.ui.graphics.BlendMode
+import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalUriHandler
@@ -238,6 +240,9 @@ private fun ImageCard(
                     Image(
                         painter = painterResource("civitai_logo.png"),
                         contentDescription = null,
+                        colorFilter = if (images.nsfw != "None")
+                            ColorFilter.tint(MaterialTheme.colorScheme.error, blendMode = BlendMode.Hue)
+                        else null,
                         modifier = Modifier.fillMaxSize()
                     )
                 },

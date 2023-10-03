@@ -171,7 +171,7 @@ private fun ModelItem(
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    val imageModel = remember { models.modelVersions.randomOrNull()?.images?.randomOrNull() }
+    val imageModel = remember { models.modelVersions.firstOrNull()?.images?.firstOrNull() }
     CoverCard(
         imageUrl = remember { imageModel?.url.orEmpty() },
         name = models.name,

@@ -1,7 +1,8 @@
 package com.programmersbox.common
 
+import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.window.DialogWindow
+import androidx.compose.ui.window.Window
 
 public actual fun getPlatformName(): String {
     return "civitaimodelbrowser"
@@ -23,14 +24,11 @@ internal actual fun SheetDetails(
     onDismiss: () -> Unit,
     content: @Composable (ModelImage) -> Unit,
 ) {
-    DialogWindow(
+    Window(
         onCloseRequest = onDismiss
     ) {
-        content(sheetDetails)
+        Surface {
+            content(sheetDetails)
+        }
     }
-    /*Window(
-        onCloseRequest = onDismiss
-    ) {
-        content(sheetDetails)
-    }*/
 }

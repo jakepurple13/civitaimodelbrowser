@@ -112,6 +112,10 @@ fun CivitAiDetailScreen(
                                             disabledLabelColor = MaterialTheme.colorScheme.error,
                                             disabledContainerColor = MaterialTheme.colorScheme.surface
                                         ),
+                                        border = AssistChipDefaults.assistChipBorder(
+                                            disabledBorderColor = MaterialTheme.colorScheme.error,
+                                            borderWidth = 1.dp
+                                        ),
                                         enabled = false,
                                     )
                                 }
@@ -259,8 +263,8 @@ private fun SheetContent(image: ModelImage) {
                         ).value
                     )
                 },
-                contentScale = ContentScale.FillWidth,
-                contentDescription = null
+                contentDescription = null,
+                modifier = Modifier.align(Alignment.CenterHorizontally)
             )
             if (image.nsfw != "None") {
                 Row(

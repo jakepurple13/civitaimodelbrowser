@@ -9,6 +9,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.staticCompositionLocalOf
+import com.programmersbox.common.db.FavoritesDatabase
+import com.programmersbox.common.db.FavoritesUI
 import moe.tlaster.precompose.navigation.NavHost
 import moe.tlaster.precompose.navigation.Navigator
 import moe.tlaster.precompose.navigation.path
@@ -27,7 +29,8 @@ internal fun App(
     val viewModel = viewModel { AppViewModel(DataStore(producePath)) }
     CompositionLocalProvider(
         LocalNavController provides navController,
-        LocalDataStore provides viewModel.dataStore
+        LocalDataStore provides viewModel.dataStore,
+        LocalDatabase provides remember { FavoritesDatabase() }
     ) {
         Surface {
             NavHost(
@@ -49,6 +52,7 @@ internal fun App(
                     )
                 }
                 scene(Screen.Settings.routeId) { SettingsScreen() }
+                scene(Screen.Favorites.routeId) { FavoritesUI() }
             }
         }
     }
@@ -58,9 +62,11 @@ class AppViewModel(val dataStore: DataStore) : ViewModel()
 
 internal val LocalNavController = staticCompositionLocalOf<Navigator> { error("Nope") }
 internal val LocalDataStore = staticCompositionLocalOf<DataStore> { error("Nope") }
+internal val LocalDatabase = staticCompositionLocalOf<FavoritesDatabase> { error("Nope") }
 
 enum class Screen(val routeId: String) {
     List("list"),
     Detail("detail/{modelId}"),
-    Settings("settings")
+    Settings("settings"),
+    Favorites("favorites")
 }

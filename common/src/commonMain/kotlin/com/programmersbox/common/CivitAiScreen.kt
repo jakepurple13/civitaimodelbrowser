@@ -2,9 +2,8 @@
 
 package com.programmersbox.common
 
-import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.ExperimentalFoundationApi
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.grid.GridItemSpan
@@ -12,6 +11,7 @@ import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowUpward
+import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.*
@@ -22,24 +22,18 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.blur
-import androidx.compose.ui.graphics.BlendMode
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.input.nestedscroll.nestedScroll
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.paging.CombinedLoadStates
 import androidx.paging.LoadState
-import io.kamel.image.KamelImage
-import io.kamel.image.asyncPainterResource
+import com.programmersbox.common.components.LoadingImage
 import kotlinx.coroutines.launch
 import moe.tlaster.precompose.flow.collectAsStateWithLifecycle
 import moe.tlaster.precompose.viewmodel.viewModel
-import org.jetbrains.compose.resources.ExperimentalResourceApi
-import org.jetbrains.compose.resources.painterResource
 
 @OptIn(ExperimentalFoundationApi::class, ExperimentalMaterial3Api::class)
 @Composable
@@ -50,6 +44,7 @@ fun CivitAiScreen(
     val navController = LocalNavController.current
     val lazyPagingItems = viewModel.pager.collectAsLazyPagingItems()
     val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior()
+    val database by LocalDatabase.current.getFavorites().collectAsStateWithLifecycle(emptyList())
     val dataStore = LocalDataStore.current
     val showNsfw by remember { dataStore.showNsfw.flow }.collectAsStateWithLifecycle(false)
     val blurStrength by remember { dataStore.hideNsfwStrength.flow }.collectAsStateWithLifecycle(6f)
@@ -73,6 +68,10 @@ fun CivitAiScreen(
                     IconButton(
                         onClick = { navController.navigate(Screen.Settings.routeId) }
                     ) { Icon(Icons.Default.Settings, null) }
+
+                    IconButton(
+                        onClick = { navController.navigate(Screen.Favorites.routeId) }
+                    ) { Icon(Icons.Default.Favorite, null) }
                 },
                 scrollBehavior = scrollBehavior
             )
@@ -131,6 +130,7 @@ fun CivitAiScreen(
                             },
                             showNsfw = showNsfw,
                             blurStrength = blurStrength.dp,
+                            isFavorite = database.any { m -> m.id == models.id },
                             modifier = Modifier.animateItemPlacement()
                         )
                     }
@@ -178,6 +178,7 @@ private fun ModelItem(
     showNsfw: Boolean,
     blurStrength: Dp,
     onClick: () -> Unit,
+    isFavorite: Boolean,
     modifier: Modifier = Modifier,
 ) {
     val imageModel = remember { models.modelVersions.firstOrNull()?.images?.firstOrNull() }
@@ -189,6 +190,7 @@ private fun ModelItem(
         showNsfw = showNsfw,
         blurStrength = blurStrength,
         onClick = onClick,
+        isFavorite = isFavorite,
         modifier = modifier.size(
             width = ComposableUtils.IMAGE_WIDTH,
             height = ComposableUtils.IMAGE_HEIGHT
@@ -196,7 +198,7 @@ private fun ModelItem(
     )
 }
 
-@OptIn(ExperimentalResourceApi::class)
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun CoverCard(
     imageUrl: String,
@@ -205,6 +207,7 @@ fun CoverCard(
     isNsfw: Boolean,
     showNsfw: Boolean,
     blurStrength: Dp,
+    isFavorite: Boolean,
     modifier: Modifier = Modifier,
     onClick: () -> Unit = {},
 ) {
@@ -212,67 +215,83 @@ fun CoverCard(
         onClick = onClick,
         tonalElevation = 4.dp,
         shape = MaterialTheme.shapes.medium,
+        border = if (isFavorite) BorderStroke(1.dp, MaterialTheme.colorScheme.primary) else null,
         modifier = modifier
     ) {
-        Box(
-            modifier = Modifier.fillMaxSize(),
-            contentAlignment = Alignment.Center
-        ) {
-            KamelImage(
-                resource = asyncPainterResource(imageUrl),
-                onLoading = {
-                    CircularProgressIndicator(progress = animateFloatAsState(targetValue = it, label = "").value)
-                },
-                onFailure = {
-                    Image(
-                        painter = painterResource("civitai_logo.png"),
-                        contentDescription = null,
-                        colorFilter = if (isNsfw)
-                            ColorFilter.tint(MaterialTheme.colorScheme.error, blendMode = BlendMode.Hue)
-                        else null,
-                        modifier = Modifier.fillMaxSize()
-                    )
-                },
-                contentScale = ContentScale.FillBounds,
-                contentDescription = name,
-                modifier = Modifier
-                    .matchParentSize()
-                    .let {
-                        if (!showNsfw && isNsfw) {
-                            it.blur(blurStrength)
-                        } else {
-                            it
-                        }
+        CardContent(
+            imageUrl = imageUrl,
+            name = name,
+            type = type,
+            isNsfw = isNsfw,
+            showNsfw = showNsfw,
+            blurStrength = blurStrength
+        )
+    }
+}
+
+@OptIn(ExperimentalLayoutApi::class)
+@Composable
+fun CardContent(
+    imageUrl: String,
+    name: String,
+    type: ModelType,
+    isNsfw: Boolean,
+    showNsfw: Boolean,
+    blurStrength: Dp,
+) {
+    Box(
+        modifier = Modifier.fillMaxSize(),
+        contentAlignment = Alignment.Center
+    ) {
+        LoadingImage(
+            imageUrl = imageUrl,
+            isNsfw = isNsfw,
+            name = name,
+            modifier = Modifier
+                .matchParentSize()
+                .let {
+                    if (!showNsfw && isNsfw) {
+                        it.blur(blurStrength)
+                    } else {
+                        it
                     }
-            )
+                },
+        )
 
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .background(
-                        brush = Brush.verticalGradient(
-                            colors = listOf(
-                                Color.Transparent,
-                                Color.Black
-                            ),
-                            startY = 50f
-                        )
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(
+                    brush = Brush.verticalGradient(
+                        colors = listOf(
+                            Color.Transparent,
+                            Color.Black
+                        ),
+                        startY = 50f
                     )
-            ) {
-                Text(
-                    name,
-                    style = MaterialTheme
-                        .typography
-                        .bodyLarge
-                        .copy(textAlign = TextAlign.Center, color = Color.White),
-                    maxLines = 2,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 4.dp)
-                        .align(Alignment.BottomCenter)
                 )
-            }
+        ) {
+            Text(
+                name,
+                style = MaterialTheme
+                    .typography
+                    .bodyLarge
+                    .copy(textAlign = TextAlign.Center, color = Color.White),
+                maxLines = 2,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 4.dp)
+                    .align(Alignment.BottomCenter)
+            )
+        }
 
+        FlowRow(
+            horizontalArrangement = Arrangement.SpaceBetween,
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 4.dp)
+                .align(Alignment.TopCenter)
+        ) {
             ElevatedAssistChip(
                 label = { Text(type.name) },
                 onClick = {},
@@ -281,9 +300,6 @@ fun CoverCard(
                     disabledContainerColor = MaterialTheme.colorScheme.surface
                 ),
                 enabled = false,
-                modifier = Modifier
-                    .padding(horizontal = 4.dp)
-                    .align(Alignment.TopStart)
             )
 
             if (isNsfw) {
@@ -299,9 +315,6 @@ fun CoverCard(
                         disabledBorderColor = MaterialTheme.colorScheme.error,
                         borderWidth = 1.dp
                     ),
-                    modifier = Modifier
-                        .padding(horizontal = 4.dp)
-                        .align(Alignment.TopEnd)
                 )
             }
         }

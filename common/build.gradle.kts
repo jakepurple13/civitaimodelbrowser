@@ -3,6 +3,7 @@ plugins {
     id("org.jetbrains.compose")
     id("com.android.library")
     id("org.jetbrains.kotlin.plugin.serialization") version libs.versions.kotlin.version.get()
+    id("io.realm.kotlin") version libs.versions.realm.get()
 }
 
 group = "com.programmersbox"
@@ -43,6 +44,7 @@ kotlin {
                 api(libs.precompose)
                 api(libs.precompose.viewmodel)
                 api(libs.jsoup)
+                api(libs.realm.base)
             }
         }
 
@@ -83,7 +85,7 @@ android {
         targetSdk = 34
     }
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_11
-        targetCompatibility = JavaVersion.VERSION_11
+        sourceCompatibility = JavaVersion.VERSION_1_8
+        targetCompatibility = JavaVersion.VERSION_1_8
     }
 }

@@ -5,7 +5,6 @@ package com.programmersbox.common
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
@@ -21,21 +20,21 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.blur
 import androidx.compose.ui.draw.rotate
-import androidx.compose.ui.graphics.BlendMode
-import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.input.nestedscroll.nestedScroll
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.unit.dp
+import com.programmersbox.common.components.LoadingImage
+import com.programmersbox.common.db.FavoritesDatabase
 import io.kamel.image.KamelImage
 import io.kamel.image.asyncPainterResource
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 import moe.tlaster.precompose.flow.collectAsStateWithLifecycle
 import moe.tlaster.precompose.viewmodel.ViewModel
 import moe.tlaster.precompose.viewmodel.viewModel
 import moe.tlaster.precompose.viewmodel.viewModelScope
 import org.jetbrains.compose.resources.ExperimentalResourceApi
-import org.jetbrains.compose.resources.painterResource
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -46,7 +45,8 @@ fun CivitAiDetailScreen(
     id: String?,
     onShareClick: (String) -> Unit,
 ) {
-    val viewModel = viewModel { CivitAiDetailViewModel(network, id) }
+    val database = LocalDatabase.current
+    val viewModel = viewModel { CivitAiDetailViewModel(network, id, database) }
     val navController = LocalNavController.current
     val simpleDateTimeFormatter = remember { SimpleDateFormat("MM/dd/yy HH:mm", Locale.getDefault()) }
     val dataStore = LocalDataStore.current
@@ -77,6 +77,32 @@ fun CivitAiDetailScreen(
                         },
                         actions = {
                             IconButton(
+                                onClick = { navController.navigate(Screen.Settings.routeId) }
+                            ) { Icon(Icons.Default.Settings, null) }
+                        },
+                        scrollBehavior = scrollBehavior
+                    )
+                },
+                bottomBar = {
+                    BottomAppBar(
+                        floatingActionButton = {
+                            FloatingActionButton(
+                                onClick = {
+                                    if (viewModel.isFavorite) {
+                                        viewModel.removeFromFavorites()
+                                    } else {
+                                        viewModel.addToFavorites()
+                                    }
+                                }
+                            ) {
+                                Icon(
+                                    if (viewModel.isFavorite) Icons.Default.Favorite else Icons.Default.FavoriteBorder,
+                                    null
+                                )
+                            }
+                        },
+                        actions = {
+                            IconButton(
                                 onClick = { onShareClick(viewModel.modelUrl) }
                             ) { Icon(Icons.Default.Share, null) }
 
@@ -84,12 +110,7 @@ fun CivitAiDetailScreen(
                             IconButton(
                                 onClick = { uriHandler.openUri(viewModel.modelUrl) }
                             ) { Icon(Icons.Default.OpenInBrowser, null) }
-
-                            IconButton(
-                                onClick = { navController.navigate(Screen.Settings.routeId) }
-                            ) { Icon(Icons.Default.Settings, null) }
-                        },
-                        scrollBehavior = scrollBehavior
+                        }
                     )
                 },
                 modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection)
@@ -179,7 +200,9 @@ fun CivitAiDetailScreen(
                     contentAlignment = Alignment.Center,
                     modifier = Modifier.fillMaxSize()
                 ) {
-                    Column {
+                    Column(
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
                         Text("Something went wrong")
                         Button(
                             onClick = viewModel::loadData
@@ -226,28 +249,10 @@ private fun ImageCard(
             modifier = Modifier.fillMaxSize(),
             contentAlignment = Alignment.Center
         ) {
-            KamelImage(
-                resource = asyncPainterResource(images.url),
-                onLoading = {
-                    CircularProgressIndicator(
-                        progress = animateFloatAsState(
-                            targetValue = it,
-                            label = ""
-                        ).value
-                    )
-                },
-                onFailure = {
-                    Image(
-                        painter = painterResource("civitai_logo.png"),
-                        contentDescription = null,
-                        colorFilter = if (images.nsfw != "None")
-                            ColorFilter.tint(MaterialTheme.colorScheme.error, blendMode = BlendMode.Hue)
-                        else null,
-                        modifier = Modifier.fillMaxSize()
-                    )
-                },
-                contentScale = ContentScale.FillBounds,
-                contentDescription = null,
+            LoadingImage(
+                imageUrl = images.url,
+                name = images.url,
+                isNsfw = images.nsfw != "None",
                 modifier = Modifier.let {
                     if (!showNsfw && images.nsfw != "None") {
                         it.blur(nsfwBlurStrength.dp)
@@ -358,12 +363,17 @@ private fun SheetContent(image: ModelImage) {
 class CivitAiDetailViewModel(
     private val network: Network,
     private val id: String?,
+    private val database: FavoritesDatabase,
 ) : ViewModel() {
     val modelUrl = "https://civitai.com/models/$id"
     var models by mutableStateOf<DetailViewState>(DetailViewState.Loading)
+    var isFavorite by mutableStateOf(false)
 
     init {
         loadData()
+        database.getFavorites()
+            .onEach { m -> isFavorite = m.any { it.id == id?.toLongOrNull() } }
+            .launchIn(viewModelScope)
     }
 
     fun loadData() {
@@ -375,6 +385,27 @@ class CivitAiDetailViewModel(
                     onSuccess = { DetailViewState.Content(it) },
                     onFailure = { DetailViewState.Error }
                 ) ?: DetailViewState.Error
+        }
+    }
+
+    fun addToFavorites() {
+        viewModelScope.launch {
+            (models as? DetailViewState.Content)?.models?.let { m ->
+                database.addFavorite(
+                    id = m.id,
+                    name = m.name,
+                    description = m.description,
+                    type = m.type,
+                    nsfw = m.nsfw,
+                    imageUrl = m.modelVersions.firstOrNull()?.images?.firstOrNull()?.url
+                )
+            }
+        }
+    }
+
+    fun removeFromFavorites() {
+        viewModelScope.launch {
+            (models as? DetailViewState.Content)?.models?.id?.let { database.removeFavorite(it) }
         }
     }
 }

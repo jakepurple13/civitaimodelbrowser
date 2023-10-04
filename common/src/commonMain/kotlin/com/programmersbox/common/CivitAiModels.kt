@@ -62,11 +62,23 @@ data class ModelVersion(
 data class ModelImage(
     val id: String? = "",
     val url: String,
-    val nsfw: String,
+    val nsfw: NsfwLevel = NsfwLevel.None,
     val width: Int,
     val height: Int,
     val meta: ImageMeta? = null,
 )
+
+@Serializable
+enum class NsfwLevel {
+    None,
+    Soft,
+    Mature,
+    X,
+    Blocked;
+
+    fun canShow() = this == None || this == Soft
+    fun canNotShow() = !(this == None || this == Soft)
+}
 
 @Serializable
 data class ImageMeta(

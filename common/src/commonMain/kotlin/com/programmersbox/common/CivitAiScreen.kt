@@ -42,14 +42,14 @@ import moe.tlaster.precompose.viewmodel.viewModel
 fun CivitAiScreen(
     network: Network,
 ) {
-    val viewModel = viewModel { CivitAiViewModel(network) }
     val navController = LocalNavController.current
-    val lazyPagingItems = viewModel.pager.collectAsLazyPagingItems()
     val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior()
     val database by LocalDatabase.current.getFavorites().collectAsStateWithLifecycle(emptyList())
     val dataStore = LocalDataStore.current
     val showNsfw by remember { dataStore.showNsfw.flow }.collectAsStateWithLifecycle(false)
     val blurStrength by remember { dataStore.hideNsfwStrength.flow }.collectAsStateWithLifecycle(6f)
+    val viewModel = viewModel { CivitAiViewModel(network, dataStore) }
+    val lazyPagingItems = viewModel.pager.collectAsLazyPagingItems()
 
     val scope = rememberCoroutineScope()
     val lazyGridState = rememberLazyGridState()
@@ -58,7 +58,7 @@ fun CivitAiScreen(
         onRefresh = { lazyPagingItems.refresh() }
     )
 
-    val searchViewModel = viewModel { CivitAiSearchViewModel(network) }
+    val searchViewModel = viewModel { CivitAiSearchViewModel(network, dataStore) }
 
     Scaffold(
         topBar = {
@@ -204,7 +204,7 @@ private fun ModelItem(
         imageUrl = remember { imageModel?.url.orEmpty() },
         name = models.name,
         type = models.type,
-        isNsfw = models.nsfw || imageModel?.nsfw != "None",
+        isNsfw = models.nsfw || imageModel?.nsfw?.canNotShow() == true,
         showNsfw = showNsfw,
         blurStrength = blurStrength,
         onClick = onClick,

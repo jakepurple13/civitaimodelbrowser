@@ -29,6 +29,7 @@ fun SettingsScreen() {
     val dataStore = LocalDataStore.current
     val showNsfw = remember { dataStore.showNsfw }
     val hideNsfwStrength = remember { dataStore.hideNsfwStrength }
+    val includeNsfw = remember { dataStore.includeNsfw }
 
     Scaffold(
         topBar = {
@@ -51,18 +52,31 @@ fun SettingsScreen() {
                 .padding(padding)
         ) {
             val isNsfwEnabled by showNsfw.flow.collectAsStateWithLifecycle(false)
+            val includeNsfwEnabled by includeNsfw.flow.collectAsStateWithLifecycle(false)
 
             ListItem(
-                headlineContent = { Text("Show NSFW Content?") },
+                headlineContent = { Text("Include NSFW Content?") },
                 trailingContent = {
                     Switch(
-                        checked = isNsfwEnabled,
-                        onCheckedChange = { scope.launch { showNsfw.update(it) } }
+                        checked = includeNsfwEnabled,
+                        onCheckedChange = { scope.launch { includeNsfw.update(it) } }
                     )
                 }
             )
 
-            AnimatedVisibility(!isNsfwEnabled) {
+            AnimatedVisibility(includeNsfwEnabled) {
+                ListItem(
+                    headlineContent = { Text("Show NSFW Content?") },
+                    trailingContent = {
+                        Switch(
+                            checked = isNsfwEnabled,
+                            onCheckedChange = { scope.launch { showNsfw.update(it) } }
+                        )
+                    }
+                )
+            }
+
+            AnimatedVisibility(!isNsfwEnabled && includeNsfwEnabled) {
                 val nsfwBlurStrength by hideNsfwStrength.flow.collectAsStateWithLifecycle(6f)
                 ListItem(
                     headlineContent = { Text("Strength: ${nsfwBlurStrength.roundToInt()}") },

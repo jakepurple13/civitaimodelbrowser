@@ -251,7 +251,7 @@ private fun ImageCard(
     Surface(
         tonalElevation = 4.dp,
         shape = MaterialTheme.shapes.medium,
-        border = if (images.nsfw != "None")
+        border = if (images.nsfw.canNotShow())
             BorderStroke(1.dp, MaterialTheme.colorScheme.error)
         else null,
         onClick = onClick,
@@ -267,9 +267,9 @@ private fun ImageCard(
             LoadingImage(
                 imageUrl = images.url,
                 name = images.url,
-                isNsfw = images.nsfw != "None",
+                isNsfw = images.nsfw.canNotShow(),
                 modifier = Modifier.let {
-                    if (!showNsfw && images.nsfw != "None") {
+                    if (!showNsfw && images.nsfw.canNotShow()) {
                         it.blur(nsfwBlurStrength.dp)
                     } else {
                         it
@@ -277,7 +277,7 @@ private fun ImageCard(
                 }
             )
 
-            if (images.nsfw != "None") {
+            if (images.nsfw.canNotShow()) {
                 ElevatedAssistChip(
                     label = { Text("NSFW") },
                     onClick = {},
@@ -314,7 +314,7 @@ private fun SheetContent(image: ModelImage) {
                 contentDescription = null,
                 modifier = Modifier.align(Alignment.CenterHorizontally)
             )
-            if (image.nsfw != "None") {
+            if (image.nsfw.canNotShow()) {
                 Row(
                     horizontalArrangement = Arrangement.spacedBy(4.dp),
                     modifier = Modifier.padding(horizontal = 4.dp)
@@ -334,7 +334,7 @@ private fun SheetContent(image: ModelImage) {
                     )
 
                     ElevatedAssistChip(
-                        label = { Text(image.nsfw) },
+                        label = { Text(image.nsfw.name) },
                         onClick = {},
                         colors = AssistChipDefaults.elevatedAssistChipColors(
                             disabledLabelColor = MaterialTheme.colorScheme.error,

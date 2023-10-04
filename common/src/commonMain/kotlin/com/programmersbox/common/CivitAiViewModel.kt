@@ -7,27 +7,38 @@ import androidx.paging.Pager
 import androidx.paging.PagingConfig
 import androidx.paging.PagingData
 import androidx.paging.cachedIn
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.emptyFlow
+import kotlinx.coroutines.flow.*
 import moe.tlaster.precompose.viewmodel.ViewModel
 import moe.tlaster.precompose.viewmodel.viewModelScope
 
 class CivitAiViewModel(
     network: Network,
+    dataStore: DataStore,
 ): ViewModel() {
 
-    val pager = Pager(
-        PagingConfig(
-            pageSize = 20,
-            enablePlaceholders = true
-        ),
-    ) { CivitBrowserPagingSource(network, 20) }
-        .flow
-        .cachedIn(viewModelScope)
+    var pager by mutableStateOf<Flow<PagingData<Models>>>(emptyFlow())
+
+    init {
+        dataStore.includeNsfw.flow
+            .distinctUntilChanged()
+            .onEach {
+                pager = Pager(
+                    PagingConfig(
+                        pageSize = 20,
+                        enablePlaceholders = true
+                    ),
+                ) { CivitBrowserPagingSource(network, 20, it) }
+                    .flow
+                    .cachedIn(viewModelScope)
+            }
+            .launchIn(viewModelScope)
+    }
+
 }
 
 class CivitAiSearchViewModel(
     private val network: Network,
+    dataStore: DataStore,
 ) : ViewModel() {
 
     var showSearch by mutableStateOf(false)
@@ -36,13 +47,22 @@ class CivitAiSearchViewModel(
 
     var pager by mutableStateOf<Flow<PagingData<Models>>>(emptyFlow())
 
+    private var includeNsfw = true
+
+    init {
+        dataStore.includeNsfw.flow
+            .distinctUntilChanged()
+            .onEach { includeNsfw = it }
+            .launchIn(viewModelScope)
+    }
+
     fun onSearch(query: String) {
         pager = Pager(
             PagingConfig(
                 pageSize = 20,
                 enablePlaceholders = true
             ),
-        ) { CivitBrowserSearchPagingSource(network, query, 20) }
+        ) { CivitBrowserSearchPagingSource(network, query, 20, includeNsfw) }
             .flow
             .cachedIn(viewModelScope)
     }

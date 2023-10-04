@@ -25,6 +25,12 @@ class DataStore(
         defaultValue = 6f
     )
 
+    val includeNsfw = DataStoreTypeNonNull(
+        key = booleanPreferencesKey("include_nsfw"),
+        dataStore = dataStore,
+        defaultValue = true
+    )
+
     open class DataStoreType<T>(
         protected val key: Preferences.Key<T>,
         protected val dataStore: DataStore<Preferences>,

@@ -34,8 +34,9 @@ class Network {
     suspend fun getModels(
         page: Int,
         perPage: Int = 20,
+        includeNsfw: Boolean = true,
     ) = runCatching {
-        client.get("models?page=$page&sort=Newest&limit=$perPage&nsfw=true") {
+        client.get("models?page=$page&sort=Newest&limit=$perPage&nsfw=$includeNsfw") {
             contentType(ContentType.Application.Json)
         }.body<CivitAi>()
     }
@@ -44,8 +45,9 @@ class Network {
         page: Int,
         searchQuery: String,
         perPage: Int = 20,
+        includeNsfw: Boolean = true,
     ) = runCatching {
-        client.get("models?page=$page&sort=Newest&limit=$perPage&nsfw=true&query=$searchQuery") {
+        client.get("models?page=$page&sort=Newest&limit=$perPage&nsfw=$includeNsfw&query=$searchQuery") {
             contentType(ContentType.Application.Json)
         }.body<CivitAi>()
     }

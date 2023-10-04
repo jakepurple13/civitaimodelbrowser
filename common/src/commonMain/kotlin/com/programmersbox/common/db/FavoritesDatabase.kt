@@ -1,9 +1,6 @@
 package com.programmersbox.common.db
 
-import com.programmersbox.common.ModelImage
-import com.programmersbox.common.ModelType
-import com.programmersbox.common.ModelVersion
-import com.programmersbox.common.Models
+import com.programmersbox.common.*
 import io.realm.kotlin.MutableRealm
 import io.realm.kotlin.Realm
 import io.realm.kotlin.RealmConfiguration
@@ -66,7 +63,7 @@ class FavoritesDatabase(
                                 ModelImage(
                                     id = null,
                                     url = favorite.imageUrl.orEmpty(),
-                                    nsfw = "Soft",
+                                    nsfw = NsfwLevel.None,
                                     width = 0,
                                     height = 0,
                                     meta = null

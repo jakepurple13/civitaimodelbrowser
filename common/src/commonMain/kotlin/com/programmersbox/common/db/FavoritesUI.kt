@@ -83,7 +83,7 @@ private fun ModelItem(
         imageUrl = remember { imageModel?.url.orEmpty() },
         name = models.name,
         type = models.type,
-        isNsfw = models.nsfw || imageModel?.nsfw != "None",
+        isNsfw = models.nsfw || imageModel?.nsfw?.canNotShow() == true,
         showNsfw = showNsfw,
         blurStrength = blurStrength,
         onClick = onClick,

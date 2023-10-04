@@ -98,9 +98,9 @@ data class ImageMeta(
 
 @Serializable
 data class PageData(
-    val totalItems: Long,
-    val currentPage: Long,
-    val pageSize: Long,
-    val totalPages: Long,
-    val nextPage: String,
+    val totalItems: Long? = null,
+    val currentPage: Long? = null,
+    val pageSize: Long? = null,
+    val totalPages: Long? = null,
+    val nextPage: String? = null,
 )

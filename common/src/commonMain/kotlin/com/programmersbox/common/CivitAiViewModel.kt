@@ -8,6 +8,7 @@ import androidx.paging.PagingConfig
 import androidx.paging.PagingData
 import androidx.paging.cachedIn
 import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.launch
 import moe.tlaster.precompose.viewmodel.ViewModel
 import moe.tlaster.precompose.viewmodel.viewModelScope
 
@@ -38,7 +39,7 @@ class CivitAiViewModel(
 
 class CivitAiSearchViewModel(
     private val network: Network,
-    dataStore: DataStore,
+    private val dataStore: DataStore,
 ) : ViewModel() {
 
     var showSearch by mutableStateOf(false)
@@ -47,23 +48,17 @@ class CivitAiSearchViewModel(
 
     var pager by mutableStateOf<Flow<PagingData<Models>>>(emptyFlow())
 
-    private var includeNsfw = true
-
-    init {
-        dataStore.includeNsfw.flow
-            .distinctUntilChanged()
-            .onEach { includeNsfw = it }
-            .launchIn(viewModelScope)
-    }
-
     fun onSearch(query: String) {
-        pager = Pager(
-            PagingConfig(
-                pageSize = 20,
-                enablePlaceholders = true
-            ),
-        ) { CivitBrowserSearchPagingSource(network, query, 20, includeNsfw) }
-            .flow
-            .cachedIn(viewModelScope)
+        viewModelScope.launch {
+            val includeNsfw = dataStore.includeNsfw.flow.first()
+            pager = Pager(
+                PagingConfig(
+                    pageSize = 20,
+                    enablePlaceholders = true
+                ),
+            ) { CivitBrowserSearchPagingSource(network, query, 20, includeNsfw) }
+                .flow
+                .cachedIn(viewModelScope)
+        }
     }
 }

@@ -52,7 +52,10 @@ fun FavoritesUI() {
                 .padding(4.dp)
                 .fillMaxSize()
         ) {
-            items(list.filter { it.name.contains(search, true) }) { model ->
+            items(
+                list.filter { it.name.contains(search, true) },
+                key = { it.id }
+            ) { model ->
                 ModelItem(
                     models = model,
                     onClick = {

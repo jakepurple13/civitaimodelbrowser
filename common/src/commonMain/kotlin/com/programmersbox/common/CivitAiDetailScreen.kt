@@ -3,6 +3,7 @@
 package com.programmersbox.common
 
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.*
@@ -10,6 +11,7 @@ import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.selection.toggleable
 import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
@@ -128,7 +130,19 @@ fun CivitAiDetailScreen(
                         ListItem(
                             leadingContent = { Text(model.models.type.name) },
                             headlineContent = { Text(model.models.name) },
-                            supportingContent = { Text(model.models.parsedDescription()) },
+                            supportingContent = {
+                                var showFullDescription by remember { mutableStateOf(false) }
+                                Text(
+                                    model.models.parsedDescription(),
+                                    maxLines = if (showFullDescription) Int.MAX_VALUE else 3,
+                                    modifier = Modifier
+                                        .animateContentSize()
+                                        .toggleable(
+                                            value = showFullDescription,
+                                            onValueChange = { showFullDescription = it }
+                                        )
+                                )
+                            },
                             trailingContent = {
                                 if (model.models.nsfw) {
                                     ElevatedAssistChip(
@@ -145,7 +159,8 @@ fun CivitAiDetailScreen(
                                         enabled = false,
                                     )
                                 }
-                            }
+                            },
+                            modifier = Modifier.animateContentSize()
                         )
                     }
 

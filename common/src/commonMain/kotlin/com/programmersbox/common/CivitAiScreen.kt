@@ -2,6 +2,11 @@
 
 package com.programmersbox.common
 
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutVertically
+import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
@@ -10,10 +15,7 @@ import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowUpward
-import androidx.compose.material.icons.filled.Favorite
-import androidx.compose.material.icons.filled.Refresh
-import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -55,16 +57,25 @@ fun CivitAiScreen(
         refreshing = lazyPagingItems.loadState.refresh == LoadState.Loading,
         onRefresh = { lazyPagingItems.refresh() }
     )
+
+    val searchViewModel = viewModel { CivitAiSearchViewModel(network) }
+
     Scaffold(
         topBar = {
             TopAppBar(
                 title = { Text("CivitAi Model Browser") },
                 navigationIcon = {
-                    IconButton(
-                        onClick = { lazyPagingItems.refresh() },
-                    ) { Icon(Icons.Default.Refresh, null) }
+                    if (showRefreshButton) {
+                        IconButton(
+                            onClick = { lazyPagingItems.refresh() },
+                        ) { Icon(Icons.Default.Refresh, null) }
+                    }
                 },
                 actions = {
+                    IconButton(
+                        onClick = { searchViewModel.showSearch = true }
+                    ) { Icon(Icons.Default.Search, null) }
+
                     IconButton(
                         onClick = { navController.navigate(Screen.Settings.routeId) }
                     ) { Icon(Icons.Default.Settings, null) }
@@ -166,6 +177,13 @@ fun CivitAiScreen(
             )
         }
     }
+
+    SearchView(
+        viewModel = searchViewModel,
+        database = database,
+        showNsfw = showNsfw,
+        blurStrength = blurStrength,
+    )
 }
 
 inline fun <reified T : LoadState> CombinedLoadStates.hasType(): Boolean {
@@ -316,6 +334,106 @@ fun CardContent(
                         borderWidth = 1.dp
                     ),
                 )
+            }
+        }
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
+@Composable
+fun SearchView(
+    viewModel: CivitAiSearchViewModel,
+    database: List<Models>,
+    showNsfw: Boolean,
+    blurStrength: Float,
+) {
+    val navController = LocalNavController.current
+    val lazyPagingItems = viewModel.pager.collectAsLazyPagingItems()
+    AnimatedContent(
+        targetState = viewModel.showSearch,
+        transitionSpec = {
+            slideInVertically(
+                animationSpec = tween(durationMillis = 500),
+                initialOffsetY = { -it }
+            ) togetherWith slideOutVertically(
+                animationSpec = tween(durationMillis = 500),
+                targetOffsetY = { -it }
+            )
+        },
+        contentAlignment = Alignment.TopCenter,
+        modifier = Modifier.fillMaxWidth()
+    ) { target ->
+        if (target) {
+            SearchBar(
+                query = viewModel.searchQuery,
+                onQueryChange = { viewModel.searchQuery = it },
+                onSearch = viewModel::onSearch,
+                active = true,
+                onActiveChange = { viewModel.showSearch = it },
+                placeholder = { Text("Search CivitAi") },
+                trailingIcon = {
+                    IconButton(
+                        onClick = {
+                            viewModel.searchQuery = ""
+                            viewModel.onSearch("")
+                        }
+                    ) { Icon(Icons.Default.Clear, null) }
+                },
+                leadingIcon = {
+                    IconButton(
+                        onClick = { viewModel.showSearch = false }
+                    ) { Icon(Icons.Default.ArrowBack, null) }
+                },
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                LazyVerticalGrid(
+                    columns = adaptiveGridCell(),
+                    verticalArrangement = Arrangement.spacedBy(4.dp),
+                    horizontalArrangement = Arrangement.spacedBy(4.dp),
+                    modifier = Modifier
+                        .padding(4.dp)
+                        .fillMaxSize()
+                ) {
+                    items(
+                        count = lazyPagingItems.itemCount,
+                        contentType = lazyPagingItems.itemContentType(),
+                        key = lazyPagingItems.itemKeyIndexed { model, index -> "${model.id}$index" }
+                    ) {
+                        lazyPagingItems[it]?.let { models ->
+                            ModelItem(
+                                models = models,
+                                onClick = {
+                                    navController.navigate(
+                                        Screen.Detail.routeId.replace(
+                                            "{modelId}",
+                                            models.id.toString()
+                                        )
+                                    )
+                                },
+                                showNsfw = showNsfw,
+                                blurStrength = blurStrength.dp,
+                                isFavorite = database.any { m -> m.id == models.id },
+                                modifier = Modifier.animateItemPlacement()
+                            )
+                        }
+                    }
+
+                    //TODO: Gotta get this working on the first search
+                    if (
+                        lazyPagingItems.loadState.append == LoadState.Loading ||
+                        lazyPagingItems.loadState.prepend == LoadState.Loading
+                    ) {
+                        item(
+                            span = { GridItemSpan(maxLineSpan) }
+                        ) {
+                            CircularProgressIndicator(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .wrapContentWidth(Alignment.CenterHorizontally)
+                            )
+                        }
+                    }
+                }
             }
         }
     }

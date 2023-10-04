@@ -24,7 +24,7 @@ class FavoritesDatabase(
                     Favorite::class
                 )
             )
-                .schemaVersion(1)
+                .schemaVersion(2)
                 .name(name)
                 .migration(AutomaticSchemaMigration { })
                 //.deleteRealmIfMigrationNeeded()

@@ -32,3 +32,5 @@ internal actual fun SheetDetails(
         }
     }
 }
+
+internal actual val showRefreshButton: Boolean = true

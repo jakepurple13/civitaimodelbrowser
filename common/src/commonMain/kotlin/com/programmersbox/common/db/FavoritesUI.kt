@@ -12,6 +12,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.programmersbox.common.*
+import com.programmersbox.common.home.CardContent
 import moe.tlaster.precompose.flow.collectAsStateWithLifecycle
 
 @OptIn(ExperimentalFoundationApi::class, ExperimentalMaterial3Api::class)
@@ -58,9 +59,7 @@ fun FavoritesUI() {
             ) { model ->
                 ModelItem(
                     models = model,
-                    onClick = {
-                        navController.navigate(Screen.Detail.routeId.replace("{modelId}", model.id.toString()))
-                    },
+                    onClick = { navController.navigateToDetail(model.id) },
                     showNsfw = showNsfw,
                     blurStrength = blurStrength.dp,
                     modifier = Modifier.animateItemPlacement()

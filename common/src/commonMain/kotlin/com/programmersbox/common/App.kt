@@ -9,12 +9,12 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.staticCompositionLocalOf
+import com.programmersbox.common.creator.CivitAiUserScreen
 import com.programmersbox.common.db.FavoritesDatabase
 import com.programmersbox.common.db.FavoritesUI
-import moe.tlaster.precompose.navigation.NavHost
-import moe.tlaster.precompose.navigation.Navigator
-import moe.tlaster.precompose.navigation.path
-import moe.tlaster.precompose.navigation.rememberNavigator
+import com.programmersbox.common.details.CivitAiDetailScreen
+import com.programmersbox.common.home.CivitAiScreen
+import moe.tlaster.precompose.navigation.*
 import moe.tlaster.precompose.navigation.transition.NavTransition
 import moe.tlaster.precompose.viewmodel.ViewModel
 import moe.tlaster.precompose.viewmodel.viewModel
@@ -25,7 +25,6 @@ internal fun App(
     producePath: () -> String,
 ) {
     val navController = rememberNavigator()
-    val network = remember { Network() }
     val viewModel = viewModel { AppViewModel(DataStore(producePath)) }
     CompositionLocalProvider(
         LocalNavController provides navController,
@@ -43,16 +42,18 @@ internal fun App(
                     pauseTransition = slideOutHorizontally { -it },
                 )
             ) {
-                scene(Screen.List.routeId) { CivitAiScreen(network) }
+                scene(Screen.List.routeId) { CivitAiScreen() }
                 scene(Screen.Detail.routeId) {
                     CivitAiDetailScreen(
-                        network = network,
                         id = it.path<String>("modelId"),
                         onShareClick = onShareClick
                     )
                 }
                 scene(Screen.Settings.routeId) { SettingsScreen() }
                 scene(Screen.Favorites.routeId) { FavoritesUI() }
+                scene(Screen.User.routeId) {
+                    CivitAiUserScreen(username = it.path<String>("username").orEmpty())
+                }
             }
         }
     }
@@ -63,10 +64,26 @@ class AppViewModel(val dataStore: DataStore) : ViewModel()
 internal val LocalNavController = staticCompositionLocalOf<Navigator> { error("Nope") }
 internal val LocalDataStore = staticCompositionLocalOf<DataStore> { error("Nope") }
 internal val LocalDatabase = staticCompositionLocalOf<FavoritesDatabase> { error("Nope") }
+internal val LocalNetwork = staticCompositionLocalOf { Network() }
+
+fun Navigator.navigateToDetail(id: Long) {
+    navigate(
+        route = Screen.Detail.routeId.replace("{modelId}", id.toString()),
+        options = NavOptions(launchSingleTop = true, includePath = true)
+    )
+}
+
+fun Navigator.navigateToUser(username: String) {
+    navigate(
+        route = Screen.User.routeId.replace("{username}", username),
+        options = NavOptions(launchSingleTop = true)
+    )
+}
 
 enum class Screen(val routeId: String) {
     List("list"),
     Detail("detail/{modelId}"),
     Settings("settings"),
-    Favorites("favorites")
+    Favorites("favorites"),
+    User("user/{username}")
 }

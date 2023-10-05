@@ -1,6 +1,6 @@
 @file:Suppress("INLINE_FROM_HIGHER_PLATFORM")
 
-package com.programmersbox.common
+package com.programmersbox.common.home
 
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.core.tween
@@ -12,6 +12,7 @@ import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.grid.GridItemSpan
+import androidx.compose.foundation.lazy.grid.LazyGridScope
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.material.icons.Icons
@@ -32,15 +33,24 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.paging.CombinedLoadStates
 import androidx.paging.LoadState
+import com.programmersbox.common.*
 import com.programmersbox.common.components.LoadingImage
+import com.programmersbox.common.components.PullRefreshIndicator
+import com.programmersbox.common.components.pullRefresh
+import com.programmersbox.common.components.rememberPullRefreshState
+import com.programmersbox.common.paging.LazyPagingItems
+import com.programmersbox.common.paging.collectAsLazyPagingItems
+import com.programmersbox.common.paging.itemContentType
+import com.programmersbox.common.paging.itemKeyIndexed
 import kotlinx.coroutines.launch
 import moe.tlaster.precompose.flow.collectAsStateWithLifecycle
+import moe.tlaster.precompose.navigation.Navigator
 import moe.tlaster.precompose.viewmodel.viewModel
 
 @OptIn(ExperimentalFoundationApi::class, ExperimentalMaterial3Api::class)
 @Composable
 fun CivitAiScreen(
-    network: Network,
+    network: Network = LocalNetwork.current,
 ) {
     val navController = LocalNavController.current
     val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior()
@@ -115,59 +125,13 @@ fun CivitAiScreen(
                     .padding(4.dp)
                     .fillMaxSize()
             ) {
-                if (lazyPagingItems.loadState.refresh == LoadState.Loading) {
-                    item(
-                        span = { GridItemSpan(maxLineSpan) }
-                    ) {
-                        Text(
-                            text = "Waiting for items to load from the backend",
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .wrapContentWidth(Alignment.CenterHorizontally)
-                        )
-                    }
-                }
-
-                items(
-                    count = lazyPagingItems.itemCount,
-                    contentType = lazyPagingItems.itemContentType(),
-                    key = lazyPagingItems.itemKeyIndexed { model, index -> "${model.id}$index" }
-                ) {
-                    lazyPagingItems[it]?.let { models ->
-                        ModelItem(
-                            models = models,
-                            onClick = {
-                                navController.navigate(Screen.Detail.routeId.replace("{modelId}", models.id.toString()))
-                            },
-                            showNsfw = showNsfw,
-                            blurStrength = blurStrength.dp,
-                            isFavorite = database.any { m -> m.id == models.id },
-                            modifier = Modifier.animateItemPlacement()
-                        )
-                    }
-                }
-
-                if (lazyPagingItems.loadState.append == LoadState.Loading) {
-                    item(
-                        span = { GridItemSpan(maxLineSpan) }
-                    ) {
-                        CircularProgressIndicator(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .wrapContentWidth(Alignment.CenterHorizontally)
-                        )
-                    }
-                }
-
-                if (lazyPagingItems.loadState.hasType<LoadState.Error>()) {
-                    item(
-                        span = { GridItemSpan(maxLineSpan) }
-                    ) {
-                        Column {
-                            Text("Something went wrong! Please try again!")
-                        }
-                    }
-                }
+                modelItems(
+                    lazyPagingItems = lazyPagingItems,
+                    navController = navController,
+                    showNsfw = showNsfw,
+                    blurStrength = blurStrength,
+                    database = database
+                )
             }
 
             PullRefreshIndicator(
@@ -184,6 +148,59 @@ fun CivitAiScreen(
         showNsfw = showNsfw,
         blurStrength = blurStrength,
     )
+}
+
+@OptIn(ExperimentalFoundationApi::class)
+fun LazyGridScope.modelItems(
+    lazyPagingItems: LazyPagingItems<Models>,
+    navController: Navigator,
+    showNsfw: Boolean,
+    blurStrength: Float,
+    database: List<Models>,
+) {
+    items(
+        count = lazyPagingItems.itemCount,
+        contentType = lazyPagingItems.itemContentType(),
+        key = lazyPagingItems.itemKeyIndexed { model, index -> "${model.id}$index" }
+    ) {
+        lazyPagingItems[it]?.let { models ->
+            ModelItem(
+                models = models,
+                onClick = { navController.navigateToDetail(models.id) },
+                showNsfw = showNsfw,
+                blurStrength = blurStrength.dp,
+                isFavorite = database.any { m -> m.id == models.id },
+                modifier = Modifier.animateItemPlacement()
+            )
+        }
+    }
+
+    if (lazyPagingItems.loadState.append == LoadState.Loading) {
+        item(
+            span = { GridItemSpan(maxLineSpan) }
+        ) {
+            CircularProgressIndicator(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .wrapContentWidth(Alignment.CenterHorizontally)
+            )
+        }
+    }
+
+    if (lazyPagingItems.loadState.hasType<LoadState.Error>()) {
+        item(
+            span = { GridItemSpan(maxLineSpan) }
+        ) {
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                Text("Something went wrong")
+                Button(
+                    onClick = lazyPagingItems::retry
+                ) { Text("Try Again") }
+            }
+        }
+    }
 }
 
 inline fun <reified T : LoadState> CombinedLoadStates.hasType(): Boolean {
@@ -394,29 +411,13 @@ fun SearchView(
                         .padding(4.dp)
                         .fillMaxSize()
                 ) {
-                    items(
-                        count = lazyPagingItems.itemCount,
-                        contentType = lazyPagingItems.itemContentType(),
-                        key = lazyPagingItems.itemKeyIndexed { model, index -> "${model.id}$index" }
-                    ) {
-                        lazyPagingItems[it]?.let { models ->
-                            ModelItem(
-                                models = models,
-                                onClick = {
-                                    navController.navigate(
-                                        Screen.Detail.routeId.replace(
-                                            "{modelId}",
-                                            models.id.toString()
-                                        )
-                                    )
-                                },
-                                showNsfw = showNsfw,
-                                blurStrength = blurStrength.dp,
-                                isFavorite = database.any { m -> m.id == models.id },
-                                modifier = Modifier.animateItemPlacement()
-                            )
-                        }
-                    }
+                    modelItems(
+                        lazyPagingItems = lazyPagingItems,
+                        navController = navController,
+                        showNsfw = showNsfw,
+                        blurStrength = blurStrength,
+                        database = database
+                    )
 
                     //TODO: Gotta get this working on the first search
                     if (

@@ -24,9 +24,16 @@ data class Models(
     val allowDifferentLicense: Boolean,
     val tags: List<String>,
     val modelVersions: List<ModelVersion>,
+    val creator: Creator? = null,
 ) {
     fun parsedDescription() = Jsoup.parse(description.orEmpty()).text()
 }
+
+@Serializable
+data class Creator(
+    val username: String? = null,
+    val image: String? = null,
+)
 
 @Serializable
 enum class ModelType {

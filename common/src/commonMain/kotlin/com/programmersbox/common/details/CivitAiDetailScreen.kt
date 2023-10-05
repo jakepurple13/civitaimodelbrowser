@@ -1,19 +1,18 @@
 @file:Suppress("INLINE_FROM_HIGHER_PLATFORM")
 
-package com.programmersbox.common
+package com.programmersbox.common.details
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.core.animateFloatAsState
-import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.selection.toggleable
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.text.selection.SelectionContainer
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
@@ -21,31 +20,27 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.blur
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.unit.dp
+import com.programmersbox.common.*
 import com.programmersbox.common.components.LoadingImage
-import com.programmersbox.common.db.FavoritesDatabase
 import io.kamel.image.KamelImage
 import io.kamel.image.asyncPainterResource
-import kotlinx.coroutines.flow.launchIn
-import kotlinx.coroutines.flow.onEach
-import kotlinx.coroutines.launch
 import moe.tlaster.precompose.flow.collectAsStateWithLifecycle
-import moe.tlaster.precompose.viewmodel.ViewModel
 import moe.tlaster.precompose.viewmodel.viewModel
-import moe.tlaster.precompose.viewmodel.viewModelScope
 import org.jetbrains.compose.resources.ExperimentalResourceApi
 import java.text.SimpleDateFormat
 import java.util.*
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
 @Composable
 fun CivitAiDetailScreen(
-    network: Network,
     id: String?,
     onShareClick: (String) -> Unit,
+    network: Network = LocalNetwork.current,
 ) {
     val database = LocalDatabase.current
     val viewModel = viewModel { CivitAiDetailViewModel(network, id, database) }
@@ -71,16 +66,30 @@ fun CivitAiDetailScreen(
             Scaffold(
                 topBar = {
                     TopAppBar(
-                        title = { Text(model.models.name) },
+                        title = {
+                            Text(
+                                model.models.name,
+                                modifier = Modifier.basicMarquee()
+                            )
+                        },
                         navigationIcon = {
                             IconButton(
                                 onClick = { navController.popBackStack() }
                             ) { Icon(Icons.Default.ArrowBack, null) }
                         },
                         actions = {
-                            IconButton(
-                                onClick = { navController.navigate(Screen.Settings.routeId) }
-                            ) { Icon(Icons.Default.Settings, null) }
+                            model.models.creator?.let { creator ->
+                                IconButton(
+                                    onClick = { navController.navigateToUser(creator.username.orEmpty()) },
+                                ) {
+                                    LoadingImage(
+                                        creator.image.orEmpty(),
+                                        modifier = Modifier
+                                            .size(48.dp)
+                                            .clip(CircleShape)
+                                    )
+                                }
+                            }
                         },
                         scrollBehavior = scrollBehavior
                     )
@@ -104,14 +113,20 @@ fun CivitAiDetailScreen(
                             }
                         },
                         actions = {
-                            IconButton(
-                                onClick = { onShareClick(viewModel.modelUrl) }
-                            ) { Icon(Icons.Default.Share, null) }
+                            NavigationBarItem(
+                                selected = false,
+                                onClick = { onShareClick(viewModel.modelUrl) },
+                                icon = { Icon(Icons.Default.Share, null) },
+                                label = { Text("Share") },
+                            )
 
                             val uriHandler = LocalUriHandler.current
-                            IconButton(
-                                onClick = { uriHandler.openUri(viewModel.modelUrl) }
-                            ) { Icon(Icons.Default.OpenInBrowser, null) }
+                            NavigationBarItem(
+                                selected = false,
+                                onClick = { uriHandler.openUri(viewModel.modelUrl) },
+                                icon = { Icon(Icons.Default.OpenInBrowser, null) },
+                                label = { Text("Open in Browser") },
+                            )
                         }
                     )
                 },
@@ -373,60 +388,4 @@ private fun SheetContent(image: ModelImage) {
             }
         }
     }
-}
-
-class CivitAiDetailViewModel(
-    private val network: Network,
-    private val id: String?,
-    private val database: FavoritesDatabase,
-) : ViewModel() {
-    val modelUrl = "https://civitai.com/models/$id"
-    var models by mutableStateOf<DetailViewState>(DetailViewState.Loading)
-    var isFavorite by mutableStateOf(false)
-
-    init {
-        loadData()
-        database.getFavorites()
-            .onEach { m -> isFavorite = m.any { it.id == id?.toLongOrNull() } }
-            .launchIn(viewModelScope)
-    }
-
-    fun loadData() {
-        viewModelScope.launch {
-            models = DetailViewState.Loading
-            models = id?.let { network.fetchModel(it) }
-                ?.onFailure { it.printStackTrace() }
-                ?.fold(
-                    onSuccess = { DetailViewState.Content(it) },
-                    onFailure = { DetailViewState.Error }
-                ) ?: DetailViewState.Error
-        }
-    }
-
-    fun addToFavorites() {
-        viewModelScope.launch {
-            (models as? DetailViewState.Content)?.models?.let { m ->
-                database.addFavorite(
-                    id = m.id,
-                    name = m.name,
-                    description = m.description,
-                    type = m.type,
-                    nsfw = m.nsfw,
-                    imageUrl = m.modelVersions.firstOrNull()?.images?.firstOrNull()?.url
-                )
-            }
-        }
-    }
-
-    fun removeFromFavorites() {
-        viewModelScope.launch {
-            (models as? DetailViewState.Content)?.models?.id?.let { database.removeFavorite(it) }
-        }
-    }
-}
-
-sealed class DetailViewState {
-    data object Loading : DetailViewState()
-    data object Error : DetailViewState()
-    data class Content(val models: Models) : DetailViewState()
 }

@@ -41,6 +41,17 @@ class Network {
         }.body<CivitAi>()
     }
 
+    suspend fun getModels(
+        page: Int,
+        creatorUsername: String,
+        perPage: Int = 20,
+        includeNsfw: Boolean = true,
+    ) = runCatching {
+        client.get("models?page=$page&sort=Newest&limit=$perPage&nsfw=$includeNsfw&username=$creatorUsername") {
+            contentType(ContentType.Application.Json)
+        }.body<CivitAi>()
+    }
+
     suspend fun searchModels(
         page: Int,
         searchQuery: String,

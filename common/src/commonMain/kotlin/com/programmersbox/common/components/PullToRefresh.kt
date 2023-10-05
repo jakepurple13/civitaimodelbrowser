@@ -1,4 +1,4 @@
-package com.programmersbox.common
+package com.programmersbox.common.components
 
 import androidx.compose.animation.Crossfade
 import androidx.compose.animation.core.*

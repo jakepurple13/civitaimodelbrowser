@@ -24,7 +24,6 @@ class CivitAiUserViewModel(
     ) {
         CivitBrowserUserPagingSource(
             network = network,
-            perPage = 20,
             username = username,
             includeNsfw = runBlocking { dataStore.includeNsfw.flow.first() }
         )

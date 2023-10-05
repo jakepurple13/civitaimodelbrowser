@@ -7,7 +7,6 @@ import com.programmersbox.common.Network
 
 class CivitBrowserUserPagingSource(
     private val network: Network,
-    private val perPage: Int = 20,
     private val includeNsfw: Boolean = true,
     private val username: String,
 ) : PagingSource<Int, Models>() {
@@ -25,7 +24,7 @@ class CivitBrowserUserPagingSource(
 
         return network.getModels(
             page = page.coerceAtLeast(1),
-            perPage = perPage,
+            perPage = params.loadSize,
             includeNsfw = includeNsfw,
             creatorUsername = username
         ).fold(

@@ -8,7 +8,6 @@ import com.programmersbox.common.Network
 class CivitBrowserSearchPagingSource(
     private val network: Network,
     private val searchQuery: String,
-    private val perPage: Int = 20,
     private val includeNsfw: Boolean = true,
 ) : PagingSource<Int, Models>() {
 
@@ -28,7 +27,7 @@ class CivitBrowserSearchPagingSource(
         else
             network.searchModels(
                 page = page.coerceAtLeast(1),
-                perPage = perPage,
+                perPage = params.loadSize,
                 searchQuery = searchQuery,
                 includeNsfw = includeNsfw
             ).fold(

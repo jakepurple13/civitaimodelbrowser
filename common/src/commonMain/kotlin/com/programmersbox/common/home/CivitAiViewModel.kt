@@ -30,7 +30,7 @@ class CivitAiViewModel(
                         pageSize = 20,
                         enablePlaceholders = true
                     ),
-                ) { CivitBrowserPagingSource(network, 20, it) }
+                ) { CivitBrowserPagingSource(network, it) }
                     .flow
                     .cachedIn(viewModelScope)
             }
@@ -79,7 +79,7 @@ class CivitAiSearchViewModel(
                         pageSize = 20,
                         enablePlaceholders = true
                     ),
-                ) { CivitBrowserSearchPagingSource(network, query, 20, includeNsfw) }
+                ) { CivitBrowserSearchPagingSource(network, query, includeNsfw) }
                     .flow
                     .cachedIn(viewModelScope)
             }

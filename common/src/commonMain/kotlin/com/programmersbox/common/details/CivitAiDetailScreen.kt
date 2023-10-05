@@ -143,6 +143,7 @@ fun CivitAiDetailScreen(
                         span = { GridItemSpan(maxLineSpan) }
                     ) {
                         ListItem(
+                            overlineContent = model.models.creator?.username?.let { { Text("Made by $it") } },
                             leadingContent = { Text(model.models.type.name) },
                             headlineContent = { Text(model.models.name) },
                             supportingContent = {

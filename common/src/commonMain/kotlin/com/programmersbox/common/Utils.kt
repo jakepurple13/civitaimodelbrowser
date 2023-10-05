@@ -1,7 +1,8 @@
 package com.programmersbox.common
 
 import androidx.compose.foundation.lazy.grid.GridCells
-import androidx.compose.runtime.Composable
+import androidx.compose.foundation.lazy.grid.LazyGridState
+import androidx.compose.runtime.*
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.Dp
@@ -59,4 +60,22 @@ private fun calculateCellsCrossAxisSizeImpl(
     return List(slotCount) {
         slotSize + if (it < remainingPixels) 1 else 0
     }
+}
+
+@Composable
+fun LazyGridState.isScrollingUp(): Boolean {
+    var previousIndex by remember(this) { mutableIntStateOf(firstVisibleItemIndex) }
+    var previousScrollOffset by remember(this) { mutableIntStateOf(firstVisibleItemScrollOffset) }
+    return remember(this) {
+        derivedStateOf {
+            if (previousIndex != firstVisibleItemIndex) {
+                previousIndex > firstVisibleItemIndex
+            } else {
+                previousScrollOffset >= firstVisibleItemScrollOffset
+            }.also {
+                previousIndex = firstVisibleItemIndex
+                previousScrollOffset = firstVisibleItemScrollOffset
+            }
+        }
+    }.value
 }

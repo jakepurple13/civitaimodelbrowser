@@ -2,11 +2,8 @@
 
 package com.programmersbox.common.home
 
-import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.*
 import androidx.compose.animation.core.tween
-import androidx.compose.animation.slideInVertically
-import androidx.compose.animation.slideOutVertically
-import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
@@ -79,12 +76,18 @@ fun CivitAiScreen(
                         IconButton(
                             onClick = { lazyPagingItems.refresh() },
                         ) { Icon(Icons.Default.Refresh, null) }
+                    } else {
+                        IconButton(
+                            onClick = { searchViewModel.showSearch = true }
+                        ) { Icon(Icons.Default.Search, null) }
                     }
                 },
                 actions = {
-                    IconButton(
-                        onClick = { searchViewModel.showSearch = true }
-                    ) { Icon(Icons.Default.Search, null) }
+                    if (showRefreshButton) {
+                        IconButton(
+                            onClick = { searchViewModel.showSearch = true }
+                        ) { Icon(Icons.Default.Search, null) }
+                    }
 
                     IconButton(
                         onClick = { navController.navigate(Screen.Settings.routeId) }
@@ -97,17 +100,16 @@ fun CivitAiScreen(
                 scrollBehavior = scrollBehavior
             )
         },
-        bottomBar = {
-            BottomAppBar(
-                actions = {
-                    Text("Models Loaded: ${lazyPagingItems.itemCount}")
-                },
-                floatingActionButton = {
-                    FloatingActionButton(
-                        onClick = { scope.launch { lazyGridState.animateScrollToItem(0) } },
-                    ) { Icon(Icons.Default.ArrowUpward, null) }
-                }
-            )
+        floatingActionButton = {
+            AnimatedVisibility(
+                visible = lazyGridState.isScrollingUp(),
+                enter = fadeIn() + slideInHorizontally { it },
+                exit = slideOutHorizontally { it } + fadeOut()
+            ) {
+                FloatingActionButton(
+                    onClick = { scope.launch { lazyGridState.animateScrollToItem(0) } },
+                ) { Icon(Icons.Default.ArrowUpward, null) }
+            }
         },
         modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection)
     ) { padding ->
@@ -121,9 +123,7 @@ fun CivitAiScreen(
                 columns = adaptiveGridCell(),
                 verticalArrangement = Arrangement.spacedBy(4.dp),
                 horizontalArrangement = Arrangement.spacedBy(4.dp),
-                modifier = Modifier
-                    .padding(4.dp)
-                    .fillMaxSize()
+                modifier = Modifier.fillMaxSize()
             ) {
                 modelItems(
                     lazyPagingItems = lazyPagingItems,

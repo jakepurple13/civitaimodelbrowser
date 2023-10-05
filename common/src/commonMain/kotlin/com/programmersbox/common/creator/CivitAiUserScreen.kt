@@ -21,20 +21,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.unit.dp
-import androidx.paging.Pager
-import androidx.paging.PagingConfig
-import androidx.paging.cachedIn
 import com.programmersbox.common.*
 import com.programmersbox.common.components.LoadingImage
 import com.programmersbox.common.home.modelItems
-import com.programmersbox.common.paging.CivitBrowserUserPagingSource
 import com.programmersbox.common.paging.collectAsLazyPagingItems
-import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.runBlocking
 import moe.tlaster.precompose.flow.collectAsStateWithLifecycle
-import moe.tlaster.precompose.viewmodel.ViewModel
 import moe.tlaster.precompose.viewmodel.viewModel
-import moe.tlaster.precompose.viewmodel.viewModelScope
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
 @Composable
@@ -95,7 +87,7 @@ fun CivitAiUserScreen(
             ) {
                 CenterAlignedTopAppBar(
                     title = { Text("Models made by $username") },
-                    windowInsets = WindowInsets(0.dp)
+                    windowInsets = WindowInsets(0.dp),
                 )
             }
             modelItems(
@@ -107,26 +99,4 @@ fun CivitAiUserScreen(
             )
         }
     }
-}
-
-class CivitAiUserViewModel(
-    network: Network,
-    dataStore: DataStore,
-    val username: String,
-) : ViewModel() {
-    val pager = Pager(
-        PagingConfig(
-            pageSize = 20,
-            enablePlaceholders = true
-        ),
-    ) {
-        CivitBrowserUserPagingSource(
-            network = network,
-            perPage = 20,
-            username = username,
-            includeNsfw = runBlocking { dataStore.includeNsfw.flow.first() }
-        )
-    }
-        .flow
-        .cachedIn(viewModelScope)
 }

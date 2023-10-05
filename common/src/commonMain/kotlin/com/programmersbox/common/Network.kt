@@ -58,7 +58,7 @@ class Network {
         perPage: Int = 20,
         includeNsfw: Boolean = true,
     ) = runCatching {
-        client.get("models?page=$page&sort=Newest&limit=$perPage&nsfw=$includeNsfw&query=$searchQuery") {
+        client.get("models?page=$page&sort=Newest&limit=$perPage&nsfw=$includeNsfw&query=$searchQuery".encodeURLQueryComponent()) {
             contentType(ContentType.Application.Json)
         }.body<CivitAi>()
     }

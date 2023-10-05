@@ -3,10 +3,7 @@ package com.programmersbox.common.home
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
-import androidx.paging.Pager
-import androidx.paging.PagingConfig
-import androidx.paging.PagingData
-import androidx.paging.cachedIn
+import androidx.paging.*
 import com.programmersbox.common.DataStore
 import com.programmersbox.common.Models
 import com.programmersbox.common.Network
@@ -20,7 +17,7 @@ import moe.tlaster.precompose.viewmodel.viewModelScope
 class CivitAiViewModel(
     network: Network,
     dataStore: DataStore,
-): ViewModel() {
+) : ViewModel() {
 
     var pager by mutableStateOf<Flow<PagingData<Models>>>(emptyFlow())
 
@@ -51,19 +48,41 @@ class CivitAiSearchViewModel(
 
     var searchQuery by mutableStateOf("")
 
-    var pager by mutableStateOf<Flow<PagingData<Models>>>(emptyFlow())
+    var pager by mutableStateOf<Flow<PagingData<Models>>>(
+        flowOf(
+            PagingData.empty(
+                LoadStates(
+                    LoadState.NotLoading(true),
+                    LoadState.NotLoading(true),
+                    LoadState.NotLoading(true),
+                )
+            )
+        )
+    )
 
     fun onSearch(query: String) {
         viewModelScope.launch {
-            val includeNsfw = dataStore.includeNsfw.flow.first()
-            pager = Pager(
-                PagingConfig(
-                    pageSize = 20,
-                    enablePlaceholders = true
-                ),
-            ) { CivitBrowserSearchPagingSource(network, query, 20, includeNsfw) }
-                .flow
-                .cachedIn(viewModelScope)
+            pager = if (query.isEmpty()) {
+                flowOf(
+                    PagingData.empty(
+                        LoadStates(
+                            LoadState.NotLoading(true),
+                            LoadState.NotLoading(true),
+                            LoadState.NotLoading(true),
+                        )
+                    )
+                )
+            } else {
+                val includeNsfw = dataStore.includeNsfw.flow.first()
+                Pager(
+                    PagingConfig(
+                        pageSize = 20,
+                        enablePlaceholders = true
+                    ),
+                ) { CivitBrowserSearchPagingSource(network, query, 20, includeNsfw) }
+                    .flow
+                    .cachedIn(viewModelScope)
+            }
         }
     }
 }

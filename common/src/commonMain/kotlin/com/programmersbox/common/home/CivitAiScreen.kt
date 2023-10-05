@@ -114,12 +114,11 @@ fun CivitAiScreen(
         modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection)
     ) { padding ->
         Box(
-            modifier = Modifier
-                .padding(padding)
-                .pullRefresh(pullToRefreshState)
+            modifier = Modifier.pullRefresh(pullToRefreshState)
         ) {
             LazyVerticalGrid(
                 state = lazyGridState,
+                contentPadding = padding,
                 columns = adaptiveGridCell(),
                 verticalArrangement = Arrangement.spacedBy(4.dp),
                 horizontalArrangement = Arrangement.spacedBy(4.dp),
@@ -134,10 +133,19 @@ fun CivitAiScreen(
                 )
             }
 
+            /*VerticalScrollbar(
+                rememberScrollbarAdapter(lazyGridState),
+                modifier = Modifier
+                    .align(Alignment.CenterEnd)
+                    .fillMaxHeight(),
+            )*/
+
             PullRefreshIndicator(
                 refreshing = lazyPagingItems.loadState.refresh == LoadState.Loading || lazyPagingItems.loadState.append == LoadState.Loading,
                 state = pullToRefreshState,
-                modifier = Modifier.align(Alignment.TopCenter)
+                modifier = Modifier
+                    .padding(padding)
+                    .align(Alignment.TopCenter)
             )
         }
     }
@@ -175,7 +183,7 @@ fun LazyGridScope.modelItems(
         }
     }
 
-    if (lazyPagingItems.loadState.append == LoadState.Loading) {
+    if (lazyPagingItems.loadState.hasType<LoadState.Loading>()) {
         item(
             span = { GridItemSpan(maxLineSpan) }
         ) {
@@ -204,7 +212,7 @@ fun LazyGridScope.modelItems(
 }
 
 inline fun <reified T : LoadState> CombinedLoadStates.hasType(): Boolean {
-    return refresh == T::class || append == T::class || prepend == T::class
+    return refresh is T || append is T || prepend is T
 }
 
 @Composable
@@ -418,22 +426,6 @@ fun SearchView(
                         blurStrength = blurStrength,
                         database = database
                     )
-
-                    //TODO: Gotta get this working on the first search
-                    if (
-                        lazyPagingItems.loadState.append == LoadState.Loading ||
-                        lazyPagingItems.loadState.prepend == LoadState.Loading
-                    ) {
-                        item(
-                            span = { GridItemSpan(maxLineSpan) }
-                        ) {
-                            CircularProgressIndicator(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .wrapContentWidth(Alignment.CenterHorizontally)
-                            )
-                        }
-                    }
                 }
             }
         }

@@ -224,7 +224,11 @@ private fun ModelItem(
     isFavorite: Boolean,
     modifier: Modifier = Modifier,
 ) {
-    val imageModel = remember { models.modelVersions.firstOrNull()?.images?.firstOrNull() }
+    val imageModel = remember {
+        models.modelVersions.firstNotNullOfOrNull { mv ->
+            mv.images.firstOrNull { it.url.isNotEmpty() }
+        }
+    }
     CoverCard(
         imageUrl = remember { imageModel?.url.orEmpty() },
         name = models.name,

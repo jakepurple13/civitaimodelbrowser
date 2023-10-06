@@ -161,9 +161,10 @@ class SROState {
     }
 }
 
+@Composable
 @OptIn(ExperimentalFoundationApi::class)
 fun Modifier.scaleRotateOffsetReset(
-    sroState: SROState,
+    sroState: SROState = rememberSROState(),
     canScale: Boolean = true,
     canRotate: Boolean = true,
     canOffset: Boolean = true,

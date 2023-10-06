@@ -93,7 +93,6 @@ private fun ModelItem(
     )
 }
 
-@OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun CoverCard(
     imageUrl: String,

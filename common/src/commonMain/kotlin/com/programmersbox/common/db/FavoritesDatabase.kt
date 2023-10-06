@@ -99,7 +99,7 @@ class FavoritesDatabase(
     }
 
     suspend fun removeFavorite(id: Long) {
-        realm.updateInfo<FavoriteList> { it?.favorites?.removeIf { it.id == id } }
+        realm.updateInfo<FavoriteList> { it?.favorites?.removeIf { f -> f.id == id } }
     }
 }
 

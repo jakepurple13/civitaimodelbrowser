@@ -34,11 +34,11 @@ fun CivitAiUserScreen(
     network: Network = LocalNetwork.current,
     username: String,
 ) {
-    val database by LocalDatabase.current.getFavorites().collectAsStateWithLifecycle(emptyList())
     val dataStore = LocalDataStore.current
     val showNsfw by remember { dataStore.showNsfw.flow }.collectAsStateWithLifecycle(false)
     val blurStrength by remember { dataStore.hideNsfwStrength.flow }.collectAsStateWithLifecycle(6f)
     val viewModel = viewModel { CivitAiUserViewModel(network, dataStore, username) }
+    val database by LocalDatabase.current.getFavorites().collectAsStateWithLifecycle(emptyList())
     val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior()
     val navController = LocalNavController.current
 

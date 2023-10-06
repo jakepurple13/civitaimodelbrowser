@@ -38,7 +38,7 @@ fun LoadingImage(
                 modifier = Modifier.fillMaxSize()
             )
         },
-        contentScale = ContentScale.FillBounds,
+        contentScale = ContentScale.Fit,
         contentDescription = name,
         modifier = modifier
     )

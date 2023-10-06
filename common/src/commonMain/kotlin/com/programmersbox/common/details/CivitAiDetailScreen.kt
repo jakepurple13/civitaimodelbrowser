@@ -25,13 +25,13 @@ import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.window.DialogProperties
 import com.programmersbox.common.*
 import com.programmersbox.common.components.LoadingImage
 import io.kamel.image.KamelImage
 import io.kamel.image.asyncPainterResource
 import moe.tlaster.precompose.flow.collectAsStateWithLifecycle
 import moe.tlaster.precompose.viewmodel.viewModel
-import org.jetbrains.compose.resources.ExperimentalResourceApi
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -256,7 +256,6 @@ fun CivitAiDetailScreen(
     }
 }
 
-@OptIn(ExperimentalResourceApi::class)
 @Composable
 private fun ImageCard(
     images: ModelImage,
@@ -311,14 +310,52 @@ private fun ImageCard(
     }
 }
 
+@OptIn(ExperimentalFoundationApi::class, ExperimentalMaterial3Api::class)
 @Composable
 private fun SheetContent(image: ModelImage) {
+    val painter = asyncPainterResource(image.url)
     SelectionContainer {
+        var imagePopup by remember { mutableStateOf(false) }
+
+        if (imagePopup) {
+            val sroState = rememberSROState()
+            AlertDialog(
+                properties = DialogProperties(usePlatformDefaultWidth = false),
+                onDismissRequest = { imagePopup = false },
+                title = {
+                    TopAppBar(
+                        title = {},
+                        actions = {
+                            IconButton(
+                                onClick = sroState::reset
+                            ) { Icon(Icons.Default.Refresh, null) }
+                        },
+                        windowInsets = WindowInsets(0.dp)
+                    )
+                },
+                text = {
+                    KamelImage(
+                        resource = painter,
+                        onLoading = {
+                            CircularProgressIndicator(
+                                progress = animateFloatAsState(
+                                    targetValue = it,
+                                    label = ""
+                                ).value
+                            )
+                        },
+                        contentDescription = null,
+                        modifier = Modifier.scaleRotateOffsetReset(sroState)
+                    )
+                },
+                confirmButton = { TextButton(onClick = { imagePopup = false }) { Text("Done") } }
+            )
+        }
         Column(
             modifier = Modifier.verticalScroll(rememberScrollState())
         ) {
             KamelImage(
-                resource = asyncPainterResource(image.url),
+                resource = painter,
                 onLoading = {
                     CircularProgressIndicator(
                         progress = animateFloatAsState(
@@ -328,7 +365,9 @@ private fun SheetContent(image: ModelImage) {
                     )
                 },
                 contentDescription = null,
-                modifier = Modifier.align(Alignment.CenterHorizontally)
+                modifier = Modifier
+                    .combinedClickable(onDoubleClick = { imagePopup = true }) {}
+                    .align(Alignment.CenterHorizontally)
             )
             if (image.nsfw.canNotShow()) {
                 Row(

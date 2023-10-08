@@ -63,7 +63,9 @@ class CivitAiDetailViewModel(
     fun addImageToFavorites(modelImage: ModelImage) {
         viewModelScope.launch {
             database.addFavorite(
-                id = modelImage.id?.toLongOrNull() ?: Random.nextLong(),
+                id = modelImage.id?.toLongOrNull()
+                    ?: (models as? DetailViewState.Content)?.models?.id
+                    ?: Random.nextLong(),
                 name = modelImage.meta?.model.orEmpty(),
                 imageMetaDb = modelImage.meta?.toDb(),
                 nsfw = modelImage.nsfw.canNotShow(),
@@ -73,15 +75,21 @@ class CivitAiDetailViewModel(
         }
     }
 
-    fun removeImageToFavorites(modelImage: ModelImage) {
+    fun removeImageFromFavorites(modelImage: ModelImage) {
         viewModelScope.launch {
-            database.removeFavorite(modelImage.url)
+            database.removeFrom {
+                removeIf { f -> f.imageUrl == modelImage.url && f.favoriteType == FavoriteType.Image.name }
+            }
         }
     }
 
     fun removeFromFavorites() {
         viewModelScope.launch {
-            (models as? DetailViewState.Content)?.models?.id?.let { database.removeFavorite(it) }
+            (models as? DetailViewState.Content)?.models?.id?.let {
+                database.removeFrom {
+                    removeIf { f -> f.id == it && f.favoriteType == FavoriteType.Model.name }
+                }
+            }
         }
     }
 }

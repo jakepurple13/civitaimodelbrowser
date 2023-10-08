@@ -7,6 +7,7 @@ import io.realm.kotlin.Realm
 import io.realm.kotlin.RealmConfiguration
 import io.realm.kotlin.ext.asFlow
 import io.realm.kotlin.migration.AutomaticSchemaMigration
+import io.realm.kotlin.types.RealmList
 import io.realm.kotlin.types.RealmObject
 import kotlinx.coroutines.flow.mapNotNull
 
@@ -133,6 +134,10 @@ class FavoritesDatabase(
                 }
             )
         }
+    }
+
+    suspend fun removeFrom(block: RealmList<Favorite>.() -> Unit) {
+        realm.updateInfo<FavoriteList> { it?.favorites?.block() }
     }
 
     suspend fun removeFavorite(id: Long) {

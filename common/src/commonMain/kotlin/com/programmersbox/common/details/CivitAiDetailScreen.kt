@@ -67,7 +67,7 @@ fun CivitAiDetailScreen(
                                 .filterIsInstance<FavoriteModel.Image>()
                                 .any { f -> f.imageUrl == sheetModel.url },
                             onFavorite = { viewModel.addImageToFavorites(sheetModel) },
-                            onRemoveFromFavorite = { viewModel.removeImageToFavorites(sheetModel) }
+                            onRemoveFromFavorite = { viewModel.removeImageFromFavorites(sheetModel) }
                         )
                     }
                 )

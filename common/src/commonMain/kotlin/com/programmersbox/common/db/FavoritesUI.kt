@@ -11,6 +11,7 @@ import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.ArrowRight
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -35,6 +36,7 @@ fun FavoritesUI() {
     val database = LocalDatabase.current
     val list by database.getFavorites().collectAsStateWithLifecycle(emptyList())
     var search by remember { mutableStateOf("") }
+    val scope = rememberCoroutineScope()
     Scaffold(
         topBar = {
             SearchBar(
@@ -84,6 +86,7 @@ fun FavoritesUI() {
                                 content = {
                                     SheetContent(
                                         image = sheetModel,
+                                        onNavigate = { navController.navigateToDetail(sheetModel.id) }
                                     )
                                 }
                             )
@@ -117,6 +120,7 @@ fun FavoritesUI() {
 @Composable
 private fun SheetContent(
     image: FavoriteModel.Image,
+    onNavigate: () -> Unit,
 ) {
     val painter = asyncPainterResource(image.imageUrl.orEmpty())
     SelectionContainer {
@@ -159,6 +163,15 @@ private fun SheetContent(
         Column(
             modifier = Modifier.verticalScroll(rememberScrollState())
         ) {
+            TopAppBar(
+                title = {},
+                windowInsets = WindowInsets(0.dp),
+                actions = {
+                    IconButton(
+                        onClick = onNavigate
+                    ) { Icon(Icons.Default.ArrowRight, null) }
+                }
+            )
             KamelImage(
                 resource = painter,
                 onLoading = {

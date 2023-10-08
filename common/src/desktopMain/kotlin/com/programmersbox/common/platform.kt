@@ -20,15 +20,14 @@ internal actual fun getPagingPlaceholderKey(index: Int): Any = index
 
 @Composable
 internal actual fun SheetDetails(
-    sheetDetails: ModelImage,
     onDismiss: () -> Unit,
-    content: @Composable (ModelImage) -> Unit,
+    content: @Composable () -> Unit,
 ) {
     Window(
         onCloseRequest = onDismiss
     ) {
         Surface {
-            content(sheetDetails)
+            content()
         }
     }
 }

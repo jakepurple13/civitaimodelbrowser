@@ -45,14 +45,13 @@ private data class PagingPlaceholderKey(private val index: Int) : Parcelable {
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 internal actual fun SheetDetails(
-    sheetDetails: ModelImage,
     onDismiss: () -> Unit,
-    content: @Composable (ModelImage) -> Unit,
+    content: @Composable () -> Unit,
 ) {
     ModalBottomSheet(
         onDismissRequest = onDismiss
     ) {
-        content(sheetDetails)
+        content()
     }
 }
 

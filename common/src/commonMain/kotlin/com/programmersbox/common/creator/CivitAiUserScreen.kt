@@ -13,6 +13,8 @@ import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -37,8 +39,9 @@ fun CivitAiUserScreen(
     val dataStore = LocalDataStore.current
     val showNsfw by remember { dataStore.showNsfw.flow }.collectAsStateWithLifecycle(false)
     val blurStrength by remember { dataStore.hideNsfwStrength.flow }.collectAsStateWithLifecycle(6f)
-    val viewModel = viewModel { CivitAiUserViewModel(network, dataStore, username) }
-    val database by LocalDatabase.current.getFavorites().collectAsStateWithLifecycle(emptyList())
+    val database = LocalDatabase.current
+    val favorites by database.getFavorites().collectAsStateWithLifecycle(emptyList())
+    val viewModel = viewModel { CivitAiUserViewModel(network, dataStore, database, username) }
     val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior()
     val navController = LocalNavController.current
 
@@ -61,6 +64,23 @@ fun CivitAiUserScreen(
                 actions = {
                     if (lazyPagingItems.itemSnapshotList.isNotEmpty()) {
                         lazyPagingItems[0]?.creator?.let { creator ->
+                            IconButton(
+                                onClick = {
+                                    if (favorites.any { it.name == viewModel.username }) {
+                                        viewModel.removeToFavorites(creator)
+                                    } else {
+                                        viewModel.addToFavorites(creator)
+                                    }
+                                }
+                            ) {
+                                Icon(
+                                    if (favorites.any { it.name == viewModel.username })
+                                        Icons.Default.Favorite
+                                    else
+                                        Icons.Default.FavoriteBorder,
+                                    null
+                                )
+                            }
                             LoadingImage(
                                 creator.image.orEmpty(),
                                 modifier = Modifier
@@ -95,7 +115,7 @@ fun CivitAiUserScreen(
                 navController = navController,
                 showNsfw = showNsfw,
                 blurStrength = blurStrength,
-                database = database
+                database = favorites
             )
         }
     }

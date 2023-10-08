@@ -10,7 +10,6 @@ internal expect val showRefreshButton: Boolean
 
 @Composable
 internal expect fun SheetDetails(
-    sheetDetails: ModelImage,
     onDismiss: () -> Unit,
-    content: @Composable (ModelImage) -> Unit,
+    content: @Composable () -> Unit,
 )

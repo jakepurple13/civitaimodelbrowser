@@ -28,6 +28,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.DialogProperties
 import com.programmersbox.common.*
 import com.programmersbox.common.components.LoadingImage
+import com.programmersbox.common.db.FavoriteModel
 import io.kamel.image.KamelImage
 import io.kamel.image.asyncPainterResource
 import moe.tlaster.precompose.flow.collectAsStateWithLifecycle
@@ -50,15 +51,25 @@ fun CivitAiDetailScreen(
     val showNsfw by remember { dataStore.showNsfw.flow }.collectAsStateWithLifecycle(false)
     val nsfwBlurStrength by remember { dataStore.hideNsfwStrength.flow }.collectAsStateWithLifecycle(6f)
 
+    val favoriteList by database.getFavorites().collectAsStateWithLifecycle(emptyList())
+
     when (val model = viewModel.models) {
         is DetailViewState.Content -> {
             var sheetDetails by remember { mutableStateOf<ModelImage?>(null) }
 
             sheetDetails?.let { sheetModel ->
                 SheetDetails(
-                    sheetDetails = sheetModel,
                     onDismiss = { sheetDetails = null },
-                    content = { SheetContent(it) }
+                    content = {
+                        SheetContent(
+                            image = sheetModel,
+                            isFavorite = favoriteList
+                                .filterIsInstance<FavoriteModel.Image>()
+                                .any { f -> f.imageUrl == sheetModel.url },
+                            onFavorite = { viewModel.addImageToFavorites(sheetModel) },
+                            onRemoveFromFavorite = { viewModel.removeImageToFavorites(sheetModel) }
+                        )
+                    }
                 )
             }
 
@@ -217,6 +228,9 @@ fun CivitAiDetailScreen(
                                 images = images,
                                 showNsfw = showNsfw,
                                 nsfwBlurStrength = nsfwBlurStrength,
+                                isFavorite = favoriteList
+                                    .filterIsInstance<FavoriteModel.Image>()
+                                    .any { f -> f.imageUrl == images.url },
                                 onClick = { sheetDetails = images }
                             )
                         }
@@ -260,15 +274,18 @@ fun CivitAiDetailScreen(
 private fun ImageCard(
     images: ModelImage,
     showNsfw: Boolean,
+    isFavorite: Boolean,
     nsfwBlurStrength: Float,
     onClick: () -> Unit,
 ) {
     Surface(
         tonalElevation = 4.dp,
         shape = MaterialTheme.shapes.medium,
-        border = if (images.nsfw.canNotShow())
-            BorderStroke(1.dp, MaterialTheme.colorScheme.error)
-        else null,
+        border = when {
+            isFavorite -> BorderStroke(1.dp, MaterialTheme.colorScheme.primary)
+            images.nsfw.canNotShow() -> BorderStroke(1.dp, MaterialTheme.colorScheme.error)
+            else -> null
+        },
         onClick = onClick,
         modifier = Modifier.size(
             width = ComposableUtils.IMAGE_WIDTH,
@@ -312,7 +329,12 @@ private fun ImageCard(
 
 @OptIn(ExperimentalFoundationApi::class, ExperimentalMaterial3Api::class)
 @Composable
-private fun SheetContent(image: ModelImage) {
+private fun SheetContent(
+    image: ModelImage,
+    isFavorite: Boolean,
+    onFavorite: () -> Unit,
+    onRemoveFromFavorite: () -> Unit,
+) {
     val painter = asyncPainterResource(image.url)
     SelectionContainer {
         var imagePopup by remember { mutableStateOf(false) }
@@ -354,6 +376,26 @@ private fun SheetContent(image: ModelImage) {
         Column(
             modifier = Modifier.verticalScroll(rememberScrollState())
         ) {
+            TopAppBar(
+                title = {},
+                windowInsets = WindowInsets(0.dp),
+                actions = {
+                    IconButton(
+                        onClick = {
+                            if (isFavorite) {
+                                onRemoveFromFavorite()
+                            } else {
+                                onFavorite()
+                            }
+                        }
+                    ) {
+                        Icon(
+                            if (isFavorite) Icons.Default.Favorite else Icons.Default.FavoriteBorder,
+                            null
+                        )
+                    }
+                }
+            )
             KamelImage(
                 resource = painter,
                 onLoading = {

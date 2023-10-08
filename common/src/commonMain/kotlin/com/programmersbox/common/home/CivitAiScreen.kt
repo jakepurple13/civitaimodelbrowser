@@ -35,6 +35,7 @@ import com.programmersbox.common.components.LoadingImage
 import com.programmersbox.common.components.PullRefreshIndicator
 import com.programmersbox.common.components.pullRefresh
 import com.programmersbox.common.components.rememberPullRefreshState
+import com.programmersbox.common.db.FavoriteModel
 import com.programmersbox.common.paging.LazyPagingItems
 import com.programmersbox.common.paging.collectAsLazyPagingItems
 import com.programmersbox.common.paging.itemContentType
@@ -129,7 +130,7 @@ fun CivitAiScreen(
                     navController = navController,
                     showNsfw = showNsfw,
                     blurStrength = blurStrength,
-                    database = database
+                    database = database.filterIsInstance<FavoriteModel.Model>()
                 )
             }
 
@@ -152,7 +153,7 @@ fun CivitAiScreen(
 
     SearchView(
         viewModel = searchViewModel,
-        database = database,
+        database = database.filterIsInstance<FavoriteModel.Model>(),
         showNsfw = showNsfw,
         blurStrength = blurStrength,
     )
@@ -164,7 +165,7 @@ fun LazyGridScope.modelItems(
     navController: Navigator,
     showNsfw: Boolean,
     blurStrength: Float,
-    database: List<Models>,
+    database: List<FavoriteModel>,
 ) {
     items(
         count = lazyPagingItems.itemCount,
@@ -372,7 +373,7 @@ fun CardContent(
 @Composable
 fun SearchView(
     viewModel: CivitAiSearchViewModel,
-    database: List<Models>,
+    database: List<FavoriteModel>,
     showNsfw: Boolean,
     blurStrength: Float,
 ) {

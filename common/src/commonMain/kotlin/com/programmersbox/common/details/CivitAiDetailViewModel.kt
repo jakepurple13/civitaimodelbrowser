@@ -3,14 +3,18 @@ package com.programmersbox.common.details
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
+import com.programmersbox.common.ModelImage
 import com.programmersbox.common.Models
 import com.programmersbox.common.Network
+import com.programmersbox.common.db.FavoriteType
 import com.programmersbox.common.db.FavoritesDatabase
+import com.programmersbox.common.db.toDb
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 import moe.tlaster.precompose.viewmodel.ViewModel
 import moe.tlaster.precompose.viewmodel.viewModelScope
+import kotlin.random.Random
 
 class CivitAiDetailViewModel(
     private val network: Network,
@@ -49,9 +53,29 @@ class CivitAiDetailViewModel(
                     description = m.description,
                     type = m.type,
                     nsfw = m.nsfw,
-                    imageUrl = m.modelVersions.firstOrNull()?.images?.firstOrNull()?.url
+                    imageUrl = m.modelVersions.firstOrNull()?.images?.firstOrNull()?.url,
+                    favoriteType = FavoriteType.Model
                 )
             }
+        }
+    }
+
+    fun addImageToFavorites(modelImage: ModelImage) {
+        viewModelScope.launch {
+            database.addFavorite(
+                id = modelImage.id?.toLongOrNull() ?: Random.nextLong(),
+                name = modelImage.meta?.model.orEmpty(),
+                imageMetaDb = modelImage.meta?.toDb(),
+                nsfw = modelImage.nsfw.canNotShow(),
+                imageUrl = modelImage.url,
+                favoriteType = FavoriteType.Image
+            )
+        }
+    }
+
+    fun removeImageToFavorites(modelImage: ModelImage) {
+        viewModelScope.launch {
+            database.removeFavorite(modelImage.url)
         }
     }
 

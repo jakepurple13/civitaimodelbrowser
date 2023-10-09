@@ -60,7 +60,6 @@ data class ModelVersion(
     val earlyAccessTimeFrame: Long,
     val description: String?,
     val images: List<ModelImage>,
-    val downloadUrl: String,
 ) {
     fun parsedDescription() = description?.let { Jsoup.parse(it).text() }
 }

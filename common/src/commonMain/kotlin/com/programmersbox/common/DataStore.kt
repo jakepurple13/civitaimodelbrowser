@@ -9,10 +9,22 @@ import kotlinx.coroutines.flow.mapNotNull
 import okio.Path.Companion.toPath
 
 
-class DataStore(
+class DataStore private constructor(
     producePath: () -> String = { "androidx.preferences_pb" },
 ) {
     private val dataStore = PreferenceDataStoreFactory.createWithPath { producePath().toPath() }
+
+    companion object {
+        lateinit var dataStore: com.programmersbox.common.DataStore
+
+        fun getStore(producePath: () -> String = { "androidx.preferences_pb" }) =
+            if (::dataStore.isInitialized)
+                dataStore
+            else {
+                dataStore = DataStore(producePath)
+                dataStore
+            }
+    }
 
     val showNsfw = DataStoreTypeNonNull(
         key = booleanPreferencesKey("show_nsfw"),

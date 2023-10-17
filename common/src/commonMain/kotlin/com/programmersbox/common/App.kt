@@ -26,7 +26,7 @@ internal fun App(
     producePath: () -> String,
 ) {
     val navController = rememberNavigator()
-    val viewModel = viewModel { AppViewModel(DataStore(producePath)) }
+    val viewModel = viewModel { AppViewModel(DataStore.getStore(producePath)) }
     CompositionLocalProvider(
         LocalNavController provides navController,
         LocalDataStore provides viewModel.dataStore,

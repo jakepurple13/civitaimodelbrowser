@@ -6,6 +6,7 @@ import androidx.paging.cachedIn
 import com.programmersbox.common.Creator
 import com.programmersbox.common.DataStore
 import com.programmersbox.common.Network
+import com.programmersbox.common.PAGE_LIMIT
 import com.programmersbox.common.db.FavoriteType
 import com.programmersbox.common.db.FavoritesDatabase
 import com.programmersbox.common.paging.CivitBrowserUserPagingSource
@@ -24,7 +25,7 @@ class CivitAiUserViewModel(
 ) : ViewModel() {
     val pager = Pager(
         PagingConfig(
-            pageSize = 20,
+            pageSize = PAGE_LIMIT,
             enablePlaceholders = true
         ),
     ) {

@@ -4,6 +4,7 @@ import androidx.paging.PagingSource
 import androidx.paging.PagingState
 import com.programmersbox.common.CustomModelImage
 import com.programmersbox.common.Network
+import com.programmersbox.common.PAGE_LIMIT
 
 class CivitDetailsImagePagingSource(
     private val network: Network,
@@ -24,7 +25,7 @@ class CivitDetailsImagePagingSource(
         return network.fetchAllImagesByModel(
             modelId = modelId.orEmpty(),
             page = page,
-            perPage = 20,
+            perPage = PAGE_LIMIT,
             includeNsfw = includeNsfw
         )
             .fold(

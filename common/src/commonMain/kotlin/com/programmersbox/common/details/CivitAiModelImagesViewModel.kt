@@ -7,6 +7,7 @@ import androidx.paging.*
 import com.programmersbox.common.CustomModelImage
 import com.programmersbox.common.DataStore
 import com.programmersbox.common.Network
+import com.programmersbox.common.PAGE_LIMIT
 import com.programmersbox.common.db.FavoriteType
 import com.programmersbox.common.db.FavoritesDatabase
 import com.programmersbox.common.db.toDb
@@ -44,7 +45,7 @@ class CivitAiModelImagesViewModel(
             val includeNsfw = dataStore.includeNsfw.flow.first()
             pager = Pager(
                 PagingConfig(
-                    pageSize = 20,
+                    pageSize = PAGE_LIMIT,
                     enablePlaceholders = true
                 ),
             ) { CivitDetailsImagePagingSource(network, includeNsfw, modelId) }

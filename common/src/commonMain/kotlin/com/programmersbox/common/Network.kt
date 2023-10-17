@@ -9,6 +9,8 @@ import io.ktor.http.*
 import io.ktor.serialization.kotlinx.json.*
 import kotlinx.serialization.json.Json
 
+const val PAGE_LIMIT = 20
+
 class Network {
     companion object {
         private const val URL = "https://civitai.com/api/v1/"
@@ -33,7 +35,7 @@ class Network {
 
     suspend fun getModels(
         page: Int,
-        perPage: Int = 20,
+        perPage: Int = PAGE_LIMIT,
         includeNsfw: Boolean = true,
     ) = runCatching {
         client.get("models?page=$page&sort=Newest&limit=$perPage&nsfw=$includeNsfw") {
@@ -44,7 +46,7 @@ class Network {
     suspend fun getModels(
         page: Int,
         creatorUsername: String,
-        perPage: Int = 20,
+        perPage: Int = PAGE_LIMIT,
         includeNsfw: Boolean = true,
     ) = runCatching {
         client.get("models?page=$page&sort=Newest&limit=$perPage&nsfw=$includeNsfw&username=$creatorUsername") {
@@ -55,7 +57,7 @@ class Network {
     suspend fun searchModels(
         page: Int,
         searchQuery: String,
-        perPage: Int = 20,
+        perPage: Int = PAGE_LIMIT,
         includeNsfw: Boolean = true,
     ) = runCatching {
         client.get("models?page=$page&sort=Newest&limit=$perPage&nsfw=$includeNsfw&query=$searchQuery".encodeURLQueryComponent()) {
@@ -72,7 +74,7 @@ class Network {
     suspend fun fetchAllImagesByModel(
         modelId: String,
         page: Int,
-        perPage: Int = 20,
+        perPage: Int = PAGE_LIMIT,
         includeNsfw: Boolean = true,
 
         ) = runCatching {

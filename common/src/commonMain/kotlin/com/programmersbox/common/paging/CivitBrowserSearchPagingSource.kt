@@ -2,6 +2,7 @@ package com.programmersbox.common.paging
 
 import com.programmersbox.common.CivitAi
 import com.programmersbox.common.Network
+import com.programmersbox.common.PAGE_LIMIT
 
 class CivitBrowserSearchPagingSource(
     network: Network,
@@ -14,7 +15,7 @@ class CivitBrowserSearchPagingSource(
         includeNsfw: Boolean,
     ): Result<CivitAi> = network.searchModels(
         page = page.coerceAtLeast(1),
-        perPage = 20,
+        perPage = PAGE_LIMIT,
         searchQuery = searchQuery,
         includeNsfw = includeNsfw
     )

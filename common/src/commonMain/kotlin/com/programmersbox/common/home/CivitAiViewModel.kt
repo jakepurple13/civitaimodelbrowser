@@ -7,6 +7,7 @@ import androidx.paging.*
 import com.programmersbox.common.DataStore
 import com.programmersbox.common.Models
 import com.programmersbox.common.Network
+import com.programmersbox.common.PAGE_LIMIT
 import com.programmersbox.common.paging.CivitBrowserPagingSource
 import com.programmersbox.common.paging.CivitBrowserSearchPagingSource
 import kotlinx.coroutines.flow.*
@@ -27,7 +28,7 @@ class CivitAiViewModel(
             .onEach {
                 pager = Pager(
                     PagingConfig(
-                        pageSize = 20,
+                        pageSize = PAGE_LIMIT,
                         enablePlaceholders = true
                     ),
                 ) { CivitBrowserPagingSource(network, it) }
@@ -76,7 +77,7 @@ class CivitAiSearchViewModel(
                 val includeNsfw = dataStore.includeNsfw.flow.first()
                 Pager(
                     PagingConfig(
-                        pageSize = 20,
+                        pageSize = PAGE_LIMIT,
                         enablePlaceholders = true
                     ),
                 ) { CivitBrowserSearchPagingSource(network, query, includeNsfw) }

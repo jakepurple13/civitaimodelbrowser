@@ -135,7 +135,17 @@ fun CivitAiDetailScreen(
                                 selected = false,
                                 onClick = { uriHandler.openUri(viewModel.modelUrl) },
                                 icon = { Icon(Icons.Default.OpenInBrowser, null) },
-                                label = { Text("Open in Browser") },
+                                label = { Text("Open Browser") },
+                            )
+
+                            NavigationBarItem(
+                                selected = false,
+                                onClick = {
+                                    id?.toLongOrNull()
+                                        ?.let { navController.navigateToDetailImages(it, model.models.name) }
+                                },
+                                icon = { Icon(Icons.Default.Image, null) },
+                                label = { Text("Images") },
                             )
                         }
                     )
@@ -207,15 +217,11 @@ fun CivitAiDetailScreen(
                                 TopAppBar(
                                     title = { Text("Version: ${version.name}") },
                                     actions = {
-                                        IconButton(
-                                            onClick = { showMoreInfo = !showMoreInfo }
-                                        ) {
-                                            Icon(
-                                                Icons.Filled.ArrowDropDown,
-                                                null,
-                                                Modifier.rotate(if (showMoreInfo) 180f else 0f)
-                                            )
-                                        }
+                                        Icon(
+                                            Icons.Filled.ArrowDropDown,
+                                            null,
+                                            Modifier.rotate(if (showMoreInfo) 180f else 0f)
+                                        )
                                     },
                                     windowInsets = WindowInsets(0.dp)
                                 )

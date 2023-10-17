@@ -13,6 +13,7 @@ import com.programmersbox.common.creator.CivitAiUserScreen
 import com.programmersbox.common.db.FavoritesDatabase
 import com.programmersbox.common.db.FavoritesUI
 import com.programmersbox.common.details.CivitAiDetailScreen
+import com.programmersbox.common.details.CivitAiModelImagesScreen
 import com.programmersbox.common.home.CivitAiScreen
 import moe.tlaster.precompose.navigation.*
 import moe.tlaster.precompose.navigation.transition.NavTransition
@@ -43,11 +44,23 @@ internal fun App(
                 )
             ) {
                 scene(Screen.List.routeId) { CivitAiScreen() }
-                scene(Screen.Detail.routeId) {
-                    CivitAiDetailScreen(
-                        id = it.path<String>("modelId"),
-                        onShareClick = onShareClick
-                    )
+                group(
+                    "detailsgroup",
+                    Screen.Detail.routeId
+                ) {
+                    scene(Screen.Detail.routeId) {
+                        CivitAiDetailScreen(
+                            id = it.path<String>("modelId"),
+                            onShareClick = onShareClick
+                        )
+                    }
+
+                    scene(Screen.DetailsImage.routeId) {
+                        CivitAiModelImagesScreen(
+                            modelId = it.path<String>("modelId"),
+                            modelName = it.path<String>("modelName")
+                        )
+                    }
                 }
                 scene(Screen.Settings.routeId) { SettingsScreen() }
                 scene(Screen.Favorites.routeId) { FavoritesUI() }
@@ -73,6 +86,13 @@ fun Navigator.navigateToDetail(id: Long) {
     )
 }
 
+fun Navigator.navigateToDetailImages(id: Long, name: String) {
+    navigate(
+        route = Screen.DetailsImage.routeId.replace("{modelId}", id.toString()).replace("{modelName}", name),
+        options = NavOptions(launchSingleTop = true, includePath = true)
+    )
+}
+
 fun Navigator.navigateToUser(username: String) {
     navigate(
         route = Screen.User.routeId.replace("{username}", username),
@@ -85,5 +105,6 @@ enum class Screen(val routeId: String) {
     Detail("detail/{modelId}"),
     Settings("settings"),
     Favorites("favorites"),
-    User("user/{username}")
+    User("user/{username}"),
+    DetailsImage("detailsimage/{modelId}&{modelName}")
 }

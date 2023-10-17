@@ -75,6 +75,23 @@ data class ModelImage(
 )
 
 @Serializable
+data class CivitAiCustomImages(
+    val items: List<CustomModelImage>,
+)
+
+@Serializable
+data class CustomModelImage(
+    val id: String? = "",
+    val url: String,
+    val nsfw: NsfwLevel = NsfwLevel.None,
+    val width: Int,
+    val height: Int,
+    val meta: ImageMeta? = null,
+    val postId: Long? = null,
+    val username: String? = null,
+)
+
+@Serializable
 enum class NsfwLevel {
     None,
     Soft,

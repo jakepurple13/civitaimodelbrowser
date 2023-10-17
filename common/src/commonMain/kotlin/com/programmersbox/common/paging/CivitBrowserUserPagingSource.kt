@@ -14,7 +14,7 @@ class CivitBrowserUserPagingSource(
         includeNsfw: Boolean,
     ): Result<CivitAi> = network.getModels(
         page = page.coerceAtLeast(1),
-        perPage = params.loadSize,
+        perPage = 20,
         includeNsfw = includeNsfw,
         creatorUsername = username
     )

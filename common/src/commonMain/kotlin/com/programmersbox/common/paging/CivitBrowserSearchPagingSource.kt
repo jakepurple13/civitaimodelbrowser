@@ -14,7 +14,7 @@ class CivitBrowserSearchPagingSource(
         includeNsfw: Boolean,
     ): Result<CivitAi> = network.searchModels(
         page = page.coerceAtLeast(1),
-        perPage = params.loadSize,
+        perPage = 20,
         searchQuery = searchQuery,
         includeNsfw = includeNsfw
     )

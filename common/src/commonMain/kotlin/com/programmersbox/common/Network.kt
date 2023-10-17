@@ -68,4 +68,16 @@ class Network {
             contentType(ContentType.Application.Json)
         }.body<Models>()
     }
+
+    suspend fun fetchAllImagesByModel(
+        modelId: String,
+        page: Int,
+        perPage: Int = 20,
+        includeNsfw: Boolean = true,
+
+        ) = runCatching {
+        client.get("images?limit=$perPage&page=$page&modelId=$modelId${if (!includeNsfw) "&nsfw=None" else ""}") {
+            contentType(ContentType.Application.Json)
+        }.body<CivitAiCustomImages>().items
+    }
 }

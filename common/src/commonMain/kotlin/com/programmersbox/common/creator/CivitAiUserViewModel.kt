@@ -45,7 +45,8 @@ class CivitAiUserViewModel(
                 id = Random.nextLong(),
                 name = creator.username.orEmpty(),
                 imageUrl = creator.image,
-                favoriteType = FavoriteType.Creator
+                favoriteType = FavoriteType.Creator,
+                modelId = Random.nextLong()
             )
         }
     }

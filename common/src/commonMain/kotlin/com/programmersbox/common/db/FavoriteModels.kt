@@ -18,6 +18,7 @@ class Favorite : RealmObject {
     var imageUrl: String? = null
     var favoriteType: String = FavoriteType.Model.name
     var imageMeta: ImageMetaDb? = null
+    var modelId: Long = id
 }
 
 class ImageMetaDb : RealmObject {
@@ -58,6 +59,7 @@ sealed class FavoriteModel(
         imageUrl: String?,
         val imageMetaDb: ImageMetaDb?,
         val nsfw: Boolean,
+        val modelId: Long,
     ) : FavoriteModel(id, name, imageUrl)
 
     class Creator(

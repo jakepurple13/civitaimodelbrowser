@@ -23,7 +23,7 @@ class FavoritesDatabase(
                     ImageMetaDb::class
                 )
             )
-                .schemaVersion(3)
+                .schemaVersion(4)
                 .name(name)
                 .migration(AutomaticSchemaMigration { })
                 //.deleteRealmIfMigrationNeeded()
@@ -58,7 +58,8 @@ class FavoritesDatabase(
                             name = favorite.name,
                             imageUrl = favorite.imageUrl,
                             nsfw = favorite.nsfw,
-                            imageMetaDb = favorite.imageMeta
+                            imageMetaDb = favorite.imageMeta,
+                            modelId = favorite.modelId
                         )
                     }
 
@@ -112,6 +113,7 @@ class FavoritesDatabase(
 
     suspend fun addFavorite(
         id: Long,
+        modelId: Long,
         name: String = "",
         description: String? = null,
         type: ModelType = ModelType.Other,
@@ -131,6 +133,7 @@ class FavoritesDatabase(
                     this.imageUrl = imageUrl
                     this.favoriteType = favoriteType.name
                     this.imageMeta = imageMetaDb
+                    this.modelId = modelId
                 }
             )
         }

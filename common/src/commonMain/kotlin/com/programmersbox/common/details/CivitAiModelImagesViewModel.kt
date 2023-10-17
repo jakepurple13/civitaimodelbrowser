@@ -56,12 +56,13 @@ class CivitAiModelImagesViewModel(
     fun addImageToFavorites(modelImage: CustomModelImage) {
         viewModelScope.launch {
             database.addFavorite(
-                id = modelId?.toLongOrNull() ?: modelImage.id?.toLongOrNull() ?: Random.nextLong(),
+                id = modelImage.id?.toLongOrNull() ?: Random.nextLong(),
                 name = modelImage.meta?.model.orEmpty(),
                 imageMetaDb = modelImage.meta?.toDb(),
-                nsfw = modelImage.nsfw.canNotShow(),
+                nsfw = modelImage.nsfwLevel.canNotShow(),
                 imageUrl = modelImage.url,
-                favoriteType = FavoriteType.Image
+                favoriteType = FavoriteType.Image,
+                modelId = modelId?.toLongOrNull() ?: modelImage.id?.toLongOrNull() ?: Random.nextLong()
             )
         }
     }

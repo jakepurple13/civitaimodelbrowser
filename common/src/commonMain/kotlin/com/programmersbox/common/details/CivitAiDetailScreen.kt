@@ -135,7 +135,7 @@ fun CivitAiDetailScreen(
                                 selected = false,
                                 onClick = { uriHandler.openUri(viewModel.modelUrl) },
                                 icon = { Icon(Icons.Default.OpenInBrowser, null) },
-                                label = { Text("Open Browser") },
+                                label = { Text("Browser") },
                             )
 
                             NavigationBarItem(

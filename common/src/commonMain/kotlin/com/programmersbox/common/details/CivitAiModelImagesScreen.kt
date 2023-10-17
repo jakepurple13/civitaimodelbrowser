@@ -132,7 +132,7 @@ private fun ImageCard(
         shape = MaterialTheme.shapes.medium,
         border = when {
             isFavorite -> BorderStroke(1.dp, MaterialTheme.colorScheme.primary)
-            images.nsfw.canNotShow() -> BorderStroke(1.dp, MaterialTheme.colorScheme.error)
+            images.nsfwLevel.canNotShow() -> BorderStroke(1.dp, MaterialTheme.colorScheme.error)
             else -> null
         },
         onClick = onClick,
@@ -148,9 +148,9 @@ private fun ImageCard(
             LoadingImage(
                 imageUrl = images.url,
                 name = images.url,
-                isNsfw = images.nsfw.canNotShow(),
+                isNsfw = images.nsfwLevel.canNotShow(),
                 modifier = Modifier.let {
-                    if (!showNsfw && images.nsfw.canNotShow()) {
+                    if (!showNsfw && images.nsfwLevel.canNotShow()) {
                         it.blur(nsfwBlurStrength.dp)
                     } else {
                         it
@@ -158,7 +158,7 @@ private fun ImageCard(
                 }
             )
 
-            if (images.nsfw.canNotShow()) {
+            if (images.nsfwLevel.canNotShow()) {
                 ElevatedAssistChip(
                     label = { Text("NSFW") },
                     onClick = {},
@@ -226,7 +226,7 @@ private fun SheetContent(
             modifier = Modifier.verticalScroll(rememberScrollState())
         ) {
             TopAppBar(
-                title = {},
+                title = { Text("By ${image.username}") },
                 windowInsets = WindowInsets(0.dp),
                 actions = {
                     IconButton(
@@ -260,7 +260,7 @@ private fun SheetContent(
                     .combinedClickable(onDoubleClick = { imagePopup = true }) {}
                     .align(Alignment.CenterHorizontally)
             )
-            if (image.nsfw.canNotShow()) {
+            if (image.nsfwLevel.canNotShow()) {
                 Row(
                     horizontalArrangement = Arrangement.spacedBy(4.dp),
                     modifier = Modifier.padding(horizontal = 4.dp)
@@ -280,7 +280,7 @@ private fun SheetContent(
                     )
 
                     ElevatedAssistChip(
-                        label = { Text(image.nsfw.name) },
+                        label = { Text(image.nsfwLevel.name) },
                         onClick = {},
                         colors = AssistChipDefaults.elevatedAssistChipColors(
                             disabledLabelColor = MaterialTheme.colorScheme.error,

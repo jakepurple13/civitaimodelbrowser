@@ -54,7 +54,8 @@ class CivitAiDetailViewModel(
                     type = m.type,
                     nsfw = m.nsfw,
                     imageUrl = m.modelVersions.firstOrNull()?.images?.firstOrNull()?.url,
-                    favoriteType = FavoriteType.Model
+                    favoriteType = FavoriteType.Model,
+                    modelId = m.id
                 )
             }
         }
@@ -70,7 +71,10 @@ class CivitAiDetailViewModel(
                 imageMetaDb = modelImage.meta?.toDb(),
                 nsfw = modelImage.nsfw.canNotShow(),
                 imageUrl = modelImage.url,
-                favoriteType = FavoriteType.Image
+                favoriteType = FavoriteType.Image,
+                modelId = modelImage.id?.toLongOrNull()
+                    ?: (models as? DetailViewState.Content)?.models?.id
+                    ?: Random.nextLong()
             )
         }
     }

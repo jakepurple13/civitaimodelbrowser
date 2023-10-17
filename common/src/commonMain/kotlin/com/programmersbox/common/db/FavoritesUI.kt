@@ -12,6 +12,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.ArrowRightAlt
+import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -24,6 +25,7 @@ import com.programmersbox.common.*
 import com.programmersbox.common.home.CardContent
 import io.kamel.image.KamelImage
 import io.kamel.image.asyncPainterResource
+import kotlinx.coroutines.launch
 import moe.tlaster.precompose.flow.collectAsStateWithLifecycle
 
 @OptIn(ExperimentalFoundationApi::class, ExperimentalMaterial3Api::class)
@@ -31,6 +33,7 @@ import moe.tlaster.precompose.flow.collectAsStateWithLifecycle
 fun FavoritesUI() {
     val navController = LocalNavController.current
     val dataStore = LocalDataStore.current
+    val scope = rememberCoroutineScope()
     val showNsfw by remember { dataStore.showNsfw.flow }.collectAsStateWithLifecycle(false)
     val blurStrength by remember { dataStore.hideNsfwStrength.flow }.collectAsStateWithLifecycle(6f)
     val database = LocalDatabase.current
@@ -66,7 +69,13 @@ fun FavoritesUI() {
         ) {
             items(
                 list.filter { it.name.contains(search, true) },
-                key = { it.id }
+                key = {
+                    when (it) {
+                        is FavoriteModel.Creator -> it.name
+                        is FavoriteModel.Image -> it.imageUrl
+                        is FavoriteModel.Model -> it.id
+                    } as Any
+                }
             ) { model ->
                 when (model) {
                     is FavoriteModel.Creator -> {
@@ -85,7 +94,20 @@ fun FavoritesUI() {
                                 content = {
                                     SheetContent(
                                         image = sheetModel,
-                                        onNavigate = { navController.navigateToDetail(sheetModel.id) }
+                                        onNavigate = {
+                                            sheetDetails = null
+                                            navController.navigateToDetail(sheetModel.modelId)
+                                        },
+                                        onRemoveFavorite = {
+                                            scope.launch {
+                                                database.removeFrom {
+                                                    removeIf { f ->
+                                                        f.imageUrl == sheetModel.imageUrl &&
+                                                                f.favoriteType == FavoriteType.Image.name
+                                                    }
+                                                }
+                                            }
+                                        }
                                     )
                                 }
                             )
@@ -119,6 +141,7 @@ fun FavoritesUI() {
 @Composable
 private fun SheetContent(
     image: FavoriteModel.Image,
+    onRemoveFavorite: () -> Unit,
     onNavigate: () -> Unit,
 ) {
     val painter = asyncPainterResource(image.imageUrl.orEmpty())
@@ -164,6 +187,11 @@ private fun SheetContent(
         ) {
             TopAppBar(
                 title = {},
+                navigationIcon = {
+                    IconButton(onClick = onRemoveFavorite) {
+                        Icon(Icons.Default.Favorite, null)
+                    }
+                },
                 windowInsets = WindowInsets(0.dp),
                 actions = {
                     IconButton(

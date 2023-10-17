@@ -83,7 +83,7 @@ data class CivitAiCustomImages(
 data class CustomModelImage(
     val id: String? = "",
     val url: String,
-    val nsfw: NsfwLevel = NsfwLevel.None,
+    val nsfwLevel: NsfwLevel = NsfwLevel.None,
     val width: Int,
     val height: Int,
     val meta: ImageMeta? = null,

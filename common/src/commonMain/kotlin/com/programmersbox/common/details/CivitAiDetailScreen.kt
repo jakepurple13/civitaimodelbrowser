@@ -200,10 +200,10 @@ fun CivitAiDetailScreen(
                         )
                     }
 
-                    model.models.modelVersions.forEach { version ->
+                    model.models.modelVersions.forEachIndexed { index, version ->
 
-                        var showImages by mutableStateOf(false)
-                        var showMoreInfo by mutableStateOf(false)
+                        var showImages by mutableStateOf(index == 0)
+                        var showMoreInfo by mutableStateOf(index == 0)
 
                         item(
                             span = { GridItemSpan(maxLineSpan) }

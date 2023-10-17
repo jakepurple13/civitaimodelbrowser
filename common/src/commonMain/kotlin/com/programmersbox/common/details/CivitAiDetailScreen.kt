@@ -2,8 +2,7 @@
 
 package com.programmersbox.common.details
 
-import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.animateContentSize
+import androidx.compose.animation.*
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
@@ -192,11 +191,19 @@ fun CivitAiDetailScreen(
                     }
 
                     model.models.modelVersions.forEach { version ->
+
+                        var showImages by mutableStateOf(false)
+                        var showMoreInfo by mutableStateOf(false)
+
                         item(
                             span = { GridItemSpan(maxLineSpan) }
                         ) {
-                            var showMoreInfo by remember { mutableStateOf(false) }
-                            Column {
+                            Card(
+                                onClick = {
+                                    showImages = !showImages
+                                    showMoreInfo = !showMoreInfo
+                                }
+                            ) {
                                 TopAppBar(
                                     title = { Text("Version: ${version.name}") },
                                     actions = {
@@ -224,15 +231,21 @@ fun CivitAiDetailScreen(
                         }
 
                         items(version.images) { images ->
-                            ImageCard(
-                                images = images,
-                                showNsfw = showNsfw,
-                                nsfwBlurStrength = nsfwBlurStrength,
-                                isFavorite = favoriteList
-                                    .filterIsInstance<FavoriteModel.Image>()
-                                    .any { f -> f.imageUrl == images.url },
-                                onClick = { sheetDetails = images }
-                            )
+                            AnimatedVisibility(
+                                showImages,
+                                enter = fadeIn() + expandVertically(),
+                                exit = fadeOut() + shrinkVertically()
+                            ) {
+                                ImageCard(
+                                    images = images,
+                                    showNsfw = showNsfw,
+                                    nsfwBlurStrength = nsfwBlurStrength,
+                                    isFavorite = favoriteList
+                                        .filterIsInstance<FavoriteModel.Image>()
+                                        .any { f -> f.imageUrl == images.url },
+                                    onClick = { sheetDetails = images }
+                                )
+                            }
                         }
                     }
                 }

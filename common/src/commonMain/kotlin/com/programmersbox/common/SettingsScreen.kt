@@ -1,10 +1,13 @@
 package com.programmersbox.common
 
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
@@ -14,12 +17,17 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.platform.LocalUriHandler
+import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.launch
 import moe.tlaster.precompose.flow.collectAsStateWithLifecycle
+import org.jetbrains.compose.resources.ExperimentalResourceApi
+import org.jetbrains.compose.resources.painterResource
 import kotlin.math.roundToInt
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalResourceApi::class)
 @Composable
 fun SettingsScreen() {
     val navController = LocalNavController.current
@@ -92,6 +100,24 @@ fun SettingsScreen() {
                 )
             }
             Divider()
+
+            val uriHandler = LocalUriHandler.current
+            Card(
+                onClick = { uriHandler.openUri("https://civitai.com/") }
+            ) {
+                ListItem(
+                    headlineContent = { Text("Open CivitAi") },
+                    leadingContent = {
+                        Image(
+                            painter = painterResource("civitai_logo.png"),
+                            contentDescription = null,
+                            modifier = Modifier
+                                .size(48.dp)
+                                .clip(CircleShape)
+                        )
+                    }
+                )
+            }
             //https://github.com/civitai/civitai/wiki/REST-API-Reference
         }
     }

@@ -21,6 +21,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.unit.dp
+import com.programmersbox.common.components.icons.Github
 import kotlinx.coroutines.launch
 import moe.tlaster.precompose.flow.collectAsStateWithLifecycle
 import org.jetbrains.compose.resources.ExperimentalResourceApi
@@ -102,6 +103,24 @@ fun SettingsScreen() {
             Divider()
 
             val uriHandler = LocalUriHandler.current
+
+            Card(
+                onClick = { uriHandler.openUri("https://github.com/civitai/civitai/wiki/REST-API-Reference") }
+            ) {
+                ListItem(
+                    headlineContent = { Text("Open CivitAi REST API") },
+                    leadingContent = {
+                        Icon(
+                            Icons.Github,
+                            contentDescription = null,
+                            modifier = Modifier
+                                .size(48.dp)
+                                .clip(CircleShape)
+                        )
+                    }
+                )
+            }
+
             Card(
                 onClick = { uriHandler.openUri("https://civitai.com/") }
             ) {
@@ -118,7 +137,6 @@ fun SettingsScreen() {
                     }
                 )
             }
-            //https://github.com/civitai/civitai/wiki/REST-API-Reference
         }
     }
 }

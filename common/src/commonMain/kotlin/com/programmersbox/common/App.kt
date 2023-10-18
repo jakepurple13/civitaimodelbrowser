@@ -58,7 +58,7 @@ internal fun App(
                     scene(Screen.DetailsImage.routeId) {
                         CivitAiModelImagesScreen(
                             modelId = it.path<String>("modelId"),
-                            modelName = it.path<String>("modelName")
+                            modelName = it.query<String>("modelName")
                         )
                     }
                 }
@@ -88,7 +88,7 @@ fun Navigator.navigateToDetail(id: Long) {
 
 fun Navigator.navigateToDetailImages(id: Long, name: String) {
     navigate(
-        route = Screen.DetailsImage.routeId.replace("{modelId}", id.toString()).replace("{modelName}", name),
+        route = Screen.DetailsImage.routeId.replace("{modelId}", id.toString()) + "?modelName=$name",
         options = NavOptions(launchSingleTop = true, includePath = true)
     )
 }
@@ -106,5 +106,5 @@ enum class Screen(val routeId: String) {
     Settings("settings"),
     Favorites("favorites"),
     User("user/{username}"),
-    DetailsImage("detailsimage/{modelId}&{modelName}")
+    DetailsImage("detailsimage/{modelId}")
 }

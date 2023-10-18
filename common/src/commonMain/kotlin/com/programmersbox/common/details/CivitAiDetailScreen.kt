@@ -22,7 +22,9 @@ import androidx.compose.ui.draw.blur
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.platform.LocalUriHandler
+import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.DialogProperties
 import com.programmersbox.common.*
@@ -216,6 +218,14 @@ fun CivitAiDetailScreen(
                             ) {
                                 TopAppBar(
                                     title = { Text("Version: ${version.name}") },
+                                    navigationIcon = {
+                                        version.downloadUrl?.let { downloadUrl ->
+                                            val clipboard = LocalClipboardManager.current
+                                            IconButton(
+                                                onClick = { clipboard.setText(AnnotatedString(downloadUrl)) }
+                                            ) { Icon(Icons.Default.ContentCopy, null) }
+                                        }
+                                    },
                                     actions = {
                                         Icon(
                                             Icons.Filled.ArrowDropDown,

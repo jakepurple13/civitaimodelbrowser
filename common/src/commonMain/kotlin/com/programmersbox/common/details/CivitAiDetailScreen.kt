@@ -220,10 +220,14 @@ fun CivitAiDetailScreen(
                                     title = { Text("Version: ${version.name}") },
                                     navigationIcon = {
                                         version.downloadUrl?.let { downloadUrl ->
-                                            val clipboard = LocalClipboardManager.current
-                                            IconButton(
-                                                onClick = { clipboard.setText(AnnotatedString(downloadUrl)) }
-                                            ) { Icon(Icons.Default.ContentCopy, null) }
+                                            RichTooltipBox(
+                                                text = { Text("Copy Download Url") },
+                                            ) {
+                                                val clipboard = LocalClipboardManager.current
+                                                IconButton(
+                                                    onClick = { clipboard.setText(AnnotatedString(downloadUrl)) }
+                                                ) { Icon(Icons.Default.ContentCopy, null) }
+                                            }
                                         }
                                     },
                                     actions = {

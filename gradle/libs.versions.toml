@@ -3,7 +3,7 @@ browser = "1.6.0"
 jsoup = "1.16.1"
 kotlin-version = "1.9.10"
 agp-version = "7.3.0"
-compose-version = "1.5.10-beta02"
+compose-version = "1.5.10-rc01"
 ktor-version = "2.3.4"
 kotlinx-datetime = "0.4.1"
 datastore-version = "1.1.0-alpha05"
@@ -22,7 +22,7 @@ kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin.ve
 androidx-appcompat = { module = "androidx.appcompat:appcompat", version = "1.6.1" }
 androidx-browser = { module = "androidx.browser:browser", version.ref = "browser" }
 androidx-core = { module = "androidx.core:core-ktx", version = "1.12.0" }
-androidx-activity-compose = "androidx.activity:activity-compose:1.8.0-rc01"
+androidx-activity-compose = "androidx.activity:activity-compose:1.8.0"
 datastore-core = { module = "androidx.datastore:datastore-core", version.ref = "datastore.version" }
 datastore-preferences = { module = "androidx.datastore:datastore-preferences-core", version.ref = "datastore.version" }
 datastore-core-okio = { group = "androidx.datastore", name = "datastore-core-okio", version.ref = "datastore.version" }

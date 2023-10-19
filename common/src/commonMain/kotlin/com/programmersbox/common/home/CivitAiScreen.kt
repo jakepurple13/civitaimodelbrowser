@@ -200,7 +200,7 @@ fun LazyGridScope.modelItems(
         }
     }
 
-    if (lazyPagingItems.loadState.hasType<LoadState.Error>()) {
+    lazyPagingItems.loadState.getType<LoadState.Error>()?.let { error ->
         item(
             span = { GridItemSpan(maxLineSpan) }
         ) {
@@ -211,6 +211,7 @@ fun LazyGridScope.modelItems(
                 Button(
                     onClick = lazyPagingItems::retry
                 ) { Text("Try Again") }
+                error.error.message?.let { Text(it) }
             }
         }
     }
@@ -218,6 +219,10 @@ fun LazyGridScope.modelItems(
 
 inline fun <reified T : LoadState> CombinedLoadStates.hasType(): Boolean {
     return refresh is T || append is T || prepend is T
+}
+
+inline fun <reified T : LoadState> CombinedLoadStates.getType(): T? {
+    return refresh as? T ?: append as? T ?: prepend as? T
 }
 
 @Composable
@@ -250,7 +255,6 @@ private fun ModelItem(
     )
 }
 
-@OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun CoverCard(
     imageUrl: String,

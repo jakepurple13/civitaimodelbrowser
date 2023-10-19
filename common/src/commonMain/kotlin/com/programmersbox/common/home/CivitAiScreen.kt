@@ -37,6 +37,7 @@ import com.programmersbox.common.paging.LazyPagingItems
 import com.programmersbox.common.paging.collectAsLazyPagingItems
 import com.programmersbox.common.paging.itemContentType
 import com.programmersbox.common.paging.itemKeyIndexed
+import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.launch
 import moe.tlaster.precompose.flow.collectAsStateWithLifecycle
 import moe.tlaster.precompose.navigation.Navigator
@@ -70,6 +71,12 @@ fun CivitAiScreen(
             searchViewModel.searchQuery = ""
             searchViewModel.onSearch("")
         }
+    }
+
+    LaunchedEffect(lazyGridState) {
+        snapshotFlow { lazyGridState.firstVisibleItemScrollOffset }
+            .filter { it == 0 }
+            .collect { scrollBehavior.state.contentOffset = 0f }
     }
 
     Scaffold(

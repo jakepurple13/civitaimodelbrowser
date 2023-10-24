@@ -39,8 +39,8 @@ class CivitAiDetailViewModel(
                 ?.onFailure { it.printStackTrace() }
                 ?.fold(
                     onSuccess = { DetailViewState.Content(it) },
-                    onFailure = { DetailViewState.Error }
-                ) ?: DetailViewState.Error
+                    onFailure = { DetailViewState.Error(it) }
+                ) ?: DetailViewState.Error(Throwable("No ID"))
         }
     }
 
@@ -100,6 +100,6 @@ class CivitAiDetailViewModel(
 
 sealed class DetailViewState {
     data object Loading : DetailViewState()
-    data object Error : DetailViewState()
+    data class Error(val error: Throwable) : DetailViewState()
     data class Content(val models: Models) : DetailViewState()
 }

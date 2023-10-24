@@ -272,7 +272,7 @@ fun CivitAiDetailScreen(
             }
         }
 
-        DetailViewState.Error -> {
+        is DetailViewState.Error -> {
             Surface {
                 Box(
                     contentAlignment = Alignment.Center,
@@ -285,6 +285,7 @@ fun CivitAiDetailScreen(
                         Button(
                             onClick = viewModel::loadData
                         ) { Text("Try Again") }
+                        model.error.message?.let { Text(it) }
                     }
                 }
             }

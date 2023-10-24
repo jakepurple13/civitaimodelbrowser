@@ -68,7 +68,10 @@ fun FavoritesUI() {
                 .fillMaxSize()
         ) {
             items(
-                list.filter { it.name.contains(search, true) },
+                list.filter {
+                    it.name.contains(search, true) ||
+                            (it as? FavoriteModel.Model)?.description?.contains(search, true) == true
+                },
                 key = {
                     when (it) {
                         is FavoriteModel.Creator -> it.name

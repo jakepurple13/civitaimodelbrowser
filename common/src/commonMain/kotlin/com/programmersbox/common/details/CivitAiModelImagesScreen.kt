@@ -17,6 +17,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.blur
+import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.DialogProperties
 import com.programmersbox.common.*
@@ -49,6 +50,7 @@ fun CivitAiModelImagesScreen(
             database = database
         )
     }
+    val uriHandler = LocalUriHandler.current
     val lazyPagingItems = viewModel.pager.collectAsLazyPagingItems()
     val navController = LocalNavController.current
     val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior()
@@ -87,6 +89,7 @@ fun CivitAiModelImagesScreen(
                         onClick = { navController.popBackStack() }
                     ) { Icon(Icons.Default.ArrowBack, null) }
                 },
+                actions = { Text("(${lazyPagingItems.itemCount})") },
                 scrollBehavior = scrollBehavior
             )
         },
@@ -111,7 +114,13 @@ fun CivitAiModelImagesScreen(
                         isFavorite = favoriteList
                             .filterIsInstance<FavoriteModel.Image>()
                             .any { f -> f.imageUrl == models.url },
-                        onClick = { sheetDetails = models }
+                        onClick = {
+                            if (models.height < 2000 || models.width < 2000) {
+                                sheetDetails = models
+                            } else {
+                                uriHandler.openUri(models.url)
+                            }
+                        }
                     )
                 }
             }
@@ -131,10 +140,11 @@ private fun ImageCard(
         tonalElevation = 4.dp,
         shape = MaterialTheme.shapes.medium,
         border = when {
-            isFavorite -> BorderStroke(1.dp, MaterialTheme.colorScheme.primary)
-            images.nsfwLevel.canNotShow() -> BorderStroke(1.dp, MaterialTheme.colorScheme.error)
+            isFavorite -> MaterialTheme.colorScheme.primary
+            images.nsfwLevel.canNotShow() -> MaterialTheme.colorScheme.error
+            images.height > 2000 || images.width > 2000 -> MaterialTheme.colorScheme.secondary
             else -> null
-        },
+        }?.let { BorderStroke(1.dp, it) },
         onClick = onClick,
         modifier = Modifier.size(
             width = ComposableUtils.IMAGE_WIDTH,
@@ -145,18 +155,22 @@ private fun ImageCard(
             modifier = Modifier.fillMaxSize(),
             contentAlignment = Alignment.Center
         ) {
-            LoadingImage(
-                imageUrl = images.url,
-                name = images.url,
-                isNsfw = images.nsfwLevel.canNotShow(),
-                modifier = Modifier.let {
-                    if (!showNsfw && images.nsfwLevel.canNotShow()) {
-                        it.blur(nsfwBlurStrength.dp)
-                    } else {
-                        it
+            if (images.height < 2000 || images.width < 2000) {
+                LoadingImage(
+                    imageUrl = images.url,
+                    name = images.url,
+                    isNsfw = images.nsfwLevel.canNotShow(),
+                    modifier = Modifier.let {
+                        if (!showNsfw && images.nsfwLevel.canNotShow()) {
+                            it.blur(nsfwBlurStrength.dp)
+                        } else {
+                            it
+                        }
                     }
-                }
-            )
+                )
+            } else {
+                Text("Too Large")
+            }
 
             if (images.nsfwLevel.canNotShow()) {
                 ElevatedAssistChip(

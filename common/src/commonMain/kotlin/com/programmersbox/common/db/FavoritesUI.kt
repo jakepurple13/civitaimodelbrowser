@@ -4,8 +4,10 @@ import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.foundation.verticalScroll
@@ -28,6 +30,9 @@ import io.kamel.image.asyncPainterResource
 import kotlinx.coroutines.launch
 import moe.tlaster.precompose.flow.collectAsStateWithLifecycle
 
+private const val IMAGE_FILTER = "Image"
+private const val CREATOR_FILTER = "Creator"
+
 @OptIn(ExperimentalFoundationApi::class, ExperimentalMaterial3Api::class)
 @Composable
 fun FavoritesUI() {
@@ -39,23 +44,79 @@ fun FavoritesUI() {
     val database = LocalDatabase.current
     val list by database.getFavorites().collectAsStateWithLifecycle(emptyList())
     var search by remember { mutableStateOf("") }
+    val filterList = remember { mutableStateListOf<String>() }
     Scaffold(
         topBar = {
-            SearchBar(
-                query = search,
-                onQueryChange = { search = it },
-                onSearch = {},
-                active = false,
-                onActiveChange = {},
-                leadingIcon = {
-                    IconButton(
-                        onClick = { navController.popBackStack() }
-                    ) { Icon(Icons.Default.ArrowBack, null) }
-                },
-                placeholder = { Text("Search Favorites") },
-                trailingIcon = { Text("(${list.size})") },
-                modifier = Modifier.fillMaxWidth()
-            ) {}
+            Surface {
+                Column {
+                    SearchBar(
+                        query = search,
+                        onQueryChange = { search = it },
+                        onSearch = {},
+                        active = false,
+                        onActiveChange = {},
+                        leadingIcon = {
+                            IconButton(
+                                onClick = { navController.popBackStack() }
+                            ) { Icon(Icons.Default.ArrowBack, null) }
+                        },
+                        placeholder = { Text("Search Favorites") },
+                        trailingIcon = { Text("(${list.size})") },
+                        modifier = Modifier.fillMaxWidth()
+                    ) {}
+                    LazyRow(
+                        horizontalArrangement = Arrangement.spacedBy(4.dp),
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        items(
+                            list
+                                .filterIsInstance<FavoriteModel.Model>()
+                                .map { it.type }
+                                .distinct()
+                        ) {
+                            FilterChip(
+                                selected = it in filterList,
+                                onClick = {
+                                    if (it in filterList) {
+                                        filterList.remove(it)
+                                    } else {
+                                        filterList.add(it)
+                                    }
+                                },
+                                label = { Text(it) }
+                            )
+                        }
+
+                        item {
+                            FilterChip(
+                                selected = IMAGE_FILTER in filterList,
+                                onClick = {
+                                    if (IMAGE_FILTER in filterList) {
+                                        filterList.remove(IMAGE_FILTER)
+                                    } else {
+                                        filterList.add(IMAGE_FILTER)
+                                    }
+                                },
+                                label = { Text(IMAGE_FILTER) }
+                            )
+                        }
+
+                        item {
+                            FilterChip(
+                                selected = CREATOR_FILTER in filterList,
+                                onClick = {
+                                    if (CREATOR_FILTER in filterList) {
+                                        filterList.remove(CREATOR_FILTER)
+                                    } else {
+                                        filterList.add(CREATOR_FILTER)
+                                    }
+                                },
+                                label = { Text(CREATOR_FILTER) }
+                            )
+                        }
+                    }
+                }
+            }
         }
     ) { padding ->
         LazyVerticalGrid(
@@ -69,8 +130,13 @@ fun FavoritesUI() {
         ) {
             items(
                 list.filter {
-                    it.name.contains(search, true) ||
-                            (it as? FavoriteModel.Model)?.description?.contains(search, true) == true
+                    (it.name.contains(search, true) ||
+                            (it as? FavoriteModel.Model)?.description?.contains(search, true) == true) &&
+                            (filterList.isEmpty() || when (it) {
+                                is FavoriteModel.Creator -> CREATOR_FILTER in filterList
+                                is FavoriteModel.Image -> IMAGE_FILTER in filterList
+                                is FavoriteModel.Model -> it.type in filterList
+                            })
                 },
                 key = {
                     when (it) {

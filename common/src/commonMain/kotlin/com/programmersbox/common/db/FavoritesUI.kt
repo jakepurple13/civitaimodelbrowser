@@ -1,5 +1,8 @@
+@file:Suppress("INLINE_FROM_HIGHER_PLATFORM")
+
 package com.programmersbox.common.db
 
+import androidx.compose.animation.*
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.combinedClickable
@@ -7,15 +10,13 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material.icons.filled.ArrowRightAlt
-import androidx.compose.material.icons.filled.Favorite
-import androidx.compose.material.icons.filled.Refresh
+import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -29,9 +30,10 @@ import io.kamel.image.KamelImage
 import io.kamel.image.asyncPainterResource
 import kotlinx.coroutines.launch
 import moe.tlaster.precompose.flow.collectAsStateWithLifecycle
+import moe.tlaster.precompose.viewmodel.viewModel
 
-private const val IMAGE_FILTER = "Image"
-private const val CREATOR_FILTER = "Creator"
+internal const val IMAGE_FILTER = "Image"
+internal const val CREATOR_FILTER = "Creator"
 
 @OptIn(ExperimentalFoundationApi::class, ExperimentalMaterial3Api::class)
 @Composable
@@ -42,16 +44,16 @@ fun FavoritesUI() {
     val showNsfw by remember { dataStore.showNsfw.flow }.collectAsStateWithLifecycle(false)
     val blurStrength by remember { dataStore.hideNsfwStrength.flow }.collectAsStateWithLifecycle(6f)
     val database = LocalDatabase.current
-    val list by database.getFavorites().collectAsStateWithLifecycle(emptyList())
-    var search by remember { mutableStateOf("") }
-    val filterList = remember { mutableStateListOf<String>() }
+    val lazyGridState = rememberLazyGridState()
+    val viewModel = viewModel { FavoritesViewModel(database) }
+
     Scaffold(
         topBar = {
             Surface {
                 Column {
                     SearchBar(
-                        query = search,
-                        onQueryChange = { search = it },
+                        query = viewModel.search,
+                        onQueryChange = { viewModel.search = it },
                         onSearch = {},
                         active = false,
                         onActiveChange = {},
@@ -61,27 +63,19 @@ fun FavoritesUI() {
                             ) { Icon(Icons.Default.ArrowBack, null) }
                         },
                         placeholder = { Text("Search Favorites") },
-                        trailingIcon = { Text("(${list.size})") },
+                        trailingIcon = { Text("(${viewModel.favoritesList.size})") },
                         modifier = Modifier.fillMaxWidth()
                     ) {}
                     LazyRow(
                         horizontalArrangement = Arrangement.spacedBy(4.dp),
                         modifier = Modifier.fillMaxWidth()
                     ) {
-                        items(
-                            list
-                                .filterIsInstance<FavoriteModel.Model>()
-                                .map { it.type }
-                                .distinct()
-                        ) {
+                        items(viewModel.typeList) {
                             FilterChip(
-                                selected = it in filterList,
+                                selected = it in viewModel.filterList,
                                 onClick = {
-                                    if (it in filterList) {
-                                        filterList.remove(it)
-                                    } else {
-                                        filterList.add(it)
-                                    }
+                                    viewModel.toggleFilter(it)
+                                    scope.launch { lazyGridState.animateScrollToItem(0) }
                                 },
                                 label = { Text(it) }
                             )
@@ -89,13 +83,10 @@ fun FavoritesUI() {
 
                         item {
                             FilterChip(
-                                selected = IMAGE_FILTER in filterList,
+                                selected = IMAGE_FILTER in viewModel.filterList,
                                 onClick = {
-                                    if (IMAGE_FILTER in filterList) {
-                                        filterList.remove(IMAGE_FILTER)
-                                    } else {
-                                        filterList.add(IMAGE_FILTER)
-                                    }
+                                    viewModel.toggleFilter(IMAGE_FILTER)
+                                    scope.launch { lazyGridState.animateScrollToItem(0) }
                                 },
                                 label = { Text(IMAGE_FILTER) }
                             )
@@ -103,13 +94,10 @@ fun FavoritesUI() {
 
                         item {
                             FilterChip(
-                                selected = CREATOR_FILTER in filterList,
+                                selected = CREATOR_FILTER in viewModel.filterList,
                                 onClick = {
-                                    if (CREATOR_FILTER in filterList) {
-                                        filterList.remove(CREATOR_FILTER)
-                                    } else {
-                                        filterList.add(CREATOR_FILTER)
-                                    }
+                                    viewModel.toggleFilter(CREATOR_FILTER)
+                                    scope.launch { lazyGridState.animateScrollToItem(0) }
                                 },
                                 label = { Text(CREATOR_FILTER) }
                             )
@@ -117,9 +105,21 @@ fun FavoritesUI() {
                     }
                 }
             }
-        }
+        },
+        floatingActionButton = {
+            AnimatedVisibility(
+                visible = lazyGridState.isScrollingUp() && lazyGridState.firstVisibleItemIndex > 0,
+                enter = fadeIn() + slideInHorizontally { it },
+                exit = slideOutHorizontally { it } + fadeOut()
+            ) {
+                FloatingActionButton(
+                    onClick = { scope.launch { lazyGridState.animateScrollToItem(0) } },
+                ) { Icon(Icons.Default.ArrowUpward, null) }
+            }
+        },
     ) { padding ->
         LazyVerticalGrid(
+            state = lazyGridState,
             columns = adaptiveGridCell(),
             verticalArrangement = Arrangement.spacedBy(4.dp),
             horizontalArrangement = Arrangement.spacedBy(4.dp),
@@ -129,15 +129,7 @@ fun FavoritesUI() {
                 .fillMaxSize()
         ) {
             items(
-                list.filter {
-                    (it.name.contains(search, true) ||
-                            (it as? FavoriteModel.Model)?.description?.contains(search, true) == true) &&
-                            (filterList.isEmpty() || when (it) {
-                                is FavoriteModel.Creator -> CREATOR_FILTER in filterList
-                                is FavoriteModel.Image -> IMAGE_FILTER in filterList
-                                is FavoriteModel.Model -> it.type in filterList
-                            })
-                },
+                viewModel.viewingList,
                 key = {
                     when (it) {
                         is FavoriteModel.Creator -> it.name
@@ -263,9 +255,12 @@ private fun SheetContent(
                 },
                 windowInsets = WindowInsets(0.dp),
                 actions = {
-                    IconButton(
+                    TextButton(
                         onClick = onNavigate
-                    ) { Icon(Icons.Default.ArrowRightAlt, null) }
+                    ) {
+                        Text("View Model")
+                        Icon(Icons.Default.ArrowRightAlt, null)
+                    }
                 }
             )
             KamelImage(
@@ -339,7 +334,7 @@ private fun CreatorItem(
     CoverCard(
         imageUrl = models.imageUrl.orEmpty(),
         name = models.name,
-        type = ModelType.Other,
+        type = CREATOR_FILTER,
         isNsfw = false,
         showNsfw = true,
         blurStrength = 0.dp,
@@ -362,7 +357,7 @@ private fun ImageItem(
     CoverCard(
         imageUrl = models.imageUrl.orEmpty(),
         name = models.name,
-        type = ModelType.Other,
+        type = IMAGE_FILTER,
         isNsfw = models.nsfw,
         showNsfw = showNsfw,
         blurStrength = blurStrength,
@@ -385,7 +380,7 @@ private fun ModelItem(
     CoverCard(
         imageUrl = models.imageUrl.orEmpty(),
         name = models.name,
-        type = ModelType.valueOf(models.type),
+        type = models.type,
         isNsfw = models.nsfw,
         showNsfw = showNsfw,
         blurStrength = blurStrength,
@@ -401,7 +396,7 @@ private fun ModelItem(
 fun CoverCard(
     imageUrl: String,
     name: String,
-    type: ModelType,
+    type: String,
     isNsfw: Boolean,
     showNsfw: Boolean,
     blurStrength: Dp,

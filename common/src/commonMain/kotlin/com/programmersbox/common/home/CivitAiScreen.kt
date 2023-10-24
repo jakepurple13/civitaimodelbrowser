@@ -114,7 +114,7 @@ fun CivitAiScreen(
         },
         floatingActionButton = {
             AnimatedVisibility(
-                visible = lazyGridState.isScrollingUp(),
+                visible = lazyGridState.isScrollingUp() && lazyGridState.firstVisibleItemIndex > 0,
                 enter = fadeIn() + slideInHorizontally { it },
                 exit = slideOutHorizontally { it } + fadeOut()
             ) {
@@ -284,7 +284,7 @@ fun CoverCard(
         CardContent(
             imageUrl = imageUrl,
             name = name,
-            type = type,
+            type = type.name,
             isNsfw = isNsfw,
             showNsfw = showNsfw,
             blurStrength = blurStrength
@@ -297,7 +297,7 @@ fun CoverCard(
 fun CardContent(
     imageUrl: String,
     name: String,
-    type: ModelType,
+    type: String,
     isNsfw: Boolean,
     showNsfw: Boolean,
     blurStrength: Dp,
@@ -356,7 +356,7 @@ fun CardContent(
                 .align(Alignment.TopCenter)
         ) {
             ElevatedAssistChip(
-                label = { Text(type.name) },
+                label = { Text(type) },
                 onClick = {},
                 colors = AssistChipDefaults.elevatedAssistChipColors(
                     disabledLabelColor = MaterialTheme.colorScheme.onSurface,

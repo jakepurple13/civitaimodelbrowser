@@ -35,7 +35,7 @@ import moe.tlaster.precompose.viewmodel.viewModel
 internal const val IMAGE_FILTER = "Image"
 internal const val CREATOR_FILTER = "Creator"
 
-@OptIn(ExperimentalFoundationApi::class, ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalFoundationApi::class, ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
 @Composable
 fun FavoritesUI() {
     val navController = LocalNavController.current
@@ -46,6 +46,41 @@ fun FavoritesUI() {
     val database = LocalDatabase.current
     val lazyGridState = rememberLazyGridState()
     val viewModel = viewModel { FavoritesViewModel(database) }
+
+    var showSortedByDialog by remember { mutableStateOf(false) }
+
+    if (showSortedByDialog) {
+        SheetDetails(
+            onDismiss = { showSortedByDialog = false },
+            content = {
+                Surface {
+                    Column(
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        CenterAlignedTopAppBar(
+                            title = { Text("Sort By") },
+                            windowInsets = WindowInsets(0.dp)
+                        )
+
+                        FlowRow(
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(horizontal = 4.dp)
+                        ) {
+                            SortedBy.entries.forEach {
+                                FilterChip(
+                                    selected = it == viewModel.sortedBy,
+                                    label = { Text(it.name) },
+                                    onClick = { viewModel.sortedBy = it }
+                                )
+                            }
+                        }
+                    }
+                }
+            }
+        )
+    }
 
     Scaffold(
         topBar = {
@@ -63,7 +98,21 @@ fun FavoritesUI() {
                             ) { Icon(Icons.Default.ArrowBack, null) }
                         },
                         placeholder = { Text("Search Favorites") },
-                        trailingIcon = { Text("(${viewModel.favoritesList.size})") },
+                        trailingIcon = {
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Text("(${viewModel.favoritesList.size})")
+                                IconButton(
+                                    onClick = { showSortedByDialog = true }
+                                ) { Icon(Icons.Default.Sort, null) }
+                                AnimatedVisibility(viewModel.search.isNotEmpty()) {
+                                    IconButton(
+                                        onClick = { viewModel.search = "" }
+                                    ) { Icon(Icons.Default.Clear, null) }
+                                }
+                            }
+                        },
                         modifier = Modifier.fillMaxWidth()
                     ) {}
                     LazyRow(

@@ -14,6 +14,7 @@ import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 import moe.tlaster.precompose.viewmodel.ViewModel
 import moe.tlaster.precompose.viewmodel.viewModelScope
+import okio.Path.Companion.toPath
 import kotlin.random.Random
 
 class CivitAiDetailViewModel(
@@ -64,16 +65,14 @@ class CivitAiDetailViewModel(
     fun addImageToFavorites(modelImage: ModelImage) {
         viewModelScope.launch {
             database.addFavorite(
-                id = modelImage.id?.toLongOrNull()
-                    ?: (models as? DetailViewState.Content)?.models?.id
-                    ?: Random.nextLong(),
-                name = modelImage.meta?.model.orEmpty(),
+                id = modelImage.id?.toLongOrNull() ?: Random.nextLong(),
+                name = modelImage.meta?.model ?: modelImage.url.toPath().name,
                 imageMetaDb = modelImage.meta?.toDb(),
                 nsfw = modelImage.nsfw.canNotShow(),
                 imageUrl = modelImage.url,
                 favoriteType = FavoriteType.Image,
-                modelId = modelImage.id?.toLongOrNull()
-                    ?: (models as? DetailViewState.Content)?.models?.id
+                modelId = (models as? DetailViewState.Content)?.models?.id
+                    ?: modelImage.id?.toLongOrNull()
                     ?: Random.nextLong()
             )
         }

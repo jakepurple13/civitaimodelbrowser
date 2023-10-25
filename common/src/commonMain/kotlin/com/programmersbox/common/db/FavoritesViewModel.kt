@@ -13,6 +13,8 @@ class FavoritesViewModel(
     val filterList = mutableStateListOf<String>()
     val favoritesList = mutableStateListOf<FavoriteModel>()
 
+    var sortedBy by mutableStateOf(SortedBy.Default)
+
     val typeList by derivedStateOf {
         favoritesList
             .filterIsInstance<FavoriteModel.Model>()
@@ -21,19 +23,21 @@ class FavoritesViewModel(
     }
 
     val viewingList by derivedStateOf {
-        favoritesList.filter {
-            val name = it.name.contains(search, true)
-            val description = (it as? FavoriteModel.Model)
-                ?.description
-                ?.contains(search, true) == true
-            val filter = filterList.isEmpty() || when (it) {
-                is FavoriteModel.Creator -> CREATOR_FILTER
-                is FavoriteModel.Image -> IMAGE_FILTER
-                is FavoriteModel.Model -> it.type
-            } in filterList
+        favoritesList
+            .filter {
+                val name = it.name.contains(search, true)
+                val description = (it as? FavoriteModel.Model)
+                    ?.description
+                    ?.contains(search, true) == true
+                val filter = filterList.isEmpty() || when (it) {
+                    is FavoriteModel.Creator -> CREATOR_FILTER
+                    is FavoriteModel.Image -> IMAGE_FILTER
+                    is FavoriteModel.Model -> it.type
+                } in filterList
 
-            (name || description) && filter
-        }
+                (name || description) && filter
+            }
+            .let { sortedBy.sorting(it) }
     }
 
     init {
@@ -52,4 +56,20 @@ class FavoritesViewModel(
             filterList.add(filter)
         }
     }
+}
+
+enum class SortedBy(
+    val sorting: (List<FavoriteModel>) -> List<FavoriteModel>,
+) {
+    Default({ it }),
+    Name({ it.sortedBy { it.name } }),
+    Type(
+        {
+            it.sortedWith(
+                compareByDescending<FavoriteModel> { it is FavoriteModel.Model }
+                    .thenBy { it is FavoriteModel.Creator }
+                    .thenBy { it is FavoriteModel.Image }
+            )
+        }
+    )
 }

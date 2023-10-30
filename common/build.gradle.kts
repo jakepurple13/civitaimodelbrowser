@@ -45,6 +45,7 @@ kotlin {
                 api(libs.precompose.viewmodel)
                 api(libs.jsoup)
                 api(libs.realm.base)
+                api(libs.haze)
             }
         }
 
@@ -70,7 +71,6 @@ kotlin {
         }
 
         val desktopTest by getting
-
 
     }
 }

@@ -87,7 +87,7 @@ fun FavoritesUI() {
     GlassScaffold(
         topBar = {
             Column {
-                SearchBar(
+                DockedSearchBar(
                     query = viewModel.search,
                     onQueryChange = { viewModel.search = it },
                     onSearch = {},
@@ -117,7 +117,9 @@ fun FavoritesUI() {
                     colors = SearchBarDefaults.colors(
                         containerColor = Color.Transparent
                     ),
-                    modifier = Modifier.fillMaxWidth()
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .windowInsetsPadding(SearchBarDefaults.windowInsets)
                 ) {}
                 LazyRow(
                     horizontalArrangement = Arrangement.spacedBy(4.dp),

@@ -21,10 +21,12 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.DialogProperties
 import com.programmersbox.common.*
+import com.programmersbox.common.components.GlassScaffold
 import com.programmersbox.common.home.CardContent
 import io.kamel.image.KamelImage
 import io.kamel.image.asyncPainterResource
@@ -82,75 +84,78 @@ fun FavoritesUI() {
         )
     }
 
-    Scaffold(
+    GlassScaffold(
         topBar = {
-            Surface {
-                Column {
-                    SearchBar(
-                        query = viewModel.search,
-                        onQueryChange = { viewModel.search = it },
-                        onSearch = {},
-                        active = false,
-                        onActiveChange = {},
-                        leadingIcon = {
+            Column {
+                SearchBar(
+                    query = viewModel.search,
+                    onQueryChange = { viewModel.search = it },
+                    onSearch = {},
+                    active = false,
+                    onActiveChange = {},
+                    leadingIcon = {
+                        IconButton(
+                            onClick = { navController.popBackStack() }
+                        ) { Icon(Icons.Default.ArrowBack, null) }
+                    },
+                    placeholder = { Text("Search Favorites") },
+                    trailingIcon = {
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Text("(${viewModel.favoritesList.size})")
                             IconButton(
-                                onClick = { navController.popBackStack() }
-                            ) { Icon(Icons.Default.ArrowBack, null) }
-                        },
-                        placeholder = { Text("Search Favorites") },
-                        trailingIcon = {
-                            Row(
-                                verticalAlignment = Alignment.CenterVertically
-                            ) {
-                                Text("(${viewModel.favoritesList.size})")
+                                onClick = { showSortedByDialog = true }
+                            ) { Icon(Icons.Default.Sort, null) }
+                            AnimatedVisibility(viewModel.search.isNotEmpty()) {
                                 IconButton(
-                                    onClick = { showSortedByDialog = true }
-                                ) { Icon(Icons.Default.Sort, null) }
-                                AnimatedVisibility(viewModel.search.isNotEmpty()) {
-                                    IconButton(
-                                        onClick = { viewModel.search = "" }
-                                    ) { Icon(Icons.Default.Clear, null) }
-                                }
+                                    onClick = { viewModel.search = "" }
+                                ) { Icon(Icons.Default.Clear, null) }
                             }
-                        },
-                        modifier = Modifier.fillMaxWidth()
-                    ) {}
-                    LazyRow(
-                        horizontalArrangement = Arrangement.spacedBy(4.dp),
-                        modifier = Modifier.fillMaxWidth()
-                    ) {
-                        items(viewModel.typeList) {
-                            FilterChip(
-                                selected = it in viewModel.filterList,
-                                onClick = {
-                                    viewModel.toggleFilter(it)
-                                    scope.launch { lazyGridState.animateScrollToItem(0) }
-                                },
-                                label = { Text(it) }
-                            )
                         }
+                    },
+                    colors = SearchBarDefaults.colors(
+                        containerColor = Color.Transparent
+                    ),
+                    modifier = Modifier.fillMaxWidth()
+                ) {}
+                LazyRow(
+                    horizontalArrangement = Arrangement.spacedBy(4.dp),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 4.dp)
+                ) {
+                    items(viewModel.typeList) {
+                        FilterChip(
+                            selected = it in viewModel.filterList,
+                            onClick = {
+                                viewModel.toggleFilter(it)
+                                scope.launch { lazyGridState.animateScrollToItem(0) }
+                            },
+                            label = { Text(it) }
+                        )
+                    }
 
-                        item {
-                            FilterChip(
-                                selected = IMAGE_FILTER in viewModel.filterList,
-                                onClick = {
-                                    viewModel.toggleFilter(IMAGE_FILTER)
-                                    scope.launch { lazyGridState.animateScrollToItem(0) }
-                                },
-                                label = { Text(IMAGE_FILTER) }
-                            )
-                        }
+                    item {
+                        FilterChip(
+                            selected = IMAGE_FILTER in viewModel.filterList,
+                            onClick = {
+                                viewModel.toggleFilter(IMAGE_FILTER)
+                                scope.launch { lazyGridState.animateScrollToItem(0) }
+                            },
+                            label = { Text(IMAGE_FILTER) }
+                        )
+                    }
 
-                        item {
-                            FilterChip(
-                                selected = CREATOR_FILTER in viewModel.filterList,
-                                onClick = {
-                                    viewModel.toggleFilter(CREATOR_FILTER)
-                                    scope.launch { lazyGridState.animateScrollToItem(0) }
-                                },
-                                label = { Text(CREATOR_FILTER) }
-                            )
-                        }
+                    item {
+                        FilterChip(
+                            selected = CREATOR_FILTER in viewModel.filterList,
+                            onClick = {
+                                viewModel.toggleFilter(CREATOR_FILTER)
+                                scope.launch { lazyGridState.animateScrollToItem(0) }
+                            },
+                            label = { Text(CREATOR_FILTER) }
+                        )
                     }
                 }
             }
@@ -241,7 +246,6 @@ fun FavoritesUI() {
                         )
                     }
                 }
-
             }
         }
     }

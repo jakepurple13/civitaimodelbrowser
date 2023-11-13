@@ -21,9 +21,10 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import com.programmersbox.common.*
+import com.programmersbox.common.components.GlassScaffold
 import com.programmersbox.common.components.LoadingImage
 import com.programmersbox.common.home.modelItems
 import com.programmersbox.common.paging.collectAsLazyPagingItems
@@ -42,12 +43,11 @@ fun CivitAiUserScreen(
     val database = LocalDatabase.current
     val favorites by database.getFavorites().collectAsStateWithLifecycle(emptyList())
     val viewModel = viewModel { CivitAiUserViewModel(network, dataStore, database, username) }
-    val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior()
     val navController = LocalNavController.current
 
     val lazyPagingItems = viewModel.pager.collectAsLazyPagingItems()
 
-    Scaffold(
+    GlassScaffold(
         topBar = {
             TopAppBar(
                 title = {
@@ -90,10 +90,9 @@ fun CivitAiUserScreen(
                         }
                     }
                 },
-                scrollBehavior = scrollBehavior
+                colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.Transparent),
             )
         },
-        modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection)
     ) { padding ->
         LazyVerticalGrid(
             columns = adaptiveGridCell(),

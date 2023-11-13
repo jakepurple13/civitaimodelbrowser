@@ -21,23 +21,18 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.blur
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.paging.CombinedLoadStates
 import androidx.paging.LoadState
 import com.programmersbox.common.*
-import com.programmersbox.common.components.LoadingImage
-import com.programmersbox.common.components.PullRefreshIndicator
-import com.programmersbox.common.components.pullRefresh
-import com.programmersbox.common.components.rememberPullRefreshState
+import com.programmersbox.common.components.*
 import com.programmersbox.common.db.FavoriteModel
 import com.programmersbox.common.paging.LazyPagingItems
 import com.programmersbox.common.paging.collectAsLazyPagingItems
 import com.programmersbox.common.paging.itemContentType
 import com.programmersbox.common.paging.itemKeyIndexed
-import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.launch
 import moe.tlaster.precompose.flow.collectAsStateWithLifecycle
 import moe.tlaster.precompose.navigation.Navigator
@@ -49,7 +44,6 @@ fun CivitAiScreen(
     network: Network = LocalNetwork.current,
 ) {
     val navController = LocalNavController.current
-    val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior()
     val database by LocalDatabase.current.getFavorites().collectAsStateWithLifecycle(emptyList())
     val dataStore = LocalDataStore.current
     val showNsfw by remember { dataStore.showNsfw.flow }.collectAsStateWithLifecycle(false)
@@ -73,13 +67,7 @@ fun CivitAiScreen(
         }
     }
 
-    LaunchedEffect(lazyGridState) {
-        snapshotFlow { lazyGridState.firstVisibleItemScrollOffset }
-            .filter { it == 0 }
-            .collect { scrollBehavior.state.contentOffset = 0f }
-    }
-
-    Scaffold(
+    GlassScaffold(
         topBar = {
             TopAppBar(
                 title = { Text("CivitAi Model Browser") },
@@ -109,7 +97,7 @@ fun CivitAiScreen(
                         onClick = { navController.navigate(Screen.Favorites.routeId) }
                     ) { Icon(Icons.Default.Favorite, null) }
                 },
-                scrollBehavior = scrollBehavior
+                colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.Transparent),
             )
         },
         floatingActionButton = {
@@ -123,7 +111,6 @@ fun CivitAiScreen(
                 ) { Icon(Icons.Default.ArrowUpward, null) }
             }
         },
-        modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection)
     ) { padding ->
         Box(
             modifier = Modifier.pullRefresh(pullToRefreshState)

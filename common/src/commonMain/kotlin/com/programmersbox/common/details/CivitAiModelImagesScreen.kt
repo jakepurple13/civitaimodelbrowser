@@ -17,10 +17,12 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.blur
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.DialogProperties
 import com.programmersbox.common.*
+import com.programmersbox.common.components.GlassScaffold
 import com.programmersbox.common.components.LoadingImage
 import com.programmersbox.common.db.FavoriteModel
 import com.programmersbox.common.paging.collectAsLazyPagingItems
@@ -53,7 +55,6 @@ fun CivitAiModelImagesScreen(
     val uriHandler = LocalUriHandler.current
     val lazyPagingItems = viewModel.pager.collectAsLazyPagingItems()
     val navController = LocalNavController.current
-    val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior()
 
     val favoriteList by database.getFavorites().collectAsStateWithLifecycle(emptyList())
 
@@ -75,7 +76,7 @@ fun CivitAiModelImagesScreen(
         )
     }
 
-    Scaffold(
+    GlassScaffold(
         topBar = {
             TopAppBar(
                 title = {
@@ -90,7 +91,7 @@ fun CivitAiModelImagesScreen(
                     ) { Icon(Icons.Default.ArrowBack, null) }
                 },
                 actions = { Text("(${lazyPagingItems.itemCount})") },
-                scrollBehavior = scrollBehavior
+                colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.Transparent)
             )
         },
     ) { padding ->

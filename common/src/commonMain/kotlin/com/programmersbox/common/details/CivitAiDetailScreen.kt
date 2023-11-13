@@ -21,19 +21,16 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.blur
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.rotate
-import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalClipboardManager
-import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.DialogProperties
 import com.programmersbox.common.*
+import com.programmersbox.common.components.GlassScaffold
 import com.programmersbox.common.components.LoadingImage
 import com.programmersbox.common.db.FavoriteModel
-import dev.chrisbanes.haze.haze
 import io.kamel.image.KamelImage
 import io.kamel.image.asyncPainterResource
 import moe.tlaster.precompose.flow.collectAsStateWithLifecycle
@@ -78,7 +75,7 @@ fun CivitAiDetailScreen(
                 )
             }
 
-            Scaffold(
+            GlassScaffold(
                 topBar = {
                     TopAppBar(
                         title = {
@@ -157,142 +154,117 @@ fun CivitAiDetailScreen(
                     )
                 },
             ) { paddingValues ->
-                BoxWithConstraints {
-                    // Calculate the top and bottom bar bounds by combining the incoming
-                    // constraints + contentPadding
-                    val topBarBounds = with(LocalDensity.current) {
-                        Rect(
-                            Offset(0f, 0f),
-                            Offset(maxWidth.toPx(), paddingValues.calculateTopPadding().toPx())
-                        )
-                    }
-                    val bottomBarBounds = with(LocalDensity.current) {
-                        val bottomPaddingPx = paddingValues.calculateBottomPadding().toPx()
-                        Rect(
-                            Offset(0f, maxHeight.toPx() - bottomPaddingPx),
-                            Offset(maxWidth.toPx(), maxHeight.toPx())
-                        )
-                    }
-                    LazyVerticalGrid(
-                        columns = adaptiveGridCell(),
-                        contentPadding = paddingValues,
-                        verticalArrangement = Arrangement.spacedBy(4.dp),
-                        horizontalArrangement = Arrangement.spacedBy(4.dp),
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .haze(
-                                //TODO: Have to look into this
-                                // or wait until the jetpack-compose extension removal
-                                topBarBounds,
-                                bottomBarBounds,
-                                backgroundColor = MaterialTheme.colorScheme.surface,
-                            )
+                LazyVerticalGrid(
+                    columns = adaptiveGridCell(),
+                    contentPadding = paddingValues,
+                    verticalArrangement = Arrangement.spacedBy(4.dp),
+                    horizontalArrangement = Arrangement.spacedBy(4.dp),
+                    modifier = Modifier.fillMaxSize()
+                ) {
+                    item(
+                        span = { GridItemSpan(maxLineSpan) }
                     ) {
+                        ListItem(
+                            overlineContent = model.models.creator?.username?.let { { Text("Made by $it") } },
+                            leadingContent = { Text(model.models.type.name) },
+                            headlineContent = { Text(model.models.name) },
+                            supportingContent = {
+                                var showFullDescription by remember { mutableStateOf(false) }
+                                Text(
+                                    model.models.parsedDescription(),
+                                    maxLines = if (showFullDescription) Int.MAX_VALUE else 3,
+                                    modifier = Modifier
+                                        .animateContentSize()
+                                        .toggleable(
+                                            value = showFullDescription,
+                                            onValueChange = { showFullDescription = it }
+                                        )
+                                )
+                            },
+                            trailingContent = {
+                                if (model.models.nsfw) {
+                                    ElevatedAssistChip(
+                                        label = { Text("NSFW") },
+                                        onClick = {},
+                                        colors = AssistChipDefaults.elevatedAssistChipColors(
+                                            disabledLabelColor = MaterialTheme.colorScheme.error,
+                                            disabledContainerColor = MaterialTheme.colorScheme.surface
+                                        ),
+                                        border = AssistChipDefaults.assistChipBorder(
+                                            disabledBorderColor = MaterialTheme.colorScheme.error,
+                                            borderWidth = 1.dp
+                                        ),
+                                        enabled = false,
+                                    )
+                                }
+                            },
+                            modifier = Modifier.animateContentSize()
+                        )
+                    }
+
+                    model.models.modelVersions.forEachIndexed { index, version ->
+
+                        var showImages by mutableStateOf(index == 0)
+                        var showMoreInfo by mutableStateOf(index == 0)
+
                         item(
                             span = { GridItemSpan(maxLineSpan) }
                         ) {
-                            ListItem(
-                                overlineContent = model.models.creator?.username?.let { { Text("Made by $it") } },
-                                leadingContent = { Text(model.models.type.name) },
-                                headlineContent = { Text(model.models.name) },
-                                supportingContent = {
-                                    var showFullDescription by remember { mutableStateOf(false) }
-                                    Text(
-                                        model.models.parsedDescription(),
-                                        maxLines = if (showFullDescription) Int.MAX_VALUE else 3,
-                                        modifier = Modifier
-                                            .animateContentSize()
-                                            .toggleable(
-                                                value = showFullDescription,
-                                                onValueChange = { showFullDescription = it }
-                                            )
-                                    )
-                                },
-                                trailingContent = {
-                                    if (model.models.nsfw) {
-                                        ElevatedAssistChip(
-                                            label = { Text("NSFW") },
-                                            onClick = {},
-                                            colors = AssistChipDefaults.elevatedAssistChipColors(
-                                                disabledLabelColor = MaterialTheme.colorScheme.error,
-                                                disabledContainerColor = MaterialTheme.colorScheme.surface
-                                            ),
-                                            border = AssistChipDefaults.assistChipBorder(
-                                                disabledBorderColor = MaterialTheme.colorScheme.error,
-                                                borderWidth = 1.dp
-                                            ),
-                                            enabled = false,
-                                        )
-                                    }
-                                },
-                                modifier = Modifier.animateContentSize()
-                            )
-                        }
-
-                        model.models.modelVersions.forEachIndexed { index, version ->
-
-                            var showImages by mutableStateOf(index == 0)
-                            var showMoreInfo by mutableStateOf(index == 0)
-
-                            item(
-                                span = { GridItemSpan(maxLineSpan) }
+                            Card(
+                                onClick = {
+                                    showImages = !showImages
+                                    showMoreInfo = !showMoreInfo
+                                }
                             ) {
-                                Card(
-                                    onClick = {
-                                        showImages = !showImages
-                                        showMoreInfo = !showMoreInfo
-                                    }
-                                ) {
-                                    TopAppBar(
-                                        title = { Text("Version: ${version.name}") },
-                                        navigationIcon = {
-                                            version.downloadUrl?.let { downloadUrl ->
-                                                RichTooltipBox(
-                                                    text = { Text("Copy Download Url") },
-                                                ) {
-                                                    val clipboard = LocalClipboardManager.current
-                                                    IconButton(
-                                                        onClick = { clipboard.setText(AnnotatedString(downloadUrl)) }
-                                                    ) { Icon(Icons.Default.ContentCopy, null) }
-                                                }
+                                TopAppBar(
+                                    title = { Text("Version: ${version.name}") },
+                                    navigationIcon = {
+                                        version.downloadUrl?.let { downloadUrl ->
+                                            RichTooltipBox(
+                                                text = { Text("Copy Download Url") },
+                                            ) {
+                                                val clipboard = LocalClipboardManager.current
+                                                IconButton(
+                                                    onClick = { clipboard.setText(AnnotatedString(downloadUrl)) }
+                                                ) { Icon(Icons.Default.ContentCopy, null) }
                                             }
-                                        },
-                                        actions = {
-                                            Icon(
-                                                Icons.Filled.ArrowDropDown,
-                                                null,
-                                                Modifier.rotate(if (showMoreInfo) 180f else 0f)
-                                            )
-                                        },
-                                        windowInsets = WindowInsets(0.dp)
-                                    )
-                                    AnimatedVisibility(showMoreInfo) {
-                                        ListItem(
-                                            headlineContent = {
-                                                Text("Last Update at: " + simpleDateTimeFormatter.format(version.updatedAt.toEpochMilliseconds()))
-                                            },
-                                            supportingContent = version.parsedDescription()?.let { { Text(it) } }
+                                        }
+                                    },
+                                    actions = {
+                                        Icon(
+                                            Icons.Filled.ArrowDropDown,
+                                            null,
+                                            Modifier.rotate(if (showMoreInfo) 180f else 0f)
                                         )
-                                    }
+                                    },
+                                    windowInsets = WindowInsets(0.dp)
+                                )
+                                AnimatedVisibility(showMoreInfo) {
+                                    ListItem(
+                                        headlineContent = {
+                                            Text("Last Update at: " + simpleDateTimeFormatter.format(version.updatedAt.toEpochMilliseconds()))
+                                        },
+                                        supportingContent = version.parsedDescription()?.let { { Text(it) } }
+                                    )
                                 }
                             }
+                        }
 
-                            items(version.images) { images ->
-                                AnimatedVisibility(
-                                    showImages,
-                                    enter = fadeIn() + expandVertically(),
-                                    exit = fadeOut() + shrinkVertically()
-                                ) {
-                                    ImageCard(
-                                        images = images,
-                                        showNsfw = showNsfw,
-                                        nsfwBlurStrength = nsfwBlurStrength,
-                                        isFavorite = favoriteList
-                                            .filterIsInstance<FavoriteModel.Image>()
-                                            .any { f -> f.imageUrl == images.url },
-                                        onClick = { sheetDetails = images }
-                                    )
-                                }
+                        items(version.images) { images ->
+                            AnimatedVisibility(
+                                showImages,
+                                enter = fadeIn() + expandVertically(),
+                                exit = fadeOut() + shrinkVertically()
+                            ) {
+                                ImageCard(
+                                    images = images,
+                                    showNsfw = showNsfw,
+                                    nsfwBlurStrength = nsfwBlurStrength,
+                                    isFavorite = favoriteList
+                                        .filterIsInstance<FavoriteModel.Image>()
+                                        .any { f -> f.imageUrl == images.url },
+                                    onClick = { sheetDetails = images }
+                                )
                             }
                         }
                     }

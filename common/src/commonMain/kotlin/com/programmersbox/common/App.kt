@@ -15,6 +15,7 @@ import com.programmersbox.common.db.FavoritesUI
 import com.programmersbox.common.details.CivitAiDetailScreen
 import com.programmersbox.common.details.CivitAiModelImagesScreen
 import com.programmersbox.common.home.CivitAiScreen
+import moe.tlaster.precompose.PreComposeApp
 import moe.tlaster.precompose.navigation.*
 import moe.tlaster.precompose.navigation.transition.NavTransition
 import moe.tlaster.precompose.viewmodel.ViewModel
@@ -25,47 +26,49 @@ internal fun App(
     onShareClick: (String) -> Unit,
     producePath: () -> String,
 ) {
-    val navController = rememberNavigator()
-    val viewModel = viewModel { AppViewModel(DataStore.getStore(producePath)) }
-    CompositionLocalProvider(
-        LocalNavController provides navController,
-        LocalDataStore provides viewModel.dataStore,
-        LocalDatabase provides remember { FavoritesDatabase() }
-    ) {
-        Surface {
-            NavHost(
-                navigator = navController,
-                initialRoute = Screen.List.routeId,
-                navTransition = NavTransition(
-                    createTransition = slideInHorizontally { it },
-                    destroyTransition = slideOutHorizontally { it },
-                    resumeTransition = slideInHorizontally { -it },
-                    pauseTransition = slideOutHorizontally { -it },
-                )
-            ) {
-                scene(Screen.List.routeId) { CivitAiScreen() }
-                group(
-                    "detailsgroup",
-                    Screen.Detail.routeId
+    PreComposeApp {
+        val navController = rememberNavigator()
+        val viewModel = viewModel { AppViewModel(DataStore.getStore(producePath)) }
+        CompositionLocalProvider(
+            LocalNavController provides navController,
+            LocalDataStore provides viewModel.dataStore,
+            LocalDatabase provides remember { FavoritesDatabase() }
+        ) {
+            Surface {
+                NavHost(
+                    navigator = navController,
+                    initialRoute = Screen.List.routeId,
+                    navTransition = NavTransition(
+                        createTransition = slideInHorizontally { it },
+                        destroyTransition = slideOutHorizontally { it },
+                        resumeTransition = slideInHorizontally { -it },
+                        pauseTransition = slideOutHorizontally { -it },
+                    )
                 ) {
-                    scene(Screen.Detail.routeId) {
-                        CivitAiDetailScreen(
-                            id = it.path<String>("modelId"),
-                            onShareClick = onShareClick
-                        )
-                    }
+                    scene(Screen.List.routeId) { CivitAiScreen() }
+                    group(
+                        "detailsgroup",
+                        Screen.Detail.routeId
+                    ) {
+                        scene(Screen.Detail.routeId) {
+                            CivitAiDetailScreen(
+                                id = it.path<String>("modelId"),
+                                onShareClick = onShareClick
+                            )
+                        }
 
-                    scene(Screen.DetailsImage.routeId) {
-                        CivitAiModelImagesScreen(
-                            modelId = it.path<String>("modelId"),
-                            modelName = it.query<String>("modelName")
-                        )
+                        scene(Screen.DetailsImage.routeId) {
+                            CivitAiModelImagesScreen(
+                                modelId = it.path<String>("modelId"),
+                                modelName = it.query<String>("modelName")
+                            )
+                        }
                     }
-                }
-                scene(Screen.Settings.routeId) { SettingsScreen() }
-                scene(Screen.Favorites.routeId) { FavoritesUI() }
-                scene(Screen.User.routeId) {
-                    CivitAiUserScreen(username = it.path<String>("username").orEmpty())
+                    scene(Screen.Settings.routeId) { SettingsScreen() }
+                    scene(Screen.Favorites.routeId) { FavoritesUI() }
+                    scene(Screen.User.routeId) {
+                        CivitAiUserScreen(username = it.path<String>("username").orEmpty())
+                    }
                 }
             }
         }

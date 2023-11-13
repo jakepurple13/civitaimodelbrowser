@@ -5,6 +5,8 @@ import android.content.Context
 import android.content.Intent
 import android.os.Build
 import android.os.Bundle
+import androidx.activity.ComponentActivity
+import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.browser.customtabs.CustomTabsIntent
 import androidx.compose.foundation.isSystemInDarkTheme
@@ -22,10 +24,8 @@ import androidx.compose.ui.platform.UriHandler
 import androidx.core.net.toUri
 import androidx.core.view.WindowCompat
 import com.programmersbox.common.UIShow
-import moe.tlaster.precompose.lifecycle.PreComposeActivity
-import moe.tlaster.precompose.lifecycle.setContent
 
-class MainActivity : PreComposeActivity() {
+class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         WindowCompat.setDecorFitsSystemWindows(window, false)

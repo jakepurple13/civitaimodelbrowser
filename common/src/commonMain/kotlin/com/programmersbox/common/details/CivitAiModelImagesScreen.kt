@@ -22,12 +22,14 @@ import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.DialogProperties
 import com.programmersbox.common.*
-import com.programmersbox.common.components.GlassScaffold
 import com.programmersbox.common.components.LoadingImage
 import com.programmersbox.common.db.FavoriteModel
 import com.programmersbox.common.paging.collectAsLazyPagingItems
 import com.programmersbox.common.paging.itemContentType
 import com.programmersbox.common.paging.itemKey
+import dev.chrisbanes.haze.HazeState
+import dev.chrisbanes.haze.haze
+import dev.chrisbanes.haze.hazeChild
 import io.kamel.image.KamelImage
 import io.kamel.image.asyncPainterResource
 import moe.tlaster.precompose.flow.collectAsStateWithLifecycle
@@ -39,6 +41,7 @@ fun CivitAiModelImagesScreen(
     modelId: String?,
     modelName: String?,
 ) {
+    val hazeState = remember { HazeState() }
     val database = LocalDatabase.current
     val dataStore = LocalDataStore.current
     val showNsfw by remember { dataStore.showNsfw.flow }.collectAsStateWithLifecycle(false)
@@ -76,7 +79,7 @@ fun CivitAiModelImagesScreen(
         )
     }
 
-    GlassScaffold(
+    Scaffold(
         topBar = {
             TopAppBar(
                 title = {
@@ -91,7 +94,8 @@ fun CivitAiModelImagesScreen(
                     ) { Icon(Icons.Default.ArrowBack, null) }
                 },
                 actions = { Text("(${lazyPagingItems.itemCount})") },
-                colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.Transparent)
+                colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.Transparent),
+                modifier = Modifier.hazeChild(hazeState)
             )
         },
     ) { padding ->
@@ -100,7 +104,12 @@ fun CivitAiModelImagesScreen(
             contentPadding = padding,
             verticalArrangement = Arrangement.spacedBy(4.dp),
             horizontalArrangement = Arrangement.spacedBy(4.dp),
-            modifier = Modifier.fillMaxSize()
+            modifier = Modifier
+                .haze(
+                    state = hazeState,
+                    backgroundColor = MaterialTheme.colorScheme.surface
+                )
+                .fillMaxSize()
         ) {
             items(
                 count = lazyPagingItems.itemCount,

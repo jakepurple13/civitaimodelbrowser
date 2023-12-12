@@ -15,7 +15,6 @@ import androidx.compose.ui.layout.SubcomposeLayout
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.offset
-import dev.chrisbanes.haze.haze
 
 private val LocalScaffoldContentPadding = staticCompositionLocalOf { PaddingValues(0.dp) }
 
@@ -204,9 +203,9 @@ private fun NestedScaffoldLayout(
                 )
 
                 Box(
-                    modifier = Modifier.thenIf(blurAreas.isNotEmpty()) {
+                    /*modifier = Modifier.thenIf(blurAreas.isNotEmpty()) {
                         haze(*blurAreas.toTypedArray(), backgroundColor = MaterialTheme.colorScheme.surface)
-                    },
+                    },*/
                 ) {
                     // Scaffold always applies the insets, so we only want to pass down the content padding
                     // without the insets (i.e. padding from the bottom bar, etc)

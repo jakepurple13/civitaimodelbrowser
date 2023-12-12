@@ -27,12 +27,18 @@ import androidx.compose.ui.unit.dp
 import androidx.paging.CombinedLoadStates
 import androidx.paging.LoadState
 import com.programmersbox.common.*
-import com.programmersbox.common.components.*
+import com.programmersbox.common.components.LoadingImage
+import com.programmersbox.common.components.PullRefreshIndicator
+import com.programmersbox.common.components.pullRefresh
+import com.programmersbox.common.components.rememberPullRefreshState
 import com.programmersbox.common.db.FavoriteModel
 import com.programmersbox.common.paging.LazyPagingItems
 import com.programmersbox.common.paging.collectAsLazyPagingItems
 import com.programmersbox.common.paging.itemContentType
 import com.programmersbox.common.paging.itemKeyIndexed
+import dev.chrisbanes.haze.HazeState
+import dev.chrisbanes.haze.haze
+import dev.chrisbanes.haze.hazeChild
 import kotlinx.coroutines.launch
 import moe.tlaster.precompose.flow.collectAsStateWithLifecycle
 import moe.tlaster.precompose.navigation.Navigator
@@ -43,6 +49,7 @@ import moe.tlaster.precompose.viewmodel.viewModel
 fun CivitAiScreen(
     network: Network = LocalNetwork.current,
 ) {
+    val hazeState = remember { HazeState() }
     val navController = LocalNavController.current
     val database by LocalDatabase.current.getFavorites().collectAsStateWithLifecycle(emptyList())
     val dataStore = LocalDataStore.current
@@ -67,7 +74,7 @@ fun CivitAiScreen(
         }
     }
 
-    GlassScaffold(
+    Scaffold(
         topBar = {
             TopAppBar(
                 title = { Text("CivitAi Model Browser") },
@@ -98,6 +105,7 @@ fun CivitAiScreen(
                     ) { Icon(Icons.Default.Favorite, null) }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.Transparent),
+                modifier = Modifier.hazeChild(hazeState)
             )
         },
         floatingActionButton = {
@@ -121,7 +129,12 @@ fun CivitAiScreen(
                 columns = adaptiveGridCell(),
                 verticalArrangement = Arrangement.spacedBy(4.dp),
                 horizontalArrangement = Arrangement.spacedBy(4.dp),
-                modifier = Modifier.fillMaxSize()
+                modifier = Modifier
+                    .haze(
+                        state = hazeState,
+                        backgroundColor = MaterialTheme.colorScheme.surface
+                    )
+                    .fillMaxSize()
             ) {
                 modelItems(
                     lazyPagingItems = lazyPagingItems,

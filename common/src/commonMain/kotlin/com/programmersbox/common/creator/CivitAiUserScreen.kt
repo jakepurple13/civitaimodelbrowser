@@ -24,10 +24,12 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import com.programmersbox.common.*
-import com.programmersbox.common.components.GlassScaffold
 import com.programmersbox.common.components.LoadingImage
 import com.programmersbox.common.home.modelItems
 import com.programmersbox.common.paging.collectAsLazyPagingItems
+import dev.chrisbanes.haze.HazeState
+import dev.chrisbanes.haze.haze
+import dev.chrisbanes.haze.hazeChild
 import moe.tlaster.precompose.flow.collectAsStateWithLifecycle
 import moe.tlaster.precompose.viewmodel.viewModel
 
@@ -37,6 +39,7 @@ fun CivitAiUserScreen(
     network: Network = LocalNetwork.current,
     username: String,
 ) {
+    val hazeState = remember { HazeState() }
     val dataStore = LocalDataStore.current
     val showNsfw by remember { dataStore.showNsfw.flow }.collectAsStateWithLifecycle(false)
     val blurStrength by remember { dataStore.hideNsfwStrength.flow }.collectAsStateWithLifecycle(6f)
@@ -47,7 +50,7 @@ fun CivitAiUserScreen(
 
     val lazyPagingItems = viewModel.pager.collectAsLazyPagingItems()
 
-    GlassScaffold(
+    Scaffold(
         topBar = {
             TopAppBar(
                 title = {
@@ -91,6 +94,7 @@ fun CivitAiUserScreen(
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.Transparent),
+                modifier = Modifier.hazeChild(hazeState)
             )
         },
     ) { padding ->
@@ -99,7 +103,12 @@ fun CivitAiUserScreen(
             verticalArrangement = Arrangement.spacedBy(4.dp),
             horizontalArrangement = Arrangement.spacedBy(4.dp),
             contentPadding = padding,
-            modifier = Modifier.fillMaxSize()
+            modifier = Modifier
+                .haze(
+                    state = hazeState,
+                    backgroundColor = MaterialTheme.colorScheme.surface
+                )
+                .fillMaxSize()
         ) {
             item(
                 span = { GridItemSpan(maxLineSpan) }

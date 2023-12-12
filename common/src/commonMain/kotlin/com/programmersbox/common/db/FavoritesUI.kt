@@ -26,8 +26,10 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.DialogProperties
 import com.programmersbox.common.*
-import com.programmersbox.common.components.GlassScaffold
 import com.programmersbox.common.home.CardContent
+import dev.chrisbanes.haze.HazeState
+import dev.chrisbanes.haze.haze
+import dev.chrisbanes.haze.hazeChild
 import io.kamel.image.KamelImage
 import io.kamel.image.asyncPainterResource
 import kotlinx.coroutines.launch
@@ -40,6 +42,7 @@ internal const val CREATOR_FILTER = "Creator"
 @OptIn(ExperimentalFoundationApi::class, ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
 @Composable
 fun FavoritesUI() {
+    val hazeState = remember { HazeState() }
     val navController = LocalNavController.current
     val dataStore = LocalDataStore.current
     val scope = rememberCoroutineScope()
@@ -84,9 +87,11 @@ fun FavoritesUI() {
         )
     }
 
-    GlassScaffold(
+    Scaffold(
         topBar = {
-            Column {
+            Column(
+                modifier = Modifier.hazeChild(hazeState)
+            ) {
                 DockedSearchBar(
                     query = viewModel.search,
                     onQueryChange = { viewModel.search = it },
@@ -182,6 +187,10 @@ fun FavoritesUI() {
             contentPadding = padding,
             modifier = Modifier
                 .padding(4.dp)
+                .haze(
+                    state = hazeState,
+                    backgroundColor = MaterialTheme.colorScheme.surface
+                )
                 .fillMaxSize()
         ) {
             items(

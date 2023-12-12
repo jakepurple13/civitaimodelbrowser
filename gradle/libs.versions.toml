@@ -1,6 +1,6 @@
 [versions]
 browser = "1.6.0"
-haze = "0.3.0"
+haze = "0.4.0"
 jsoup = "1.16.2"
 kotlin-version = "1.9.20"
 agp-version = "7.3.0"

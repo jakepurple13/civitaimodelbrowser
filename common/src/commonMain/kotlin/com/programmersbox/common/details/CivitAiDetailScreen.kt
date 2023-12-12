@@ -28,9 +28,11 @@ import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.DialogProperties
 import com.programmersbox.common.*
-import com.programmersbox.common.components.GlassScaffold
 import com.programmersbox.common.components.LoadingImage
 import com.programmersbox.common.db.FavoriteModel
+import dev.chrisbanes.haze.HazeState
+import dev.chrisbanes.haze.haze
+import dev.chrisbanes.haze.hazeChild
 import io.kamel.image.KamelImage
 import io.kamel.image.asyncPainterResource
 import moe.tlaster.precompose.flow.collectAsStateWithLifecycle
@@ -45,6 +47,7 @@ fun CivitAiDetailScreen(
     onShareClick: (String) -> Unit,
     network: Network = LocalNetwork.current,
 ) {
+    val hazeState = remember { HazeState() }
     val database = LocalDatabase.current
     val viewModel = viewModel { CivitAiDetailViewModel(network, id, database) }
     val navController = LocalNavController.current
@@ -75,7 +78,7 @@ fun CivitAiDetailScreen(
                 )
             }
 
-            GlassScaffold(
+            Scaffold(
                 topBar = {
                     TopAppBar(
                         title = {
@@ -104,6 +107,7 @@ fun CivitAiDetailScreen(
                             }
                         },
                         colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.Transparent),
+                        modifier = Modifier.hazeChild(hazeState)
                     )
                 },
                 bottomBar = {
@@ -150,7 +154,8 @@ fun CivitAiDetailScreen(
                                 label = { Text("Images") },
                             )
                         },
-                        containerColor = Color.Transparent
+                        containerColor = Color.Transparent,
+                        modifier = Modifier.hazeChild(hazeState)
                     )
                 },
             ) { paddingValues ->
@@ -159,7 +164,12 @@ fun CivitAiDetailScreen(
                     contentPadding = paddingValues,
                     verticalArrangement = Arrangement.spacedBy(4.dp),
                     horizontalArrangement = Arrangement.spacedBy(4.dp),
-                    modifier = Modifier.fillMaxSize()
+                    modifier = Modifier
+                        .haze(
+                            state = hazeState,
+                            backgroundColor = MaterialTheme.colorScheme.surface
+                        )
+                        .fillMaxSize()
                 ) {
                     item(
                         span = { GridItemSpan(maxLineSpan) }

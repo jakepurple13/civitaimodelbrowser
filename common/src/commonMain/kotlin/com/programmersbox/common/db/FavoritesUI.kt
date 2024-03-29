@@ -364,21 +364,21 @@ private fun SheetContent(
                     modifier = Modifier.padding(4.dp)
                 ) {
                     meta.model?.let { Text("Model: $it") }
-                    Divider()
+                    HorizontalDivider()
                     meta.prompt?.let { Text("Prompt: $it") }
-                    Divider()
+                    HorizontalDivider()
                     meta.negativePrompt?.let { Text("Negative Prompt: $it") }
-                    Divider()
+                    HorizontalDivider()
                     meta.seed?.let { Text("Seed: $it") }
-                    Divider()
+                    HorizontalDivider()
                     meta.sampler?.let { Text("Sampler: $it") }
-                    Divider()
+                    HorizontalDivider()
                     meta.steps?.let { Text("Steps: $it") }
-                    Divider()
+                    HorizontalDivider()
                     meta.clipSkip?.let { Text("Clip Skip: $it") }
-                    Divider()
+                    HorizontalDivider()
                     meta.size?.let { Text("Size: $it") }
-                    Divider()
+                    HorizontalDivider()
                     meta.cfgScale?.let { Text("Cfg Scale: $it") }
                 }
             }

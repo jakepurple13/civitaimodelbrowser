@@ -22,6 +22,7 @@ import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.unit.dp
 import com.programmersbox.common.components.icons.Github
+import com.programmersbox.common.db.FavoriteModel
 import kotlinx.coroutines.launch
 import moe.tlaster.precompose.flow.collectAsStateWithLifecycle
 import org.jetbrains.compose.resources.DrawableResource
@@ -31,7 +32,12 @@ import kotlin.math.roundToInt
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalResourceApi::class)
 @Composable
-fun SettingsScreen() {
+fun SettingsScreen(
+    onExport: (List<FavoriteModel>) -> Unit = {},
+    onImport: () -> String = { "" },
+    export: @Composable () -> Unit = {},
+    import: @Composable () -> Unit = {},
+) {
     val navController = LocalNavController.current
     val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
     val scope = rememberCoroutineScope()
@@ -40,6 +46,7 @@ fun SettingsScreen() {
     val showNsfw = remember { dataStore.showNsfw }
     val hideNsfwStrength = remember { dataStore.hideNsfwStrength }
     val includeNsfw = remember { dataStore.includeNsfw }
+    val database = LocalDatabase.current
 
     Scaffold(
         topBar = {
@@ -101,7 +108,32 @@ fun SettingsScreen() {
                     }
                 )
             }
-            Divider()
+
+            HorizontalDivider()
+
+            export()
+
+            Card(
+                onClick = {
+                    scope.launch { onExport(database.export()) }
+                }
+            ) {
+                ListItem(
+                    headlineContent = { Text("Export Favorites") }
+                )
+            }
+
+            import()
+
+            Card(
+                onClick = { onImport() }
+            ) {
+                ListItem(
+                    headlineContent = { Text("Import Favorites") }
+                )
+            }
+
+            HorizontalDivider()
 
             val uriHandler = LocalUriHandler.current
 

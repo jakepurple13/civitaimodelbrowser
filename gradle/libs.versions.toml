@@ -13,6 +13,7 @@ paging-version = "3.3.0-alpha02"
 kamel-image = "0.8.3"
 kotlinx-coroutines-core = "1.7.3"
 precompose = "1.5.7"
+sonner = "0.3.5"
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp.version" }
@@ -41,3 +42,4 @@ kamel-image = { module = "media.kamel:kamel-image", version.ref = "kamel-image" 
 kotlinx-coroutines-core = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", version.ref = "kotlinx-coroutines-core" }
 precompose-viewmodel = { module = "moe.tlaster:precompose-viewmodel", version.ref = "precompose" }
 precompose = { module = "moe.tlaster:precompose", version.ref = "precompose" }
+sonner = { module = "io.github.dokar3:sonner", version.ref = "sonner" }

@@ -3,18 +3,18 @@ package com.programmersbox.civitaimodelbrowser
 import android.app.Activity
 import android.content.Context
 import android.content.Intent
+import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import androidx.activity.ComponentActivity
+import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.browser.customtabs.CustomTabsIntent
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.*
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.CompositionLocalProvider
-import androidx.compose.runtime.SideEffect
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.*
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalContext
@@ -23,7 +23,19 @@ import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.platform.UriHandler
 import androidx.core.net.toUri
 import androidx.core.view.WindowCompat
+import androidx.lifecycle.lifecycleScope
+import com.dokar.sonner.Toast
+import com.dokar.sonner.ToastType
+import com.dokar.sonner.Toaster
+import com.dokar.sonner.rememberToasterState
+import com.programmersbox.common.LocalDatabase
 import com.programmersbox.common.UIShow
+import com.programmersbox.common.db.FavoriteModel
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
+import kotlinx.serialization.encodeToString
+import kotlinx.serialization.json.Json
+import java.io.*
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -32,11 +44,52 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             CustomMaterialTheme {
+                val toaster = rememberToasterState()
                 val defaultUriHandler = LocalUriHandler.current
                 val customUriHandler = remember { customTabsUriHandler { defaultUriHandler.openUri(it) } }
                 CompositionLocalProvider(
                     LocalUriHandler provides customUriHandler
                 ) {
+                    var listToExport by remember { mutableStateOf(emptyList<FavoriteModel>()) }
+                    val exportLauncher = rememberLauncherForActivityResult(
+                        ActivityResultContracts.CreateDocument("application/json")
+                    ) { document ->
+                        document?.let {
+                            lifecycleScope.launch {
+                                writeToFile(it, listToExport)
+                                listToExport = emptyList()
+                                toaster.show(
+                                    Toast(
+                                        message = "Export Completed",
+                                        type = ToastType.Success
+                                    )
+                                )
+                            }
+                        }
+                    }
+
+                    val db = LocalDatabase.current
+
+                    val importLauncher = rememberLauncherForActivityResult(
+                        ActivityResultContracts.OpenDocument()
+                    ) { document ->
+                        document?.let { uri ->
+                            contentResolver.openInputStream(uri)
+                                ?.use { inputStream -> BufferedReader(InputStreamReader(inputStream)).readText() }
+                                ?.let {
+                                    lifecycleScope.launch {
+                                        db.import(it)
+                                        toaster.show(
+                                            Toast(
+                                                message = "Import Completed",
+                                                type = ToastType.Success
+                                            )
+                                        )
+                                    }
+                                }
+                        }
+                    }
+
                     UIShow(
                         onShareClick = {
                             startActivity(
@@ -50,12 +103,52 @@ class MainActivity : ComponentActivity() {
                                 )
                             )
                         },
-                        producePath = { filesDir.resolve("androidx.preferences_pb").absolutePath }
+                        producePath = { filesDir.resolve("androidx.preferences_pb").absolutePath },
+                        onExport = {
+                            listToExport = it
+                            exportLauncher.launch("civitmodelbrowser.json")
+                        },
+                        onImport = {
+                            importLauncher.launch(arrayOf("application/json"))
+                            ""
+                        },
+                        import = {}
                     )
                 }
+                Toaster(
+                    state = toaster,
+                    richColors = true
+                )
             }
         }
     }
+}
+
+private suspend fun Context.writeToFile(document: Uri, list: List<FavoriteModel>) {
+    val json = Json {
+        isLenient = true
+        prettyPrint = true
+        ignoreUnknownKeys = true
+        coerceInputValues = true
+    }
+
+    runCatching {
+        runBlocking {
+            try {
+                contentResolver.openFileDescriptor(document, "w")?.use {
+                    FileOutputStream(it.fileDescriptor).use { f ->
+                        f.write(json.encodeToString(list).toByteArray())
+                    }
+                }
+            } catch (e: FileNotFoundException) {
+                e.printStackTrace()
+            } catch (e: IOException) {
+                e.printStackTrace()
+            }
+        }
+    }
+        .onSuccess { println("Written!") }
+        .onFailure { it.printStackTrace() }
 }
 
 fun Context.customTabsUriHandler(

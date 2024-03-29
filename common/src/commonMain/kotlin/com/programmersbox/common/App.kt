@@ -7,9 +7,9 @@ import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.staticCompositionLocalOf
 import com.programmersbox.common.creator.CivitAiUserScreen
+import com.programmersbox.common.db.FavoriteModel
 import com.programmersbox.common.db.FavoritesDatabase
 import com.programmersbox.common.db.FavoritesUI
 import com.programmersbox.common.details.CivitAiDetailScreen
@@ -25,14 +25,17 @@ import moe.tlaster.precompose.viewmodel.viewModel
 internal fun App(
     onShareClick: (String) -> Unit,
     producePath: () -> String,
+    onExport: (List<FavoriteModel>) -> Unit = {},
+    onImport: () -> String = { "" },
+    export: @Composable () -> Unit = {},
+    import: @Composable () -> Unit = {},
 ) {
     PreComposeApp {
         val navController = rememberNavigator()
         val viewModel = viewModel { AppViewModel(DataStore.getStore(producePath)) }
         CompositionLocalProvider(
             LocalNavController provides navController,
-            LocalDataStore provides viewModel.dataStore,
-            LocalDatabase provides remember { FavoritesDatabase() }
+            LocalDataStore provides viewModel.dataStore
         ) {
             Surface {
                 NavHost(
@@ -64,7 +67,14 @@ internal fun App(
                             )
                         }
                     }
-                    scene(Screen.Settings.routeId) { SettingsScreen() }
+                    scene(Screen.Settings.routeId) {
+                        SettingsScreen(
+                            onExport = onExport,
+                            onImport = onImport,
+                            export = export,
+                            import = import
+                        )
+                    }
                     scene(Screen.Favorites.routeId) { FavoritesUI() }
                     scene(Screen.User.routeId) {
                         CivitAiUserScreen(username = it.path<String>("username").orEmpty())
@@ -79,7 +89,7 @@ class AppViewModel(val dataStore: DataStore) : ViewModel()
 
 internal val LocalNavController = staticCompositionLocalOf<Navigator> { error("Nope") }
 internal val LocalDataStore = staticCompositionLocalOf<DataStore> { error("Nope") }
-internal val LocalDatabase = staticCompositionLocalOf<FavoritesDatabase> { error("Nope") }
+val LocalDatabase = staticCompositionLocalOf<FavoritesDatabase> { FavoritesDatabase() }
 internal val LocalNetwork = staticCompositionLocalOf { Network() }
 
 fun Navigator.navigateToDetail(id: Long) {

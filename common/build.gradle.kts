@@ -46,6 +46,7 @@ kotlin {
                 api(libs.jsoup)
                 api(libs.realm.base)
                 api(libs.haze)
+                api(libs.sonner)
             }
         }
 

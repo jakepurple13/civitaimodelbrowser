@@ -105,7 +105,7 @@ internal fun WindowWithBar(
                                         }
                                     }
                                 }
-                                Divider(color = MaterialTheme.colorScheme.onSurface)
+                                HorizontalDivider(color = MaterialTheme.colorScheme.onSurface)
                             }
                         },
                         containerColor = MaterialTheme.colorScheme.surface,

@@ -10,10 +10,18 @@ import io.realm.kotlin.migration.AutomaticSchemaMigration
 import io.realm.kotlin.types.RealmList
 import io.realm.kotlin.types.RealmObject
 import kotlinx.coroutines.flow.mapNotNull
+import kotlinx.serialization.json.Json
 
 class FavoritesDatabase(
     name: String = Realm.DEFAULT_FILE_NAME,
 ) {
+    private val json = Json {
+        isLenient = true
+        prettyPrint = true
+        ignoreUnknownKeys = true
+        coerceInputValues = true
+    }
+
     private val realm by lazy {
         Realm.open(
             RealmConfiguration.Builder(
@@ -48,7 +56,8 @@ class FavoritesDatabase(
                             imageUrl = favorite.imageUrl,
                             description = favorite.description,
                             type = favorite.type,
-                            nsfw = favorite.nsfw
+                            nsfw = favorite.nsfw,
+                            modelType = type.name,
                         )
                     }
 
@@ -59,7 +68,8 @@ class FavoritesDatabase(
                             imageUrl = favorite.imageUrl,
                             nsfw = favorite.nsfw,
                             imageMetaDb = favorite.imageMeta,
-                            modelId = favorite.modelId
+                            modelId = favorite.modelId,
+                            modelType = type.name,
                         )
                     }
 
@@ -67,7 +77,8 @@ class FavoritesDatabase(
                         FavoriteModel.Creator(
                             id = favorite.id,
                             name = favorite.name,
-                            imageUrl = favorite.imageUrl
+                            imageUrl = favorite.imageUrl,
+                            modelType = type.name,
                         )
                     }
                 }
@@ -154,6 +165,52 @@ class FavoritesDatabase(
     suspend fun removeFavorite(url: String) {
         realm.updateInfo<FavoriteList> { it?.favorites?.removeIf { f -> f.imageUrl == url } }
     }
+
+    suspend fun export() = realm.query(Favorite::class)
+        .find()
+        .map { it.toModel() }
+
+    suspend fun import(jsonString: String) {
+        val list = json.decodeFromString<List<FavoriteModel>>(jsonString).toMutableList()
+        realm.updateInfo<FavoriteList> { favoriteList ->
+            list.removeIf { m -> favoriteList?.favorites?.any { it.id == m.id } ?: false }
+            favoriteList?.favorites?.addAll(
+                list.map { fm ->
+                    Favorite().apply {
+                        this.id = fm.id
+                        this.name = fm.name
+                        this.imageUrl = fm.imageUrl
+
+                        when (fm.modelType) {
+                            "Model" -> {
+                                val m = (fm as FavoriteModel.Model)
+                                description = m.description
+                                type = m.type
+                                this.nsfw = m.nsfw
+                                this.favoriteType = m.modelType
+                            }
+
+                            "Image" -> {
+                                val m = (fm as FavoriteModel.Image)
+                                nsfw = m.nsfw
+                                imageMeta = m.imageMetaDb
+                                this.favoriteType = m.modelType
+                            }
+
+                            "Creator" -> {
+                                val m = (fm as FavoriteModel.Creator)
+
+                            }
+
+                            else -> {
+
+                            }
+                        }
+                    }
+                }
+            )
+        }
+    }
 }
 
 private suspend inline fun <reified T : RealmObject> Realm.updateInfo(crossinline block: MutableRealm.(T?) -> Unit) {
@@ -190,3 +247,42 @@ fun ImageMetaDb.toMeta() = ImageMeta(
     clipSkip = clipSkip,
     negativePrompt = negativePrompt
 )
+
+fun Favorite.toModel(): FavoriteModel {
+    val type = runCatching { FavoriteType.valueOf(favoriteType) }
+        .getOrDefault(FavoriteType.Model)
+    return when (type) {
+        FavoriteType.Model -> {
+            FavoriteModel.Model(
+                id = id,
+                name = name,
+                imageUrl = imageUrl,
+                description = description,
+                type = this.type,
+                nsfw = nsfw,
+                modelType = type.name
+            )
+        }
+
+        FavoriteType.Image -> {
+            FavoriteModel.Image(
+                id = id,
+                name = name,
+                imageUrl = imageUrl,
+                nsfw = nsfw,
+                imageMetaDb = imageMeta,
+                modelId = modelId,
+                modelType = type.name
+            )
+        }
+
+        FavoriteType.Creator -> {
+            FavoriteModel.Creator(
+                id = id,
+                name = name,
+                imageUrl = imageUrl,
+                modelType = type.name
+            )
+        }
+    }
+}

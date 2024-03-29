@@ -22,6 +22,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.DialogProperties
+import androidx.compose.ui.zIndex
 import com.programmersbox.common.*
 import com.programmersbox.common.home.CardContent
 import dev.chrisbanes.haze.HazeState
@@ -251,6 +252,13 @@ fun FavoritesUI() {
                 }
             }
         }
+        CustomScrollBar(
+            lazyGridState = lazyGridState,
+            modifier = Modifier
+                .zIndex(5f)
+                .padding(4.dp)
+                .padding(padding)
+        )
     }
 }
 

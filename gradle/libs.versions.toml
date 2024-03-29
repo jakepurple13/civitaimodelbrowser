@@ -1,5 +1,6 @@
 [versions]
 browser = "1.8.0"
+composeScrollbars = "1.0.4"
 haze = "0.6.2"
 jsoup = "1.17.2"
 kotlin-version = "1.9.23"
@@ -25,6 +26,7 @@ androidx-appcompat = { module = "androidx.appcompat:appcompat", version = "1.6.1
 androidx-browser = { module = "androidx.browser:browser", version.ref = "browser" }
 androidx-core = { module = "androidx.core:core-ktx", version = "1.12.0" }
 androidx-activity-compose = "androidx.activity:activity-compose:1.8.2"
+composeScrollbars = { module = "com.github.GIGAMOLE:ComposeScrollbars", version.ref = "composeScrollbars" }
 datastore-core = { module = "androidx.datastore:datastore-core", version.ref = "datastore.version" }
 datastore-preferences = { module = "androidx.datastore:datastore-preferences-core", version.ref = "datastore.version" }
 datastore-core-okio = { group = "androidx.datastore", name = "datastore-core-okio", version.ref = "datastore.version" }

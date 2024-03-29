@@ -6,9 +6,17 @@ import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.WindowInsetsSides
 import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.systemBars
+import androidx.compose.foundation.lazy.grid.LazyGridState
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
+import com.gigamole.composescrollbars.Scrollbars
+import com.gigamole.composescrollbars.config.ScrollbarsConfig
+import com.gigamole.composescrollbars.config.ScrollbarsOrientation
+import com.gigamole.composescrollbars.rememberScrollbarsState
+import com.gigamole.composescrollbars.scrolltype.ScrollbarsScrollType
+import com.gigamole.composescrollbars.scrolltype.knobtype.ScrollbarsDynamicKnobType
 import com.programmersbox.common.db.FavoriteModel
 
 public actual fun getPlatformName(): String {
@@ -73,3 +81,20 @@ internal actual fun SheetDetails(
 }
 
 internal actual val showRefreshButton: Boolean = false
+
+@Composable
+internal actual fun CustomScrollBar(lazyGridState: LazyGridState, modifier: Modifier) {
+    Scrollbars(
+        state = rememberScrollbarsState(
+            config = ScrollbarsConfig(
+                orientation = ScrollbarsOrientation.Vertical
+            ),
+            scrollType = ScrollbarsScrollType.Lazy.Grid.Dynamic(
+                knobType = ScrollbarsDynamicKnobType.Auto(),
+                state = lazyGridState,
+                spanCount = 3
+            )
+        ),
+        modifier = modifier
+    )
+}

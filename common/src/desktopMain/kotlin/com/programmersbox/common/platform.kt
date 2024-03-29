@@ -1,7 +1,11 @@
 package com.programmersbox.common
 
+import androidx.compose.foundation.VerticalScrollbar
+import androidx.compose.foundation.lazy.grid.LazyGridState
+import androidx.compose.foundation.rememberScrollbarAdapter
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.window.Window
 import com.programmersbox.common.db.FavoriteModel
 
@@ -45,3 +49,12 @@ internal actual fun SheetDetails(
 }
 
 internal actual val showRefreshButton: Boolean = true
+
+
+@Composable
+internal actual fun CustomScrollBar(lazyGridState: LazyGridState, modifier: Modifier) {
+    VerticalScrollbar(
+        adapter = rememberScrollbarAdapter(lazyGridState),
+        modifier = modifier
+    )
+}

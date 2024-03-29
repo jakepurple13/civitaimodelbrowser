@@ -61,6 +61,7 @@ kotlin {
                 api(libs.androidx.appcompat)
                 api(libs.androidx.core)
                 api(libs.ktor.jvm)
+                implementation(libs.composeScrollbars)
             }
         }
 

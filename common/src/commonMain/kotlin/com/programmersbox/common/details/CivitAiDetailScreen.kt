@@ -22,6 +22,8 @@ import androidx.compose.ui.draw.blur
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.ColorFilter
+import androidx.compose.ui.graphics.ColorMatrix
 import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.text.AnnotatedString
@@ -376,7 +378,9 @@ private fun SheetContent(
     onRemoveFromFavorite: () -> Unit,
 ) {
     val painter = asyncPainterResource(image.url)
-    SelectionContainer {
+    SelectionContainer(
+        modifier = Modifier.navigationBarsPadding()
+    ) {
         var imagePopup by remember { mutableStateOf(false) }
 
         if (imagePopup) {
@@ -399,11 +403,12 @@ private fun SheetContent(
                     KamelImage(
                         resource = painter,
                         onLoading = {
+                            val progress = animateFloatAsState(
+                                targetValue = it,
+                                label = ""
+                            ).value
                             CircularProgressIndicator(
-                                progress = animateFloatAsState(
-                                    targetValue = it,
-                                    label = ""
-                                ).value
+                                progress = { progress }
                             )
                         },
                         contentDescription = null,
@@ -436,21 +441,37 @@ private fun SheetContent(
                     }
                 }
             )
-            KamelImage(
-                resource = painter,
-                onLoading = {
-                    CircularProgressIndicator(
-                        progress = animateFloatAsState(
+
+            val blur = 70.dp
+            val alpha = .5f
+            val saturation = 3f
+            val scaleX = 1.5f
+            val scaleY = 1.5f
+
+            Box(modifier = Modifier.align(Alignment.CenterHorizontally)) {
+                KamelImage(
+                    resource = painter,
+                    contentDescription = null,
+                    colorFilter = ColorFilter.colorMatrix(ColorMatrix().apply { setToSaturation(saturation) }),
+                    modifier = Modifier.blurGradient(blur, alpha, scaleX, scaleY)
+                )
+
+                KamelImage(
+                    resource = painter,
+                    contentDescription = null,
+                    onLoading = {
+                        val progress = animateFloatAsState(
                             targetValue = it,
                             label = ""
                         ).value
-                    )
-                },
-                contentDescription = null,
-                modifier = Modifier
-                    .combinedClickable(onDoubleClick = { imagePopup = true }) {}
-                    .align(Alignment.CenterHorizontally)
-            )
+                        CircularProgressIndicator(
+                            progress = { progress }
+                        )
+                    },
+                    modifier = Modifier.combinedClickable(onDoubleClick = { imagePopup = true }) {}
+                )
+            }
+
             if (image.nsfw.canNotShow()) {
                 Row(
                     horizontalArrangement = Arrangement.spacedBy(4.dp),

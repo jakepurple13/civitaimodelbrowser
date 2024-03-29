@@ -2,6 +2,10 @@ package com.programmersbox.common
 
 import android.os.Parcel
 import android.os.Parcelable
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.WindowInsetsSides
+import androidx.compose.foundation.layout.only
+import androidx.compose.foundation.layout.systemBars
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.runtime.Composable
@@ -61,7 +65,8 @@ internal actual fun SheetDetails(
     content: @Composable () -> Unit,
 ) {
     ModalBottomSheet(
-        onDismissRequest = onDismiss
+        onDismissRequest = onDismiss,
+        windowInsets = WindowInsets.systemBars.only(WindowInsetsSides.Top),
     ) {
         content()
     }

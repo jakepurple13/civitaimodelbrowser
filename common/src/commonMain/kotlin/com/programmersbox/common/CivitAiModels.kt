@@ -75,6 +75,8 @@ data class ModelImage(
 @Serializable
 data class CivitAiCustomImages(
     val items: List<CustomModelImage>,
+    val nextPage: String? = null,
+    val prevPage: String? = null,
 )
 
 @Serializable
@@ -124,4 +126,5 @@ data class PageData(
     val pageSize: Long? = null,
     val totalPages: Long? = null,
     val nextPage: String? = null,
+    val prevPage: String? = null,
 )

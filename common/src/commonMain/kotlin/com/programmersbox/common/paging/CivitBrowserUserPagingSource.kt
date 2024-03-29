@@ -10,7 +10,7 @@ class CivitBrowserUserPagingSource(
     private val username: String,
 ) : CivitAiPagingSource(network, includeNsfw) {
     override suspend fun networkLoad(
-        params: LoadParams<Int>,
+        params: LoadParams<String>,
         page: Int,
         includeNsfw: Boolean,
     ): Result<CivitAi> = network.getModels(

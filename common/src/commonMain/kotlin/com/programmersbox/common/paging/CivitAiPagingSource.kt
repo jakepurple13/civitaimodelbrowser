@@ -9,40 +9,37 @@ import com.programmersbox.common.Network
 abstract class CivitAiPagingSource(
     protected val network: Network,
     private val includeNsfw: Boolean = true,
-) : PagingSource<Int, Models>() {
+) : PagingSource<String, Models>() {
     override val keyReuseSupported: Boolean get() = true
 
-    override fun getRefreshKey(state: PagingState<Int, Models>): Int? {
+    override fun getRefreshKey(state: PagingState<String, Models>): String? {
         return state.anchorPosition
             ?.let { state.closestPageToPosition(it) }
-            ?.let { it.prevKey?.plus(1) ?: it.nextKey?.minus(1) }
+            ?.let { it.prevKey ?: it.nextKey }
     }
 
     abstract suspend fun networkLoad(
-        params: LoadParams<Int>,
+        params: LoadParams<String>,
         page: Int,
         includeNsfw: Boolean,
     ): Result<CivitAi>
 
-    override suspend fun load(params: LoadParams<Int>): LoadResult<Int, Models> {
-        val page = params.key ?: 1
-
-        return networkLoad(
-            params = params,
-            page = page,
-            includeNsfw = includeNsfw
-        ).fold(
+    override suspend fun load(params: LoadParams<String>): LoadResult<String, Models> {
+        val request = if (params.key == null) {
+            networkLoad(
+                params = params,
+                page = 1,
+                includeNsfw = includeNsfw
+            )
+        } else {
+            network.fetchRequest<CivitAi>(params.key.orEmpty())
+        }
+        return request.fold(
             onSuccess = { response ->
-                val prevKey = page.takeIf { it > 1 }?.minus(1)
-
-                // This API defines that it's out of data when a page returns empty. When out of
-                // data, we return `null` to signify no more pages should be loaded
-                val nextKey = if (response.items.isNotEmpty()) page + 1 else null
-
                 LoadResult.Page(
                     data = response.items,
-                    prevKey = prevKey,
-                    nextKey = nextKey
+                    prevKey = response.metadata.prevPage,
+                    nextKey = response.metadata.nextPage
                 )
             },
             onFailure = {

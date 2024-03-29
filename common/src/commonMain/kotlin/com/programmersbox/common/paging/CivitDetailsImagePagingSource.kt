@@ -2,6 +2,7 @@ package com.programmersbox.common.paging
 
 import androidx.paging.PagingSource
 import androidx.paging.PagingState
+import com.programmersbox.common.CivitAiCustomImages
 import com.programmersbox.common.CustomModelImage
 import com.programmersbox.common.Network
 import com.programmersbox.common.PAGE_LIMIT
@@ -10,36 +11,33 @@ class CivitDetailsImagePagingSource(
     private val network: Network,
     private val includeNsfw: Boolean = true,
     private val modelId: String?,
-) : PagingSource<Int, CustomModelImage>() {
+) : PagingSource<String, CustomModelImage>() {
     override val keyReuseSupported: Boolean get() = true
 
-    override fun getRefreshKey(state: PagingState<Int, CustomModelImage>): Int? {
+    override fun getRefreshKey(state: PagingState<String, CustomModelImage>): String? {
         return state.anchorPosition
             ?.let { state.closestPageToPosition(it) }
-            ?.let { it.prevKey?.plus(1) ?: it.nextKey?.minus(1) }
+            ?.let { it.prevKey ?: it.nextKey }
     }
 
-    override suspend fun load(params: LoadParams<Int>): LoadResult<Int, CustomModelImage> {
-        val page = params.key ?: 1
-
-        return network.fetchAllImagesByModel(
-            modelId = modelId.orEmpty(),
-            page = page,
-            perPage = PAGE_LIMIT,
-            includeNsfw = includeNsfw
-        )
+    override suspend fun load(params: LoadParams<String>): LoadResult<String, CustomModelImage> {
+        val request = if (params.key == null) {
+            network.fetchAllImagesByModel(
+                modelId = modelId.orEmpty(),
+                page = 1,
+                perPage = PAGE_LIMIT,
+                includeNsfw = includeNsfw
+            )
+        } else {
+            network.fetchRequest<CivitAiCustomImages>(params.key.orEmpty())
+        }
+        return request
             .fold(
                 onSuccess = { response ->
-                    val prevKey = page.takeIf { it > 1 }?.minus(1)
-
-                    // This API defines that it's out of data when a page returns empty. When out of
-                    // data, we return `null` to signify no more pages should be loaded
-                    val nextKey = if (response.isNotEmpty()) page + 1 else null
-
                     LoadResult.Page(
-                        data = response,
-                        prevKey = prevKey,
-                        nextKey = nextKey
+                        data = response.items,
+                        prevKey = response.prevPage,
+                        nextKey = response.nextPage
                     )
                 },
                 onFailure = {

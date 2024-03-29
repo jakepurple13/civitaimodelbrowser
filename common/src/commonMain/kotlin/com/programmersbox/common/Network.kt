@@ -23,7 +23,7 @@ class Network {
         coerceInputValues = true
     }
 
-    private val client: HttpClient = HttpClient {
+    val client: HttpClient = HttpClient {
         install(ContentNegotiation) { json(json) }
         install(HttpTimeout) {
             requestTimeoutMillis = 10000
@@ -32,6 +32,12 @@ class Network {
             url(URL)
             bearerAuth("") //Token goes here!
         }
+    }
+
+    suspend inline fun <reified T> fetchRequest(url: String) = runCatching {
+        client.get(url) {
+            contentType(ContentType.Application.Json)
+        }.body<T>()
     }
 
     suspend fun getModels(
@@ -81,6 +87,6 @@ class Network {
         ) = runCatching {
         client.get("images?limit=$perPage&page=$page&modelId=$modelId${if (!includeNsfw) "&nsfw=None" else ""}") {
             contentType(ContentType.Application.Json)
-        }.body<CivitAiCustomImages>().items
+        }.body<CivitAiCustomImages>()
     }
 }

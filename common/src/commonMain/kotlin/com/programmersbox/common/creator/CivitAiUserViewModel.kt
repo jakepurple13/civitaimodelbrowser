@@ -56,7 +56,7 @@ class CivitAiUserViewModel(
         creator: Creator,
     ) {
         viewModelScope.launch {
-            database.removeFrom { removeIf { it.name == creator.username && it.favoriteType == FavoriteType.Creator.name } }
+            database.removeCreator(creator)
         }
     }
 }

@@ -1,13 +1,12 @@
 package com.programmersbox.common.db
 
+import com.programmersbox.common.Creator
 import com.programmersbox.common.ImageMeta
 import com.programmersbox.common.ModelType
 import io.realm.kotlin.MutableRealm
 import io.realm.kotlin.Realm
 import io.realm.kotlin.RealmConfiguration
-import io.realm.kotlin.ext.asFlow
-import io.realm.kotlin.migration.AutomaticSchemaMigration
-import io.realm.kotlin.types.RealmList
+import io.realm.kotlin.ext.query
 import io.realm.kotlin.types.RealmObject
 import kotlinx.coroutines.flow.mapNotNull
 import kotlinx.serialization.json.Json
@@ -33,17 +32,16 @@ class FavoritesDatabase(
             )
                 .schemaVersion(4)
                 .name(name)
-                .migration(AutomaticSchemaMigration { })
+                .migration({ })
                 //.deleteRealmIfMigrationNeeded()
                 .build()
         )
     }
 
-    private val list = realm.initDbBlocking { FavoriteList() }
-
-    fun getFavorites() = list
+    fun getFavorites() = realm.query(Favorite::class)
+        .find()
         .asFlow()
-        .mapNotNull { it.obj?.favorites }
+        .mapNotNull { it.list }
         .mapNotNull {
             it.map { favorite ->
                 val type = runCatching { FavoriteType.valueOf(favorite.favoriteType) }
@@ -133,8 +131,8 @@ class FavoritesDatabase(
         favoriteType: FavoriteType = FavoriteType.Model,
         imageMetaDb: ImageMetaDb? = null,
     ) {
-        realm.updateInfo<FavoriteList> {
-            it?.favorites?.add(
+        realm.write {
+            copyToRealm(
                 Favorite().apply {
                     this.id = id
                     this.name = name
@@ -150,20 +148,28 @@ class FavoritesDatabase(
         }
     }
 
-    suspend fun removeFrom(block: RealmList<Favorite>.() -> Unit) {
-        realm.updateInfo<FavoriteList> { it?.favorites?.block() }
+    suspend fun removeModel(id: Long) {
+        realm.write {
+            query<Favorite>("id == $0 AND favoriteType == $1", id, FavoriteType.Model.name)
+                .find()
+                .forEach { delete(it) }
+        }
     }
 
-    suspend fun removeFavorite(id: Long) {
-        realm.updateInfo<FavoriteList> { it?.favorites?.removeIf { f -> f.id == id } }
+    suspend fun removeImage(imageUrl: String) {
+        realm.write {
+            query<Favorite>("imageUrl == $0 AND favoriteType == $1", imageUrl, FavoriteType.Image.name)
+                .find()
+                .forEach { delete(it) }
+        }
     }
 
-    suspend fun removeFavoriteByName(name: String) {
-        realm.updateInfo<FavoriteList> { it?.favorites?.removeIf { f -> f.name == name } }
-    }
-
-    suspend fun removeFavorite(url: String) {
-        realm.updateInfo<FavoriteList> { it?.favorites?.removeIf { f -> f.imageUrl == url } }
+    suspend fun removeCreator(creator: Creator) {
+        realm.write {
+            query<Favorite>("name == $0 AND favoriteType == $1", creator.username, FavoriteType.Creator.name)
+                .find()
+                .forEach { delete(it) }
+        }
     }
 
     suspend fun export() = realm.query(Favorite::class)
@@ -172,43 +178,42 @@ class FavoritesDatabase(
 
     suspend fun import(jsonString: String) {
         val list = json.decodeFromString<List<FavoriteModel>>(jsonString).toMutableList()
-        realm.updateInfo<FavoriteList> { favoriteList ->
-            list.removeIf { m -> favoriteList?.favorites?.any { it.id == m.id } ?: false }
-            favoriteList?.favorites?.addAll(
-                list.map { fm ->
-                    Favorite().apply {
-                        this.id = fm.id
-                        this.name = fm.name
-                        this.imageUrl = fm.imageUrl
+        realm.write {
+            val favoriteList = query<Favorite>().find()
+            list.removeIf { m -> favoriteList.any { it.id == m.id } }
+            list.map { fm ->
+                Favorite().apply {
+                    this.id = fm.id
+                    this.name = fm.name
+                    this.imageUrl = fm.imageUrl
 
-                        when (fm.modelType) {
-                            "Model" -> {
-                                val m = (fm as FavoriteModel.Model)
-                                description = m.description
-                                type = m.type
-                                this.nsfw = m.nsfw
-                                this.favoriteType = m.modelType
-                            }
+                    when (fm.modelType) {
+                        "Model" -> {
+                            val m = (fm as FavoriteModel.Model)
+                            description = m.description
+                            type = m.type
+                            this.nsfw = m.nsfw
+                            this.favoriteType = m.modelType
+                        }
 
-                            "Image" -> {
-                                val m = (fm as FavoriteModel.Image)
-                                nsfw = m.nsfw
-                                imageMeta = m.imageMetaDb
-                                this.favoriteType = m.modelType
-                            }
+                        "Image" -> {
+                            val m = (fm as FavoriteModel.Image)
+                            nsfw = m.nsfw
+                            imageMeta = m.imageMetaDb
+                            this.favoriteType = m.modelType
+                        }
 
-                            "Creator" -> {
-                                val m = (fm as FavoriteModel.Creator)
+                        "Creator" -> {
+                            val m = (fm as FavoriteModel.Creator)
 
-                            }
+                        }
 
-                            else -> {
+                        else -> {
 
-                            }
                         }
                     }
                 }
-            )
+            }.forEach { copyToRealm(it) }
         }
     }
 }

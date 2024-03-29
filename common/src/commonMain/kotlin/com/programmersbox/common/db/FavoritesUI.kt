@@ -194,10 +194,10 @@ fun FavoritesUI() {
                 viewModel.viewingList,
                 key = {
                     when (it) {
-                        is FavoriteModel.Creator -> it.name
-                        is FavoriteModel.Image -> it.imageUrl
-                        is FavoriteModel.Model -> it.id
-                    } as Any
+                        is FavoriteModel.Creator -> it.name + "Creator"
+                        is FavoriteModel.Image -> it.id.toString() + it.imageUrl + "Image"
+                        is FavoriteModel.Model -> it.id.toString() + "Model"
+                    }
                 }
             ) { model ->
                 when (model) {
@@ -223,12 +223,7 @@ fun FavoritesUI() {
                                         },
                                         onRemoveFavorite = {
                                             scope.launch {
-                                                database.removeFrom {
-                                                    removeIf { f ->
-                                                        f.imageUrl == sheetModel.imageUrl &&
-                                                                f.favoriteType == FavoriteType.Image.name
-                                                    }
-                                                }
+                                                database.removeImage(sheetModel.imageUrl.orEmpty())
                                             }
                                         }
                                     )

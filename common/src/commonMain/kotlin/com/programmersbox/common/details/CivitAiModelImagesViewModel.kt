@@ -70,9 +70,7 @@ class CivitAiModelImagesViewModel(
 
     fun removeImageFromFavorites(modelImage: CustomModelImage) {
         viewModelScope.launch {
-            database.removeFrom {
-                removeIf { f -> f.imageUrl == modelImage.url && f.favoriteType == FavoriteType.Image.name }
-            }
+            database.removeImage(modelImage.url)
         }
     }
 }

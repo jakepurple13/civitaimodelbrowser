@@ -12,6 +12,7 @@ import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.layout.ContentScale
 import io.kamel.image.KamelImage
 import io.kamel.image.asyncPainterResource
+import org.jetbrains.compose.resources.DrawableResource
 import org.jetbrains.compose.resources.ExperimentalResourceApi
 import org.jetbrains.compose.resources.painterResource
 
@@ -30,7 +31,7 @@ fun LoadingImage(
         },
         onFailure = {
             Image(
-                painter = painterResource("civitai_logo.png"),
+                painter = painterResource(DrawableResource("civitai_logo.png")),
                 contentDescription = null,
                 colorFilter = if (isNsfw)
                     ColorFilter.tint(MaterialTheme.colorScheme.error, blendMode = BlendMode.Hue)

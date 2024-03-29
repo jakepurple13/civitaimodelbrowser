@@ -1,6 +1,5 @@
 package com.programmersbox.common
 
-import kotlinx.datetime.Instant
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import org.jsoup.Jsoup
@@ -19,7 +18,6 @@ data class Models(
     val type: ModelType = ModelType.Other,
     val nsfw: Boolean,
     val allowNoCredit: Boolean,
-    val allowCommercialUse: String,
     val allowDerivatives: Boolean,
     val allowDifferentLicense: Boolean,
     val tags: List<String>,
@@ -52,13 +50,12 @@ data class ModelVersion(
     val id: Long,
     val modelId: Long,
     val name: String,
-    val createdAt: Instant,
-    val updatedAt: Instant,
-    val trainedWords: List<String>,
+    //val createdAt: Instant? = null,
+    //val updatedAt: Instant,
+    //val trainedWords: List<String>,
     val baseModel: String,
-    val baseModelType: String?,
-    val earlyAccessTimeFrame: Long,
-    val description: String?,
+    //val baseModelType: String?,
+    val description: String? = null,
     val images: List<ModelImage>,
     val downloadUrl: String? = null,
 ) {

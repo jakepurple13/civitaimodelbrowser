@@ -30,6 +30,7 @@ class Network {
         }
         defaultRequest {
             url(URL)
+            bearerAuth("") //Token goes here!
         }
     }
 

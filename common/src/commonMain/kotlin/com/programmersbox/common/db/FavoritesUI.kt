@@ -4,17 +4,14 @@ package com.programmersbox.common.db
 
 import androidx.compose.animation.*
 import androidx.compose.animation.core.animateFloatAsState
-import androidx.compose.foundation.ExperimentalFoundationApi
-import androidx.compose.foundation.combinedClickable
+import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.selection.SelectionContainer
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
@@ -355,9 +352,9 @@ private fun SheetContent(
                             disabledContainerColor = MaterialTheme.colorScheme.surface
                         ),
                         enabled = false,
-                        border = AssistChipDefaults.assistChipBorder(
-                            disabledBorderColor = MaterialTheme.colorScheme.error,
-                            borderWidth = 1.dp
+                        border = BorderStroke(
+                            1.dp,
+                            MaterialTheme.colorScheme.error,
                         ),
                     )
                 }

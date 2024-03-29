@@ -200,9 +200,9 @@ fun CivitAiDetailScreen(
                                             disabledLabelColor = MaterialTheme.colorScheme.error,
                                             disabledContainerColor = MaterialTheme.colorScheme.surface
                                         ),
-                                        border = AssistChipDefaults.assistChipBorder(
-                                            disabledBorderColor = MaterialTheme.colorScheme.error,
-                                            borderWidth = 1.dp
+                                        border = BorderStroke(
+                                            1.dp,
+                                            MaterialTheme.colorScheme.error,
                                         ),
                                         enabled = false,
                                     )
@@ -230,14 +230,10 @@ fun CivitAiDetailScreen(
                                     title = { Text("Version: ${version.name}") },
                                     navigationIcon = {
                                         version.downloadUrl?.let { downloadUrl ->
-                                            RichTooltipBox(
-                                                text = { Text("Copy Download Url") },
-                                            ) {
-                                                val clipboard = LocalClipboardManager.current
-                                                IconButton(
-                                                    onClick = { clipboard.setText(AnnotatedString(downloadUrl)) }
-                                                ) { Icon(Icons.Default.ContentCopy, null) }
-                                            }
+                                            val clipboard = LocalClipboardManager.current
+                                            IconButton(
+                                                onClick = { clipboard.setText(AnnotatedString(downloadUrl)) }
+                                            ) { Icon(Icons.Default.ContentCopy, null) }
                                         }
                                     },
                                     actions = {
@@ -252,7 +248,7 @@ fun CivitAiDetailScreen(
                                 AnimatedVisibility(showMoreInfo) {
                                     ListItem(
                                         headlineContent = {
-                                            Text("Last Update at: " + simpleDateTimeFormatter.format(version.updatedAt.toEpochMilliseconds()))
+                                            //Text("Last Update at: " + simpleDateTimeFormatter.format(version.createdAt.toEpochMilliseconds()))
                                         },
                                         supportingContent = version.parsedDescription()?.let { { Text(it) } }
                                     )
@@ -468,9 +464,9 @@ private fun SheetContent(
                             disabledContainerColor = MaterialTheme.colorScheme.surface
                         ),
                         enabled = false,
-                        border = AssistChipDefaults.assistChipBorder(
-                            disabledBorderColor = MaterialTheme.colorScheme.error,
-                            borderWidth = 1.dp
+                        border = BorderStroke(
+                            1.dp,
+                            MaterialTheme.colorScheme.error,
                         ),
                     )
 
@@ -482,9 +478,9 @@ private fun SheetContent(
                             disabledContainerColor = MaterialTheme.colorScheme.surface
                         ),
                         enabled = false,
-                        border = AssistChipDefaults.assistChipBorder(
-                            disabledBorderColor = MaterialTheme.colorScheme.error,
-                            borderWidth = 1.dp
+                        border = BorderStroke(
+                            1.dp,
+                            MaterialTheme.colorScheme.error,
                         ),
                     )
                 }

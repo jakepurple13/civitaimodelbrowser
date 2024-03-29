@@ -297,9 +297,9 @@ private fun SheetContent(
                             disabledContainerColor = MaterialTheme.colorScheme.surface
                         ),
                         enabled = false,
-                        border = AssistChipDefaults.assistChipBorder(
-                            disabledBorderColor = MaterialTheme.colorScheme.error,
-                            borderWidth = 1.dp
+                        border = BorderStroke(
+                            1.dp,
+                            MaterialTheme.colorScheme.error,
                         ),
                     )
 
@@ -311,9 +311,9 @@ private fun SheetContent(
                             disabledContainerColor = MaterialTheme.colorScheme.surface
                         ),
                         enabled = false,
-                        border = AssistChipDefaults.assistChipBorder(
-                            disabledBorderColor = MaterialTheme.colorScheme.error,
-                            borderWidth = 1.dp
+                        border = BorderStroke(
+                            1.dp,
+                            MaterialTheme.colorScheme.error,
                         ),
                     )
                 }

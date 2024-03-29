@@ -23,7 +23,10 @@ fun main() = application {
 
 fun main1(): Unit = runBlocking {
     val n = Network()
-    n.getModels(1)
+    /*n.getModels(1)
+        .onSuccess { println(it) }
+        .onFailure { it.printStackTrace() }*/
+    n.fetchModel("369730")
         .onSuccess { println(it) }
         .onFailure { it.printStackTrace() }
 }

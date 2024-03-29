@@ -24,6 +24,7 @@ import androidx.compose.ui.unit.dp
 import com.programmersbox.common.components.icons.Github
 import kotlinx.coroutines.launch
 import moe.tlaster.precompose.flow.collectAsStateWithLifecycle
+import org.jetbrains.compose.resources.DrawableResource
 import org.jetbrains.compose.resources.ExperimentalResourceApi
 import org.jetbrains.compose.resources.painterResource
 import kotlin.math.roundToInt
@@ -128,7 +129,7 @@ fun SettingsScreen() {
                     headlineContent = { Text("Open CivitAi") },
                     leadingContent = {
                         Image(
-                            painter = painterResource("civitai_logo.png"),
+                            painter = painterResource(DrawableResource("civitai_logo.png")),
                             contentDescription = null,
                             modifier = Modifier
                                 .size(48.dp)

@@ -1,4 +1,5 @@
 import com.codingfeline.buildkonfig.compiler.FieldSpec.Type.STRING
+import org.jetbrains.compose.internal.utils.localPropertiesFile
 import java.io.FileInputStream
 import java.io.InputStreamReader
 import java.util.*
@@ -101,20 +102,20 @@ android {
 buildkonfig {
     packageName = "com.programmersbox.common"
     defaultConfigs {
-        val api_key: String? = getLocalProperty("api_key") as? String
+        val apiKey: String? = getLocalProperty("api_key") as? String
 
         buildConfigField(
             type = STRING,
             name = "API_KEY",
-            value = api_key ?: "",
+            value = apiKey ?: "",
             const = true
         )
     }
 }
 
-fun Project.getLocalProperty(key: String, file: String = "local.properties"): Any {
+fun Project.getLocalProperty(key: String): Any? {
     val properties = Properties()
-    val localProperties = File(file)
+    val localProperties = localPropertiesFile
     if (localProperties.isFile) {
         InputStreamReader(FileInputStream(localProperties), Charsets.UTF_8).use { reader ->
             properties.load(reader)

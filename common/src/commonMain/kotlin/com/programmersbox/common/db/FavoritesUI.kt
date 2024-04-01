@@ -46,9 +46,10 @@ fun FavoritesUI() {
     val scope = rememberCoroutineScope()
     val showNsfw by remember { dataStore.showNsfw.flow }.collectAsStateWithLifecycle(false)
     val blurStrength by remember { dataStore.hideNsfwStrength.flow }.collectAsStateWithLifecycle(6f)
+    val reverseFavorites by remember { dataStore.reverseFavorites.flow }.collectAsStateWithLifecycle(false)
     val database = LocalDatabase.current
     val lazyGridState = rememberLazyGridState()
-    val viewModel = viewModel { FavoritesViewModel(database) }
+    val viewModel = viewModel { FavoritesViewModel(database, dataStore) }
 
     var showSortedByDialog by remember { mutableStateOf(false) }
 
@@ -107,6 +108,10 @@ fun FavoritesUI() {
                             verticalAlignment = Alignment.CenterVertically
                         ) {
                             Text("(${viewModel.favoritesList.size})")
+                            FilledIconToggleButton(
+                                checked = reverseFavorites,
+                                onCheckedChange = { scope.launch { dataStore.reverseFavorites.update(it) } }
+                            ) { Icon(Icons.Default.Image, null) }
                             IconButton(
                                 onClick = { showSortedByDialog = true }
                             ) { Icon(Icons.Default.Sort, null) }
@@ -205,7 +210,8 @@ fun FavoritesUI() {
                     is FavoriteModel.Creator -> {
                         CreatorItem(
                             models = model,
-                            onClick = { navController.navigateToUser(model.name) }
+                            onClick = { navController.navigateToUser(model.name) },
+                            modifier = Modifier.animateItemPlacement()
                         )
                     }
 

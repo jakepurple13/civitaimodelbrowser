@@ -30,7 +30,7 @@ class Network {
         }
         defaultRequest {
             url(URL)
-            bearerAuth("") //Token goes here!
+            bearerAuth(BuildKonfig.API_KEY) //Token goes here!
         }
     }
 

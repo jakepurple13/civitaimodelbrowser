@@ -7,6 +7,7 @@ import io.realm.kotlin.MutableRealm
 import io.realm.kotlin.Realm
 import io.realm.kotlin.RealmConfiguration
 import io.realm.kotlin.ext.query
+import io.realm.kotlin.query.Sort
 import io.realm.kotlin.types.RealmObject
 import kotlinx.coroutines.flow.mapNotNull
 import kotlinx.serialization.json.Json
@@ -30,7 +31,7 @@ class FavoritesDatabase(
                     ImageMetaDb::class
                 )
             )
-                .schemaVersion(4)
+                .schemaVersion(5)
                 .name(name)
                 .migration({ })
                 //.deleteRealmIfMigrationNeeded()
@@ -38,7 +39,10 @@ class FavoritesDatabase(
         )
     }
 
-    fun getFavorites() = realm.query(Favorite::class)
+    fun getFavorites(
+        sortedBy: Sort = Sort.DESCENDING,
+    ) = realm.query(Favorite::class)
+        .sort("dateAdded", sortedBy)
         .find()
         .asFlow()
         .mapNotNull { it.list }

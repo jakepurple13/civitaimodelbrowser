@@ -1,9 +1,15 @@
+import com.codingfeline.buildkonfig.compiler.FieldSpec.Type.STRING
+import java.io.FileInputStream
+import java.io.InputStreamReader
+import java.util.*
+
 plugins {
     kotlin("multiplatform")
     id("org.jetbrains.compose")
     id("com.android.library")
     id("org.jetbrains.kotlin.plugin.serialization") version libs.versions.kotlin.version.get()
     id("io.realm.kotlin") version libs.versions.realm.get()
+    id("com.codingfeline.buildkonfig")
 }
 
 group = "com.programmersbox"
@@ -90,4 +96,30 @@ android {
         sourceCompatibility = JavaVersion.VERSION_1_8
         targetCompatibility = JavaVersion.VERSION_1_8
     }
+}
+
+buildkonfig {
+    packageName = "com.programmersbox.common"
+    defaultConfigs {
+        val api_key: String? = getLocalProperty("api_key") as? String
+
+        buildConfigField(
+            type = STRING,
+            name = "API_KEY",
+            value = api_key ?: "",
+            const = true
+        )
+    }
+}
+
+fun Project.getLocalProperty(key: String, file: String = "local.properties"): Any {
+    val properties = Properties()
+    val localProperties = File(file)
+    if (localProperties.isFile) {
+        InputStreamReader(FileInputStream(localProperties), Charsets.UTF_8).use { reader ->
+            properties.load(reader)
+        }
+    } else error("File from not found")
+
+    return properties.getProperty(key)
 }

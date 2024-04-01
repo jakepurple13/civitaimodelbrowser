@@ -17,4 +17,5 @@ plugins {
     alias(libs.plugins.android.library) apply false
     alias(libs.plugins.kotlin.android) apply false
     id("org.jetbrains.compose") version libs.versions.compose.version.get() apply false
+    id("com.codingfeline.buildkonfig") version "0.15.1" apply false
 }

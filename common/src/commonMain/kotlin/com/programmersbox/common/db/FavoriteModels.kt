@@ -3,6 +3,7 @@ package com.programmersbox.common.db
 import io.realm.kotlin.ext.realmListOf
 import io.realm.kotlin.types.RealmObject
 import io.realm.kotlin.types.annotations.PrimaryKey
+import kotlinx.datetime.Clock
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
@@ -21,6 +22,7 @@ class Favorite : RealmObject {
     var favoriteType: String = FavoriteType.Model.name
     var imageMeta: ImageMetaDb? = null
     var modelId: Long = id
+    var dateAdded: Long = Clock.System.now().toEpochMilliseconds()
 }
 
 @Serializable

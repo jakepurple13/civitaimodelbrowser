@@ -43,6 +43,12 @@ class DataStore private constructor(
         defaultValue = true
     )
 
+    val reverseFavorites = DataStoreTypeNonNull(
+        key = booleanPreferencesKey("reverse_favorites"),
+        dataStore = dataStore,
+        defaultValue = false
+    )
+
     open class DataStoreType<T>(
         protected val key: Preferences.Key<T>,
         protected val dataStore: DataStore<Preferences>,

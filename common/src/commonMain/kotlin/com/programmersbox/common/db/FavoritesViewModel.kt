@@ -1,13 +1,18 @@
 package com.programmersbox.common.db
 
 import androidx.compose.runtime.*
+import com.programmersbox.common.DataStore
+import io.realm.kotlin.query.Sort
+import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
 import moe.tlaster.precompose.viewmodel.ViewModel
 import moe.tlaster.precompose.viewmodel.viewModelScope
 
 class FavoritesViewModel(
     database: FavoritesDatabase,
+    dataStore: DataStore,
 ) : ViewModel() {
     var search by mutableStateOf("")
     val filterList = mutableStateListOf<String>()
@@ -41,7 +46,9 @@ class FavoritesViewModel(
     }
 
     init {
-        database.getFavorites()
+        dataStore.reverseFavorites.flow
+            .map { if (it) Sort.DESCENDING else Sort.ASCENDING }
+            .flatMapLatest { database.getFavorites(it) }
             .onEach {
                 favoritesList.clear()
                 favoritesList.addAll(it)

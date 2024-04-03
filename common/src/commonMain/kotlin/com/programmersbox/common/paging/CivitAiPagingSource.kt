@@ -13,6 +13,7 @@ abstract class CivitAiPagingSource(
     override val keyReuseSupported: Boolean get() = true
 
     override fun getRefreshKey(state: PagingState<String, Models>): String? {
+        return null
         return state.anchorPosition
             ?.let { state.closestPageToPosition(it) }
             ?.let { it.prevKey ?: it.nextKey }

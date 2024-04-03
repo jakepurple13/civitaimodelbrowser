@@ -1,15 +1,10 @@
 package com.programmersbox.common.db
 
-import io.realm.kotlin.ext.realmListOf
 import io.realm.kotlin.types.RealmObject
 import io.realm.kotlin.types.annotations.PrimaryKey
 import kotlinx.datetime.Clock
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
-
-class FavoriteList : RealmObject {
-    var favorites = realmListOf<Favorite>()
-}
 
 class Favorite : RealmObject {
     @PrimaryKey
@@ -50,6 +45,7 @@ sealed interface FavoriteModel {
     val name: String
     val imageUrl: String?
     val modelType: String?
+    val dateAdded: Long
 
     @Serializable
     data class Model(
@@ -61,6 +57,7 @@ sealed interface FavoriteModel {
         val type: String,
         val nsfw: Boolean,
         override val modelType: String = "Model",
+        override val dateAdded: Long = Clock.System.now().toEpochMilliseconds(),
     ) : FavoriteModel
 
     @Serializable
@@ -72,6 +69,7 @@ sealed interface FavoriteModel {
         val nsfw: Boolean,
         val modelId: Long,
         override val modelType: String = "Image",
+        override val dateAdded: Long = Clock.System.now().toEpochMilliseconds(),
     ) : FavoriteModel
 
     @Serializable
@@ -80,5 +78,6 @@ sealed interface FavoriteModel {
         override val name: String,
         override val imageUrl: String?,
         override val modelType: String = "Creator",
+        override val dateAdded: Long = Clock.System.now().toEpochMilliseconds(),
     ) : FavoriteModel
 }

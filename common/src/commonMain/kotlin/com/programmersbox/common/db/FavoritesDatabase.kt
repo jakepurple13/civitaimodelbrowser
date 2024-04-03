@@ -3,12 +3,12 @@ package com.programmersbox.common.db
 import com.programmersbox.common.Creator
 import com.programmersbox.common.ImageMeta
 import com.programmersbox.common.ModelType
-import io.realm.kotlin.MutableRealm
 import io.realm.kotlin.Realm
 import io.realm.kotlin.RealmConfiguration
 import io.realm.kotlin.ext.query
+import io.realm.kotlin.query.RealmResults
 import io.realm.kotlin.query.Sort
-import io.realm.kotlin.types.RealmObject
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.mapNotNull
 import kotlinx.serialization.json.Json
 
@@ -26,12 +26,11 @@ class FavoritesDatabase(
         Realm.open(
             RealmConfiguration.Builder(
                 setOf(
-                    FavoriteList::class,
                     Favorite::class,
                     ImageMetaDb::class
                 )
             )
-                .schemaVersion(5)
+                .schemaVersion(6)
                 .name(name)
                 .migration({ })
                 //.deleteRealmIfMigrationNeeded()
@@ -46,83 +45,7 @@ class FavoritesDatabase(
         .find()
         .asFlow()
         .mapNotNull { it.list }
-        .mapNotNull {
-            it.map { favorite ->
-                val type = runCatching { FavoriteType.valueOf(favorite.favoriteType) }
-                    .getOrDefault(FavoriteType.Model)
-                when (type) {
-                    FavoriteType.Model -> {
-                        FavoriteModel.Model(
-                            id = favorite.id,
-                            name = favorite.name,
-                            imageUrl = favorite.imageUrl,
-                            description = favorite.description,
-                            type = favorite.type,
-                            nsfw = favorite.nsfw,
-                            modelType = type.name,
-                        )
-                    }
-
-                    FavoriteType.Image -> {
-                        FavoriteModel.Image(
-                            id = favorite.id,
-                            name = favorite.name,
-                            imageUrl = favorite.imageUrl,
-                            nsfw = favorite.nsfw,
-                            imageMetaDb = favorite.imageMeta,
-                            modelId = favorite.modelId,
-                            modelType = type.name,
-                        )
-                    }
-
-                    FavoriteType.Creator -> {
-                        FavoriteModel.Creator(
-                            id = favorite.id,
-                            name = favorite.name,
-                            imageUrl = favorite.imageUrl,
-                            modelType = type.name,
-                        )
-                    }
-                }
-                /*Models(
-                    id = favorite.id,
-                    name = favorite.name,
-                    description = favorite.description,
-                    type = ModelType.valueOf(favorite.type),
-                    nsfw = favorite.nsfw,
-                    allowNoCredit = false,
-                    allowCommercialUse = "",
-                    allowDerivatives = false,
-                    allowDifferentLicense = false,
-                    tags = emptyList(),
-                    modelVersions = listOf(
-                        ModelVersion(
-                            id = 0,
-                            modelId = 0,
-                            name = "",
-                            createdAt = Clock.System.now(),
-                            updatedAt = Clock.System.now(),
-                            trainedWords = emptyList(),
-                            baseModel = "",
-                            baseModelType = null,
-                            earlyAccessTimeFrame = 0,
-                            description = null,
-                            images = listOf(
-                                ModelImage(
-                                    id = null,
-                                    url = favorite.imageUrl.orEmpty(),
-                                    nsfw = NsfwLevel.None,
-                                    width = 0,
-                                    height = 0,
-                                    meta = null
-                                )
-                            ),
-                            downloadUrl = ""
-                        )
-                    )
-                )*/
-            }
-        }
+        .mapToFavoriteModels()
 
     suspend fun addFavorite(
         id: Long,
@@ -190,29 +113,23 @@ class FavoritesDatabase(
                     this.id = fm.id
                     this.name = fm.name
                     this.imageUrl = fm.imageUrl
+                    this.dateAdded = fm.dateAdded
 
-                    when (fm.modelType) {
-                        "Model" -> {
-                            val m = (fm as FavoriteModel.Model)
-                            description = m.description
-                            type = m.type
-                            this.nsfw = m.nsfw
-                            this.favoriteType = m.modelType
+                    when (fm) {
+                        is FavoriteModel.Model -> {
+                            description = fm.description
+                            type = fm.type
+                            this.nsfw = fm.nsfw
+                            this.favoriteType = fm.modelType
                         }
 
-                        "Image" -> {
-                            val m = (fm as FavoriteModel.Image)
-                            nsfw = m.nsfw
-                            imageMeta = m.imageMetaDb
-                            this.favoriteType = m.modelType
+                        is FavoriteModel.Image -> {
+                            nsfw = fm.nsfw
+                            imageMeta = fm.imageMetaDb
+                            this.favoriteType = fm.modelType
                         }
 
-                        "Creator" -> {
-                            val m = (fm as FavoriteModel.Creator)
-
-                        }
-
-                        else -> {
+                        is FavoriteModel.Creator -> {
 
                         }
                     }
@@ -222,15 +139,82 @@ class FavoritesDatabase(
     }
 }
 
-private suspend inline fun <reified T : RealmObject> Realm.updateInfo(crossinline block: MutableRealm.(T?) -> Unit) {
-    query(T::class).first().find()?.also { info ->
-        write { block(findLatest(info)) }
-    }
-}
+private fun Flow<RealmResults<Favorite>>.mapToFavoriteModels() = mapNotNull {
+    it.map { favorite ->
+        val type = runCatching { FavoriteType.valueOf(favorite.favoriteType) }
+            .getOrDefault(FavoriteType.Model)
+        when (type) {
+            FavoriteType.Model -> {
+                FavoriteModel.Model(
+                    id = favorite.id,
+                    name = favorite.name,
+                    imageUrl = favorite.imageUrl,
+                    description = favorite.description,
+                    type = favorite.type,
+                    nsfw = favorite.nsfw,
+                    modelType = type.name,
+                )
+            }
 
-private inline fun <reified T : RealmObject> Realm.initDbBlocking(crossinline default: () -> T): T {
-    val f = query(T::class).first().find()
-    return f ?: writeBlocking { copyToRealm(default()) }
+            FavoriteType.Image -> {
+                FavoriteModel.Image(
+                    id = favorite.id,
+                    name = favorite.name,
+                    imageUrl = favorite.imageUrl,
+                    nsfw = favorite.nsfw,
+                    imageMetaDb = favorite.imageMeta,
+                    modelId = favorite.modelId,
+                    modelType = type.name,
+                )
+            }
+
+            FavoriteType.Creator -> {
+                FavoriteModel.Creator(
+                    id = favorite.id,
+                    name = favorite.name,
+                    imageUrl = favorite.imageUrl,
+                    modelType = type.name,
+                )
+            }
+        }
+        /*Models(
+            id = favorite.id,
+            name = favorite.name,
+            description = favorite.description,
+            type = ModelType.valueOf(favorite.type),
+            nsfw = favorite.nsfw,
+            allowNoCredit = false,
+            allowCommercialUse = "",
+            allowDerivatives = false,
+            allowDifferentLicense = false,
+            tags = emptyList(),
+            modelVersions = listOf(
+                ModelVersion(
+                    id = 0,
+                    modelId = 0,
+                    name = "",
+                    createdAt = Clock.System.now(),
+                    updatedAt = Clock.System.now(),
+                    trainedWords = emptyList(),
+                    baseModel = "",
+                    baseModelType = null,
+                    earlyAccessTimeFrame = 0,
+                    description = null,
+                    images = listOf(
+                        ModelImage(
+                            id = null,
+                            url = favorite.imageUrl.orEmpty(),
+                            nsfw = NsfwLevel.None,
+                            width = 0,
+                            height = 0,
+                            meta = null
+                        )
+                    ),
+                    downloadUrl = ""
+                )
+            )
+        )*/
+    }
 }
 
 fun ImageMeta.toDb() = ImageMetaDb().apply {
@@ -269,7 +253,8 @@ fun Favorite.toModel(): FavoriteModel {
                 description = description,
                 type = this.type,
                 nsfw = nsfw,
-                modelType = type.name
+                modelType = type.name,
+                dateAdded = dateAdded
             )
         }
 
@@ -281,7 +266,8 @@ fun Favorite.toModel(): FavoriteModel {
                 nsfw = nsfw,
                 imageMetaDb = imageMeta,
                 modelId = modelId,
-                modelType = type.name
+                modelType = type.name,
+                dateAdded = dateAdded
             )
         }
 
@@ -290,7 +276,8 @@ fun Favorite.toModel(): FavoriteModel {
                 id = id,
                 name = name,
                 imageUrl = imageUrl,
-                modelType = type.name
+                modelType = type.name,
+                dateAdded = dateAdded
             )
         }
     }

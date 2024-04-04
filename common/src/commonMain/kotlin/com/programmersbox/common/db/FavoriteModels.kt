@@ -81,3 +81,10 @@ sealed interface FavoriteModel {
         override val dateAdded: Long = Clock.System.now().toEpochMilliseconds(),
     ) : FavoriteModel
 }
+
+class BlacklistedItem : RealmObject {
+    var id: Long? = null
+    var name: String = ""
+    var nsfw: Boolean = false
+    var imageUrl: String? = null
+}

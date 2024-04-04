@@ -45,6 +45,7 @@ fun CivitAiUserScreen(
     val blurStrength by remember { dataStore.hideNsfwStrength.flow }.collectAsStateWithLifecycle(6f)
     val database = LocalDatabase.current
     val favorites by database.getFavorites().collectAsStateWithLifecycle(emptyList())
+    val blacklisted by database.getBlacklistedItems().collectAsStateWithLifecycle(emptyList())
     val viewModel = viewModel { CivitAiUserViewModel(network, dataStore, database, username) }
     val navController = LocalNavController.current
 
@@ -123,7 +124,8 @@ fun CivitAiUserScreen(
                 navController = navController,
                 showNsfw = showNsfw,
                 blurStrength = blurStrength,
-                database = favorites
+                database = favorites,
+                blacklisted = blacklisted,
             )
         }
     }

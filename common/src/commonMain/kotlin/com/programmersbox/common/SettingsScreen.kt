@@ -111,6 +111,16 @@ fun SettingsScreen(
 
             HorizontalDivider()
 
+            Card(
+                onClick = { navController.navigate(Screen.Blacklisted.routeId) }
+            ) {
+                ListItem(
+                    headlineContent = { Text("View Blacklisted Models") }
+                )
+            }
+
+            HorizontalDivider()
+
             export()
 
             Card(

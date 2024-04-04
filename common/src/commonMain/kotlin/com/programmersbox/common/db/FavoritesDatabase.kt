@@ -27,15 +27,45 @@ class FavoritesDatabase(
             RealmConfiguration.Builder(
                 setOf(
                     Favorite::class,
-                    ImageMetaDb::class
+                    ImageMetaDb::class,
+                    BlacklistedItem::class
                 )
             )
-                .schemaVersion(6)
+                .schemaVersion(8)
                 .name(name)
                 .migration({ })
                 //.deleteRealmIfMigrationNeeded()
                 .build()
         )
+    }
+
+    fun getBlacklistedItems() = realm.query<BlacklistedItem>()
+        .find()
+        .asFlow()
+        .mapNotNull { it.list }
+
+    suspend fun blacklistItem(
+        id: Long,
+        name: String,
+        nsfw: Boolean,
+        imageUrl: String? = null,
+    ) {
+        realm.write {
+            copyToRealm(
+                BlacklistedItem().apply {
+                    this.id = id
+                    this.name = name
+                    this.nsfw = nsfw
+                    this.imageUrl = imageUrl
+                }
+            )
+        }
+    }
+
+    suspend fun removeBlacklistItem(item: BlacklistedItem) {
+        realm.write {
+            findLatest(item)?.let { delete(it) }
+        }
     }
 
     fun getFavorites(

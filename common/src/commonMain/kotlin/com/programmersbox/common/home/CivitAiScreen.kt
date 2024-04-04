@@ -7,6 +7,7 @@ import androidx.compose.animation.core.tween
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.foundation.lazy.grid.LazyGridScope
@@ -19,6 +20,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.blur
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextAlign
@@ -31,6 +33,7 @@ import com.programmersbox.common.components.LoadingImage
 import com.programmersbox.common.components.PullRefreshIndicator
 import com.programmersbox.common.components.pullRefresh
 import com.programmersbox.common.components.rememberPullRefreshState
+import com.programmersbox.common.db.BlacklistedItem
 import com.programmersbox.common.db.FavoriteModel
 import com.programmersbox.common.paging.LazyPagingItems
 import com.programmersbox.common.paging.collectAsLazyPagingItems
@@ -51,7 +54,9 @@ fun CivitAiScreen(
 ) {
     val hazeState = remember { HazeState() }
     val navController = LocalNavController.current
-    val database by LocalDatabase.current.getFavorites().collectAsStateWithLifecycle(emptyList())
+    val db = LocalDatabase.current
+    val database by db.getFavorites().collectAsStateWithLifecycle(emptyList())
+    val blacklisted by db.getBlacklistedItems().collectAsStateWithLifecycle(emptyList())
     val dataStore = LocalDataStore.current
     val showNsfw by remember { dataStore.showNsfw.flow }.collectAsStateWithLifecycle(false)
     val blurStrength by remember { dataStore.hideNsfwStrength.flow }.collectAsStateWithLifecycle(6f)
@@ -141,7 +146,8 @@ fun CivitAiScreen(
                     navController = navController,
                     showNsfw = showNsfw,
                     blurStrength = blurStrength,
-                    database = database.filterIsInstance<FavoriteModel.Model>()
+                    database = database.filterIsInstance<FavoriteModel.Model>(),
+                    blacklisted = blacklisted,
                 )
             }
 
@@ -167,6 +173,7 @@ fun CivitAiScreen(
         database = database.filterIsInstance<FavoriteModel.Model>(),
         showNsfw = showNsfw,
         blurStrength = blurStrength,
+        blacklisted = blacklisted,
     )
 }
 
@@ -177,6 +184,7 @@ fun LazyGridScope.modelItems(
     showNsfw: Boolean,
     blurStrength: Float,
     database: List<FavoriteModel>,
+    blacklisted: List<BlacklistedItem>,
 ) {
     items(
         count = lazyPagingItems.itemCount,
@@ -184,12 +192,26 @@ fun LazyGridScope.modelItems(
         key = lazyPagingItems.itemKeyIndexed { model, index -> "${model.id}$index" }
     ) {
         lazyPagingItems[it]?.let { models ->
+            val isBlacklisted = blacklisted.any { b -> b.id == models.id }
+            var showDialog by remember { mutableStateOf(false) }
+
+            BlacklistHandling(
+                blacklisted = blacklisted,
+                modelId = models.id,
+                name = models.name,
+                nsfw = models.nsfw,
+                showDialog = showDialog,
+                onDialogDismiss = { showDialog = false }
+            )
+
             ModelItem(
                 models = models,
                 onClick = { navController.navigateToDetail(models.id) },
+                onLongClick = { showDialog = true },
                 showNsfw = showNsfw,
                 blurStrength = blurStrength.dp,
                 isFavorite = database.any { m -> m.id == models.id },
+                isBlacklisted = isBlacklisted,
                 modifier = Modifier.animateItemPlacement()
             )
         }
@@ -238,7 +260,9 @@ private fun ModelItem(
     showNsfw: Boolean,
     blurStrength: Dp,
     onClick: () -> Unit,
+    onLongClick: () -> Unit,
     isFavorite: Boolean,
+    isBlacklisted: Boolean,
     modifier: Modifier = Modifier,
 ) {
     val imageModel = remember {
@@ -255,6 +279,8 @@ private fun ModelItem(
         blurStrength = blurStrength,
         onClick = onClick,
         isFavorite = isFavorite,
+        isBlacklisted = isBlacklisted,
+        onLongClick = onLongClick,
         modifier = modifier.size(
             width = ComposableUtils.IMAGE_WIDTH,
             height = ComposableUtils.IMAGE_HEIGHT
@@ -262,6 +288,7 @@ private fun ModelItem(
     )
 }
 
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun CoverCard(
     imageUrl: String,
@@ -271,21 +298,28 @@ fun CoverCard(
     showNsfw: Boolean,
     blurStrength: Dp,
     isFavorite: Boolean,
+    isBlacklisted: Boolean,
     modifier: Modifier = Modifier,
+    onLongClick: () -> Unit = {},
     onClick: () -> Unit = {},
 ) {
     Surface(
-        onClick = onClick,
         tonalElevation = 4.dp,
         shape = MaterialTheme.shapes.medium,
         border = if (isFavorite) BorderStroke(1.dp, MaterialTheme.colorScheme.primary) else null,
         modifier = modifier
+            .clip(MaterialTheme.shapes.medium)
+            .combinedClickable(
+                onLongClick = onLongClick,
+                onClick = onClick
+            )
     ) {
         CardContent(
             imageUrl = imageUrl,
             name = name,
             type = type.name,
             isNsfw = isNsfw,
+            isBlacklisted = isBlacklisted,
             showNsfw = showNsfw,
             blurStrength = blurStrength
         )
@@ -301,25 +335,34 @@ fun CardContent(
     isNsfw: Boolean,
     showNsfw: Boolean,
     blurStrength: Dp,
+    isBlacklisted: Boolean = false,
 ) {
     Box(
         modifier = Modifier.fillMaxSize(),
         contentAlignment = Alignment.Center
     ) {
-        LoadingImage(
-            imageUrl = imageUrl,
-            isNsfw = isNsfw,
-            name = name,
-            modifier = Modifier
-                .matchParentSize()
-                .let {
-                    if (!showNsfw && isNsfw) {
-                        it.blur(blurStrength)
-                    } else {
-                        it
-                    }
-                },
-        )
+        if (isBlacklisted) {
+            Box(
+                Modifier
+                    .background(Color.Black)
+                    .matchParentSize()
+            )
+        } else {
+            LoadingImage(
+                imageUrl = imageUrl,
+                isNsfw = isNsfw,
+                name = name,
+                modifier = Modifier
+                    .matchParentSize()
+                    .let {
+                        if (!showNsfw && isNsfw) {
+                            it.blur(blurStrength)
+                        } else {
+                            it
+                        }
+                    },
+            )
+        }
 
         Box(
             modifier = Modifier
@@ -389,6 +432,7 @@ fun CardContent(
 fun SearchView(
     viewModel: CivitAiSearchViewModel,
     database: List<FavoriteModel>,
+    blacklisted: List<BlacklistedItem>,
     showNsfw: Boolean,
     blurStrength: Float,
 ) {
@@ -444,10 +488,56 @@ fun SearchView(
                         navController = navController,
                         showNsfw = showNsfw,
                         blurStrength = blurStrength,
-                        database = database
+                        database = database,
+                        blacklisted = blacklisted,
                     )
                 }
             }
         }
+    }
+}
+
+@Composable
+fun BlacklistHandling(
+    blacklisted: List<BlacklistedItem>,
+    modelId: Long,
+    name: String,
+    nsfw: Boolean,
+    imageUrl: String? = null,
+    showDialog: Boolean,
+    onDialogDismiss: () -> Unit,
+) {
+    val db = LocalDatabase.current
+    val scope = rememberCoroutineScope()
+    val isBlacklisted = blacklisted.any { b -> b.id == modelId }
+
+    if (showDialog) {
+        AlertDialog(
+            onDismissRequest = onDialogDismiss,
+            title = { Text(if (isBlacklisted) "Remove from Blacklist?" else "Add to Blacklist?") },
+            text = {
+                Text(if (isBlacklisted) "See the model again!" else "Black out the image.")
+            },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        scope.launch {
+                            if (isBlacklisted) {
+                                blacklisted.find { b -> b.id == modelId }
+                                    ?.let { db.removeBlacklistItem(it) }
+                            } else {
+                                db.blacklistItem(modelId, name, nsfw, imageUrl)
+                            }
+                            onDialogDismiss()
+                        }
+                    }
+                ) { Text("Confirm") }
+            },
+            dismissButton = {
+                TextButton(
+                    onClick = onDialogDismiss
+                ) { Text("Dismiss") }
+            }
+        )
     }
 }

@@ -8,6 +8,7 @@ import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.staticCompositionLocalOf
+import com.programmersbox.common.blacklisted.BlacklistedScreen
 import com.programmersbox.common.creator.CivitAiUserScreen
 import com.programmersbox.common.db.FavoriteModel
 import com.programmersbox.common.db.FavoritesDatabase
@@ -79,6 +80,7 @@ internal fun App(
                     scene(Screen.User.routeId) {
                         CivitAiUserScreen(username = it.path<String>("username").orEmpty())
                     }
+                    scene(Screen.Blacklisted.routeId) { BlacklistedScreen() }
                 }
             }
         }
@@ -119,5 +121,6 @@ enum class Screen(val routeId: String) {
     Settings("settings"),
     Favorites("favorites"),
     User("user/{username}"),
-    DetailsImage("detailsimage/{modelId}")
+    DetailsImage("detailsimage/{modelId}"),
+    Blacklisted("blacklisted"),
 }

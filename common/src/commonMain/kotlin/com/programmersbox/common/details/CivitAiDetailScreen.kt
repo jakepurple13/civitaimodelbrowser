@@ -32,6 +32,7 @@ import androidx.compose.ui.window.DialogProperties
 import com.programmersbox.common.*
 import com.programmersbox.common.components.LoadingImage
 import com.programmersbox.common.db.FavoriteModel
+import com.programmersbox.common.home.BlacklistHandling
 import dev.chrisbanes.haze.HazeState
 import dev.chrisbanes.haze.haze
 import dev.chrisbanes.haze.hazeChild
@@ -59,6 +60,7 @@ fun CivitAiDetailScreen(
     val nsfwBlurStrength by remember { dataStore.hideNsfwStrength.flow }.collectAsStateWithLifecycle(6f)
 
     val favoriteList by database.getFavorites().collectAsStateWithLifecycle(emptyList())
+    val blacklisted by database.getBlacklistedItems().collectAsStateWithLifecycle(emptyList())
 
     when (val model = viewModel.models) {
         is DetailViewState.Content -> {
@@ -264,6 +266,18 @@ fun CivitAiDetailScreen(
                                 enter = fadeIn() + expandVertically(),
                                 exit = fadeOut() + shrinkVertically()
                             ) {
+                                var showDialog by remember { mutableStateOf(false) }
+
+                                BlacklistHandling(
+                                    blacklisted = blacklisted,
+                                    modelId = images.id?.toLongOrNull() ?: 0L,
+                                    name = images.url,
+                                    nsfw = images.nsfw.canNotShow(),
+                                    imageUrl = images.url,
+                                    showDialog = showDialog,
+                                    onDialogDismiss = { showDialog = false }
+                                )
+
                                 ImageCard(
                                     images = images,
                                     showNsfw = showNsfw,
@@ -271,7 +285,9 @@ fun CivitAiDetailScreen(
                                     isFavorite = favoriteList
                                         .filterIsInstance<FavoriteModel.Image>()
                                         .any { f -> f.imageUrl == images.url },
-                                    onClick = { sheetDetails = images }
+                                    isBlacklisted = blacklisted.any { it.imageUrl == images.url },
+                                    onClick = { sheetDetails = images },
+                                    onLongClick = { showDialog = true }
                                 )
                             }
                         }
@@ -312,13 +328,16 @@ fun CivitAiDetailScreen(
     }
 }
 
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 private fun ImageCard(
     images: ModelImage,
     showNsfw: Boolean,
     isFavorite: Boolean,
+    isBlacklisted: Boolean,
     nsfwBlurStrength: Float,
     onClick: () -> Unit,
+    onLongClick: () -> Unit,
 ) {
     Surface(
         tonalElevation = 4.dp,
@@ -328,28 +347,41 @@ private fun ImageCard(
             images.nsfw.canNotShow() -> BorderStroke(1.dp, MaterialTheme.colorScheme.error)
             else -> null
         },
-        onClick = onClick,
-        modifier = Modifier.size(
-            width = ComposableUtils.IMAGE_WIDTH,
-            height = ComposableUtils.IMAGE_HEIGHT
-        )
+        modifier = Modifier
+            .size(
+                width = ComposableUtils.IMAGE_WIDTH,
+                height = ComposableUtils.IMAGE_HEIGHT
+            )
+            .clip(MaterialTheme.shapes.medium)
+            .combinedClickable(
+                onClick = onClick,
+                onLongClick = onLongClick
+            )
     ) {
         Box(
             modifier = Modifier.fillMaxSize(),
             contentAlignment = Alignment.Center
         ) {
-            LoadingImage(
-                imageUrl = images.url,
-                name = images.url,
-                isNsfw = images.nsfw.canNotShow(),
-                modifier = Modifier.let {
-                    if (!showNsfw && images.nsfw.canNotShow()) {
-                        it.blur(nsfwBlurStrength.dp)
-                    } else {
-                        it
+            if (isBlacklisted) {
+                Box(
+                    Modifier
+                        .background(Color.Black)
+                        .matchParentSize()
+                )
+            } else {
+                LoadingImage(
+                    imageUrl = images.url,
+                    name = images.url,
+                    isNsfw = images.nsfw.canNotShow(),
+                    modifier = Modifier.let {
+                        if (!showNsfw && images.nsfw.canNotShow()) {
+                            it.blur(nsfwBlurStrength.dp)
+                        } else {
+                            it
+                        }
                     }
-                }
-            )
+                )
+            }
 
             if (images.nsfw.canNotShow()) {
                 ElevatedAssistChip(

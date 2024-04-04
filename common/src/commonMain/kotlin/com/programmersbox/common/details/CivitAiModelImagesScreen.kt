@@ -16,10 +16,7 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.BlurredEdgeTreatment
-import androidx.compose.ui.draw.alpha
-import androidx.compose.ui.draw.blur
-import androidx.compose.ui.draw.scale
+import androidx.compose.ui.draw.*
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.ColorMatrix
@@ -30,6 +27,7 @@ import androidx.compose.ui.window.DialogProperties
 import com.programmersbox.common.*
 import com.programmersbox.common.components.LoadingImage
 import com.programmersbox.common.db.FavoriteModel
+import com.programmersbox.common.home.BlacklistHandling
 import com.programmersbox.common.paging.collectAsLazyPagingItems
 import com.programmersbox.common.paging.itemContentType
 import com.programmersbox.common.paging.itemKey
@@ -66,6 +64,7 @@ fun CivitAiModelImagesScreen(
     val navController = LocalNavController.current
 
     val favoriteList by database.getFavorites().collectAsStateWithLifecycle(emptyList())
+    val blacklisted by database.getBlacklistedItems().collectAsStateWithLifecycle(emptyList())
 
     var sheetDetails by remember { mutableStateOf<CustomModelImage?>(null) }
 
@@ -123,6 +122,19 @@ fun CivitAiModelImagesScreen(
                 key = lazyPagingItems.itemKey { it.url }
             ) {
                 lazyPagingItems[it]?.let { models ->
+
+                    var showDialog by remember { mutableStateOf(false) }
+
+                    BlacklistHandling(
+                        blacklisted = blacklisted,
+                        modelId = models.postId ?: 0L,
+                        name = models.url,
+                        nsfw = models.nsfwLevel.canNotShow(),
+                        imageUrl = models.url,
+                        showDialog = showDialog,
+                        onDialogDismiss = { showDialog = false }
+                    )
+
                     ImageCard(
                         images = models,
                         showNsfw = showNsfw,
@@ -130,13 +142,15 @@ fun CivitAiModelImagesScreen(
                         isFavorite = favoriteList
                             .filterIsInstance<FavoriteModel.Image>()
                             .any { f -> f.imageUrl == models.url },
+                        isBlacklisted = blacklisted.any { it.imageUrl == models.url },
                         onClick = {
                             if (models.height < 2000 || models.width < 2000) {
                                 sheetDetails = models
                             } else {
                                 uriHandler.openUri(models.url)
                             }
-                        }
+                        },
+                        onLongClick = { showDialog = true }
                     )
                 }
             }
@@ -144,13 +158,16 @@ fun CivitAiModelImagesScreen(
     }
 }
 
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 private fun ImageCard(
     images: CustomModelImage,
     showNsfw: Boolean,
     isFavorite: Boolean,
+    isBlacklisted: Boolean,
     nsfwBlurStrength: Float,
     onClick: () -> Unit,
+    onLongClick: () -> Unit,
 ) {
     Surface(
         tonalElevation = 4.dp,
@@ -161,29 +178,42 @@ private fun ImageCard(
             images.height > 2000 || images.width > 2000 -> MaterialTheme.colorScheme.secondary
             else -> null
         }?.let { BorderStroke(1.dp, it) },
-        onClick = onClick,
-        modifier = Modifier.size(
-            width = ComposableUtils.IMAGE_WIDTH,
-            height = ComposableUtils.IMAGE_HEIGHT
-        )
+        modifier = Modifier
+            .size(
+                width = ComposableUtils.IMAGE_WIDTH,
+                height = ComposableUtils.IMAGE_HEIGHT
+            )
+            .clip(MaterialTheme.shapes.medium)
+            .combinedClickable(
+                onClick = onClick,
+                onLongClick = onLongClick
+            )
     ) {
         Box(
             modifier = Modifier.fillMaxSize(),
             contentAlignment = Alignment.Center
         ) {
             if (images.height < 2000 || images.width < 2000) {
-                LoadingImage(
-                    imageUrl = images.url,
-                    name = images.url,
-                    isNsfw = images.nsfwLevel.canNotShow(),
-                    modifier = Modifier.let {
-                        if (!showNsfw && images.nsfwLevel.canNotShow()) {
-                            it.blur(nsfwBlurStrength.dp)
-                        } else {
-                            it
+                if (isBlacklisted) {
+                    Box(
+                        Modifier
+                            .background(Color.Black)
+                            .matchParentSize()
+                    )
+                } else {
+                    LoadingImage(
+                        imageUrl = images.url,
+                        name = images.url,
+                        isNsfw = images.nsfwLevel.canNotShow(),
+                        modifier = Modifier.let {
+                            if (!showNsfw && images.nsfwLevel.canNotShow()) {
+                                it.blur(nsfwBlurStrength.dp)
+                            } else {
+                                it
+                            }
                         }
-                    }
-                )
+                    )
+                }
             } else {
                 Text("Too Large")
             }

@@ -2,10 +2,7 @@ package com.programmersbox.common
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
@@ -16,7 +13,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.blur
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalUriHandler
@@ -94,19 +93,36 @@ fun SettingsScreen(
             }
 
             AnimatedVisibility(!isNsfwEnabled && includeNsfwEnabled) {
-                val nsfwBlurStrength by hideNsfwStrength.flow.collectAsStateWithLifecycle(6f)
-                ListItem(
-                    headlineContent = { Text("Strength: ${nsfwBlurStrength.roundToInt()}") },
-                    supportingContent = {
-                        val range = 5f..100f
-                        Slider(
-                            value = nsfwBlurStrength,
-                            onValueChange = { scope.launch { hideNsfwStrength.update(it) } },
-                            steps = (range.endInclusive - range.start).roundToInt(),
-                            valueRange = range
-                        )
-                    }
-                )
+                Column(
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    val nsfwBlurStrength by hideNsfwStrength.flow.collectAsStateWithLifecycle(6f)
+                    ListItem(
+                        overlineContent = { Text("Default is 6") },
+                        headlineContent = { Text("Strength: ${nsfwBlurStrength.roundToInt()}") },
+                        supportingContent = {
+                            val range = 5f..100f
+                            Slider(
+                                value = nsfwBlurStrength,
+                                onValueChange = { scope.launch { hideNsfwStrength.update(it) } },
+                                steps = (range.endInclusive - range.start).roundToInt(),
+                                valueRange = range
+                            )
+                        }
+                    )
+
+                    Image(
+                        painter = painterResource(DrawableResource("civitai_logo.png")),
+                        contentDescription = null,
+                        modifier = Modifier
+                            .align(Alignment.CenterHorizontally)
+                            .size(
+                                ComposableUtils.IMAGE_WIDTH,
+                                ComposableUtils.IMAGE_HEIGHT
+                            )
+                            .blur(nsfwBlurStrength.dp)
+                    )
+                }
             }
 
             HorizontalDivider()

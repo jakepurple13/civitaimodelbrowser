@@ -24,6 +24,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavHostController
 import androidx.paging.CombinedLoadStates
 import androidx.paging.LoadState
 import com.programmersbox.common.*
@@ -41,8 +43,6 @@ import dev.chrisbanes.haze.haze
 import dev.chrisbanes.haze.hazeChild
 import kotlinx.coroutines.launch
 import moe.tlaster.precompose.flow.collectAsStateWithLifecycle
-import moe.tlaster.precompose.navigation.Navigator
-import moe.tlaster.precompose.viewmodel.viewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -173,7 +173,7 @@ fun CivitAiScreen(
 @OptIn(ExperimentalFoundationApi::class)
 fun LazyGridScope.modelItems(
     lazyPagingItems: LazyPagingItems<Models>,
-    navController: Navigator,
+    navController: NavHostController,
     showNsfw: Boolean,
     blurStrength: Float,
     database: List<FavoriteModel>,

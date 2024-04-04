@@ -16,6 +16,8 @@ kotlinx-coroutines-core = "1.8.0"
 precompose = "1.5.7"
 sonner = "0.3.5"
 
+compose-multiplatform = "0.0.0-nav-dev1535"
+
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp.version" }
 android-library = { id = "com.android.library", version.ref = "agp.version" }
@@ -45,3 +47,6 @@ kotlinx-coroutines-core = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-c
 precompose-viewmodel = { module = "moe.tlaster:precompose-viewmodel", version.ref = "precompose" }
 precompose = { module = "moe.tlaster:precompose", version.ref = "precompose" }
 sonner = { module = "io.github.dokar3:sonner", version.ref = "sonner" }
+
+internal-lifecycle-viewmodel-compose = { module = "org.jetbrains.compose.lifecycle-internal:lifecycle-viewmodel-compose", version.ref = "compose-multiplatform" }
+internal-navigation-compose = { module = "org.jetbrains.compose.navigation-internal:navigation-compose", version.ref = "compose-multiplatform" }

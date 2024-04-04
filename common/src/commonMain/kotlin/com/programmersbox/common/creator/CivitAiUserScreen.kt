@@ -23,6 +23,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.createSavedStateHandle
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.programmersbox.common.*
 import com.programmersbox.common.components.LoadingImage
 import com.programmersbox.common.home.modelItems
@@ -31,13 +33,12 @@ import dev.chrisbanes.haze.HazeState
 import dev.chrisbanes.haze.haze
 import dev.chrisbanes.haze.hazeChild
 import moe.tlaster.precompose.flow.collectAsStateWithLifecycle
-import moe.tlaster.precompose.viewmodel.viewModel
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
 @Composable
 fun CivitAiUserScreen(
     network: Network = LocalNetwork.current,
-    username: String,
+    username: String = "",
 ) {
     val hazeState = remember { HazeState() }
     val dataStore = LocalDataStore.current
@@ -45,7 +46,7 @@ fun CivitAiUserScreen(
     val blurStrength by remember { dataStore.hideNsfwStrength.flow }.collectAsStateWithLifecycle(6f)
     val database = LocalDatabase.current
     val favorites by database.getFavorites().collectAsStateWithLifecycle(emptyList())
-    val viewModel = viewModel { CivitAiUserViewModel(network, dataStore, database, username) }
+    val viewModel = viewModel { CivitAiUserViewModel(network, dataStore, database, createSavedStateHandle()) }
     val navController = LocalNavController.current
 
     val lazyPagingItems = viewModel.pager.collectAsLazyPagingItems()
@@ -55,7 +56,7 @@ fun CivitAiUserScreen(
             TopAppBar(
                 title = {
                     Text(
-                        viewModel.username,
+                        viewModel.username!!,
                         modifier = Modifier.basicMarquee()
                     )
                 },

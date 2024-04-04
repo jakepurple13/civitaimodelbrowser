@@ -29,6 +29,8 @@ import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.DialogProperties
+import androidx.lifecycle.createSavedStateHandle
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.programmersbox.common.*
 import com.programmersbox.common.components.LoadingImage
 import com.programmersbox.common.db.FavoriteModel
@@ -38,7 +40,6 @@ import dev.chrisbanes.haze.hazeChild
 import io.kamel.image.KamelImage
 import io.kamel.image.asyncPainterResource
 import moe.tlaster.precompose.flow.collectAsStateWithLifecycle
-import moe.tlaster.precompose.viewmodel.viewModel
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -51,7 +52,9 @@ fun CivitAiDetailScreen(
 ) {
     val hazeState = remember { HazeState() }
     val database = LocalDatabase.current
-    val viewModel = viewModel { CivitAiDetailViewModel(network, id, database) }
+    val viewModel = viewModel {
+        CivitAiDetailViewModel(network, database, createSavedStateHandle())
+    }
     val navController = LocalNavController.current
     val simpleDateTimeFormatter = remember { SimpleDateFormat("MM/dd/yy HH:mm", Locale.getDefault()) }
     val dataStore = LocalDataStore.current

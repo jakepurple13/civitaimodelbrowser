@@ -1,5 +1,8 @@
 package com.programmersbox.common.creator
 
+import androidx.lifecycle.SavedStateHandle
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import androidx.paging.Pager
 import androidx.paging.PagingConfig
 import androidx.paging.cachedIn
@@ -13,16 +16,16 @@ import com.programmersbox.common.paging.CivitBrowserUserPagingSource
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
-import moe.tlaster.precompose.viewmodel.ViewModel
-import moe.tlaster.precompose.viewmodel.viewModelScope
 import kotlin.random.Random
 
 class CivitAiUserViewModel(
     network: Network,
     dataStore: DataStore,
     val database: FavoritesDatabase,
-    val username: String,
+    //val username: String,
+    savedStateHandle: SavedStateHandle,
 ) : ViewModel() {
+    val username = savedStateHandle.get("username") as? String
     val pager = Pager(
         PagingConfig(
             pageSize = PAGE_LIMIT,
@@ -31,7 +34,7 @@ class CivitAiUserViewModel(
     ) {
         CivitBrowserUserPagingSource(
             network = network,
-            username = username,
+            username = username!!,
             includeNsfw = runBlocking { dataStore.includeNsfw.flow.first() }
         )
     }

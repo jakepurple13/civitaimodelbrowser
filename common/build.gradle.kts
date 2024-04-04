@@ -54,6 +54,17 @@ kotlin {
                 api(libs.realm.base)
                 api(libs.haze)
                 api(libs.sonner)
+
+                val lifecycle_version = "2.8.0-alpha04"
+                api("androidx.lifecycle:lifecycle-viewmodel:$lifecycle_version")
+                api("androidx.lifecycle:lifecycle-common:$lifecycle_version")
+                api("androidx.lifecycle:lifecycle-viewmodel-compose:$lifecycle_version")
+                //api("org.jetbrains.androidx.navigation:navigation-compose:2.8.0-dev1561")
+                api("androidx.lifecycle:lifecycle-runtime:$lifecycle_version")
+                //implementation("androidx.lifecycle:lifecycle-runtime-compose:$lifecycle_version")
+
+                implementation(libs.internal.lifecycle.viewmodel.compose)
+                implementation(libs.internal.navigation.compose)
             }
         }
 

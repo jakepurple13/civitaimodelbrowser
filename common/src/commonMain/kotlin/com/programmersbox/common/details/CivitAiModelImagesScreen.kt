@@ -27,6 +27,8 @@ import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.DialogProperties
+import androidx.lifecycle.createSavedStateHandle
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.programmersbox.common.*
 import com.programmersbox.common.components.LoadingImage
 import com.programmersbox.common.db.FavoriteModel
@@ -39,7 +41,6 @@ import dev.chrisbanes.haze.hazeChild
 import io.kamel.image.KamelImage
 import io.kamel.image.asyncPainterResource
 import moe.tlaster.precompose.flow.collectAsStateWithLifecycle
-import moe.tlaster.precompose.viewmodel.viewModel
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
 @Composable
@@ -55,10 +56,11 @@ fun CivitAiModelImagesScreen(
     val network = LocalNetwork.current
     val viewModel = viewModel {
         CivitAiModelImagesViewModel(
-            modelId = modelId,
+            //modelId = modelId,
             dataStore = dataStore,
             network = network,
-            database = database
+            database = database,
+            createSavedStateHandle()
         )
     }
     val uriHandler = LocalUriHandler.current

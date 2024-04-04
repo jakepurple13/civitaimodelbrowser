@@ -3,6 +3,9 @@ package com.programmersbox.common.details
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
+import androidx.lifecycle.SavedStateHandle
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import com.programmersbox.common.ModelImage
 import com.programmersbox.common.Models
 import com.programmersbox.common.Network
@@ -12,16 +15,16 @@ import com.programmersbox.common.db.toDb
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
-import moe.tlaster.precompose.viewmodel.ViewModel
-import moe.tlaster.precompose.viewmodel.viewModelScope
 import okio.Path.Companion.toPath
 import kotlin.random.Random
 
 class CivitAiDetailViewModel(
     private val network: Network,
-    private val id: String?,
+    //private val id: String?,
     private val database: FavoritesDatabase,
+    savedStateHandle: SavedStateHandle,
 ) : ViewModel() {
+    val id: String? = savedStateHandle["modelId"]
     val modelUrl = "https://civitai.com/models/$id"
     var models by mutableStateOf<DetailViewState>(DetailViewState.Loading)
     var isFavorite by mutableStateOf(false)

@@ -40,7 +40,6 @@ class FavoritesDatabase(
     }
 
     fun getBlacklistedItems() = realm.query<BlacklistedItem>()
-        .find()
         .asFlow()
         .mapNotNull { it.list }
 
@@ -72,7 +71,6 @@ class FavoritesDatabase(
         sortedBy: Sort = Sort.DESCENDING,
     ) = realm.query(Favorite::class)
         .sort("dateAdded", sortedBy)
-        .find()
         .asFlow()
         .mapNotNull { it.list }
         .mapToFavoriteModels()

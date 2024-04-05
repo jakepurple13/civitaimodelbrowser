@@ -204,16 +204,25 @@ fun LazyGridScope.modelItems(
                 onDialogDismiss = { showDialog = false }
             )
 
-            ModelItem(
-                models = models,
-                onClick = { navController.navigateToDetail(models.id) },
-                onLongClick = { showDialog = true },
-                showNsfw = showNsfw,
-                blurStrength = blurStrength.dp,
-                isFavorite = database.any { m -> m.id == models.id },
+            ContextMenu(
                 isBlacklisted = isBlacklisted,
-                modifier = Modifier.animateItemPlacement()
-            )
+                blacklistItems = blacklisted,
+                modelId = models.id,
+                name = models.name,
+                nsfw = models.nsfw,
+                imageUrl = null
+            ) {
+                ModelItem(
+                    models = models,
+                    onClick = { navController.navigateToDetail(models.id) },
+                    onLongClick = { showDialog = true },
+                    showNsfw = showNsfw,
+                    blurStrength = blurStrength.dp,
+                    isFavorite = database.any { m -> m.id == models.id },
+                    isBlacklisted = isBlacklisted,
+                    modifier = Modifier.animateItemPlacement()
+                )
+            }
         }
     }
 

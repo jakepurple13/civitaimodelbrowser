@@ -17,6 +17,7 @@ import com.gigamole.composescrollbars.config.ScrollbarsOrientation
 import com.gigamole.composescrollbars.rememberScrollbarsState
 import com.gigamole.composescrollbars.scrolltype.ScrollbarsScrollType
 import com.gigamole.composescrollbars.scrolltype.knobtype.ScrollbarsDynamicKnobType
+import com.programmersbox.common.db.BlacklistedItem
 import com.programmersbox.common.db.FavoriteModel
 
 public actual fun getPlatformName(): String {
@@ -97,4 +98,17 @@ internal actual fun CustomScrollBar(lazyGridState: LazyGridState, modifier: Modi
         ),
         modifier = modifier
     )
+}
+
+@Composable
+internal actual fun ContextMenu(
+    isBlacklisted: Boolean,
+    blacklistItems: List<BlacklistedItem>,
+    modelId: Long,
+    name: String,
+    nsfw: Boolean,
+    imageUrl: String?,
+    content: @Composable () -> Unit,
+) {
+    content()
 }

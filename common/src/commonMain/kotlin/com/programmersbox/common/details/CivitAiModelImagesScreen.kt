@@ -135,23 +135,32 @@ fun CivitAiModelImagesScreen(
                         onDialogDismiss = { showDialog = false }
                     )
 
-                    ImageCard(
-                        images = models,
-                        showNsfw = showNsfw,
-                        nsfwBlurStrength = nsfwBlurStrength,
-                        isFavorite = favoriteList
-                            .filterIsInstance<FavoriteModel.Image>()
-                            .any { f -> f.imageUrl == models.url },
+                    ContextMenu(
                         isBlacklisted = blacklisted.any { it.imageUrl == models.url },
-                        onClick = {
-                            if (models.height < 2000 || models.width < 2000) {
-                                sheetDetails = models
-                            } else {
-                                uriHandler.openUri(models.url)
-                            }
-                        },
-                        onLongClick = { showDialog = true }
-                    )
+                        blacklistItems = blacklisted,
+                        modelId = models.postId ?: 0L,
+                        name = models.url,
+                        nsfw = models.nsfwLevel.canNotShow(),
+                        imageUrl = models.url,
+                    ) {
+                        ImageCard(
+                            images = models,
+                            showNsfw = showNsfw,
+                            nsfwBlurStrength = nsfwBlurStrength,
+                            isFavorite = favoriteList
+                                .filterIsInstance<FavoriteModel.Image>()
+                                .any { f -> f.imageUrl == models.url },
+                            isBlacklisted = blacklisted.any { it.imageUrl == models.url },
+                            onClick = {
+                                if (models.height < 2000 || models.width < 2000) {
+                                    sheetDetails = models
+                                } else {
+                                    uriHandler.openUri(models.url)
+                                }
+                            },
+                            onLongClick = { showDialog = true }
+                        )
+                    }
                 }
             }
         }

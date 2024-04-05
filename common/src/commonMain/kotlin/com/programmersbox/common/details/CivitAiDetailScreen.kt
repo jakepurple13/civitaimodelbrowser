@@ -277,18 +277,26 @@ fun CivitAiDetailScreen(
                                     showDialog = showDialog,
                                     onDialogDismiss = { showDialog = false }
                                 )
-
-                                ImageCard(
-                                    images = images,
-                                    showNsfw = showNsfw,
-                                    nsfwBlurStrength = nsfwBlurStrength,
-                                    isFavorite = favoriteList
-                                        .filterIsInstance<FavoriteModel.Image>()
-                                        .any { f -> f.imageUrl == images.url },
+                                ContextMenu(
                                     isBlacklisted = blacklisted.any { it.imageUrl == images.url },
-                                    onClick = { sheetDetails = images },
-                                    onLongClick = { showDialog = true }
-                                )
+                                    blacklistItems = blacklisted,
+                                    modelId = images.id?.toLongOrNull() ?: 0L,
+                                    name = images.url,
+                                    nsfw = images.nsfw.canNotShow(),
+                                    imageUrl = images.url,
+                                ) {
+                                    ImageCard(
+                                        images = images,
+                                        showNsfw = showNsfw,
+                                        nsfwBlurStrength = nsfwBlurStrength,
+                                        isFavorite = favoriteList
+                                            .filterIsInstance<FavoriteModel.Image>()
+                                            .any { f -> f.imageUrl == images.url },
+                                        isBlacklisted = blacklisted.any { it.imageUrl == images.url },
+                                        onClick = { sheetDetails = images },
+                                        onLongClick = { showDialog = true }
+                                    )
+                                }
                             }
                         }
                     }

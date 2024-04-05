@@ -23,11 +23,12 @@ kotlin {
             kotlinOptions.jvmTarget = "11"
         }
     }
-    jvm() {
+    jvm {
         compilations.all {
             kotlinOptions.jvmTarget = "11"
         }
     }
+    applyDefaultHierarchyTemplate()
 
     sourceSets {
         commonMain.dependencies {

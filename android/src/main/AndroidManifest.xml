@@ -9,6 +9,7 @@
             android:label="CivitAi Browser"
             android:allowBackup="false"
             android:supportsRtl="true"
+            android:enableOnBackInvokedCallback="true"
             android:icon="@drawable/civitai_logo"
             android:theme="@style/Theme.AppCompat.Light.NoActionBar">
         <activity android:name=".MainActivity" android:exported="true">

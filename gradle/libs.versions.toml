@@ -14,7 +14,7 @@ realm = "1.11.0"
 paging-version = "3.3.0-alpha02"
 kamel-image = "0.9.4"
 kotlinx-coroutines-core = "1.8.0"
-precompose = "1.5.7"
+precompose = "1.6.0"
 sonner = "0.3.5"
 
 [plugins]

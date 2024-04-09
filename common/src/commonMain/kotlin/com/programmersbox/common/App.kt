@@ -8,6 +8,7 @@ import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.staticCompositionLocalOf
+import androidx.compose.ui.unit.dp
 import com.programmersbox.common.blacklisted.BlacklistedScreen
 import com.programmersbox.common.creator.CivitAiUserScreen
 import com.programmersbox.common.db.FavoriteModel
@@ -47,26 +48,24 @@ internal fun App(
                         destroyTransition = slideOutHorizontally { it },
                         resumeTransition = slideInHorizontally { -it },
                         pauseTransition = slideOutHorizontally { -it },
+                    ),
+                    swipeProperties = SwipeProperties(
+                        spaceToSwipe = Int.MAX_VALUE.dp
                     )
                 ) {
                     scene(Screen.List.routeId) { CivitAiScreen() }
-                    group(
-                        "detailsgroup",
-                        Screen.Detail.routeId
-                    ) {
-                        scene(Screen.Detail.routeId) {
-                            CivitAiDetailScreen(
-                                id = it.path<String>("modelId"),
-                                onShareClick = onShareClick
-                            )
-                        }
+                    scene(Screen.Detail.routeId) {
+                        CivitAiDetailScreen(
+                            id = it.path<String>("modelId"),
+                            onShareClick = onShareClick
+                        )
+                    }
 
-                        scene(Screen.DetailsImage.routeId) {
-                            CivitAiModelImagesScreen(
-                                modelId = it.path<String>("modelId"),
-                                modelName = it.query<String>("modelName")
-                            )
-                        }
+                    scene(Screen.DetailsImage.routeId) {
+                        CivitAiModelImagesScreen(
+                            modelId = it.path<String>("modelId"),
+                            modelName = it.query<String>("modelName")
+                        )
                     }
                     scene(Screen.Settings.routeId) {
                         SettingsScreen(
@@ -91,7 +90,7 @@ class AppViewModel(val dataStore: DataStore) : ViewModel()
 
 internal val LocalNavController = staticCompositionLocalOf<Navigator> { error("Nope") }
 internal val LocalDataStore = staticCompositionLocalOf<DataStore> { error("Nope") }
-val LocalDatabase = staticCompositionLocalOf<FavoritesDatabase> { FavoritesDatabase() }
+val LocalDatabase = staticCompositionLocalOf { FavoritesDatabase() }
 internal val LocalNetwork = staticCompositionLocalOf { Network() }
 
 fun Navigator.navigateToDetail(id: Long) {

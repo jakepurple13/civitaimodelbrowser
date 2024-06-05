@@ -48,7 +48,7 @@ enum class ModelType {
 @Serializable
 data class ModelVersion(
     val id: Long,
-    val modelId: Long,
+    val modelId: Long? = null,
     val name: String,
     //val createdAt: Instant? = null,
     //val updatedAt: Instant,

@@ -3,7 +3,6 @@
 package com.programmersbox.common.db
 
 import androidx.compose.animation.*
-import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyRow
@@ -13,6 +12,9 @@ import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.ArrowRightAlt
+import androidx.compose.material.icons.automirrored.filled.Sort
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -23,6 +25,8 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.DialogProperties
 import androidx.compose.ui.zIndex
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.programmersbox.common.*
 import com.programmersbox.common.home.CardContent
 import dev.chrisbanes.haze.HazeState
@@ -31,8 +35,6 @@ import dev.chrisbanes.haze.hazeChild
 import io.kamel.image.KamelImage
 import io.kamel.image.asyncPainterResource
 import kotlinx.coroutines.launch
-import moe.tlaster.precompose.flow.collectAsStateWithLifecycle
-import moe.tlaster.precompose.viewmodel.viewModel
 
 internal const val IMAGE_FILTER = "Image"
 internal const val CREATOR_FILTER = "Creator"
@@ -100,7 +102,7 @@ fun FavoritesUI() {
                     leadingIcon = {
                         IconButton(
                             onClick = { navController.popBackStack() }
-                        ) { Icon(Icons.Default.ArrowBack, null) }
+                        ) { Icon(Icons.AutoMirrored.Filled.ArrowBack, null) }
                     },
                     placeholder = { Text("Search Favorites") },
                     trailingIcon = {
@@ -114,7 +116,7 @@ fun FavoritesUI() {
                             ) { Icon(Icons.Default.Image, null) }
                             IconButton(
                                 onClick = { showSortedByDialog = true }
-                            ) { Icon(Icons.Default.Sort, null) }
+                            ) { Icon(Icons.AutoMirrored.Filled.Sort, null) }
                             AnimatedVisibility(viewModel.search.isNotEmpty()) {
                                 IconButton(
                                     onClick = { viewModel.search = "" }
@@ -190,10 +192,7 @@ fun FavoritesUI() {
             contentPadding = padding,
             modifier = Modifier
                 .padding(4.dp)
-                .haze(
-                    state = hazeState,
-                    backgroundColor = MaterialTheme.colorScheme.surface
-                )
+                .haze(state = hazeState)
                 .fillMaxSize()
         ) {
             items(
@@ -299,12 +298,7 @@ private fun SheetContent(
                     KamelImage(
                         resource = painter,
                         onLoading = {
-                            CircularProgressIndicator(
-                                progress = animateFloatAsState(
-                                    targetValue = it,
-                                    label = ""
-                                ).value
-                            )
+                            CircularProgressIndicator({ it })
                         },
                         contentDescription = null,
                         modifier = Modifier.scaleRotateOffsetReset(sroState)
@@ -329,19 +323,14 @@ private fun SheetContent(
                         onClick = onNavigate
                     ) {
                         Text("View Model")
-                        Icon(Icons.Default.ArrowRightAlt, null)
+                        Icon(Icons.AutoMirrored.Filled.ArrowRightAlt, null)
                     }
                 }
             )
             KamelImage(
                 resource = painter,
                 onLoading = {
-                    CircularProgressIndicator(
-                        progress = animateFloatAsState(
-                            targetValue = it,
-                            label = ""
-                        ).value
-                    )
+                    CircularProgressIndicator({ it })
                 },
                 contentDescription = null,
                 modifier = Modifier

@@ -31,6 +31,8 @@ class ImageMetaDb : RealmObject {
     var cfgScale: Double? = null
     var clipSkip: String? = null
     var negativePrompt: String? = null
+
+    companion object
 }
 
 enum class FavoriteType {

@@ -12,7 +12,7 @@ import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material3.*
@@ -23,6 +23,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.programmersbox.common.*
 import com.programmersbox.common.components.LoadingImage
 import com.programmersbox.common.home.modelItems
@@ -30,8 +32,6 @@ import com.programmersbox.common.paging.collectAsLazyPagingItems
 import dev.chrisbanes.haze.HazeState
 import dev.chrisbanes.haze.haze
 import dev.chrisbanes.haze.hazeChild
-import moe.tlaster.precompose.flow.collectAsStateWithLifecycle
-import moe.tlaster.precompose.viewmodel.viewModel
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
 @Composable
@@ -63,7 +63,7 @@ fun CivitAiUserScreen(
                 navigationIcon = {
                     IconButton(
                         onClick = { navController.popBackStack() }
-                    ) { Icon(Icons.Default.ArrowBack, null) }
+                    ) { Icon(Icons.AutoMirrored.Filled.ArrowBack, null) }
                 },
                 actions = {
                     if (lazyPagingItems.itemSnapshotList.isNotEmpty()) {
@@ -105,10 +105,7 @@ fun CivitAiUserScreen(
             horizontalArrangement = Arrangement.spacedBy(4.dp),
             contentPadding = padding,
             modifier = Modifier
-                .haze(
-                    state = hazeState,
-                    backgroundColor = MaterialTheme.colorScheme.surface
-                )
+                .haze(state = hazeState)
                 .fillMaxSize()
         ) {
             item(

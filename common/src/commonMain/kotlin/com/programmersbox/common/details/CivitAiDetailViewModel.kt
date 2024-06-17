@@ -3,6 +3,8 @@ package com.programmersbox.common.details
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import com.programmersbox.common.ModelImage
 import com.programmersbox.common.Models
 import com.programmersbox.common.Network
@@ -12,8 +14,6 @@ import com.programmersbox.common.db.toDb
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
-import moe.tlaster.precompose.viewmodel.ViewModel
-import moe.tlaster.precompose.viewmodel.viewModelScope
 import okio.Path.Companion.toPath
 import kotlin.random.Random
 

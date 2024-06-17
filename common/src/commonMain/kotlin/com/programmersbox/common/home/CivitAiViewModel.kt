@@ -3,6 +3,8 @@ package com.programmersbox.common.home
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import androidx.paging.*
 import com.programmersbox.common.DataStore
 import com.programmersbox.common.Models
@@ -12,8 +14,6 @@ import com.programmersbox.common.paging.CivitBrowserPagingSource
 import com.programmersbox.common.paging.CivitBrowserSearchPagingSource
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
-import moe.tlaster.precompose.viewmodel.ViewModel
-import moe.tlaster.precompose.viewmodel.viewModelScope
 
 class CivitAiViewModel(
     network: Network,

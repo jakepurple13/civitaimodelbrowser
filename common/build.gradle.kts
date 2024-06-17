@@ -1,5 +1,6 @@
 import com.codingfeline.buildkonfig.compiler.FieldSpec.Type.STRING
 import org.jetbrains.compose.internal.utils.localPropertiesFile
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import java.io.FileInputStream
 import java.io.InputStreamReader
 import java.util.*
@@ -11,6 +12,7 @@ plugins {
     id("org.jetbrains.kotlin.plugin.serialization") version libs.versions.kotlin.version.get()
     id("io.realm.kotlin") version libs.versions.realm.get()
     id("com.codingfeline.buildkonfig")
+    alias(libs.plugins.compose.compiler)
 }
 
 group = "com.programmersbox"
@@ -19,13 +21,13 @@ version = "1.0-SNAPSHOT"
 @OptIn(org.jetbrains.compose.ExperimentalComposeLibrary::class)
 kotlin {
     androidTarget {
-        compilations.all {
-            kotlinOptions.jvmTarget = "11"
+        compilerOptions {
+            jvmTarget.set(JvmTarget.JVM_17)
         }
     }
     jvm {
-        compilations.all {
-            kotlinOptions.jvmTarget = "11"
+        compilerOptions {
+            jvmTarget.set(JvmTarget.JVM_17)
         }
     }
     applyDefaultHierarchyTemplate()
@@ -45,12 +47,13 @@ kotlin {
             api(libs.datastore.core.okio)
             api(libs.datastore.preferences)
             api(libs.paging.runtime)
-            //implementation(libs.paging.compose)
+            //api(libs.paging.compose)
             api(libs.kamel.image)
             api(libs.kotlinx.datetime)
             api(libs.kotlinx.coroutines.core)
-            api(libs.precompose)
-            api(libs.precompose.viewmodel)
+            api(libs.lifecycle.viewmodel.compose)
+            api(libs.androidx.lifecycle.runtime.compose)
+            api(libs.navigation.compose)
             api(libs.jsoup)
             api(libs.realm.base)
             api(libs.haze)
@@ -78,8 +81,15 @@ kotlin {
     }
 }
 
+compose.resources {
+    publicResClass = true
+    packageOfResClass = "com.programmersbox.resources"
+    generateResClass = always
+}
+
 android {
     compileSdk = 34
+    namespace = "com.programmersbox.common"
     sourceSets["main"].manifest.srcFile("src/androidMain/AndroidManifest.xml")
     sourceSets["main"].res.srcDirs("src/androidMain/res")
     sourceSets["main"].resources.srcDirs("src/commonMain/resources")
@@ -88,8 +98,8 @@ android {
         targetSdk = 34
     }
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_1_8
-        targetCompatibility = JavaVersion.VERSION_1_8
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
     }
 }
 

@@ -8,7 +8,13 @@ import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.staticCompositionLocalOf
-import androidx.compose.ui.unit.dp
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavController
+import androidx.navigation.NavOptions
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.compose.rememberNavController
 import com.programmersbox.common.blacklisted.BlacklistedScreen
 import com.programmersbox.common.creator.CivitAiUserScreen
 import com.programmersbox.common.db.FavoriteModel
@@ -17,11 +23,6 @@ import com.programmersbox.common.db.FavoritesUI
 import com.programmersbox.common.details.CivitAiDetailScreen
 import com.programmersbox.common.details.CivitAiModelImagesScreen
 import com.programmersbox.common.home.CivitAiScreen
-import moe.tlaster.precompose.PreComposeApp
-import moe.tlaster.precompose.navigation.*
-import moe.tlaster.precompose.navigation.transition.NavTransition
-import moe.tlaster.precompose.viewmodel.ViewModel
-import moe.tlaster.precompose.viewmodel.viewModel
 
 @Composable
 internal fun App(
@@ -32,8 +33,10 @@ internal fun App(
     export: @Composable () -> Unit = {},
     import: @Composable () -> Unit = {},
 ) {
-    PreComposeApp {
-        val navController = rememberNavigator()
+    CompositionLocalProvider(
+        androidx.lifecycle.compose.LocalLifecycleOwner provides androidx.compose.ui.platform.LocalLifecycleOwner.current,
+    ) {
+        val navController = rememberNavController()
         val viewModel = viewModel { AppViewModel(DataStore.getStore(producePath)) }
         CompositionLocalProvider(
             LocalNavController provides navController,
@@ -41,33 +44,28 @@ internal fun App(
         ) {
             Surface {
                 NavHost(
-                    navigator = navController,
-                    initialRoute = Screen.List.routeId,
-                    navTransition = NavTransition(
-                        createTransition = slideInHorizontally { it },
-                        destroyTransition = slideOutHorizontally { it },
-                        resumeTransition = slideInHorizontally { -it },
-                        pauseTransition = slideOutHorizontally { -it },
-                    ),
-                    swipeProperties = SwipeProperties(
-                        spaceToSwipe = Int.MAX_VALUE.dp
-                    )
+                    navController = navController,
+                    startDestination = Screen.List.routeId,
+                    enterTransition = { slideInHorizontally { it } },
+                    exitTransition = { slideOutHorizontally { -it } },
+                    popExitTransition = { slideOutHorizontally { -it } },
+                    popEnterTransition = { slideInHorizontally { it } },
                 ) {
-                    scene(Screen.List.routeId) { CivitAiScreen() }
-                    scene(Screen.Detail.routeId) {
+                    composable(Screen.List.routeId) { CivitAiScreen() }
+                    composable(Screen.Detail.routeId) {
                         CivitAiDetailScreen(
-                            id = it.path<String>("modelId"),
+                            id = it.arguments?.getString("modelId"),
                             onShareClick = onShareClick
                         )
                     }
 
-                    scene(Screen.DetailsImage.routeId) {
+                    composable(Screen.DetailsImage.routeId) {
                         CivitAiModelImagesScreen(
-                            modelId = it.path<String>("modelId"),
-                            modelName = it.query<String>("modelName")
+                            modelId = it.arguments?.getString("modelId"),
+                            modelName = it.arguments?.getString("modelName")
                         )
                     }
-                    scene(Screen.Settings.routeId) {
+                    composable(Screen.Settings.routeId) {
                         SettingsScreen(
                             onExport = onExport,
                             onImport = onImport,
@@ -75,11 +73,11 @@ internal fun App(
                             import = import
                         )
                     }
-                    scene(Screen.Favorites.routeId) { FavoritesUI() }
-                    scene(Screen.User.routeId) {
-                        CivitAiUserScreen(username = it.path<String>("username").orEmpty())
+                    composable(Screen.Favorites.routeId) { FavoritesUI() }
+                    composable(Screen.User.routeId) {
+                        CivitAiUserScreen(username = it.arguments?.getString("username").orEmpty())
                     }
-                    scene(Screen.Blacklisted.routeId) { BlacklistedScreen() }
+                    composable(Screen.Blacklisted.routeId) { BlacklistedScreen() }
                 }
             }
         }
@@ -88,29 +86,35 @@ internal fun App(
 
 class AppViewModel(val dataStore: DataStore) : ViewModel()
 
-internal val LocalNavController = staticCompositionLocalOf<Navigator> { error("Nope") }
+internal val LocalNavController = staticCompositionLocalOf<NavController> { error("Nope") }
 internal val LocalDataStore = staticCompositionLocalOf<DataStore> { error("Nope") }
 val LocalDatabase = staticCompositionLocalOf { FavoritesDatabase() }
 internal val LocalNetwork = staticCompositionLocalOf { Network() }
 
-fun Navigator.navigateToDetail(id: Long) {
+fun NavController.navigateToDetail(id: Long) {
     navigate(
         route = Screen.Detail.routeId.replace("{modelId}", id.toString()),
-        options = NavOptions(launchSingleTop = true, includePath = true)
+        navOptions = NavOptions.Builder()
+            .setLaunchSingleTop(true)
+            .build()
     )
 }
 
-fun Navigator.navigateToDetailImages(id: Long, name: String) {
+fun NavController.navigateToDetailImages(id: Long, name: String) {
     navigate(
         route = Screen.DetailsImage.routeId.replace("{modelId}", id.toString()) + "?modelName=$name",
-        options = NavOptions(launchSingleTop = true, includePath = true)
+        navOptions = NavOptions.Builder()
+            .setLaunchSingleTop(true)
+            .build()
     )
 }
 
-fun Navigator.navigateToUser(username: String) {
+fun NavController.navigateToUser(username: String) {
     navigate(
         route = Screen.User.routeId.replace("{username}", username),
-        options = NavOptions(launchSingleTop = true)
+        navOptions = NavOptions.Builder()
+            .setLaunchSingleTop(true)
+            .build()
     )
 }
 

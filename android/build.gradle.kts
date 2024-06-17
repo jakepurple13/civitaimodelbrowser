@@ -2,6 +2,7 @@ plugins {
     id("org.jetbrains.compose")
     id("com.android.application")
     kotlin("android")
+    alias(libs.plugins.compose.compiler)
 }
 
 group = "com.programmersbox"
@@ -12,6 +13,7 @@ repositories {
 }
 
 android {
+    namespace = "com.programmersbox.civitaimodelbrowser"
     compileSdk = 34
     defaultConfig {
         applicationId = "com.programmersbox.civitaimodelbrowser"
@@ -21,11 +23,11 @@ android {
         versionName = "1.0-SNAPSHOT"
     }
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_11
-        targetCompatibility = JavaVersion.VERSION_11
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
     }
     kotlinOptions {
-        jvmTarget = JavaVersion.VERSION_11.toString()
+        jvmTarget = JavaVersion.VERSION_17.toString()
     }
     buildTypes {
         getByName("release") {

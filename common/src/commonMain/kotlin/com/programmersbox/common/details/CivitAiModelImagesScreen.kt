@@ -8,7 +8,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material.icons.filled.Refresh
@@ -24,6 +24,8 @@ import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.DialogProperties
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.programmersbox.common.*
 import com.programmersbox.common.components.LoadingImage
 import com.programmersbox.common.db.FavoriteModel
@@ -36,8 +38,6 @@ import dev.chrisbanes.haze.haze
 import dev.chrisbanes.haze.hazeChild
 import io.kamel.image.KamelImage
 import io.kamel.image.asyncPainterResource
-import moe.tlaster.precompose.flow.collectAsStateWithLifecycle
-import moe.tlaster.precompose.viewmodel.viewModel
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
 @Composable
@@ -96,7 +96,7 @@ fun CivitAiModelImagesScreen(
                 navigationIcon = {
                     IconButton(
                         onClick = { navController.popBackStack() }
-                    ) { Icon(Icons.Default.ArrowBack, null) }
+                    ) { Icon(Icons.AutoMirrored.Filled.ArrowBack, null) }
                 },
                 actions = { Text("(${lazyPagingItems.itemCount})") },
                 colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.Transparent),
@@ -110,10 +110,7 @@ fun CivitAiModelImagesScreen(
             verticalArrangement = Arrangement.spacedBy(4.dp),
             horizontalArrangement = Arrangement.spacedBy(4.dp),
             modifier = Modifier
-                .haze(
-                    state = hazeState,
-                    backgroundColor = MaterialTheme.colorScheme.surface
-                )
+                .haze(state = hazeState)
                 .fillMaxSize()
         ) {
             items(

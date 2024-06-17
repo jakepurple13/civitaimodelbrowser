@@ -14,6 +14,7 @@ import androidx.compose.foundation.lazy.grid.LazyGridScope
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -26,6 +27,9 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavController
 import androidx.paging.CombinedLoadStates
 import androidx.paging.LoadState
 import com.programmersbox.common.*
@@ -43,9 +47,6 @@ import dev.chrisbanes.haze.HazeState
 import dev.chrisbanes.haze.haze
 import dev.chrisbanes.haze.hazeChild
 import kotlinx.coroutines.launch
-import moe.tlaster.precompose.flow.collectAsStateWithLifecycle
-import moe.tlaster.precompose.navigation.Navigator
-import moe.tlaster.precompose.viewmodel.viewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -135,10 +136,7 @@ fun CivitAiScreen(
                 verticalArrangement = Arrangement.spacedBy(4.dp),
                 horizontalArrangement = Arrangement.spacedBy(4.dp),
                 modifier = Modifier
-                    .haze(
-                        state = hazeState,
-                        backgroundColor = MaterialTheme.colorScheme.surface
-                    )
+                    .haze(state = hazeState)
                     .fillMaxSize()
             ) {
                 modelItems(
@@ -180,7 +178,7 @@ fun CivitAiScreen(
 @OptIn(ExperimentalFoundationApi::class)
 fun LazyGridScope.modelItems(
     lazyPagingItems: LazyPagingItems<Models>,
-    navController: Navigator,
+    navController: NavController,
     showNsfw: Boolean,
     blurStrength: Float,
     database: List<FavoriteModel>,
@@ -480,7 +478,7 @@ fun SearchView(
                 leadingIcon = {
                     IconButton(
                         onClick = { viewModel.showSearch = false }
-                    ) { Icon(Icons.Default.ArrowBack, null) }
+                    ) { Icon(Icons.AutoMirrored.Filled.ArrowBack, null) }
                 },
                 modifier = Modifier.fillMaxWidth()
             ) {

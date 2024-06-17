@@ -29,6 +29,8 @@ import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.DialogProperties
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.programmersbox.common.*
 import com.programmersbox.common.components.LoadingImage
 import com.programmersbox.common.db.FavoriteModel
@@ -38,8 +40,6 @@ import dev.chrisbanes.haze.haze
 import dev.chrisbanes.haze.hazeChild
 import io.kamel.image.KamelImage
 import io.kamel.image.asyncPainterResource
-import moe.tlaster.precompose.flow.collectAsStateWithLifecycle
-import moe.tlaster.precompose.viewmodel.viewModel
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -169,10 +169,7 @@ fun CivitAiDetailScreen(
                     verticalArrangement = Arrangement.spacedBy(4.dp),
                     horizontalArrangement = Arrangement.spacedBy(4.dp),
                     modifier = Modifier
-                        .haze(
-                            state = hazeState,
-                            backgroundColor = MaterialTheme.colorScheme.surface
-                        )
+                        .haze(state = hazeState)
                         .fillMaxSize()
                 ) {
                     item(

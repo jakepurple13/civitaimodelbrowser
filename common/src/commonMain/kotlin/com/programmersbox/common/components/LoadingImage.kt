@@ -1,6 +1,5 @@
 package com.programmersbox.common.components
 
-import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.CircularProgressIndicator
@@ -10,9 +9,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.BlendMode
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.layout.ContentScale
+import com.programmersbox.resources.Res
+import com.programmersbox.resources.civitai_logo
 import io.kamel.image.KamelImage
 import io.kamel.image.asyncPainterResource
-import org.jetbrains.compose.resources.DrawableResource
 import org.jetbrains.compose.resources.ExperimentalResourceApi
 import org.jetbrains.compose.resources.painterResource
 
@@ -27,11 +27,11 @@ fun LoadingImage(
     KamelImage(
         resource = asyncPainterResource(imageUrl),
         onLoading = {
-            CircularProgressIndicator(progress = animateFloatAsState(targetValue = it, label = "").value)
+            CircularProgressIndicator({ it })
         },
         onFailure = {
             Image(
-                painter = painterResource(DrawableResource("civitai_logo.png")),
+                painter = painterResource(Res.drawable.civitai_logo),
                 contentDescription = null,
                 colorFilter = if (isNsfw)
                     ColorFilter.tint(MaterialTheme.colorScheme.error, blendMode = BlendMode.Hue)

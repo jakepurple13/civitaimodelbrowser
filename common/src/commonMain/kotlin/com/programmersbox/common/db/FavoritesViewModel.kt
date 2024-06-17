@@ -1,14 +1,14 @@
 package com.programmersbox.common.db
 
 import androidx.compose.runtime.*
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import com.programmersbox.common.DataStore
 import io.realm.kotlin.query.Sort
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
-import moe.tlaster.precompose.viewmodel.ViewModel
-import moe.tlaster.precompose.viewmodel.viewModelScope
 
 class FavoritesViewModel(
     database: FavoritesDatabase,

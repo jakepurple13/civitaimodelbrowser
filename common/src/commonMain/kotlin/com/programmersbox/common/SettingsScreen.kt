@@ -7,7 +7,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -20,11 +20,12 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.programmersbox.common.components.icons.Github
 import com.programmersbox.common.db.FavoriteModel
+import com.programmersbox.resources.Res
+import com.programmersbox.resources.civitai_logo
 import kotlinx.coroutines.launch
-import moe.tlaster.precompose.flow.collectAsStateWithLifecycle
-import org.jetbrains.compose.resources.DrawableResource
 import org.jetbrains.compose.resources.ExperimentalResourceApi
 import org.jetbrains.compose.resources.painterResource
 import kotlin.math.roundToInt
@@ -54,7 +55,7 @@ fun SettingsScreen(
                 navigationIcon = {
                     IconButton(
                         onClick = { navController.popBackStack() }
-                    ) { Icon(Icons.Default.ArrowBack, null) }
+                    ) { Icon(Icons.AutoMirrored.Filled.ArrowBack, null) }
                 },
                 scrollBehavior = scrollBehavior
             )
@@ -112,7 +113,7 @@ fun SettingsScreen(
                     )
 
                     Image(
-                        painter = painterResource(DrawableResource("civitai_logo.png")),
+                        painter = painterResource(Res.drawable.civitai_logo),
                         contentDescription = null,
                         modifier = Modifier
                             .align(Alignment.CenterHorizontally)
@@ -187,7 +188,7 @@ fun SettingsScreen(
                     headlineContent = { Text("Open CivitAi") },
                     leadingContent = {
                         Image(
-                            painter = painterResource(DrawableResource("civitai_logo.png")),
+                            painter = painterResource(Res.drawable.civitai_logo),
                             contentDescription = null,
                             modifier = Modifier
                                 .size(48.dp)

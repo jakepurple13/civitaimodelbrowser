@@ -1,5 +1,7 @@
 package com.programmersbox.common.creator
 
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import androidx.paging.Pager
 import androidx.paging.PagingConfig
 import androidx.paging.cachedIn
@@ -13,8 +15,6 @@ import com.programmersbox.common.paging.CivitBrowserUserPagingSource
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
-import moe.tlaster.precompose.viewmodel.ViewModel
-import moe.tlaster.precompose.viewmodel.viewModelScope
 import kotlin.random.Random
 
 class CivitAiUserViewModel(

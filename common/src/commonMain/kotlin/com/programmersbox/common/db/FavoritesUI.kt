@@ -48,7 +48,8 @@ fun FavoritesUI() {
     val scope = rememberCoroutineScope()
     val showNsfw by remember { dataStore.showNsfw.flow }.collectAsStateWithLifecycle(false)
     val blurStrength by remember { dataStore.hideNsfwStrength.flow }.collectAsStateWithLifecycle(6f)
-    val reverseFavorites by remember { dataStore.reverseFavorites.flow }.collectAsStateWithLifecycle(false)
+    var reverseFavorites by dataStore.rememberReverseFavorites()
+    val showBlur by dataStore.rememberShowBlur()
     val database = LocalDatabase.current
     val lazyGridState = rememberLazyGridState()
     val viewModel = viewModel { FavoritesViewModel(database, dataStore) }
@@ -90,84 +91,88 @@ fun FavoritesUI() {
 
     Scaffold(
         topBar = {
-            Column(
-                modifier = Modifier.hazeChild(hazeState)
+            Surface(
+                color = if (showBlur) Color.Transparent else MaterialTheme.colorScheme.surface
             ) {
-                DockedSearchBar(
-                    query = viewModel.search,
-                    onQueryChange = { viewModel.search = it },
-                    onSearch = {},
-                    active = false,
-                    onActiveChange = {},
-                    leadingIcon = {
-                        IconButton(
-                            onClick = { navController.popBackStack() }
-                        ) { Icon(Icons.AutoMirrored.Filled.ArrowBack, null) }
-                    },
-                    placeholder = { Text("Search Favorites") },
-                    trailingIcon = {
-                        Row(
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            Text("(${viewModel.favoritesList.size})")
-                            FilledIconToggleButton(
-                                checked = reverseFavorites,
-                                onCheckedChange = { scope.launch { dataStore.reverseFavorites.update(it) } }
-                            ) { Icon(Icons.Default.Image, null) }
-                            IconButton(
-                                onClick = { showSortedByDialog = true }
-                            ) { Icon(Icons.AutoMirrored.Filled.Sort, null) }
-                            AnimatedVisibility(viewModel.search.isNotEmpty()) {
-                                IconButton(
-                                    onClick = { viewModel.search = "" }
-                                ) { Icon(Icons.Default.Clear, null) }
-                            }
-                        }
-                    },
-                    colors = SearchBarDefaults.colors(
-                        containerColor = Color.Transparent
-                    ),
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .windowInsetsPadding(SearchBarDefaults.windowInsets)
-                ) {}
-                LazyRow(
-                    horizontalArrangement = Arrangement.spacedBy(4.dp),
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 4.dp)
+                Column(
+                    modifier = Modifier.ifTrue(showBlur) { hazeChild(hazeState) }
                 ) {
-                    items(viewModel.typeList) {
-                        FilterChip(
-                            selected = it in viewModel.filterList,
-                            onClick = {
-                                viewModel.toggleFilter(it)
-                                scope.launch { lazyGridState.animateScrollToItem(0) }
-                            },
-                            label = { Text(it) }
-                        )
-                    }
+                    DockedSearchBar(
+                        query = viewModel.search,
+                        onQueryChange = { viewModel.search = it },
+                        onSearch = {},
+                        active = false,
+                        onActiveChange = {},
+                        leadingIcon = {
+                            IconButton(
+                                onClick = { navController.popBackStack() }
+                            ) { Icon(Icons.AutoMirrored.Filled.ArrowBack, null) }
+                        },
+                        placeholder = { Text("Search Favorites") },
+                        trailingIcon = {
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Text("(${viewModel.favoritesList.size})")
+                                FilledIconToggleButton(
+                                    checked = reverseFavorites,
+                                    onCheckedChange = { reverseFavorites = it }
+                                ) { Icon(Icons.Default.Image, null) }
+                                IconButton(
+                                    onClick = { showSortedByDialog = true }
+                                ) { Icon(Icons.AutoMirrored.Filled.Sort, null) }
+                                AnimatedVisibility(viewModel.search.isNotEmpty()) {
+                                    IconButton(
+                                        onClick = { viewModel.search = "" }
+                                    ) { Icon(Icons.Default.Clear, null) }
+                                }
+                            }
+                        },
+                        colors = if (showBlur) SearchBarDefaults.colors(
+                            containerColor = Color.Transparent
+                        ) else SearchBarDefaults.colors(),
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .windowInsetsPadding(SearchBarDefaults.windowInsets)
+                    ) {}
+                    LazyRow(
+                        horizontalArrangement = Arrangement.spacedBy(4.dp),
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 4.dp)
+                    ) {
+                        items(viewModel.typeList) {
+                            FilterChip(
+                                selected = it in viewModel.filterList,
+                                onClick = {
+                                    viewModel.toggleFilter(it)
+                                    scope.launch { lazyGridState.animateScrollToItem(0) }
+                                },
+                                label = { Text(it) }
+                            )
+                        }
 
-                    item {
-                        FilterChip(
-                            selected = IMAGE_FILTER in viewModel.filterList,
-                            onClick = {
-                                viewModel.toggleFilter(IMAGE_FILTER)
-                                scope.launch { lazyGridState.animateScrollToItem(0) }
-                            },
-                            label = { Text(IMAGE_FILTER) }
-                        )
-                    }
+                        item {
+                            FilterChip(
+                                selected = IMAGE_FILTER in viewModel.filterList,
+                                onClick = {
+                                    viewModel.toggleFilter(IMAGE_FILTER)
+                                    scope.launch { lazyGridState.animateScrollToItem(0) }
+                                },
+                                label = { Text(IMAGE_FILTER) }
+                            )
+                        }
 
-                    item {
-                        FilterChip(
-                            selected = CREATOR_FILTER in viewModel.filterList,
-                            onClick = {
-                                viewModel.toggleFilter(CREATOR_FILTER)
-                                scope.launch { lazyGridState.animateScrollToItem(0) }
-                            },
-                            label = { Text(CREATOR_FILTER) }
-                        )
+                        item {
+                            FilterChip(
+                                selected = CREATOR_FILTER in viewModel.filterList,
+                                onClick = {
+                                    viewModel.toggleFilter(CREATOR_FILTER)
+                                    scope.launch { lazyGridState.animateScrollToItem(0) }
+                                },
+                                label = { Text(CREATOR_FILTER) }
+                            )
+                        }
                     }
                 }
             }
@@ -192,7 +197,7 @@ fun FavoritesUI() {
             contentPadding = padding,
             modifier = Modifier
                 .padding(4.dp)
-                .haze(state = hazeState)
+                .ifTrue(showBlur) { haze(state = hazeState) }
                 .fillMaxSize()
         ) {
             items(

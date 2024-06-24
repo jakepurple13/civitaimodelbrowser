@@ -13,6 +13,7 @@ import androidx.compose.foundation.selection.toggleable
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -56,6 +57,7 @@ fun CivitAiDetailScreen(
     val navController = LocalNavController.current
     val simpleDateTimeFormatter = remember { SimpleDateFormat("MM/dd/yy HH:mm", Locale.getDefault()) }
     val dataStore = LocalDataStore.current
+    val showBlur by dataStore.rememberShowBlur()
     val showNsfw by remember { dataStore.showNsfw.flow }.collectAsStateWithLifecycle(false)
     val nsfwBlurStrength by remember { dataStore.hideNsfwStrength.flow }.collectAsStateWithLifecycle(6f)
 
@@ -94,7 +96,7 @@ fun CivitAiDetailScreen(
                         navigationIcon = {
                             IconButton(
                                 onClick = { navController.popBackStack() }
-                            ) { Icon(Icons.Default.ArrowBack, null) }
+                            ) { Icon(Icons.AutoMirrored.Filled.ArrowBack, null) }
                         },
                         actions = {
                             model.models.creator?.let { creator ->
@@ -110,8 +112,9 @@ fun CivitAiDetailScreen(
                                 }
                             }
                         },
-                        colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.Transparent),
-                        modifier = Modifier.hazeChild(hazeState)
+                        colors = if (showBlur) TopAppBarDefaults.topAppBarColors(containerColor = Color.Transparent)
+                        else TopAppBarDefaults.topAppBarColors(),
+                        modifier = Modifier.ifTrue(showBlur) { hazeChild(hazeState) }
                     )
                 },
                 bottomBar = {
@@ -158,8 +161,8 @@ fun CivitAiDetailScreen(
                                 label = { Text("Images") },
                             )
                         },
-                        containerColor = Color.Transparent,
-                        modifier = Modifier.hazeChild(hazeState)
+                        containerColor = if (showBlur) Color.Transparent else BottomAppBarDefaults.containerColor,
+                        modifier = Modifier.ifTrue(showBlur) { hazeChild(hazeState) }
                     )
                 },
             ) { paddingValues ->
@@ -169,7 +172,7 @@ fun CivitAiDetailScreen(
                     verticalArrangement = Arrangement.spacedBy(4.dp),
                     horizontalArrangement = Arrangement.spacedBy(4.dp),
                     modifier = Modifier
-                        .haze(state = hazeState)
+                        .ifTrue(showBlur) { haze(state = hazeState) }
                         .fillMaxSize()
                 ) {
                     item(

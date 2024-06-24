@@ -1,11 +1,14 @@
 package com.programmersbox.common
 
+import androidx.compose.runtime.*
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.*
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.mapNotNull
+import kotlinx.coroutines.launch
 import okio.Path.Companion.toPath
 
 
@@ -49,6 +52,18 @@ class DataStore private constructor(
         defaultValue = false
     )
 
+    @Composable
+    fun rememberReverseFavorites() = rememberPreference(
+        booleanPreferencesKey("reverse_favorites"),
+        false
+    )
+
+    @Composable
+    fun rememberShowBlur() = rememberPreference(
+        booleanPreferencesKey("show_blur"),
+        true
+    )
+
     open class DataStoreType<T>(
         protected val key: Preferences.Key<T>,
         protected val dataStore: DataStore<Preferences>,
@@ -71,4 +86,31 @@ class DataStore private constructor(
             .mapNotNull { it[key] ?: defaultValue }
             .distinctUntilChanged()
     }
+
+    @Composable
+    private fun <T> rememberPreference(
+        key: Preferences.Key<T>,
+        defaultValue: T,
+    ): MutableState<T> {
+        val coroutineScope = rememberCoroutineScope()
+        val state by remember {
+            dataStore.data.map { it[key] ?: defaultValue }
+        }.collectAsStateWithLifecycle(initialValue = defaultValue)
+
+        return remember(state) {
+            object : MutableState<T> {
+                override var value: T
+                    get() = state
+                    set(value) {
+                        coroutineScope.launch {
+                            dataStore.edit { it[key] = value }
+                        }
+                    }
+
+                override fun component1() = value
+                override fun component2(): (T) -> Unit = { value = it }
+            }
+        }
+    }
 }
+

@@ -8,11 +8,10 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.BlurOff
+import androidx.compose.material.icons.filled.BlurOn
 import androidx.compose.material3.*
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.blur
@@ -47,6 +46,7 @@ fun SettingsScreen(
     val hideNsfwStrength = remember { dataStore.hideNsfwStrength }
     val includeNsfw = remember { dataStore.includeNsfw }
     val database = LocalDatabase.current
+    var showBlur by dataStore.rememberShowBlur()
 
     Scaffold(
         topBar = {
@@ -133,6 +133,23 @@ fun SettingsScreen(
             ) {
                 ListItem(
                     headlineContent = { Text("View Blacklisted Models") }
+                )
+            }
+
+            HorizontalDivider()
+
+            Card(
+                onClick = { showBlur = !showBlur }
+            ) {
+                ListItem(
+                    leadingContent = { Icon(if (showBlur) Icons.Default.BlurOn else Icons.Default.BlurOff, null) },
+                    headlineContent = { Text("Show Blur") },
+                    trailingContent = {
+                        Switch(
+                            checked = showBlur,
+                            onCheckedChange = { showBlur = it }
+                        )
+                    }
                 )
             }
 

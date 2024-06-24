@@ -50,6 +50,7 @@ fun CivitAiModelImagesScreen(
     val dataStore = LocalDataStore.current
     val showNsfw by remember { dataStore.showNsfw.flow }.collectAsStateWithLifecycle(false)
     val nsfwBlurStrength by remember { dataStore.hideNsfwStrength.flow }.collectAsStateWithLifecycle(6f)
+    val showBlur by dataStore.rememberShowBlur()
     val network = LocalNetwork.current
     val viewModel = viewModel {
         CivitAiModelImagesViewModel(
@@ -99,8 +100,9 @@ fun CivitAiModelImagesScreen(
                     ) { Icon(Icons.AutoMirrored.Filled.ArrowBack, null) }
                 },
                 actions = { Text("(${lazyPagingItems.itemCount})") },
-                colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.Transparent),
-                modifier = Modifier.hazeChild(hazeState)
+                colors = if (showBlur) TopAppBarDefaults.topAppBarColors(containerColor = Color.Transparent)
+                else TopAppBarDefaults.topAppBarColors(),
+                modifier = Modifier.ifTrue(showBlur) { hazeChild(hazeState) }
             )
         },
     ) { padding ->

@@ -195,3 +195,6 @@ fun Modifier.scaleRotateOffsetReset(
 }
 
 fun List<BlacklistedItem>.isBlacklisted(modelId: Long) = any { it.id == modelId }
+
+fun Modifier.ifTrue(isTrue: Boolean, modifierBlock: Modifier.() -> Modifier) = if (isTrue) this.modifierBlock()
+else this

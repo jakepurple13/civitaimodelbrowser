@@ -47,6 +47,7 @@ fun CivitAiUserScreen(
     val favorites by database.getFavorites().collectAsStateWithLifecycle(emptyList())
     val blacklisted by database.getBlacklistedItems().collectAsStateWithLifecycle(emptyList())
     val viewModel = viewModel { CivitAiUserViewModel(network, dataStore, database, username) }
+    val showBlur by dataStore.rememberShowBlur()
     val navController = LocalNavController.current
 
     val lazyPagingItems = viewModel.pager.collectAsLazyPagingItems()
@@ -94,8 +95,9 @@ fun CivitAiUserScreen(
                         }
                     }
                 },
-                colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.Transparent),
-                modifier = Modifier.hazeChild(hazeState)
+                colors = if (showBlur) TopAppBarDefaults.topAppBarColors(containerColor = Color.Transparent)
+                else TopAppBarDefaults.topAppBarColors(),
+                modifier = Modifier.ifTrue(showBlur) { hazeChild(hazeState) }
             )
         },
     ) { padding ->
@@ -105,7 +107,7 @@ fun CivitAiUserScreen(
             horizontalArrangement = Arrangement.spacedBy(4.dp),
             contentPadding = padding,
             modifier = Modifier
-                .haze(state = hazeState)
+                .ifTrue(showBlur) { haze(state = hazeState) }
                 .fillMaxSize()
         ) {
             item(

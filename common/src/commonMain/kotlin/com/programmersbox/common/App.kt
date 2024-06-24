@@ -47,9 +47,9 @@ internal fun App(
                     navController = navController,
                     startDestination = Screen.List.routeId,
                     enterTransition = { slideInHorizontally { it } },
-                    exitTransition = { slideOutHorizontally { -it } },
-                    popExitTransition = { slideOutHorizontally { -it } },
+                    exitTransition = { slideOutHorizontally { it } },
                     popEnterTransition = { slideInHorizontally { it } },
+                    popExitTransition = { slideOutHorizontally { it } },
                 ) {
                     composable(Screen.List.routeId) { CivitAiScreen() }
                     composable(Screen.Detail.routeId) {

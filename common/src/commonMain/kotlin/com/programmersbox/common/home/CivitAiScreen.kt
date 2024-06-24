@@ -3,7 +3,6 @@
 package com.programmersbox.common.home
 
 import androidx.compose.animation.*
-import androidx.compose.animation.core.tween
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
@@ -59,6 +58,7 @@ fun CivitAiScreen(
     val database by db.getFavorites().collectAsStateWithLifecycle(emptyList())
     val blacklisted by db.getBlacklistedItems().collectAsStateWithLifecycle(emptyList())
     val dataStore = LocalDataStore.current
+    val showBlur by dataStore.rememberShowBlur()
     val showNsfw by remember { dataStore.showNsfw.flow }.collectAsStateWithLifecycle(false)
     val blurStrength by remember { dataStore.hideNsfwStrength.flow }.collectAsStateWithLifecycle(6f)
     val viewModel = viewModel { CivitAiViewModel(network, dataStore) }
@@ -82,36 +82,15 @@ fun CivitAiScreen(
 
     Scaffold(
         topBar = {
-            TopAppBar(
-                title = { Text("CivitAi Model Browser") },
-                navigationIcon = {
-                    if (showRefreshButton) {
-                        IconButton(
-                            onClick = { lazyPagingItems.refresh() },
-                        ) { Icon(Icons.Default.Refresh, null) }
-                    } else {
-                        IconButton(
-                            onClick = { searchViewModel.showSearch = true }
-                        ) { Icon(Icons.Default.Search, null) }
-                    }
-                },
-                actions = {
-                    if (showRefreshButton) {
-                        IconButton(
-                            onClick = { searchViewModel.showSearch = true }
-                        ) { Icon(Icons.Default.Search, null) }
-                    }
-
-                    IconButton(
-                        onClick = { navController.navigate(Screen.Settings.routeId) }
-                    ) { Icon(Icons.Default.Settings, null) }
-
-                    IconButton(
-                        onClick = { navController.navigate(Screen.Favorites.routeId) }
-                    ) { Icon(Icons.Default.Favorite, null) }
-                },
-                colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.Transparent),
-                modifier = Modifier.hazeChild(hazeState)
+            SearchAppBar(
+                viewModel = searchViewModel,
+                database = database.filterIsInstance<FavoriteModel.Model>(),
+                showNsfw = showNsfw,
+                blurStrength = blurStrength,
+                blacklisted = blacklisted,
+                onShowSearch = { searchViewModel.showSearch = it },
+                showBlur = showBlur,
+                modifier = Modifier.ifTrue(showBlur) { hazeChild(hazeState) }
             )
         },
         floatingActionButton = {
@@ -136,7 +115,7 @@ fun CivitAiScreen(
                 verticalArrangement = Arrangement.spacedBy(4.dp),
                 horizontalArrangement = Arrangement.spacedBy(4.dp),
                 modifier = Modifier
-                    .haze(state = hazeState)
+                    .ifTrue(showBlur) { haze(state = hazeState) }
                     .fillMaxSize()
             ) {
                 modelItems(
@@ -166,13 +145,13 @@ fun CivitAiScreen(
         }
     }
 
-    SearchView(
+    /*SearchView(
         viewModel = searchViewModel,
         database = database.filterIsInstance<FavoriteModel.Model>(),
         showNsfw = showNsfw,
         blurStrength = blurStrength,
         blacklisted = blacklisted,
-    )
+    )*/
 }
 
 @OptIn(ExperimentalFoundationApi::class)
@@ -436,70 +415,99 @@ fun CardContent(
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun SearchView(
+private fun SearchAppBar(
     viewModel: CivitAiSearchViewModel,
     database: List<FavoriteModel>,
     blacklisted: List<BlacklistedItem>,
     showNsfw: Boolean,
     blurStrength: Float,
+    onShowSearch: (Boolean) -> Unit,
+    showBlur: Boolean,
+    modifier: Modifier = Modifier,
 ) {
     val navController = LocalNavController.current
     val lazyPagingItems = viewModel.pager.collectAsLazyPagingItems()
-    AnimatedContent(
-        targetState = viewModel.showSearch,
-        transitionSpec = {
-            slideInVertically(
-                animationSpec = tween(durationMillis = 500),
-                initialOffsetY = { -it }
-            ) togetherWith slideOutVertically(
-                animationSpec = tween(durationMillis = 500),
-                targetOffsetY = { -it }
-            )
-        },
-        contentAlignment = Alignment.TopCenter,
-        modifier = Modifier.fillMaxWidth()
-    ) { target ->
-        if (target) {
-            SearchBar(
-                query = viewModel.searchQuery,
-                onQueryChange = { viewModel.searchQuery = it },
-                onSearch = viewModel::onSearch,
-                active = true,
-                onActiveChange = { viewModel.showSearch = it },
-                placeholder = { Text("Search CivitAi") },
-                trailingIcon = {
+    SearchBar(
+        query = viewModel.searchQuery,
+        onQueryChange = { viewModel.searchQuery = it },
+        onSearch = viewModel::onSearch,
+        active = viewModel.showSearch,
+        onActiveChange = { viewModel.showSearch = it },
+        placeholder = { Text("Search CivitAi") },
+        trailingIcon = {
+            Row(
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                AnimatedVisibility(
+                    viewModel.searchQuery.isNotEmpty(),
+                    enter = slideInHorizontally { it } + fadeIn(),
+                    exit = slideOutHorizontally { it } + fadeOut()
+                ) {
                     IconButton(
                         onClick = {
                             viewModel.searchQuery = ""
                             viewModel.onSearch("")
                         }
                     ) { Icon(Icons.Default.Clear, null) }
-                },
-                leadingIcon = {
+                }
+
+                if (showRefreshButton) {
+                    IconButton(
+                        onClick = { onShowSearch(true) }
+                    ) { Icon(Icons.Default.Search, null) }
+                }
+
+                IconButton(
+                    onClick = { navController.navigate(Screen.Settings.routeId) }
+                ) { Icon(Icons.Default.Settings, null) }
+
+                IconButton(
+                    onClick = { navController.navigate(Screen.Favorites.routeId) }
+                ) { Icon(Icons.Default.Favorite, null) }
+            }
+        },
+        leadingIcon = {
+            Row(
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                if (showRefreshButton) {
+                    IconButton(
+                        onClick = { lazyPagingItems.refresh() },
+                    ) { Icon(Icons.Default.Refresh, null) }
+                }
+
+                AnimatedVisibility(
+                    viewModel.showSearch,
+                    enter = slideInHorizontally { -it } + fadeIn(),
+                    exit = slideOutHorizontally { -it } + fadeOut()
+                ) {
                     IconButton(
                         onClick = { viewModel.showSearch = false }
                     ) { Icon(Icons.AutoMirrored.Filled.ArrowBack, null) }
-                },
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                LazyVerticalGrid(
-                    columns = adaptiveGridCell(),
-                    verticalArrangement = Arrangement.spacedBy(4.dp),
-                    horizontalArrangement = Arrangement.spacedBy(4.dp),
-                    modifier = Modifier
-                        .padding(4.dp)
-                        .fillMaxSize()
-                ) {
-                    modelItems(
-                        lazyPagingItems = lazyPagingItems,
-                        navController = navController,
-                        showNsfw = showNsfw,
-                        blurStrength = blurStrength,
-                        database = database,
-                        blacklisted = blacklisted,
-                    )
                 }
             }
+        },
+        colors = if (showBlur) SearchBarDefaults.colors(
+            containerColor = Color.Transparent
+        ) else SearchBarDefaults.colors(),
+        modifier = modifier.fillMaxWidth()
+    ) {
+        LazyVerticalGrid(
+            columns = adaptiveGridCell(),
+            verticalArrangement = Arrangement.spacedBy(4.dp),
+            horizontalArrangement = Arrangement.spacedBy(4.dp),
+            modifier = Modifier
+                .padding(4.dp)
+                .fillMaxSize()
+        ) {
+            modelItems(
+                lazyPagingItems = lazyPagingItems,
+                navController = navController,
+                showNsfw = showNsfw,
+                blurStrength = blurStrength,
+                database = database,
+                blacklisted = blacklisted,
+            )
         }
     }
 }

@@ -1,12 +1,12 @@
 [versions]
 browser = "1.8.0"
 composeScrollbars = "1.0.4"
-haze = "0.7.1"
+haze = "0.7.2"
 jsoup = "1.17.2"
 kotlin-version = "2.0.0"
 agp-version = "8.2.2"
 compose-version = "1.6.11"
-ktor-version = "2.3.11"
+ktor-version = "2.3.12"
 kotlinx-datetime = "0.6.0"
 datastore-version = "1.1.1"
 navigationCompose = "2.7.0-alpha07"
@@ -15,7 +15,7 @@ realm = "2.0.0"
 paging-version = "3.3.0"
 kamel-image = "0.9.5"
 kotlinx-coroutines-core = "1.8.1"
-sonner = "0.3.6"
+sonner = "0.3.7"
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp-version" }

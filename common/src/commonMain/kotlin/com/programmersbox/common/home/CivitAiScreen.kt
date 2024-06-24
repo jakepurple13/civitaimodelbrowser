@@ -476,14 +476,20 @@ private fun SearchAppBar(
                     ) { Icon(Icons.Default.Refresh, null) }
                 }
 
-                AnimatedVisibility(
+                AnimatedContent(
                     viewModel.showSearch,
-                    enter = slideInHorizontally { -it } + fadeIn(),
-                    exit = slideOutHorizontally { -it } + fadeOut()
-                ) {
-                    IconButton(
-                        onClick = { viewModel.showSearch = false }
-                    ) { Icon(Icons.AutoMirrored.Filled.ArrowBack, null) }
+                    transitionSpec = {
+                        slideInHorizontally { -it } + fadeIn() togetherWith slideOutHorizontally { -it } + fadeOut()
+                    },
+                    contentAlignment = Alignment.Center
+                ) { target ->
+                    if (target) {
+                        IconButton(
+                            onClick = { viewModel.showSearch = false }
+                        ) { Icon(Icons.AutoMirrored.Filled.ArrowBack, null) }
+                    } else {
+                        Icon(Icons.Default.Search, null)
+                    }
                 }
             }
         },

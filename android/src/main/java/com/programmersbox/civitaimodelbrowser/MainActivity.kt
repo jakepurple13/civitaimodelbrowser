@@ -30,7 +30,7 @@ import com.dokar.sonner.Toaster
 import com.dokar.sonner.rememberToasterState
 import com.programmersbox.common.LocalDatabaseDao
 import com.programmersbox.common.UIShow
-import com.programmersbox.common.db.FavoriteModel
+import com.programmersbox.common.db.CivitDb
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.encodeToString
@@ -50,14 +50,14 @@ class MainActivity : ComponentActivity() {
                 CompositionLocalProvider(
                     LocalUriHandler provides customUriHandler
                 ) {
-                    var listToExport by remember { mutableStateOf(emptyList<FavoriteModel>()) }
+                    var listToExport by remember { mutableStateOf(CivitDb(emptyList(), emptyList())) }
                     val exportLauncher = rememberLauncherForActivityResult(
                         ActivityResultContracts.CreateDocument("application/json")
                     ) { document ->
                         document?.let {
                             lifecycleScope.launch {
                                 writeToFile(it, listToExport)
-                                listToExport = emptyList()
+                                listToExport = CivitDb(emptyList(), emptyList())
                                 toaster.show(
                                     Toast(
                                         message = "Export Completed",
@@ -129,7 +129,7 @@ class MainActivity : ComponentActivity() {
     }
 }
 
-private suspend fun Context.writeToFile(document: Uri, list: List<FavoriteModel>) {
+private suspend fun Context.writeToFile(document: Uri, list: CivitDb) {
     val json = Json {
         isLenient = true
         prettyPrint = true

@@ -7,6 +7,7 @@ import com.programmersbox.common.ModelType
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
+import kotlinx.serialization.Serializable
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 
@@ -142,6 +143,9 @@ interface FavoritesDao {
     @Query("SELECT * FROM blacklisted_table")
     fun getBlacklisted(): Flow<List<BlacklistedItemRoom>>
 
+    @Query("SELECT * FROM blacklisted_table")
+    suspend fun getBlacklistedSync(): List<BlacklistedItemRoom>
+
     @Delete
     suspend fun delete(item: FavoriteRoom)
 
@@ -168,7 +172,10 @@ interface FavoritesDao {
             ignoreUnknownKeys = true
             coerceInputValues = true
         },
-    ) = getFavoritesSync().map { room -> room.toModel(json) }
+    ) = CivitDb(
+        favorites = getFavoritesSync().map { room -> room.toModel(json) },
+        blacklistedItemRoom = getBlacklistedSync()
+    )
 
     @Ignore
     suspend fun import(
@@ -180,8 +187,8 @@ interface FavoritesDao {
             coerceInputValues = true
         },
     ) {
-        val list = json.decodeFromString<List<FavoriteModel>>(jsonString).toMutableList()
-        list.forEach { model ->
+        val list = json.decodeFromString<CivitDb>(jsonString)
+        list.favorites.forEach { model ->
             insert(
                 when (model) {
                     is FavoriteModel.Model -> FavoriteRoom(
@@ -214,6 +221,8 @@ interface FavoritesDao {
                 }
             )
         }
+
+        list.blacklistedItemRoom.forEach { item -> insert(item) }
     }
 }
 
@@ -239,4 +248,10 @@ fun ImageMetaDb.toMeta() = ImageMeta(
     cfgScale = cfgScale,
     clipSkip = clipSkip,
     negativePrompt = negativePrompt
+)
+
+@Serializable
+data class CivitDb(
+    val favorites: List<FavoriteModel>,
+    val blacklistedItemRoom: List<BlacklistedItemRoom>,
 )

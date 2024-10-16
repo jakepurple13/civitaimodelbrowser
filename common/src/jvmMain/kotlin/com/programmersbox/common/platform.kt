@@ -14,7 +14,7 @@ import androidx.room.Room
 import androidx.room.RoomDatabase
 import com.programmersbox.common.db.AppDatabase
 import com.programmersbox.common.db.BlacklistedItemRoom
-import com.programmersbox.common.db.FavoriteModel
+import com.programmersbox.common.db.CivitDb
 import kotlinx.coroutines.launch
 import java.io.File
 
@@ -26,7 +26,7 @@ public actual fun getPlatformName(): String {
 public fun UIShow(
     onShareClick: (String) -> Unit,
     producePath: () -> String,
-    onExport: (List<FavoriteModel>) -> Unit,
+    onExport: (CivitDb) -> Unit = {},
     onImport: () -> String,
     export: @Composable () -> Unit = {},
     import: (@Composable () -> Unit)? = null,

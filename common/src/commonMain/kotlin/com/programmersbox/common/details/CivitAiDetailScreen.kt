@@ -167,7 +167,10 @@ fun CivitAiDetailScreen(
                         modifier = Modifier.ifTrue(showBlur) {
                             hazeChild(hazeState, hazeStyle) {
                                 //TODO: Fix this
-                                progressive = HazeProgressive.verticalGradient(startIntensity = 0f, endIntensity = 1f)
+                                progressive = HazeProgressive.verticalGradient(
+                                    startIntensity = 0f,
+                                    endIntensity = 1f,
+                                )
                             }
                         }
                     )

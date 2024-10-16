@@ -21,7 +21,7 @@ import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.programmersbox.common.components.icons.Github
-import com.programmersbox.common.db.FavoriteModel
+import com.programmersbox.common.db.CivitDb
 import com.programmersbox.resources.Res
 import com.programmersbox.resources.civitai_logo
 import kotlinx.coroutines.launch
@@ -32,7 +32,7 @@ import kotlin.math.roundToInt
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalResourceApi::class)
 @Composable
 fun SettingsScreen(
-    onExport: (List<FavoriteModel>) -> Unit = {},
+    onExport: (CivitDb) -> Unit = {},
     onImport: () -> String = { "" },
     export: @Composable () -> Unit = {},
     import: (@Composable () -> Unit)? = null,

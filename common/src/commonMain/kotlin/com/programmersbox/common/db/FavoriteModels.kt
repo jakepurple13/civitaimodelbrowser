@@ -20,6 +20,7 @@ data class FavoriteRoom(
     val dateAdded: Long = Clock.System.now().toEpochMilliseconds(),
 )
 
+@Serializable
 @Entity(tableName = "blacklisted_table")
 data class BlacklistedItemRoom(
     @androidx.room.PrimaryKey

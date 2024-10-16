@@ -28,7 +28,7 @@ import dev.chrisbanes.haze.materials.HazeMaterials
 internal fun App(
     onShareClick: (String) -> Unit,
     producePath: () -> String,
-    onExport: (List<FavoriteModel>) -> Unit = {},
+    onExport: (CivitDb) -> Unit = {},
     onImport: () -> String = { "" },
     export: @Composable () -> Unit = {},
     import: (@Composable () -> Unit)? = null,

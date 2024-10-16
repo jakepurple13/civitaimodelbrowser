@@ -23,7 +23,7 @@ import com.gigamole.composescrollbars.scrolltype.ScrollbarsScrollType
 import com.gigamole.composescrollbars.scrolltype.knobtype.ScrollbarsDynamicKnobType
 import com.programmersbox.common.db.AppDatabase
 import com.programmersbox.common.db.BlacklistedItemRoom
-import com.programmersbox.common.db.FavoriteModel
+import com.programmersbox.common.db.CivitDb
 
 public actual fun getPlatformName(): String {
     return "civitaimodelbrowser"
@@ -33,7 +33,7 @@ public actual fun getPlatformName(): String {
 public fun UIShow(
     onShareClick: (String) -> Unit,
     producePath: () -> String,
-    onExport: (List<FavoriteModel>) -> Unit = {},
+    onExport: (CivitDb) -> Unit = {},
     onImport: () -> String = { "" },
     export: @Composable () -> Unit = {},
     import: (@Composable () -> Unit)? = null,

@@ -1,3 +1,6 @@
+import androidx.compose.material3.Card
+import androidx.compose.material3.ListItem
+import androidx.compose.material3.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.window.AwtWindow
 import androidx.compose.ui.window.application
@@ -5,7 +8,7 @@ import com.dokar.sonner.Toast
 import com.dokar.sonner.ToastType
 import com.dokar.sonner.Toaster
 import com.dokar.sonner.rememberToasterState
-import com.programmersbox.common.LocalDatabase
+import com.programmersbox.common.LocalDatabaseDao
 import com.programmersbox.common.Network
 import com.programmersbox.common.UIShow
 import kotlinx.coroutines.launch
@@ -29,8 +32,6 @@ fun main() = application {
     WindowWithBar(
         onCloseRequest = ::exitApplication,
         frameWindowScope = {
-            val db = LocalDatabase.current
-
             var dragState by remember { mutableStateOf(false) }
 
             LaunchedEffect(Unit) {
@@ -59,7 +60,7 @@ fun main() = application {
                                                 toaster.dismiss(13)
                                                 it
                                                     .let { File(it).readText() }
-                                                    .let { scope.launch { db.import(it) } }
+                                                //.let { scope.launch { db.import(it) } }
 
                                                 toaster.show(
                                                     Toast(
@@ -105,7 +106,7 @@ fun main() = application {
                 ""
             },
             export = {
-                val database = LocalDatabase.current
+                val database = LocalDatabaseDao.current
                 if (export) {
                     FileDialog(
                         FileDialogMode.Save,
@@ -139,7 +140,7 @@ fun main() = application {
                 }
             },
             import = {
-                val database = LocalDatabase.current
+                val database = LocalDatabaseDao.current
                 if (import) {
                     FileDialog(
                         FileDialogMode.Load,
@@ -162,6 +163,14 @@ fun main() = application {
                                 }
                             }
                     }
+                }
+
+                Card(
+                    onClick = { import = true }
+                ) {
+                    ListItem(
+                        headlineContent = { Text("Import Favorites") }
+                    )
                 }
             }
         )

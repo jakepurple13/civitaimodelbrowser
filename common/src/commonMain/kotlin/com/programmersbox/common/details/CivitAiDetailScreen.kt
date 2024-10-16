@@ -1,5 +1,3 @@
-@file:Suppress("INLINE_FROM_HIGHER_PLATFORM")
-
 package com.programmersbox.common.details
 
 import androidx.compose.animation.*
@@ -36,9 +34,7 @@ import com.programmersbox.common.*
 import com.programmersbox.common.components.LoadingImage
 import com.programmersbox.common.db.FavoriteModel
 import com.programmersbox.common.home.BlacklistHandling
-import dev.chrisbanes.haze.HazeState
-import dev.chrisbanes.haze.haze
-import dev.chrisbanes.haze.hazeChild
+import dev.chrisbanes.haze.*
 import io.kamel.image.KamelImage
 import io.kamel.image.asyncPainterResource
 import java.text.SimpleDateFormat
@@ -52,8 +48,8 @@ fun CivitAiDetailScreen(
     network: Network = LocalNetwork.current,
 ) {
     val hazeState = remember { HazeState() }
-    val database = LocalDatabase.current
-    val viewModel = viewModel { CivitAiDetailViewModel(network, id, database) }
+    val dao = LocalDatabaseDao.current
+    val viewModel = viewModel { CivitAiDetailViewModel(network, id, dao) }
     val navController = LocalNavController.current
     val simpleDateTimeFormatter = remember { SimpleDateFormat("MM/dd/yy HH:mm", Locale.getDefault()) }
     val dataStore = LocalDataStore.current
@@ -61,8 +57,10 @@ fun CivitAiDetailScreen(
     val showNsfw by remember { dataStore.showNsfw.flow }.collectAsStateWithLifecycle(false)
     val nsfwBlurStrength by remember { dataStore.hideNsfwStrength.flow }.collectAsStateWithLifecycle(6f)
 
-    val favoriteList by database.getFavorites().collectAsStateWithLifecycle(emptyList())
-    val blacklisted by database.getBlacklistedItems().collectAsStateWithLifecycle(emptyList())
+    val favoriteList by dao.getFavoriteModels().collectAsStateWithLifecycle(emptyList())
+    val blacklisted by dao.getBlacklisted().collectAsStateWithLifecycle(emptyList())
+
+    val hazeStyle = LocalHazeStyle.current
 
     when (val model = viewModel.models) {
         is DetailViewState.Content -> {
@@ -114,7 +112,11 @@ fun CivitAiDetailScreen(
                         },
                         colors = if (showBlur) TopAppBarDefaults.topAppBarColors(containerColor = Color.Transparent)
                         else TopAppBarDefaults.topAppBarColors(),
-                        modifier = Modifier.ifTrue(showBlur) { hazeChild(hazeState) }
+                        modifier = Modifier.ifTrue(showBlur) {
+                            hazeChild(hazeState, hazeStyle) {
+                                progressive = HazeProgressive.verticalGradient(startIntensity = 1f, endIntensity = 0f)
+                            }
+                        }
                     )
                 },
                 bottomBar = {
@@ -162,7 +164,12 @@ fun CivitAiDetailScreen(
                             )
                         },
                         containerColor = if (showBlur) Color.Transparent else BottomAppBarDefaults.containerColor,
-                        modifier = Modifier.ifTrue(showBlur) { hazeChild(hazeState) }
+                        modifier = Modifier.ifTrue(showBlur) {
+                            hazeChild(hazeState, hazeStyle) {
+                                //TODO: Fix this
+                                progressive = HazeProgressive.verticalGradient(startIntensity = 0f, endIntensity = 1f)
+                            }
+                        }
                     )
                 },
             ) { paddingValues ->
@@ -441,7 +448,7 @@ private fun SheetContent(
                 },
                 text = {
                     KamelImage(
-                        resource = painter,
+                        resource = { painter },
                         onLoading = {
                             val progress = animateFloatAsState(
                                 targetValue = it,
@@ -490,14 +497,14 @@ private fun SheetContent(
 
             Box(modifier = Modifier.align(Alignment.CenterHorizontally)) {
                 KamelImage(
-                    resource = painter,
+                    resource = { painter },
                     contentDescription = null,
                     colorFilter = ColorFilter.colorMatrix(ColorMatrix().apply { setToSaturation(saturation) }),
                     modifier = Modifier.blurGradient(blur, alpha, scaleX, scaleY)
                 )
 
                 KamelImage(
-                    resource = painter,
+                    resource = { painter },
                     contentDescription = null,
                     onLoading = {
                         val progress = animateFloatAsState(

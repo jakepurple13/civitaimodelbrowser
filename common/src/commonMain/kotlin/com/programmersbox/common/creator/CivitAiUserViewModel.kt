@@ -10,7 +10,7 @@ import com.programmersbox.common.DataStore
 import com.programmersbox.common.Network
 import com.programmersbox.common.PAGE_LIMIT
 import com.programmersbox.common.db.FavoriteType
-import com.programmersbox.common.db.FavoritesDatabase
+import com.programmersbox.common.db.FavoritesDao
 import com.programmersbox.common.paging.CivitBrowserUserPagingSource
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
@@ -20,7 +20,7 @@ import kotlin.random.Random
 class CivitAiUserViewModel(
     network: Network,
     dataStore: DataStore,
-    val database: FavoritesDatabase,
+    val database: FavoritesDao,
     val username: String,
 ) : ViewModel() {
     val pager = Pager(

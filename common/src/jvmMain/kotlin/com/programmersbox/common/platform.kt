@@ -10,9 +10,13 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.window.Window
-import com.programmersbox.common.db.BlacklistedItem
+import androidx.room.Room
+import androidx.room.RoomDatabase
+import com.programmersbox.common.db.AppDatabase
+import com.programmersbox.common.db.BlacklistedItemRoom
 import com.programmersbox.common.db.FavoriteModel
 import kotlinx.coroutines.launch
+import java.io.File
 
 public actual fun getPlatformName(): String {
     return "civitaimodelbrowser"
@@ -25,7 +29,7 @@ public fun UIShow(
     onExport: (List<FavoriteModel>) -> Unit,
     onImport: () -> String,
     export: @Composable () -> Unit = {},
-    import: @Composable () -> Unit = {},
+    import: (@Composable () -> Unit)? = null,
 ) {
     App(
         onShareClick = onShareClick,
@@ -33,7 +37,8 @@ public fun UIShow(
         onExport = onExport,
         onImport = onImport,
         export = export,
-        import = import
+        import = import,
+        builder = getDatabaseBuilder()
     )
 }
 
@@ -67,7 +72,7 @@ internal actual fun CustomScrollBar(lazyGridState: LazyGridState, modifier: Modi
 @Composable
 internal actual fun ContextMenu(
     isBlacklisted: Boolean,
-    blacklistItems: List<BlacklistedItem>,
+    blacklistItems: List<BlacklistedItemRoom>,
     modelId: Long,
     name: String,
     nsfw: Boolean,
@@ -75,7 +80,7 @@ internal actual fun ContextMenu(
     content: @Composable () -> Unit,
 ) {
     val scope = rememberCoroutineScope()
-    val db = LocalDatabase.current
+    val db = LocalDatabaseDao.current
     ContextMenuArea(
         items = {
             listOfNotNull(
@@ -87,11 +92,18 @@ internal actual fun ContextMenu(
                 ContextMenuItem("Remove from Blacklist") {
                     scope.launch {
                         blacklistItems.find { b -> b.id == modelId }
-                            ?.let { db.removeBlacklistItem(it) }
+                            ?.let { db.delete(it) }
                     }
                 }.takeIf { isBlacklisted }
             )
         },
         content = content
+    )
+}
+
+fun getDatabaseBuilder(): RoomDatabase.Builder<AppDatabase> {
+    val dbFile = File(System.getProperty("java.io.tmpdir"), "my_room.db")
+    return Room.databaseBuilder<AppDatabase>(
+        name = dbFile.absolutePath,
     )
 }

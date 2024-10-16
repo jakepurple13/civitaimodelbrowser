@@ -1,5 +1,3 @@
-@file:Suppress("INLINE_FROM_HIGHER_PLATFORM")
-
 package com.programmersbox.common.db
 
 import androidx.compose.animation.*
@@ -29,9 +27,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.programmersbox.common.*
 import com.programmersbox.common.home.CardContent
-import dev.chrisbanes.haze.HazeState
-import dev.chrisbanes.haze.haze
-import dev.chrisbanes.haze.hazeChild
+import dev.chrisbanes.haze.*
 import io.kamel.image.KamelImage
 import io.kamel.image.asyncPainterResource
 import kotlinx.coroutines.launch
@@ -50,11 +46,13 @@ fun FavoritesUI() {
     val blurStrength by remember { dataStore.hideNsfwStrength.flow }.collectAsStateWithLifecycle(6f)
     var reverseFavorites by dataStore.rememberReverseFavorites()
     val showBlur by dataStore.rememberShowBlur()
-    val database = LocalDatabase.current
     val lazyGridState = rememberLazyGridState()
-    val viewModel = viewModel { FavoritesViewModel(database, dataStore) }
+    val dao = LocalDatabaseDao.current
+    val viewModel = viewModel { FavoritesViewModel(dao, dataStore) }
 
     var showSortedByDialog by remember { mutableStateOf(false) }
+
+    val hazeStyle = LocalHazeStyle.current
 
     if (showSortedByDialog) {
         SheetDetails(
@@ -95,38 +93,48 @@ fun FavoritesUI() {
                 color = if (showBlur) Color.Transparent else MaterialTheme.colorScheme.surface
             ) {
                 Column(
-                    modifier = Modifier.ifTrue(showBlur) { hazeChild(hazeState) }
+                    modifier = Modifier.ifTrue(showBlur) {
+                        hazeChild(hazeState, hazeStyle) {
+                            progressive = HazeProgressive.verticalGradient(startIntensity = 1f, endIntensity = 0f)
+                        }
+                    }
                 ) {
                     DockedSearchBar(
-                        query = viewModel.search,
-                        onQueryChange = { viewModel.search = it },
-                        onSearch = {},
-                        active = false,
-                        onActiveChange = {},
-                        leadingIcon = {
-                            IconButton(
-                                onClick = { navController.popBackStack() }
-                            ) { Icon(Icons.AutoMirrored.Filled.ArrowBack, null) }
-                        },
-                        placeholder = { Text("Search Favorites") },
-                        trailingIcon = {
-                            Row(
-                                verticalAlignment = Alignment.CenterVertically
-                            ) {
-                                Text("(${viewModel.favoritesList.size})")
-                                FilledIconToggleButton(
-                                    checked = reverseFavorites,
-                                    onCheckedChange = { reverseFavorites = it }
-                                ) { Icon(Icons.Default.Image, null) }
-                                IconButton(
-                                    onClick = { showSortedByDialog = true }
-                                ) { Icon(Icons.AutoMirrored.Filled.Sort, null) }
-                                AnimatedVisibility(viewModel.search.isNotEmpty()) {
+                        expanded = false,
+                        onExpandedChange = {},
+                        inputField = {
+                            SearchBarDefaults.InputField(
+                                query = viewModel.search,
+                                onQueryChange = { viewModel.search = it },
+                                onSearch = {},
+                                expanded = false,
+                                onExpandedChange = {},
+                                leadingIcon = {
                                     IconButton(
-                                        onClick = { viewModel.search = "" }
-                                    ) { Icon(Icons.Default.Clear, null) }
-                                }
-                            }
+                                        onClick = { navController.popBackStack() }
+                                    ) { Icon(Icons.AutoMirrored.Filled.ArrowBack, null) }
+                                },
+                                placeholder = { Text("Search Favorites") },
+                                trailingIcon = {
+                                    Row(
+                                        verticalAlignment = Alignment.CenterVertically
+                                    ) {
+                                        Text("(${viewModel.favoritesList.size})")
+                                        FilledIconToggleButton(
+                                            checked = reverseFavorites,
+                                            onCheckedChange = { reverseFavorites = it }
+                                        ) { Icon(Icons.Default.Image, null) }
+                                        IconButton(
+                                            onClick = { showSortedByDialog = true }
+                                        ) { Icon(Icons.AutoMirrored.Filled.Sort, null) }
+                                        AnimatedVisibility(viewModel.search.isNotEmpty()) {
+                                            IconButton(
+                                                onClick = { viewModel.search = "" }
+                                            ) { Icon(Icons.Default.Clear, null) }
+                                        }
+                                    }
+                                },
+                            )
                         },
                         colors = if (showBlur) SearchBarDefaults.colors(
                             containerColor = Color.Transparent
@@ -215,7 +223,7 @@ fun FavoritesUI() {
                         CreatorItem(
                             models = model,
                             onClick = { navController.navigateToUser(model.name) },
-                            modifier = Modifier.animateItemPlacement()
+                            modifier = Modifier.animateItem()
                         )
                     }
 
@@ -234,7 +242,7 @@ fun FavoritesUI() {
                                         },
                                         onRemoveFavorite = {
                                             scope.launch {
-                                                database.removeImage(sheetModel.imageUrl.orEmpty())
+                                                dao.removeImage(sheetModel.imageUrl.orEmpty())
                                             }
                                         }
                                     )
@@ -246,7 +254,7 @@ fun FavoritesUI() {
                             onClick = { sheetDetails = model },
                             showNsfw = showNsfw,
                             blurStrength = blurStrength.dp,
-                            modifier = Modifier.animateItemPlacement()
+                            modifier = Modifier.animateItem()
                         )
                     }
 
@@ -256,7 +264,7 @@ fun FavoritesUI() {
                             onClick = { navController.navigateToDetail(model.id) },
                             showNsfw = showNsfw,
                             blurStrength = blurStrength.dp,
-                            modifier = Modifier.animateItemPlacement()
+                            modifier = Modifier.animateItem()
                         )
                     }
                 }
@@ -301,7 +309,7 @@ private fun SheetContent(
                 },
                 text = {
                     KamelImage(
-                        resource = painter,
+                        resource = { painter },
                         onLoading = {
                             CircularProgressIndicator({ it })
                         },
@@ -333,7 +341,7 @@ private fun SheetContent(
                 }
             )
             KamelImage(
-                resource = painter,
+                resource = { painter },
                 onLoading = {
                     CircularProgressIndicator({ it })
                 },

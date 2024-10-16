@@ -1,5 +1,3 @@
-@file:Suppress("INLINE_FROM_HIGHER_PLATFORM")
-
 package com.programmersbox.common.components
 
 import androidx.compose.foundation.layout.*

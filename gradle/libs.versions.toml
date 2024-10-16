@@ -1,49 +1,58 @@
 [versions]
 browser = "1.8.0"
 composeScrollbars = "1.0.4"
-haze = "0.7.2"
-jsoup = "1.17.2"
-kotlin-version = "2.0.0"
+haze = "0.9.0-beta04"
+jsoup = "1.18.1"
+kotlin-version = "2.0.21"
 agp-version = "8.2.2"
-compose-version = "1.6.11"
-ktor-version = "2.3.12"
-kotlinx-datetime = "0.6.0"
+compose-version = "1.7.0"
+ktor-version = "3.0.0"
+kotlinx-datetime = "0.6.1"
 datastore-version = "1.1.1"
 navigationCompose = "2.7.0-alpha07"
-lifecycleViewmodelCompose = "2.8.0"
-realm = "2.0.0"
-paging-version = "3.3.0"
-kamel-image = "0.9.5"
-kotlinx-coroutines-core = "1.8.1"
+lifecycleViewmodelCompose = "2.8.2"
+paging-version = "3.3.2"
+kamel-image = "1.0.0"
+kotlinx-coroutines-core = "1.9.0"
 sonner = "0.3.7"
+androidx-material = "1.12.0"
+
+ksp = "2.0.21-1.0.25"
+androidx-room = "2.7.0-alpha07"
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp-version" }
 android-library = { id = "com.android.library", version.ref = "agp-version" }
 kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin-version" }
 compose-compiler = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin-version" }
+ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
+room = { id = "androidx.room", version.ref = "androidx-room" }
 
 [libraries]
 androidx-appcompat = { module = "androidx.appcompat:appcompat", version = "1.7.0" }
 androidx-browser = { module = "androidx.browser:browser", version.ref = "browser" }
 androidx-core = { module = "androidx.core:core-ktx", version = "1.13.1" }
-androidx-activity-compose = "androidx.activity:activity-compose:1.9.0"
+androidx-activity-compose = "androidx.activity:activity-compose:1.9.2"
 composeScrollbars = { module = "com.github.GIGAMOLE:ComposeScrollbars", version.ref = "composeScrollbars" }
 datastore-core = { module = "androidx.datastore:datastore-core", version.ref = "datastore-version" }
 datastore-preferences = { module = "androidx.datastore:datastore-preferences-core", version.ref = "datastore-version" }
 datastore-core-okio = { group = "androidx.datastore", name = "datastore-core-okio", version.ref = "datastore-version" }
 haze = { module = "dev.chrisbanes.haze:haze", version.ref = "haze" }
+haze-materials = { module = "dev.chrisbanes.haze:haze-materials", version.ref = "haze" }
 jsoup = { module = "org.jsoup:jsoup", version.ref = "jsoup" }
 navigation-compose = { module = "org.jetbrains.androidx.navigation:navigation-compose", version.ref = "navigationCompose" }
 lifecycle-viewmodel-compose = { module = "org.jetbrains.androidx.lifecycle:lifecycle-viewmodel-compose", version.ref = "lifecycleViewmodelCompose" }
-realm-base = { module = "io.realm.kotlin:library-base", version.ref = "realm" }
+androidx-room-compiler = { group = "androidx.room", name = "room-compiler", version.ref = "androidx-room" }
+androidx-room-runtime = { group = "androidx.room", name = "room-runtime", version.ref = "androidx-room" }
+androidx-room-paging = { group = "androidx.room", name = "room-paging", version.ref = "androidx-room" }
 paging-runtime = { module = "androidx.paging:paging-common", version.ref = "paging-version" }
 ktor-core = { module = "io.ktor:ktor-client-core", version.ref = "ktor-version" }
 ktor-jvm = { module = "io.ktor:ktor-client-okhttp", version.ref = "ktor-version" }
 ktor-content-negotiation = { module = "io.ktor:ktor-client-content-negotiation", version.ref = "ktor-version" }
 ktor-serialization = { module = "io.ktor:ktor-serialization-kotlinx-json", version.ref = "ktor-version" }
 kotlinx-datetime = { module = "org.jetbrains.kotlinx:kotlinx-datetime", version.ref = "kotlinx-datetime" }
-kamel-image = { module = "media.kamel:kamel-image", version.ref = "kamel-image" }
+kamel-image = { module = "media.kamel:kamel-image-default", version.ref = "kamel-image" }
 kotlinx-coroutines-core = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", version.ref = "kotlinx-coroutines-core" }
 sonner = { module = "io.github.dokar3:sonner", version.ref = "sonner" }
 androidx-lifecycle-runtime-compose = { group = "androidx.lifecycle", name = "lifecycle-runtime-compose", version.ref = "lifecycleViewmodelCompose" }
+androidx-material = { group = "com.google.android.material", name = "material", version.ref = "androidx-material" }

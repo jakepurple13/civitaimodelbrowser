@@ -1,5 +1,3 @@
-@file:Suppress("INLINE_FROM_HIGHER_PLATFORM")
-
 package com.programmersbox.common.creator
 
 import androidx.compose.foundation.ExperimentalFoundationApi
@@ -29,9 +27,7 @@ import com.programmersbox.common.*
 import com.programmersbox.common.components.LoadingImage
 import com.programmersbox.common.home.modelItems
 import com.programmersbox.common.paging.collectAsLazyPagingItems
-import dev.chrisbanes.haze.HazeState
-import dev.chrisbanes.haze.haze
-import dev.chrisbanes.haze.hazeChild
+import dev.chrisbanes.haze.*
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
 @Composable
@@ -43,14 +39,16 @@ fun CivitAiUserScreen(
     val dataStore = LocalDataStore.current
     val showNsfw by remember { dataStore.showNsfw.flow }.collectAsStateWithLifecycle(false)
     val blurStrength by remember { dataStore.hideNsfwStrength.flow }.collectAsStateWithLifecycle(6f)
-    val database = LocalDatabase.current
-    val favorites by database.getFavorites().collectAsStateWithLifecycle(emptyList())
-    val blacklisted by database.getBlacklistedItems().collectAsStateWithLifecycle(emptyList())
+    val database = LocalDatabaseDao.current
+    val favorites by database.getFavoriteModels().collectAsStateWithLifecycle(emptyList())
+    val blacklisted by database.getBlacklisted().collectAsStateWithLifecycle(emptyList())
     val viewModel = viewModel { CivitAiUserViewModel(network, dataStore, database, username) }
     val showBlur by dataStore.rememberShowBlur()
     val navController = LocalNavController.current
 
     val lazyPagingItems = viewModel.pager.collectAsLazyPagingItems()
+
+    val hazeStyle = LocalHazeStyle.current
 
     Scaffold(
         topBar = {
@@ -97,7 +95,11 @@ fun CivitAiUserScreen(
                 },
                 colors = if (showBlur) TopAppBarDefaults.topAppBarColors(containerColor = Color.Transparent)
                 else TopAppBarDefaults.topAppBarColors(),
-                modifier = Modifier.ifTrue(showBlur) { hazeChild(hazeState) }
+                modifier = Modifier.ifTrue(showBlur) {
+                    hazeChild(hazeState, hazeStyle) {
+                        progressive = HazeProgressive.verticalGradient(startIntensity = 1f, endIntensity = 0f)
+                    }
+                }
             )
         },
     ) { padding ->

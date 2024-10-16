@@ -28,7 +28,7 @@ import com.dokar.sonner.Toast
 import com.dokar.sonner.ToastType
 import com.dokar.sonner.Toaster
 import com.dokar.sonner.rememberToasterState
-import com.programmersbox.common.LocalDatabase
+import com.programmersbox.common.LocalDatabaseDao
 import com.programmersbox.common.UIShow
 import com.programmersbox.common.db.FavoriteModel
 import kotlinx.coroutines.launch
@@ -68,28 +68,6 @@ class MainActivity : ComponentActivity() {
                         }
                     }
 
-                    val db = LocalDatabase.current
-
-                    val importLauncher = rememberLauncherForActivityResult(
-                        ActivityResultContracts.OpenDocument()
-                    ) { document ->
-                        document?.let { uri ->
-                            contentResolver.openInputStream(uri)
-                                ?.use { inputStream -> BufferedReader(InputStreamReader(inputStream)).readText() }
-                                ?.let {
-                                    lifecycleScope.launch {
-                                        db.import(it)
-                                        toaster.show(
-                                            Toast(
-                                                message = "Import Completed",
-                                                type = ToastType.Success
-                                            )
-                                        )
-                                    }
-                                }
-                        }
-                    }
-
                     UIShow(
                         onShareClick = {
                             startActivity(
@@ -108,11 +86,38 @@ class MainActivity : ComponentActivity() {
                             listToExport = it
                             exportLauncher.launch("civitmodelbrowser.json")
                         },
-                        onImport = {
-                            importLauncher.launch(arrayOf("application/json"))
-                            ""
-                        },
-                        import = {}
+                        onImport = { "" },
+                        import = {
+                            val dao = LocalDatabaseDao.current
+                            val importLauncher2 = rememberLauncherForActivityResult(
+                                ActivityResultContracts.OpenDocument()
+                            ) { document ->
+                                document?.let { uri ->
+                                    contentResolver.openInputStream(uri)
+                                        ?.use { inputStream -> BufferedReader(InputStreamReader(inputStream)).readText() }
+                                        ?.let {
+                                            lifecycleScope.launch {
+                                                dao.import(it)
+                                                toaster.show(
+                                                    Toast(
+                                                        message = "Import Completed",
+                                                        type = ToastType.Success
+                                                    )
+                                                )
+                                            }
+                                        }
+                                }
+                            }
+                            Card(
+                                onClick = {
+                                    importLauncher2.launch(arrayOf("application/json"))
+                                }
+                            ) {
+                                ListItem(
+                                    headlineContent = { Text("Import Favorites") }
+                                )
+                            }
+                        }
                     )
                 }
                 Toaster(

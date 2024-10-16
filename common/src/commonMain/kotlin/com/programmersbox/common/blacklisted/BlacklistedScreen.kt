@@ -10,7 +10,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.programmersbox.common.LocalDatabase
+import com.programmersbox.common.LocalDatabaseDao
 import com.programmersbox.common.LocalNavController
 import kotlinx.coroutines.launch
 
@@ -18,8 +18,8 @@ import kotlinx.coroutines.launch
 @Composable
 fun BlacklistedScreen() {
     val navController = LocalNavController.current
-    val db = LocalDatabase.current
-    val blacklistedItems by db.getBlacklistedItems().collectAsStateWithLifecycle(emptyList())
+    val db = LocalDatabaseDao.current
+    val blacklistedItems by db.getBlacklisted().collectAsStateWithLifecycle(emptyList())
     val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior()
     val scope = rememberCoroutineScope()
 
@@ -55,7 +55,7 @@ fun BlacklistedScreen() {
                             TextButton(
                                 onClick = {
                                     scope.launch {
-                                        db.removeBlacklistItem(blacklistedItem)
+                                        db.delete(blacklistedItem)
                                         showDialog = false
                                     }
                                 }
@@ -70,7 +70,7 @@ fun BlacklistedScreen() {
                 }
                 OutlinedCard(
                     onClick = { showDialog = true },
-                    modifier = Modifier.animateItemPlacement()
+                    modifier = Modifier.animateItem()
                 ) {
                     ListItem(
                         overlineContent = { Text(blacklistedItem.id.toString()) },

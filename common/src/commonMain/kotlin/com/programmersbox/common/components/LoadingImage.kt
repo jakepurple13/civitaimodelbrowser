@@ -25,7 +25,7 @@ fun LoadingImage(
     name: String = "",
 ) {
     KamelImage(
-        resource = asyncPainterResource(imageUrl),
+        resource = { asyncPainterResource(imageUrl) },
         onLoading = {
             CircularProgressIndicator({ it })
         },

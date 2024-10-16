@@ -19,7 +19,6 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import com.programmersbox.common.db.BlacklistedItem
 
 object ComposableUtils {
     private const val IMAGE_WIDTH_PX = 360 * 1.5f
@@ -193,8 +192,6 @@ fun Modifier.scaleRotateOffsetReset(
             interactionSource = remember { MutableInteractionSource() }
         )
 }
-
-fun List<BlacklistedItem>.isBlacklisted(modelId: Long) = any { it.id == modelId }
 
 fun Modifier.ifTrue(isTrue: Boolean, modifierBlock: Modifier.() -> Modifier) = if (isTrue) this.modifierBlock()
 else this

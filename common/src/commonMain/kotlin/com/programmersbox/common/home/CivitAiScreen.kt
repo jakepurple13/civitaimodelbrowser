@@ -1,5 +1,3 @@
-@file:Suppress("INLINE_FROM_HIGHER_PLATFORM")
-
 package com.programmersbox.common.home
 
 import androidx.compose.animation.*
@@ -36,15 +34,13 @@ import com.programmersbox.common.components.LoadingImage
 import com.programmersbox.common.components.PullRefreshIndicator
 import com.programmersbox.common.components.pullRefresh
 import com.programmersbox.common.components.rememberPullRefreshState
-import com.programmersbox.common.db.BlacklistedItem
+import com.programmersbox.common.db.BlacklistedItemRoom
 import com.programmersbox.common.db.FavoriteModel
 import com.programmersbox.common.paging.LazyPagingItems
 import com.programmersbox.common.paging.collectAsLazyPagingItems
 import com.programmersbox.common.paging.itemContentType
 import com.programmersbox.common.paging.itemKeyIndexed
-import dev.chrisbanes.haze.HazeState
-import dev.chrisbanes.haze.haze
-import dev.chrisbanes.haze.hazeChild
+import dev.chrisbanes.haze.*
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -54,9 +50,9 @@ fun CivitAiScreen(
 ) {
     val hazeState = remember { HazeState() }
     val navController = LocalNavController.current
-    val db = LocalDatabase.current
-    val database by db.getFavorites().collectAsStateWithLifecycle(emptyList())
-    val blacklisted by db.getBlacklistedItems().collectAsStateWithLifecycle(emptyList())
+    val db = LocalDatabaseDao.current
+    val database by db.getFavoriteModels().collectAsStateWithLifecycle(emptyList())
+    val blacklisted by db.getBlacklisted().collectAsStateWithLifecycle(emptyList())
     val dataStore = LocalDataStore.current
     val showBlur by dataStore.rememberShowBlur()
     val showNsfw by remember { dataStore.showNsfw.flow }.collectAsStateWithLifecycle(false)
@@ -80,6 +76,8 @@ fun CivitAiScreen(
         }
     }
 
+    val hazeStyle = LocalHazeStyle.current
+
     Scaffold(
         topBar = {
             SearchAppBar(
@@ -90,7 +88,12 @@ fun CivitAiScreen(
                 blacklisted = blacklisted,
                 onShowSearch = { searchViewModel.showSearch = it },
                 showBlur = showBlur,
-                modifier = Modifier.ifTrue(showBlur) { hazeChild(hazeState) }
+                modifier = Modifier.ifTrue(showBlur) {
+                    hazeChild(hazeState) {
+                        progressive = HazeProgressive.verticalGradient(startIntensity = 1f, endIntensity = 0f)
+                        style = hazeStyle
+                    }
+                }
             )
         },
         floatingActionButton = {
@@ -161,7 +164,7 @@ fun LazyGridScope.modelItems(
     showNsfw: Boolean,
     blurStrength: Float,
     database: List<FavoriteModel>,
-    blacklisted: List<BlacklistedItem>,
+    blacklisted: List<BlacklistedItemRoom>,
 ) {
     items(
         count = lazyPagingItems.itemCount,
@@ -197,7 +200,7 @@ fun LazyGridScope.modelItems(
                     blurStrength = blurStrength.dp,
                     isFavorite = database.any { m -> m.id == models.id },
                     isBlacklisted = isBlacklisted,
-                    modifier = Modifier.animateItemPlacement()
+                    modifier = Modifier.animateItem()
                 )
             }
         }
@@ -418,7 +421,7 @@ fun CardContent(
 private fun SearchAppBar(
     viewModel: CivitAiSearchViewModel,
     database: List<FavoriteModel>,
-    blacklisted: List<BlacklistedItem>,
+    blacklisted: List<BlacklistedItemRoom>,
     showNsfw: Boolean,
     blurStrength: Float,
     onShowSearch: (Boolean) -> Unit,
@@ -428,70 +431,76 @@ private fun SearchAppBar(
     val navController = LocalNavController.current
     val lazyPagingItems = viewModel.pager.collectAsLazyPagingItems()
     SearchBar(
-        query = viewModel.searchQuery,
-        onQueryChange = { viewModel.searchQuery = it },
-        onSearch = viewModel::onSearch,
-        active = viewModel.showSearch,
-        onActiveChange = { viewModel.showSearch = it },
-        placeholder = { Text("Search CivitAi") },
-        trailingIcon = {
-            Row(
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                AnimatedVisibility(
-                    viewModel.searchQuery.isNotEmpty(),
-                    enter = slideInHorizontally { it } + fadeIn(),
-                    exit = slideOutHorizontally { it } + fadeOut()
-                ) {
-                    IconButton(
-                        onClick = {
-                            viewModel.searchQuery = ""
-                            viewModel.onSearch("")
+        expanded = viewModel.showSearch,
+        onExpandedChange = { viewModel.showSearch = it },
+        inputField = {
+            SearchBarDefaults.InputField(
+                query = viewModel.searchQuery,
+                onQueryChange = { viewModel.searchQuery = it },
+                onSearch = viewModel::onSearch,
+                expanded = viewModel.showSearch,
+                onExpandedChange = { viewModel.showSearch = it },
+                placeholder = { Text("Search CivitAi") },
+                trailingIcon = {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        AnimatedVisibility(
+                            viewModel.searchQuery.isNotEmpty(),
+                            enter = slideInHorizontally { it } + fadeIn(),
+                            exit = slideOutHorizontally { it } + fadeOut()
+                        ) {
+                            IconButton(
+                                onClick = {
+                                    viewModel.searchQuery = ""
+                                    viewModel.onSearch("")
+                                }
+                            ) { Icon(Icons.Default.Clear, null) }
                         }
-                    ) { Icon(Icons.Default.Clear, null) }
-                }
 
-                if (showRefreshButton) {
-                    IconButton(
-                        onClick = { onShowSearch(true) }
-                    ) { Icon(Icons.Default.Search, null) }
-                }
+                        if (showRefreshButton) {
+                            IconButton(
+                                onClick = { onShowSearch(true) }
+                            ) { Icon(Icons.Default.Search, null) }
+                        }
 
-                IconButton(
-                    onClick = { navController.navigate(Screen.Settings.routeId) }
-                ) { Icon(Icons.Default.Settings, null) }
-
-                IconButton(
-                    onClick = { navController.navigate(Screen.Favorites.routeId) }
-                ) { Icon(Icons.Default.Favorite, null) }
-            }
-        },
-        leadingIcon = {
-            Row(
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                if (showRefreshButton) {
-                    IconButton(
-                        onClick = { lazyPagingItems.refresh() },
-                    ) { Icon(Icons.Default.Refresh, null) }
-                }
-
-                AnimatedContent(
-                    viewModel.showSearch,
-                    transitionSpec = {
-                        slideInHorizontally { -it } + fadeIn() togetherWith slideOutHorizontally { -it } + fadeOut()
-                    },
-                    contentAlignment = Alignment.Center
-                ) { target ->
-                    if (target) {
                         IconButton(
-                            onClick = { viewModel.showSearch = false }
-                        ) { Icon(Icons.AutoMirrored.Filled.ArrowBack, null) }
-                    } else {
-                        Icon(Icons.Default.Search, null)
+                            onClick = { navController.navigate(Screen.Settings.routeId) }
+                        ) { Icon(Icons.Default.Settings, null) }
+
+                        IconButton(
+                            onClick = { navController.navigate(Screen.Favorites.routeId) }
+                        ) { Icon(Icons.Default.Favorite, null) }
                     }
-                }
-            }
+                },
+                leadingIcon = {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        if (showRefreshButton) {
+                            IconButton(
+                                onClick = { lazyPagingItems.refresh() },
+                            ) { Icon(Icons.Default.Refresh, null) }
+                        }
+
+                        AnimatedContent(
+                            viewModel.showSearch,
+                            transitionSpec = {
+                                slideInHorizontally { -it } + fadeIn() togetherWith slideOutHorizontally { -it } + fadeOut()
+                            },
+                            contentAlignment = Alignment.Center
+                        ) { target ->
+                            if (target) {
+                                IconButton(
+                                    onClick = { viewModel.showSearch = false }
+                                ) { Icon(Icons.AutoMirrored.Filled.ArrowBack, null) }
+                            } else {
+                                Icon(Icons.Default.Search, null)
+                            }
+                        }
+                    }
+                },
+            )
         },
         colors = if (showBlur) SearchBarDefaults.colors(
             containerColor = Color.Transparent
@@ -520,7 +529,7 @@ private fun SearchAppBar(
 
 @Composable
 fun BlacklistHandling(
-    blacklisted: List<BlacklistedItem>,
+    blacklisted: List<BlacklistedItemRoom>,
     modelId: Long,
     name: String,
     nsfw: Boolean,
@@ -528,7 +537,7 @@ fun BlacklistHandling(
     showDialog: Boolean,
     onDialogDismiss: () -> Unit,
 ) {
-    val db = LocalDatabase.current
+    val db = LocalDatabaseDao.current
     val scope = rememberCoroutineScope()
     val isBlacklisted = blacklisted.any { b -> b.id == modelId }
 
@@ -545,7 +554,7 @@ fun BlacklistHandling(
                         scope.launch {
                             if (isBlacklisted) {
                                 blacklisted.find { b -> b.id == modelId }
-                                    ?.let { db.removeBlacklistItem(it) }
+                                    ?.let { db.delete(it) }
                             } else {
                                 db.blacklistItem(modelId, name, nsfw, imageUrl)
                             }

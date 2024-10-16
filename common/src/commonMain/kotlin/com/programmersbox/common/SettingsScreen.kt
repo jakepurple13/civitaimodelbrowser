@@ -35,7 +35,7 @@ fun SettingsScreen(
     onExport: (List<FavoriteModel>) -> Unit = {},
     onImport: () -> String = { "" },
     export: @Composable () -> Unit = {},
-    import: @Composable () -> Unit = {},
+    import: (@Composable () -> Unit)? = null,
 ) {
     val navController = LocalNavController.current
     val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
@@ -45,7 +45,7 @@ fun SettingsScreen(
     val showNsfw = remember { dataStore.showNsfw }
     val hideNsfwStrength = remember { dataStore.hideNsfwStrength }
     val includeNsfw = remember { dataStore.includeNsfw }
-    val database = LocalDatabase.current
+    val dao = LocalDatabaseDao.current
     var showBlur by dataStore.rememberShowBlur()
 
     Scaffold(
@@ -159,7 +159,7 @@ fun SettingsScreen(
 
             Card(
                 onClick = {
-                    scope.launch { onExport(database.export()) }
+                    scope.launch { onExport(dao.export()) }
                 }
             ) {
                 ListItem(
@@ -167,9 +167,7 @@ fun SettingsScreen(
                 )
             }
 
-            import()
-
-            Card(
+            import?.invoke() ?: Card(
                 onClick = { onImport() }
             ) {
                 ListItem(

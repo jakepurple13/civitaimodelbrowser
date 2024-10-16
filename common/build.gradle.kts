@@ -10,9 +10,10 @@ plugins {
     id("org.jetbrains.compose")
     id("com.android.library")
     id("org.jetbrains.kotlin.plugin.serialization") version libs.versions.kotlin.version.get()
-    id("io.realm.kotlin") version libs.versions.realm.get()
     id("com.codingfeline.buildkonfig")
     alias(libs.plugins.compose.compiler)
+    alias(libs.plugins.ksp)
+    alias(libs.plugins.room)
 }
 
 group = "com.programmersbox"
@@ -55,9 +56,11 @@ kotlin {
             api(libs.androidx.lifecycle.runtime.compose)
             api(libs.navigation.compose)
             api(libs.jsoup)
-            api(libs.realm.base)
             api(libs.haze)
+            api(libs.haze.materials)
             api(libs.sonner)
+            implementation(libs.androidx.room.runtime)
+            //add("ksp", libs.androidx.room.compiler)
         }
 
         commonTest.dependencies {
@@ -81,6 +84,11 @@ kotlin {
     }
 }
 
+dependencies {
+    add("kspAndroid", libs.androidx.room.compiler)
+    add("kspJvm", libs.androidx.room.compiler)
+}
+
 compose.resources {
     publicResClass = true
     packageOfResClass = "com.programmersbox.resources"
@@ -94,13 +102,17 @@ android {
     sourceSets["main"].res.srcDirs("src/androidMain/res")
     sourceSets["main"].resources.srcDirs("src/commonMain/resources")
     defaultConfig {
-        minSdk = 24
+        minSdk = 28
         targetSdk = 34
     }
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17
     }
+}
+
+room {
+    schemaDirectory("$projectDir/schemas")
 }
 
 buildkonfig {

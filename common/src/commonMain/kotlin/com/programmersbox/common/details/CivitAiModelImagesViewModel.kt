@@ -11,7 +11,7 @@ import com.programmersbox.common.DataStore
 import com.programmersbox.common.Network
 import com.programmersbox.common.PAGE_LIMIT
 import com.programmersbox.common.db.FavoriteType
-import com.programmersbox.common.db.FavoritesDatabase
+import com.programmersbox.common.db.FavoritesDao
 import com.programmersbox.common.db.toDb
 import com.programmersbox.common.paging.CivitDetailsImagePagingSource
 import kotlinx.coroutines.flow.Flow
@@ -25,7 +25,7 @@ class CivitAiModelImagesViewModel(
     private val modelId: String?,
     dataStore: DataStore,
     network: Network,
-    private val database: FavoritesDatabase,
+    private val database: FavoritesDao,
 ) : ViewModel() {
 
     var pager by mutableStateOf<Flow<PagingData<CustomModelImage>>>(

@@ -1,39 +1,46 @@
 package com.programmersbox.common.db
 
-import io.realm.kotlin.types.RealmObject
-import io.realm.kotlin.types.annotations.PrimaryKey
+import androidx.room.Entity
 import kotlinx.datetime.Clock
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
-class Favorite : RealmObject {
-    @PrimaryKey
-    var id: Long = 0
-    var name: String = ""
-    var description: String? = null
-    var type: String = "Other"
-    var nsfw: Boolean = false
-    var imageUrl: String? = null
-    var favoriteType: String = FavoriteType.Model.name
-    var imageMeta: ImageMetaDb? = null
-    var modelId: Long = id
-    var dateAdded: Long = Clock.System.now().toEpochMilliseconds()
-}
+@Entity(tableName = "favorite_table")
+data class FavoriteRoom(
+    @androidx.room.PrimaryKey
+    val id: Long,
+    val name: String,
+    val description: String? = null,
+    val type: String = "Other",
+    val nsfw: Boolean = false,
+    val imageUrl: String? = null,
+    val favoriteType: FavoriteType = FavoriteType.Model,
+    val imageMeta: String? = null,
+    val modelId: Long = id,
+    val dateAdded: Long = Clock.System.now().toEpochMilliseconds(),
+)
+
+@Entity(tableName = "blacklisted_table")
+data class BlacklistedItemRoom(
+    @androidx.room.PrimaryKey
+    val id: Long,
+    val name: String = "",
+    val nsfw: Boolean = false,
+    val imageUrl: String? = null,
+)
 
 @Serializable
-class ImageMetaDb : RealmObject {
-    var size: String? = null
-    var seed: Long? = null
-    var model: String? = null
-    var steps: Long? = null
-    var prompt: String? = null
-    var sampler: String? = null
-    var cfgScale: Double? = null
-    var clipSkip: String? = null
-    var negativePrompt: String? = null
-
-    companion object
-}
+data class ImageMetaDb(
+    val size: String? = null,
+    val seed: Long? = null,
+    val model: String? = null,
+    val steps: Long? = null,
+    val prompt: String? = null,
+    val sampler: String? = null,
+    val cfgScale: Double? = null,
+    val clipSkip: String? = null,
+    val negativePrompt: String? = null,
+)
 
 enum class FavoriteType {
     Model,
@@ -82,11 +89,4 @@ sealed interface FavoriteModel {
         override val modelType: String = "Creator",
         override val dateAdded: Long = Clock.System.now().toEpochMilliseconds(),
     ) : FavoriteModel
-}
-
-class BlacklistedItem : RealmObject {
-    var id: Long? = null
-    var name: String = ""
-    var nsfw: Boolean = false
-    var imageUrl: String? = null
 }

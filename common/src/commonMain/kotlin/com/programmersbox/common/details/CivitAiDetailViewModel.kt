@@ -9,7 +9,7 @@ import com.programmersbox.common.ModelImage
 import com.programmersbox.common.Models
 import com.programmersbox.common.Network
 import com.programmersbox.common.db.FavoriteType
-import com.programmersbox.common.db.FavoritesDatabase
+import com.programmersbox.common.db.FavoritesDao
 import com.programmersbox.common.db.toDb
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
@@ -20,7 +20,7 @@ import kotlin.random.Random
 class CivitAiDetailViewModel(
     private val network: Network,
     private val id: String?,
-    private val database: FavoritesDatabase,
+    private val database: FavoritesDao,
 ) : ViewModel() {
     val modelUrl = "https://civitai.com/models/$id"
     var models by mutableStateOf<DetailViewState>(DetailViewState.Loading)
@@ -28,7 +28,7 @@ class CivitAiDetailViewModel(
 
     init {
         loadData()
-        database.getFavorites()
+        database.getFavoriteModels()
             .onEach { m -> isFavorite = m.any { it.id == id?.toLongOrNull() } }
             .launchIn(viewModelScope)
     }

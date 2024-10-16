@@ -17,7 +17,7 @@ android {
     compileSdk = 34
     defaultConfig {
         applicationId = "com.programmersbox.civitaimodelbrowser"
-        minSdk = 24
+        minSdk = 28
         targetSdk = 34
         versionCode = 1
         versionName = "1.0-SNAPSHOT"
@@ -46,6 +46,7 @@ dependencies {
     implementation(project(":common"))
     implementation(libs.androidx.activity.compose)
     implementation(libs.androidx.browser)
+    implementation(libs.androidx.material)
 }
 
 tasks.register("BuildAndRun") {

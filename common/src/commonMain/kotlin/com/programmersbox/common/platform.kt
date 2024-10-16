@@ -3,7 +3,7 @@ package com.programmersbox.common
 import androidx.compose.foundation.lazy.grid.LazyGridState
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import com.programmersbox.common.db.BlacklistedItem
+import com.programmersbox.common.db.BlacklistedItemRoom
 
 public expect fun getPlatformName(): String
 
@@ -23,7 +23,7 @@ internal expect fun CustomScrollBar(lazyGridState: LazyGridState, modifier: Modi
 @Composable
 internal expect fun ContextMenu(
     isBlacklisted: Boolean,
-    blacklistItems: List<BlacklistedItem>,
+    blacklistItems: List<BlacklistedItemRoom>,
     modelId: Long,
     name: String,
     nsfw: Boolean,

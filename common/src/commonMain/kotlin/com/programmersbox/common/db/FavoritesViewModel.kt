@@ -4,14 +4,13 @@ import androidx.compose.runtime.*
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.programmersbox.common.DataStore
-import io.realm.kotlin.query.Sort
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
 
 class FavoritesViewModel(
-    database: FavoritesDatabase,
+    dao: FavoritesDao,
     dataStore: DataStore,
 ) : ViewModel() {
     var search by mutableStateOf("")
@@ -47,8 +46,9 @@ class FavoritesViewModel(
 
     init {
         dataStore.reverseFavorites.flow
-            .map { if (it) Sort.DESCENDING else Sort.ASCENDING }
-            .flatMapLatest { database.getFavorites(it) }
+            //.map { if (it) Sort.DESCENDING else Sort.ASCENDING }
+            .map { it }
+            .flatMapLatest { dao.getFavoriteModels() }
             .onEach {
                 favoritesList.clear()
                 favoritesList.addAll(it)

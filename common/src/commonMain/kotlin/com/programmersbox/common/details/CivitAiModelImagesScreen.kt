@@ -1,5 +1,3 @@
-@file:Suppress("INLINE_FROM_HIGHER_PLATFORM")
-
 package com.programmersbox.common.details
 
 import androidx.compose.animation.core.animateFloatAsState
@@ -46,7 +44,7 @@ fun CivitAiModelImagesScreen(
     modelName: String?,
 ) {
     val hazeState = remember { HazeState() }
-    val database = LocalDatabase.current
+    val database = LocalDatabaseDao.current
     val dataStore = LocalDataStore.current
     val showNsfw by remember { dataStore.showNsfw.flow }.collectAsStateWithLifecycle(false)
     val nsfwBlurStrength by remember { dataStore.hideNsfwStrength.flow }.collectAsStateWithLifecycle(6f)
@@ -65,7 +63,7 @@ fun CivitAiModelImagesScreen(
     val navController = LocalNavController.current
 
     val favoriteList by database.getFavorites().collectAsStateWithLifecycle(emptyList())
-    val blacklisted by database.getBlacklistedItems().collectAsStateWithLifecycle(emptyList())
+    val blacklisted by database.getBlacklisted().collectAsStateWithLifecycle(emptyList())
 
     var sheetDetails by remember { mutableStateOf<CustomModelImage?>(null) }
 
@@ -276,7 +274,7 @@ private fun SheetContent(
                 },
                 text = {
                     KamelImage(
-                        resource = painter,
+                        resource = { painter },
                         onLoading = {
                             val progress = animateFloatAsState(
                                 targetValue = it,
@@ -325,14 +323,14 @@ private fun SheetContent(
 
             Box(modifier = Modifier.align(Alignment.CenterHorizontally)) {
                 KamelImage(
-                    resource = painter,
+                    resource = { painter },
                     contentDescription = null,
                     colorFilter = ColorFilter.colorMatrix(ColorMatrix().apply { setToSaturation(saturation) }),
                     modifier = Modifier.blurGradient(blur, alpha, scaleX, scaleY)
                 )
 
                 KamelImage(
-                    resource = painter,
+                    resource = { painter },
                     contentDescription = null,
                     onLoading = {
                         val progress = animateFloatAsState(

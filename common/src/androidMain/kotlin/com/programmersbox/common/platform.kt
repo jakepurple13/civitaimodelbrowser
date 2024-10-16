@@ -1,5 +1,6 @@
 package com.programmersbox.common
 
+import android.content.Context
 import android.os.Parcel
 import android.os.Parcelable
 import androidx.compose.foundation.layout.WindowInsets
@@ -11,13 +12,17 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
+import androidx.room.Room
+import androidx.room.RoomDatabase
 import com.gigamole.composescrollbars.Scrollbars
 import com.gigamole.composescrollbars.config.ScrollbarsConfig
 import com.gigamole.composescrollbars.config.ScrollbarsOrientation
 import com.gigamole.composescrollbars.rememberScrollbarsState
 import com.gigamole.composescrollbars.scrolltype.ScrollbarsScrollType
 import com.gigamole.composescrollbars.scrolltype.knobtype.ScrollbarsDynamicKnobType
-import com.programmersbox.common.db.BlacklistedItem
+import com.programmersbox.common.db.AppDatabase
+import com.programmersbox.common.db.BlacklistedItemRoom
 import com.programmersbox.common.db.FavoriteModel
 
 public actual fun getPlatformName(): String {
@@ -31,7 +36,7 @@ public fun UIShow(
     onExport: (List<FavoriteModel>) -> Unit = {},
     onImport: () -> String = { "" },
     export: @Composable () -> Unit = {},
-    import: @Composable () -> Unit = {},
+    import: (@Composable () -> Unit)? = null,
 ) {
     App(
         onShareClick = onShareClick,
@@ -39,7 +44,8 @@ public fun UIShow(
         onExport = onExport,
         onImport = onImport,
         export = export,
-        import = import
+        import = import,
+        builder = getDatabaseBuilder(LocalContext.current)
     )
 }
 
@@ -75,7 +81,7 @@ internal actual fun SheetDetails(
 ) {
     ModalBottomSheet(
         onDismissRequest = onDismiss,
-        windowInsets = WindowInsets.systemBars.only(WindowInsetsSides.Top),
+        contentWindowInsets = { WindowInsets.systemBars.only(WindowInsetsSides.Top) },
     ) {
         content()
     }
@@ -103,7 +109,7 @@ internal actual fun CustomScrollBar(lazyGridState: LazyGridState, modifier: Modi
 @Composable
 internal actual fun ContextMenu(
     isBlacklisted: Boolean,
-    blacklistItems: List<BlacklistedItem>,
+    blacklistItems: List<BlacklistedItemRoom>,
     modelId: Long,
     name: String,
     nsfw: Boolean,
@@ -112,3 +118,24 @@ internal actual fun ContextMenu(
 ) {
     content()
 }
+
+fun getDatabaseBuilder(ctx: Context): RoomDatabase.Builder<AppDatabase> {
+    val appContext = ctx.applicationContext
+    val dbFile = appContext.getDatabasePath("my_room.db")
+    return Room.databaseBuilder<AppDatabase>(
+        context = appContext,
+        name = dbFile.absolutePath
+    )
+}
+
+/*
+actual fun createRoomDatabase(): AppDatabase {
+    val dbFile = getDatabasePath(dbFileName)
+    return Room.databaseBuilder<AppDatabase>(
+        context = app,
+        name = dbFile.absolutePath,
+    )
+        .setDriver(BundledSQLiteDriver())
+        .setQueryCoroutineContext(Dispatchers.IO)
+        .build()
+}*/

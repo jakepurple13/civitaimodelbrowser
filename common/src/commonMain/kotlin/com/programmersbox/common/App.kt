@@ -1,7 +1,6 @@
 package com.programmersbox.common
 
-import androidx.compose.animation.slideInHorizontally
-import androidx.compose.animation.slideOutHorizontally
+import androidx.compose.animation.AnimatedContentTransitionScope
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
@@ -13,7 +12,9 @@ import androidx.navigation.NavController
 import androidx.navigation.NavOptions
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import androidx.navigation.compose.navigation
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.toRoute
 import androidx.room.RoomDatabase
 import com.programmersbox.common.blacklisted.BlacklistedScreen
 import com.programmersbox.common.creator.CivitAiUserScreen
@@ -23,6 +24,7 @@ import com.programmersbox.common.details.CivitAiModelImagesScreen
 import com.programmersbox.common.home.CivitAiScreen
 import dev.chrisbanes.haze.LocalHazeStyle
 import dev.chrisbanes.haze.materials.HazeMaterials
+import kotlinx.serialization.Serializable
 
 @Composable
 internal fun App(
@@ -45,39 +47,56 @@ internal fun App(
         Surface {
             NavHost(
                 navController = navController,
-                startDestination = Screen.List.routeId,
-                enterTransition = { slideInHorizontally { it } },
-                exitTransition = { slideOutHorizontally { it } },
-                popEnterTransition = { slideInHorizontally { it } },
-                popExitTransition = { slideOutHorizontally { it } },
+                startDestination = Screen.List,
+                enterTransition = { slideIntoContainer(AnimatedContentTransitionScope.SlideDirection.Start) },
+                exitTransition = { slideOutOfContainer(AnimatedContentTransitionScope.SlideDirection.End) },
             ) {
-                composable(Screen.List.routeId) { CivitAiScreen() }
-                composable(Screen.Detail.routeId) {
+                composable<Screen.List>(
+                    enterTransition = { slideIntoContainer(AnimatedContentTransitionScope.SlideDirection.End) },
+                    exitTransition = { slideOutOfContainer(AnimatedContentTransitionScope.SlideDirection.Start) }
+                ) { CivitAiScreen() }
+
+                composable<Screen.Detail> {
                     CivitAiDetailScreen(
-                        id = it.arguments?.getString("modelId"),
+                        id = it.toRoute<Screen.Detail>().modelId,
                         onShareClick = onShareClick
                     )
                 }
 
-                composable(Screen.DetailsImage.routeId) {
+                composable<Screen.DetailsImage> {
+                    val details = it.toRoute<Screen.DetailsImage>()
                     CivitAiModelImagesScreen(
-                        modelId = it.arguments?.getString("modelId"),
-                        modelName = it.arguments?.getString("modelName")
+                        modelId = details.modelId,
+                        modelName = details.modelName
                     )
                 }
-                composable(Screen.Settings.routeId) {
-                    SettingsScreen(
-                        onExport = onExport,
-                        onImport = onImport,
-                        export = export,
-                        import = import
-                    )
+
+                composable<Screen.User> {
+                    CivitAiUserScreen(username = it.toRoute<Screen.User>().username)
                 }
-                composable(Screen.Favorites.routeId) { FavoritesUI() }
-                composable(Screen.User.routeId) {
-                    CivitAiUserScreen(username = it.arguments?.getString("username").orEmpty())
+
+                composable<Screen.Favorites> { FavoritesUI() }
+
+                navigation<Screen.Settings>(
+                    startDestination = Screen.Settings.Screen
+                ) {
+                    composable<Screen.Settings.Screen>(
+                        enterTransition = { slideIntoContainer(AnimatedContentTransitionScope.SlideDirection.Down) },
+                        exitTransition = { slideOutOfContainer(AnimatedContentTransitionScope.SlideDirection.Up) }
+                    ) {
+                        SettingsScreen(
+                            onExport = onExport,
+                            onImport = onImport,
+                            export = export,
+                            import = import
+                        )
+                    }
+
+                    composable<Screen.Blacklisted>(
+                        enterTransition = { slideIntoContainer(AnimatedContentTransitionScope.SlideDirection.Up) },
+                        exitTransition = { slideOutOfContainer(AnimatedContentTransitionScope.SlideDirection.Down) }
+                    ) { BlacklistedScreen() }
                 }
-                composable(Screen.Blacklisted.routeId) { BlacklistedScreen() }
             }
         }
     }
@@ -92,7 +111,7 @@ internal val LocalNetwork = staticCompositionLocalOf { Network() }
 
 fun NavController.navigateToDetail(id: Long) {
     navigate(
-        route = Screen.Detail.routeId.replace("{modelId}", id.toString()),
+        route = Screen.Detail(id.toString()),
         navOptions = NavOptions.Builder()
             .setLaunchSingleTop(true)
             .build()
@@ -101,7 +120,7 @@ fun NavController.navigateToDetail(id: Long) {
 
 fun NavController.navigateToDetailImages(id: Long, name: String) {
     navigate(
-        route = Screen.DetailsImage.routeId.replace("{modelId}", id.toString()) + "?modelName=$name",
+        route = Screen.DetailsImage(id.toString(), name),
         navOptions = NavOptions.Builder()
             .setLaunchSingleTop(true)
             .build()
@@ -110,19 +129,35 @@ fun NavController.navigateToDetailImages(id: Long, name: String) {
 
 fun NavController.navigateToUser(username: String) {
     navigate(
-        route = Screen.User.routeId.replace("{username}", username),
+        route = Screen.User(username),
         navOptions = NavOptions.Builder()
             .setLaunchSingleTop(true)
             .build()
     )
 }
 
-enum class Screen(val routeId: String) {
-    List("list"),
-    Detail("detail/{modelId}"),
-    Settings("settings"),
-    Favorites("favorites"),
-    User("user/{username}"),
-    DetailsImage("detailsimage/{modelId}"),
-    Blacklisted("blacklisted"),
+sealed class Screen {
+    @Serializable
+    data object List
+
+    @Serializable
+    class Detail(val modelId: String)
+
+    @Serializable
+    data object Settings {
+        @Serializable
+        data object Screen
+    }
+
+    @Serializable
+    data object Favorites
+
+    @Serializable
+    class User(val username: String)
+
+    @Serializable
+    class DetailsImage(val modelId: String, val modelName: String)
+
+    @Serializable
+    data object Blacklisted
 }

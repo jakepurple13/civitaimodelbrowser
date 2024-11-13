@@ -96,14 +96,14 @@ compose.resources {
 }
 
 android {
-    compileSdk = 34
+    compileSdk = 35
     namespace = "com.programmersbox.common"
     sourceSets["main"].manifest.srcFile("src/androidMain/AndroidManifest.xml")
     sourceSets["main"].res.srcDirs("src/androidMain/res")
     sourceSets["main"].resources.srcDirs("src/commonMain/resources")
     defaultConfig {
         minSdk = 28
-        targetSdk = 34
+        targetSdk = 35
     }
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_17

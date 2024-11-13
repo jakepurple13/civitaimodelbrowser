@@ -25,11 +25,10 @@ import com.programmersbox.common.db.CivitDb
 import com.programmersbox.resources.Res
 import com.programmersbox.resources.civitai_logo
 import kotlinx.coroutines.launch
-import org.jetbrains.compose.resources.ExperimentalResourceApi
 import org.jetbrains.compose.resources.painterResource
 import kotlin.math.roundToInt
 
-@OptIn(ExperimentalMaterial3Api::class, ExperimentalResourceApi::class)
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SettingsScreen(
     onExport: (CivitDb) -> Unit = {},
@@ -129,7 +128,7 @@ fun SettingsScreen(
             HorizontalDivider()
 
             Card(
-                onClick = { navController.navigate(Screen.Blacklisted.routeId) }
+                onClick = { navController.navigate(Screen.Blacklisted) }
             ) {
                 ListItem(
                     headlineContent = { Text("View Blacklisted Models") }

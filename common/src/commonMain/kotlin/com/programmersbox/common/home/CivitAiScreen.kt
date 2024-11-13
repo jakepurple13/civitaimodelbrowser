@@ -90,7 +90,11 @@ fun CivitAiScreen(
                 showBlur = showBlur,
                 modifier = Modifier.ifTrue(showBlur) {
                     hazeChild(hazeState) {
-                        progressive = HazeProgressive.verticalGradient(startIntensity = 1f, endIntensity = 0f)
+                        progressive = HazeProgressive.verticalGradient(
+                            startIntensity = 1f,
+                            endIntensity = 0f,
+                            preferPerformance = true
+                        )
                         style = hazeStyle
                     }
                 }
@@ -465,11 +469,11 @@ private fun SearchAppBar(
                         }
 
                         IconButton(
-                            onClick = { navController.navigate(Screen.Settings.routeId) }
+                            onClick = { navController.navigate(Screen.Settings) }
                         ) { Icon(Icons.Default.Settings, null) }
 
                         IconButton(
-                            onClick = { navController.navigate(Screen.Favorites.routeId) }
+                            onClick = { navController.navigate(Screen.Favorites) }
                         ) { Icon(Icons.Default.Favorite, null) }
                     }
                 },

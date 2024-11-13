@@ -1,23 +1,23 @@
 [versions]
 browser = "1.8.0"
 composeScrollbars = "1.0.4"
-haze = "0.9.0-beta04"
+haze = "1.0.1"
 jsoup = "1.18.1"
 kotlin-version = "2.0.21"
 agp-version = "8.2.2"
 compose-version = "1.7.0"
-ktor-version = "3.0.0"
+ktor-version = "3.0.1"
 kotlinx-datetime = "0.6.1"
 datastore-version = "1.1.1"
-navigationCompose = "2.7.0-alpha07"
+navigationCompose = "2.8.0-alpha10"
 lifecycleViewmodelCompose = "2.8.2"
 paging-version = "3.3.2"
-kamel-image = "1.0.0"
+kamel-image = "1.0.1"
 kotlinx-coroutines-core = "1.9.0"
 sonner = "0.3.7"
 androidx-material = "1.12.0"
 
-ksp = "2.0.21-1.0.25"
+ksp = "2.0.21-1.0.27"
 androidx-room = "2.7.0-alpha07"
 
 [plugins]
@@ -31,8 +31,8 @@ room = { id = "androidx.room", version.ref = "androidx-room" }
 [libraries]
 androidx-appcompat = { module = "androidx.appcompat:appcompat", version = "1.7.0" }
 androidx-browser = { module = "androidx.browser:browser", version.ref = "browser" }
-androidx-core = { module = "androidx.core:core-ktx", version = "1.13.1" }
-androidx-activity-compose = "androidx.activity:activity-compose:1.9.2"
+androidx-core = { module = "androidx.core:core-ktx", version = "1.15.0" }
+androidx-activity-compose = "androidx.activity:activity-compose:1.9.3"
 composeScrollbars = { module = "com.github.GIGAMOLE:ComposeScrollbars", version.ref = "composeScrollbars" }
 datastore-core = { module = "androidx.datastore:datastore-core", version.ref = "datastore-version" }
 datastore-preferences = { module = "androidx.datastore:datastore-preferences-core", version.ref = "datastore-version" }

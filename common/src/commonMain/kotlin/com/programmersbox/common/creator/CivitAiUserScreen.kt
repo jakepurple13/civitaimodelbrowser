@@ -97,7 +97,11 @@ fun CivitAiUserScreen(
                 else TopAppBarDefaults.topAppBarColors(),
                 modifier = Modifier.ifTrue(showBlur) {
                     hazeChild(hazeState, hazeStyle) {
-                        progressive = HazeProgressive.verticalGradient(startIntensity = 1f, endIntensity = 0f)
+                        progressive = HazeProgressive.verticalGradient(
+                            startIntensity = 1f,
+                            endIntensity = 0f,
+                            preferPerformance = true
+                        )
                     }
                 }
             )

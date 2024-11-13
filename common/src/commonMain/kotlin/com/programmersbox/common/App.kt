@@ -92,7 +92,7 @@ internal fun App(
                         )
                     }
 
-                    composable<Screen.Blacklisted>(
+                    composable<Screen.Settings.Blacklisted>(
                         enterTransition = { slideIntoContainer(AnimatedContentTransitionScope.SlideDirection.Up) },
                         exitTransition = { slideOutOfContainer(AnimatedContentTransitionScope.SlideDirection.Down) }
                     ) { BlacklistedScreen() }
@@ -147,6 +147,9 @@ sealed class Screen {
     data object Settings {
         @Serializable
         data object Screen
+
+        @Serializable
+        data object Blacklisted
     }
 
     @Serializable
@@ -157,7 +160,4 @@ sealed class Screen {
 
     @Serializable
     class DetailsImage(val modelId: String, val modelName: String)
-
-    @Serializable
-    data object Blacklisted
 }

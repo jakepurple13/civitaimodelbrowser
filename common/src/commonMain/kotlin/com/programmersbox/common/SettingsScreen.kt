@@ -128,7 +128,7 @@ fun SettingsScreen(
             HorizontalDivider()
 
             Card(
-                onClick = { navController.navigate(Screen.Blacklisted) }
+                onClick = { navController.navigate(Screen.Settings.Blacklisted) }
             ) {
                 ListItem(
                     headlineContent = { Text("View Blacklisted Models") }

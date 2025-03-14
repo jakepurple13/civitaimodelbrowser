@@ -21,6 +21,9 @@ on:
 #  group: ${{ github.workflow }}-${{ github.ref }}
 #  cancel-in-progress: true
 
+env:
+  API_KEY:${{ secrets.ALIAS }}
+
 jobs:
   aab:
     name: Generate AAB
@@ -40,7 +43,6 @@ jobs:
         run: |
           set -x
           echo "VERSION_TAG=${GITHUB_REF/refs\/tags\//}" >> $GITHUB_ENV
-          echo "API_KEY=${{ secrets.ALIAS }}" >> $GITHUB_ENV
 
       - name: Build Artifacts
         id: buildApks

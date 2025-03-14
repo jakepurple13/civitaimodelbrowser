@@ -22,7 +22,7 @@ on:
 #  cancel-in-progress: true
 
 env:
-  API_KEY:${{ secrets.ALIAS }}
+  API_KEY: ${{ secrets.ALIAS }}
 
 jobs:
   aab:

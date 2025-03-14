@@ -133,11 +133,12 @@ buildkonfig {
 fun Project.getLocalProperty(key: String): Any? {
     val properties = Properties()
     val localProperties = localPropertiesFile
-    if (localProperties.isFile) {
+    return if (localProperties.isFile) {
         InputStreamReader(FileInputStream(localProperties), Charsets.UTF_8).use { reader ->
             properties.load(reader)
         }
+        properties.getProperty(key)
+    } else if (System.getenv("CI") == null) {
+        System.getProperty("api_key")
     } else error("File from not found")
-
-    return properties.getProperty(key)
 }

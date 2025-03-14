@@ -32,8 +32,8 @@ import com.programmersbox.common.paging.collectAsLazyPagingItems
 import com.programmersbox.common.paging.itemContentType
 import com.programmersbox.common.paging.itemKey
 import dev.chrisbanes.haze.HazeState
-import dev.chrisbanes.haze.haze
-import dev.chrisbanes.haze.hazeChild
+import dev.chrisbanes.haze.hazeEffect
+import dev.chrisbanes.haze.hazeSource
 import io.kamel.image.KamelImage
 import io.kamel.image.asyncPainterResource
 
@@ -100,7 +100,7 @@ fun CivitAiModelImagesScreen(
                 actions = { Text("(${lazyPagingItems.itemCount})") },
                 colors = if (showBlur) TopAppBarDefaults.topAppBarColors(containerColor = Color.Transparent)
                 else TopAppBarDefaults.topAppBarColors(),
-                modifier = Modifier.ifTrue(showBlur) { hazeChild(hazeState) }
+                modifier = Modifier.ifTrue(showBlur) { hazeEffect(hazeState) }
             )
         },
     ) { padding ->
@@ -110,7 +110,7 @@ fun CivitAiModelImagesScreen(
             verticalArrangement = Arrangement.spacedBy(4.dp),
             horizontalArrangement = Arrangement.spacedBy(4.dp),
             modifier = Modifier
-                .haze(state = hazeState)
+                .hazeSource(state = hazeState)
                 .fillMaxSize()
         ) {
             items(

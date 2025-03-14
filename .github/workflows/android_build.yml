@@ -1,0 +1,178 @@
+name: Android Release Workflow
+
+on:
+  push:
+    branches:
+      - master
+    paths-ignore:
+      - '.github/**'
+    tags-ignore:
+      - 'v*'
+
+  workflow_call:
+  workflow_dispatch:
+#    inputs:
+#      releaseToGooglePlay:
+#        description: 'Release to Google Play?'
+#        required: true
+#        default: 'false'
+
+#concurrency:
+#  group: ${{ github.workflow }}-${{ github.ref }}
+#  cancel-in-progress: true
+
+jobs:
+  aab:
+    name: Generate AAB
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Setup JDK
+        uses: actions/setup-java@v3
+        with:
+          distribution: adopt
+          java-version: 21
+
+      - name: Get tag name
+        id: get_tag_name
+        run: |
+          set -x
+          echo "VERSION_TAG=${GITHUB_REF/refs\/tags\//}" >> $GITHUB_ENV
+
+      - name: Build Artifacts
+        id: buildApks
+        uses: gradle/gradle-build-action@v2
+        with:
+          gradle-version: current
+          wrapper-cache-enabled: true
+          dependencies-cache-enabled: true
+          configuration-cache-enabled: true
+          arguments: android:bundle
+
+      - uses: kevin-david/zipalign-sign-android-release@v2.0.1
+        name: Sign app APK
+        id: civit_browser_sign
+        with:
+          releaseDirectory: android/build/outputs/bundle/release/
+          signingKeyBase64: ${{ secrets.SIGNING_KEY }}
+          alias: ${{ secrets.ALIAS }}
+          keyStorePassword: ${{ secrets.KEYSTORE_PASSWORD }}
+          keyPassword: ${{ secrets.KEY_PASSWORD }}
+
+      - name: Clean up build artifacts
+        run: |
+          cp ${{ steps.civit_browser_sign.outputs.signedReleaseFile }} civitbrowser-release.aab
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: Signed Civit App
+          path: civitbrowser-release.aab
+
+  apk:
+    name: Generate Apk
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Setup JDK
+        uses: actions/setup-java@v3
+        with:
+          distribution: adopt
+          java-version: 21
+
+      - name: Get tag name
+        id: get_tag_name
+        run: |
+          set -x
+          echo "VERSION_TAG=${GITHUB_REF/refs\/tags\//}" >> $GITHUB_ENV
+
+      - name: Build Artifacts
+        id: buildApks
+        uses: gradle/gradle-build-action@v2
+        with:
+          gradle-version: current
+          wrapper-cache-enabled: true
+          dependencies-cache-enabled: true
+          configuration-cache-enabled: true
+          arguments: android:assembleRelease
+
+      - uses: kevin-david/zipalign-sign-android-release@v2.0.1
+        name: Sign app APK
+        id: civit_apk_sign
+        with:
+          releaseDirectory: android/build/outputs/apk/release/
+          signingKeyBase64: ${{ secrets.SIGNING_KEY }}
+          alias: ${{ secrets.ALIAS }}
+          keyStorePassword: ${{ secrets.KEYSTORE_PASSWORD }}
+          keyPassword: ${{ secrets.KEY_PASSWORD }}
+        env:
+          # override default build-tools version (33.0.0) -- optional
+          BUILD_TOOLS_VERSION: "34.0.0"
+
+      - name: Clean up build artifacts
+        run: |
+          cp ${{ steps.civit_apk_sign.outputs.signedReleaseFile }} civit-release.apk
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: Signed Civit Apk
+          path: civit-release.apk
+
+#  release:
+#    name: Release APK
+#    needs: [ aab, apk ]
+#    if: startsWith(github.ref, 'refs/tags/')
+#    runs-on: ubuntu-latest
+#    steps:
+#      - name: Download Aab from build
+#        uses: actions/download-artifact@v3
+#        with:
+#          name: Signed Solitaire App
+#
+#      - name: Download APK from build
+#        uses: actions/download-artifact@v3
+#        with:
+#          name: Signed Solitaire Apk
+#
+#      - name: Get tag name
+#        id: get_tag_name
+#        run: |
+#          set -x
+#          echo "VERSION_TAG=${GITHUB_REF/refs\/tags\//}" >> $GITHUB_ENV
+#
+#      - name: Create Release
+#        id: create_release
+#        uses: softprops/action-gh-release@v1
+#        if: startsWith(github.ref, 'refs/tags/')
+#        env:
+#          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+#        with:
+#          fail_on_unmatched_files: true
+#          tag_name: ${{ env.VERSION_TAG }}
+#          name: Release ${{ env.VERSION_TAG }}
+#          files: |
+#            solitaire-release.aab
+#            solitaire-release.apk
+
+#  releaseToGooglePlay:
+#    name: Release to Google Play
+#    needs: apk
+#    if: startsWith(github.ref, 'refs/tags/') || github.event.inputs.releaseToGooglePlay == 'true'
+#    runs-on: ubuntu-latest
+#    steps:
+#      - name: Download APK from build
+#        uses: actions/download-artifact@v3
+#        with:
+#          name: Signed Anagramer App
+#
+#      - uses: r0adkll/upload-google-play@v1
+#        with:
+#          serviceAccountJsonPlainText: ${{ secrets.SERVICE_ACCOUNT_JSON }}
+#          packageName: com.programmersbox.solitairegame
+#          releaseFiles: solitairegame-release.aab
+#          track: production
+#          status: inProgress
+#          userFraction: 0.99

@@ -8,7 +8,6 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import kotlinx.serialization.Serializable
-import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 
 @Database(
@@ -178,7 +177,7 @@ interface FavoritesDao {
     )
 
     @Ignore
-    suspend fun import(
+    suspend fun importFavorites(
         jsonString: String,
         json: Json = Json {
             isLenient = true

@@ -4,8 +4,7 @@
     <value>
       <entry key="android">
         <State>
-          <multipleDevicesSelectedInDropDown value="true" />
-          <runningDeviceTargetsSelectedWithDialog>
+          <runningDeviceTargetSelectedWithDropDown>
             <Target>
               <type value="RUNNING_DEVICE_TARGET" />
               <deviceKey>
@@ -15,12 +14,15 @@
                 </Key>
               </deviceKey>
             </Target>
+          </runningDeviceTargetSelectedWithDropDown>
+          <timeTargetWasSelectedWithDropDown value="2024-06-17T13:45:37.524051Z" />
+          <runningDeviceTargetsSelectedWithDialog>
             <Target>
               <type value="RUNNING_DEVICE_TARGET" />
               <deviceKey>
                 <Key>
                   <type value="SERIAL_NUMBER" />
-                  <value value="320144667000" />
+                  <value value="36091FDHS000EU" />
                 </Key>
               </deviceKey>
             </Target>

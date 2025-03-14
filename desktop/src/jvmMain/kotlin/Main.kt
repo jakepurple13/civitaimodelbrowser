@@ -13,7 +13,6 @@ import com.programmersbox.common.Network
 import com.programmersbox.common.UIShow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
-import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import java.awt.FileDialog
 import java.awt.Frame
@@ -153,7 +152,7 @@ fun main() = application {
                             ?.let { File(it).readText() }
                             ?.let {
                                 scope.launch {
-                                    database.import(it)
+                                    database.importFavorites(it)
                                     toaster.show(
                                         Toast(
                                             message = "Import Completed",

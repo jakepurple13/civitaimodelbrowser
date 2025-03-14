@@ -47,6 +47,7 @@ fun CivitAiDetailScreen(
     onShareClick: (String) -> Unit,
     network: Network = LocalNetwork.current,
 ) {
+    val scope = rememberCoroutineScope()
     val hazeState = remember { HazeState() }
     val dao = LocalDatabaseDao.current
     val viewModel = viewModel { CivitAiDetailViewModel(network, id, dao) }
@@ -113,7 +114,7 @@ fun CivitAiDetailScreen(
                         colors = if (showBlur) TopAppBarDefaults.topAppBarColors(containerColor = Color.Transparent)
                         else TopAppBarDefaults.topAppBarColors(),
                         modifier = Modifier.ifTrue(showBlur) {
-                            hazeChild(hazeState, hazeStyle) {
+                            hazeEffect(hazeState, hazeStyle) {
                                 progressive = HazeProgressive.verticalGradient(
                                     startIntensity = 1f,
                                     endIntensity = 0f,
@@ -187,7 +188,7 @@ fun CivitAiDetailScreen(
                     verticalArrangement = Arrangement.spacedBy(4.dp),
                     horizontalArrangement = Arrangement.spacedBy(4.dp),
                     modifier = Modifier
-                        .ifTrue(showBlur) { haze(state = hazeState) }
+                        .ifTrue(showBlur) { hazeSource(state = hazeState) }
                         .fillMaxSize()
                 ) {
                     item(

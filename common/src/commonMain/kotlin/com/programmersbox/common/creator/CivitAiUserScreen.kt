@@ -96,7 +96,7 @@ fun CivitAiUserScreen(
                 colors = if (showBlur) TopAppBarDefaults.topAppBarColors(containerColor = Color.Transparent)
                 else TopAppBarDefaults.topAppBarColors(),
                 modifier = Modifier.ifTrue(showBlur) {
-                    hazeChild(hazeState, hazeStyle) {
+                    hazeEffect(hazeState, hazeStyle) {
                         progressive = HazeProgressive.verticalGradient(
                             startIntensity = 1f,
                             endIntensity = 0f,
@@ -113,7 +113,7 @@ fun CivitAiUserScreen(
             horizontalArrangement = Arrangement.spacedBy(4.dp),
             contentPadding = padding,
             modifier = Modifier
-                .ifTrue(showBlur) { haze(state = hazeState) }
+                .ifTrue(showBlur) { hazeSource(state = hazeState) }
                 .fillMaxSize()
         ) {
             item(

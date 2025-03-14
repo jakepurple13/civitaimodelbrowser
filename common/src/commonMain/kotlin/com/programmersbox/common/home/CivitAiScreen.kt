@@ -89,7 +89,7 @@ fun CivitAiScreen(
                 onShowSearch = { searchViewModel.showSearch = it },
                 showBlur = showBlur,
                 modifier = Modifier.ifTrue(showBlur) {
-                    hazeChild(hazeState) {
+                    hazeEffect(hazeState) {
                         progressive = HazeProgressive.verticalGradient(
                             startIntensity = 1f,
                             endIntensity = 0f,
@@ -122,7 +122,7 @@ fun CivitAiScreen(
                 verticalArrangement = Arrangement.spacedBy(4.dp),
                 horizontalArrangement = Arrangement.spacedBy(4.dp),
                 modifier = Modifier
-                    .ifTrue(showBlur) { haze(state = hazeState) }
+                    .ifTrue(showBlur) { hazeSource(state = hazeState) }
                     .fillMaxSize()
             ) {
                 modelItems(

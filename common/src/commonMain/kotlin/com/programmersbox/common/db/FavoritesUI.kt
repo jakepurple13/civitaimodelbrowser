@@ -94,7 +94,7 @@ fun FavoritesUI() {
             ) {
                 Column(
                     modifier = Modifier.ifTrue(showBlur) {
-                        hazeChild(hazeState, hazeStyle) {
+                        hazeEffect(hazeState, hazeStyle) {
                             progressive = HazeProgressive.verticalGradient(
                                 startIntensity = 1f,
                                 endIntensity = 0f,
@@ -209,7 +209,7 @@ fun FavoritesUI() {
             contentPadding = padding,
             modifier = Modifier
                 .padding(4.dp)
-                .ifTrue(showBlur) { haze(state = hazeState) }
+                .ifTrue(showBlur) { hazeSource(state = hazeState) }
                 .fillMaxSize()
         ) {
             items(

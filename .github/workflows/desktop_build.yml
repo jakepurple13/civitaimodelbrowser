@@ -1,0 +1,127 @@
+name: Compose Desktop Build
+
+env:
+  GITHUB_DEPLOY: 'false'
+
+on:
+  push:
+    branches:
+      - master
+    paths-ignore:
+      - LICENSE
+      - README.md
+      - 'docs/**'
+      - '.github/config/labels.yml'
+    tags-ignore:
+      - 'v*'
+
+  pull_request:
+    branches:
+      - main
+      - master
+
+  workflow_call:
+  workflow_dispatch:
+  repository_dispatch:
+    types: [ app-release ]
+
+defaults:
+  run:
+    shell: bash
+
+#concurrency:
+#  group: ${{ github.workflow }}-${{ github.ref }}
+#  cancel-in-progress: true
+
+jobs:
+  build:
+    name: Build Package
+    timeout-minutes: 15
+    continue-on-error: true
+    # if: github.event_name  == 'pull_request'
+
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ ubuntu-latest, macos-latest, windows-latest ]
+        jdk: [ 17 ]
+
+    steps:
+      - name: Check out the source code
+        uses: actions/checkout@v3
+
+      - name: Setup JDK
+        uses: actions/setup-java@v3
+        with:
+          distribution: adopt
+          java-version: 17
+
+      - name: Cache Gradle dependencies
+        uses: actions/cache@v3.0.11
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+          key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
+          restore-keys: |
+            ${{ runner.os }}-gradle-
+
+      - name: Build with Gradle
+        uses: gradle/gradle-build-action@v2
+        with:
+          gradle-version: current
+          arguments: "packageDistributionForCurrentOS"
+
+      - name: Upload ${{ matrix.os }} Build
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.os }}-build
+          path: |
+            desktop/build/compose/binaries/main/dmg/*.dmg
+            desktop/build/compose/binaries/main/deb/*.deb
+            desktop/build/compose/binaries/main/msi/*.msi
+
+  #      - name: Gradle Build
+  #        id: gradle-build
+  #        run: ./gradlew createDistributable
+
+  #      - name: Archive Artifacts
+  #        uses: actions/upload-artifact@v3
+  #        with:
+  #          name: distributable-${{ matrix.os }}
+  #          if-no-files-found: ignore
+  #          path: |
+  #            build/compose/binaries/main/app/
+
+#  release:
+#    name: Release new version
+#    needs: [ build ]
+#    if: startsWith(github.ref, 'refs/tags/')
+#    runs-on: ubuntu-latest
+#
+#    steps:
+#      - name: Check out the source code
+#        uses: actions/checkout@v3
+#        with:
+#          fetch-depth: 0
+#
+#      - name: Download all the build artifacts
+#        uses: actions/download-artifact@v4
+#        with:
+#          path: release-artifacts
+#
+#      - name: echo
+#        run:
+#          ls
+#
+#      - name: Github Release
+#        uses: softprops/action-gh-release@v1
+#        with:
+#          body: ${{ steps.github_release.outputs.changelog }}
+#          prerelease: ${{ contains(github.event.inputs.version, '-rc') || contains(github.event.inputs.version, '-b') || contains(github.event.inputs.version, '-a') }}
+#          files: |
+#            ${{ github.workspace }}/release-artifacts/**
+#          fail_on_unmatched_files: true
+#        env:
+#          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

@@ -33,7 +33,6 @@ import com.programmersbox.common.UIShow
 import com.programmersbox.common.db.CivitDb
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
-import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import java.io.*
 
@@ -97,7 +96,7 @@ class MainActivity : ComponentActivity() {
                                         ?.use { inputStream -> BufferedReader(InputStreamReader(inputStream)).readText() }
                                         ?.let {
                                             lifecycleScope.launch {
-                                                dao.import(it)
+                                                dao.importFavorites(it)
                                                 toaster.show(
                                                     Toast(
                                                         message = "Import Completed",

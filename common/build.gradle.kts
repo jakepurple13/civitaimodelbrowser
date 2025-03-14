@@ -139,6 +139,6 @@ fun Project.getLocalProperty(key: String): Any? {
         }
         properties.getProperty(key)
     } else if (System.getenv("CI") == null) {
-        System.getProperty("api_key")
+        System.getProperty("API_KEY")
     } else error("File from not found")
 }

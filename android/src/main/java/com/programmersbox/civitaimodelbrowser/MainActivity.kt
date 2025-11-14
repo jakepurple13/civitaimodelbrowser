@@ -185,7 +185,8 @@ fun Context.customTabsUriHandler(
                     android.R.anim.slide_out_right
                 )
                 .setShareState(CustomTabsIntent.SHARE_STATE_ON)
-                .build().launchUrl(this@customTabsUriHandler, uri.toUri())
+                .build()
+                .launchUrl(this@customTabsUriHandler, uri.toUri())
         }.onFailure { onFailure(uri) }
     }
 }

@@ -1,20 +1,71 @@
 package com.programmersbox.common.details
 
-import androidx.compose.animation.*
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.core.animateFloatAsState
-import androidx.compose.foundation.*
-import androidx.compose.foundation.layout.*
+import androidx.compose.animation.expandVertically
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.shrinkVertically
+import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.background
+import androidx.compose.foundation.basicMarquee
+import androidx.compose.foundation.combinedClickable
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.navigationBarsPadding
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.selection.toggleable
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.text.selection.SelectionContainer
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.*
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.material.icons.filled.ArrowDropDown
+import androidx.compose.material.icons.filled.ContentCopy
+import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.material.icons.filled.FavoriteBorder
+import androidx.compose.material.icons.filled.Image
+import androidx.compose.material.icons.filled.OpenInBrowser
+import androidx.compose.material.icons.filled.Refresh
+import androidx.compose.material.icons.filled.Share
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.AssistChipDefaults
+import androidx.compose.material3.BottomAppBar
+import androidx.compose.material3.BottomAppBarDefaults
+import androidx.compose.material3.Button
+import androidx.compose.material3.Card
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.ElevatedAssistChip
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FloatingActionButton
+import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.ListItem
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.NavigationBarItem
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
+import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.blur
@@ -30,15 +81,32 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.DialogProperties
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.programmersbox.common.*
+import com.programmersbox.common.BackButton
+import com.programmersbox.common.ComposableUtils
+import com.programmersbox.common.ContextMenu
+import com.programmersbox.common.LocalDataStore
+import com.programmersbox.common.LocalDatabaseDao
+import com.programmersbox.common.LocalNetwork
+import com.programmersbox.common.ModelImage
+import com.programmersbox.common.Network
+import com.programmersbox.common.SheetDetails
+import com.programmersbox.common.adaptiveGridCell
 import com.programmersbox.common.components.LoadingImage
 import com.programmersbox.common.db.FavoriteModel
 import com.programmersbox.common.home.BlacklistHandling
-import dev.chrisbanes.haze.*
+import com.programmersbox.common.ifTrue
+import com.programmersbox.common.rememberSROState
+import com.programmersbox.common.scaleRotateOffsetReset
+import dev.chrisbanes.haze.HazeProgressive
+import dev.chrisbanes.haze.HazeState
+import dev.chrisbanes.haze.LocalHazeStyle
+import dev.chrisbanes.haze.hazeChild
+import dev.chrisbanes.haze.hazeEffect
+import dev.chrisbanes.haze.hazeSource
 import io.kamel.image.KamelImage
 import io.kamel.image.asyncPainterResource
 import java.text.SimpleDateFormat
-import java.util.*
+import java.util.Locale
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
 @Composable
@@ -46,12 +114,13 @@ fun CivitAiDetailScreen(
     id: String?,
     onShareClick: (String) -> Unit,
     network: Network = LocalNetwork.current,
+    onNavigateToUser: (String) -> Unit,
+    onNavigateToDetailImages: (Long, String) -> Unit,
 ) {
     val scope = rememberCoroutineScope()
     val hazeState = remember { HazeState() }
     val dao = LocalDatabaseDao.current
     val viewModel = viewModel { CivitAiDetailViewModel(network, id, dao) }
-    val navController = LocalNavController.current
     val simpleDateTimeFormatter = remember { SimpleDateFormat("MM/dd/yy HH:mm", Locale.getDefault()) }
     val dataStore = LocalDataStore.current
     val showBlur by dataStore.rememberShowBlur()
@@ -92,15 +161,11 @@ fun CivitAiDetailScreen(
                                 modifier = Modifier.basicMarquee()
                             )
                         },
-                        navigationIcon = {
-                            IconButton(
-                                onClick = { navController.popBackStack() }
-                            ) { Icon(Icons.AutoMirrored.Filled.ArrowBack, null) }
-                        },
+                        navigationIcon = { BackButton() },
                         actions = {
                             model.models.creator?.let { creator ->
                                 IconButton(
-                                    onClick = { navController.navigateToUser(creator.username.orEmpty()) },
+                                    onClick = { onNavigateToUser(creator.username.orEmpty()) },
                                 ) {
                                     LoadingImage(
                                         creator.image.orEmpty(),
@@ -162,7 +227,7 @@ fun CivitAiDetailScreen(
                                 selected = false,
                                 onClick = {
                                     id?.toLongOrNull()
-                                        ?.let { navController.navigateToDetailImages(it, model.models.name) }
+                                        ?.let { onNavigateToDetailImages(it, model.models.name) }
                                 },
                                 icon = { Icon(Icons.Default.Image, null) },
                                 label = { Text("Images") },

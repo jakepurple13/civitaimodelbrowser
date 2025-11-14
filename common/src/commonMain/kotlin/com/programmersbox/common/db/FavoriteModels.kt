@@ -1,9 +1,12 @@
+@file:OptIn(ExperimentalTime::class)
+
 package com.programmersbox.common.db
 
 import androidx.room.Entity
-import kotlinx.datetime.Clock
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
+import kotlin.time.Clock
+import kotlin.time.ExperimentalTime
 
 @Entity(tableName = "favorite_table")
 data class FavoriteRoom(

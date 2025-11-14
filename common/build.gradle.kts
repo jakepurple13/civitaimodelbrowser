@@ -3,7 +3,7 @@ import org.jetbrains.compose.internal.utils.localPropertiesFile
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import java.io.FileInputStream
 import java.io.InputStreamReader
-import java.util.*
+import java.util.Properties
 
 plugins {
     kotlin("multiplatform")
@@ -40,7 +40,7 @@ kotlin {
             api(compose.foundation)
             api(compose.materialIconsExtended)
             //api(compose.material3)
-            api("org.jetbrains.compose.material3:material3:1.8.0-alpha03")
+            api("org.jetbrains.compose.material3:material3:1.10.0-alpha04")
             api(compose.components.resources)
             api(libs.ktor.core)
             api(libs.ktor.content.negotiation)
@@ -62,6 +62,10 @@ kotlin {
             api(libs.sonner)
             implementation(libs.androidx.room.runtime)
             //add("ksp", libs.androidx.room.compiler)
+
+            implementation(libs.cmp.navigation3.ui)
+            implementation(libs.cmp.lifecycle.viewmodel.navigation3)
+            implementation(libs.cmp.navigationevent.compose)
         }
 
         commonTest.dependencies {
@@ -97,7 +101,7 @@ compose.resources {
 }
 
 android {
-    compileSdk = 35
+    compileSdk = 36
     namespace = "com.programmersbox.common"
     sourceSets["main"].manifest.srcFile("src/androidMain/AndroidManifest.xml")
     sourceSets["main"].res.srcDirs("src/androidMain/res")

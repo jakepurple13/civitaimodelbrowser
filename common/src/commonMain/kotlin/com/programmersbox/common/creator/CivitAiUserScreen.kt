@@ -10,10 +10,16 @@ import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.FavoriteBorder
-import androidx.compose.material3.*
+import androidx.compose.material3.CenterAlignedTopAppBar
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
@@ -23,17 +29,28 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.programmersbox.common.*
+import com.programmersbox.common.BackButton
+import com.programmersbox.common.LocalDataStore
+import com.programmersbox.common.LocalDatabaseDao
+import com.programmersbox.common.LocalNetwork
+import com.programmersbox.common.Network
+import com.programmersbox.common.adaptiveGridCell
 import com.programmersbox.common.components.LoadingImage
 import com.programmersbox.common.home.modelItems
+import com.programmersbox.common.ifTrue
 import com.programmersbox.common.paging.collectAsLazyPagingItems
-import dev.chrisbanes.haze.*
+import dev.chrisbanes.haze.HazeProgressive
+import dev.chrisbanes.haze.HazeState
+import dev.chrisbanes.haze.LocalHazeStyle
+import dev.chrisbanes.haze.hazeEffect
+import dev.chrisbanes.haze.hazeSource
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
 @Composable
 fun CivitAiUserScreen(
     network: Network = LocalNetwork.current,
     username: String,
+    onNavigateToDetail: (String) -> Unit,
 ) {
     val hazeState = remember { HazeState() }
     val dataStore = LocalDataStore.current
@@ -44,7 +61,6 @@ fun CivitAiUserScreen(
     val blacklisted by database.getBlacklisted().collectAsStateWithLifecycle(emptyList())
     val viewModel = viewModel { CivitAiUserViewModel(network, dataStore, database, username) }
     val showBlur by dataStore.rememberShowBlur()
-    val navController = LocalNavController.current
 
     val lazyPagingItems = viewModel.pager.collectAsLazyPagingItems()
 
@@ -59,11 +75,7 @@ fun CivitAiUserScreen(
                         modifier = Modifier.basicMarquee()
                     )
                 },
-                navigationIcon = {
-                    IconButton(
-                        onClick = { navController.popBackStack() }
-                    ) { Icon(Icons.AutoMirrored.Filled.ArrowBack, null) }
-                },
+                navigationIcon = { BackButton() },
                 actions = {
                     if (lazyPagingItems.itemSnapshotList.isNotEmpty()) {
                         lazyPagingItems[0]?.creator?.let { creator ->
@@ -126,7 +138,7 @@ fun CivitAiUserScreen(
             }
             modelItems(
                 lazyPagingItems = lazyPagingItems,
-                navController = navController,
+                onNavigateToDetail = onNavigateToDetail,
                 showNsfw = showNsfw,
                 blurStrength = blurStrength,
                 database = favorites,

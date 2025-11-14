@@ -1,24 +1,33 @@
 package com.programmersbox.common
 
-import androidx.compose.animation.AnimatedContentTransitionScope
+import androidx.compose.animation.slideInHorizontally
+import androidx.compose.animation.slideOutHorizontally
+import androidx.compose.animation.togetherWith
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.staticCompositionLocalOf
+import androidx.compose.ui.Modifier
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.lifecycle.viewmodel.navigation3.rememberViewModelStoreNavEntryDecorator
 import androidx.navigation.NavController
 import androidx.navigation.NavOptions
-import androidx.navigation.compose.NavHost
-import androidx.navigation.compose.composable
-import androidx.navigation.compose.navigation
-import androidx.navigation.compose.rememberNavController
-import androidx.navigation.toRoute
+import androidx.navigation3.runtime.NavKey
+import androidx.navigation3.runtime.entryProvider
+import androidx.navigation3.runtime.rememberSaveableStateHolderNavEntryDecorator
+import androidx.navigation3.ui.NavDisplay
 import androidx.room.RoomDatabase
 import com.programmersbox.common.blacklisted.BlacklistedScreen
 import com.programmersbox.common.creator.CivitAiUserScreen
-import com.programmersbox.common.db.*
+import com.programmersbox.common.db.AppDatabase
+import com.programmersbox.common.db.CivitDb
+import com.programmersbox.common.db.FavoritesDao
+import com.programmersbox.common.db.FavoritesUI
+import com.programmersbox.common.db.getRoomDatabase
 import com.programmersbox.common.details.CivitAiDetailScreen
 import com.programmersbox.common.details.CivitAiModelImagesScreen
 import com.programmersbox.common.home.CivitAiScreen
@@ -36,68 +45,98 @@ internal fun App(
     import: (@Composable () -> Unit)? = null,
     builder: RoomDatabase.Builder<AppDatabase>,
 ) {
-    val navController = rememberNavController()
     val viewModel = viewModel { AppViewModel(DataStore.getStore(producePath)) }
     CompositionLocalProvider(
-        LocalNavController provides navController,
         LocalDataStore provides viewModel.dataStore,
         LocalHazeStyle provides HazeMaterials.regular(),
         LocalDatabaseDao provides remember { getRoomDatabase(builder).getDao() }
     ) {
         Surface {
-            NavHost(
-                navController = navController,
-                startDestination = Screen.List,
-                enterTransition = { slideIntoContainer(AnimatedContentTransitionScope.SlideDirection.Start) },
-                exitTransition = { slideOutOfContainer(AnimatedContentTransitionScope.SlideDirection.End) },
-            ) {
-                composable<Screen.List>(
-                    enterTransition = { slideIntoContainer(AnimatedContentTransitionScope.SlideDirection.End) },
-                    exitTransition = { slideOutOfContainer(AnimatedContentTransitionScope.SlideDirection.Start) }
-                ) { CivitAiScreen() }
-
-                composable<Screen.Detail> {
-                    CivitAiDetailScreen(
-                        id = it.toRoute<Screen.Detail>().modelId,
-                        onShareClick = onShareClick
-                    )
-                }
-
-                composable<Screen.DetailsImage> {
-                    val details = it.toRoute<Screen.DetailsImage>()
-                    CivitAiModelImagesScreen(
-                        modelId = details.modelId,
-                        modelName = details.modelName
-                    )
-                }
-
-                composable<Screen.User> {
-                    CivitAiUserScreen(username = it.toRoute<Screen.User>().username)
-                }
-
-                composable<Screen.Favorites> { FavoritesUI() }
-
-                navigation<Screen.Settings>(
-                    startDestination = Screen.Settings.Screen
-                ) {
-                    composable<Screen.Settings.Screen>(
-                        enterTransition = { slideIntoContainer(AnimatedContentTransitionScope.SlideDirection.Down) },
-                        exitTransition = { slideOutOfContainer(AnimatedContentTransitionScope.SlideDirection.Up) }
-                    ) {
+            val backStack = remember { mutableStateListOf<NavKey>(Screen.List) }
+            NavDisplay(
+                backStack = backStack,
+                entryDecorators = listOf(
+                    rememberSaveableStateHolderNavEntryDecorator(),
+                    rememberViewModelStoreNavEntryDecorator()
+                ),
+                entryProvider = entryProvider {
+                    entry<Screen.List> {
+                        CivitAiScreen(
+                            onNavigateToDetail = { id -> backStack.add(Screen.Detail(id)) },
+                            onNavigateToFavorites = { backStack.add(Screen.Favorites) },
+                            onNavigateToSettings = { backStack.add(Screen.Settings) }
+                        )
+                    }
+                    entry<Screen.Detail> {
+                        CivitAiDetailScreen(
+                            id = it.modelId,
+                            onShareClick = onShareClick,
+                            onNavigateToUser = { username -> backStack.add(Screen.User(username)) },
+                            onNavigateToDetailImages = { id, name ->
+                                backStack.add(
+                                    Screen.DetailsImage(
+                                        id.toString(),
+                                        name
+                                    )
+                                )
+                            }
+                        )
+                    }
+                    entry<Screen.DetailsImage> {
+                        CivitAiModelImagesScreen(
+                            modelId = it.modelId,
+                            modelName = it.modelName
+                        )
+                    }
+                    entry<Screen.User> {
+                        CivitAiUserScreen(
+                            username = it.username,
+                            onNavigateToDetail = { id -> backStack.add(Screen.Detail(id)) }
+                        )
+                    }
+                    entry<Screen.Favorites> {
+                        FavoritesUI(
+                            onNavigateToDetail = { id -> backStack.add(Screen.Detail(id.toString())) },
+                            onNavigateToUser = { username -> backStack.add(Screen.User(username)) }
+                        )
+                    }
+                    entry<Screen.Settings> {
                         SettingsScreen(
                             onExport = onExport,
                             onImport = onImport,
                             export = export,
-                            import = import
+                            import = import,
+                            onNavigateToBlacklisted = { backStack.add(Screen.Settings.Blacklisted) }
                         )
                     }
-
-                    composable<Screen.Settings.Blacklisted>(
-                        enterTransition = { slideIntoContainer(AnimatedContentTransitionScope.SlideDirection.Up) },
-                        exitTransition = { slideOutOfContainer(AnimatedContentTransitionScope.SlideDirection.Down) }
-                    ) { BlacklistedScreen() }
-                }
-            }
+                    entry<Screen.Settings.Blacklisted> { BlacklistedScreen() }
+                    entry<Screen.Settings.Screen> {
+                        SettingsScreen(
+                            onExport = onExport,
+                            onImport = onImport,
+                            export = export,
+                            import = import,
+                            onNavigateToBlacklisted = { backStack.add(Screen.Settings.Blacklisted) }
+                        )
+                    }
+                },
+                transitionSpec = {
+                    // Slide in from right when navigating forward
+                    slideInHorizontally(initialOffsetX = { it }) togetherWith
+                            slideOutHorizontally(targetOffsetX = { -it })
+                },
+                popTransitionSpec = {
+                    // Slide in from left when navigating back
+                    slideInHorizontally(initialOffsetX = { -it }) togetherWith
+                            slideOutHorizontally(targetOffsetX = { it })
+                },
+                predictivePopTransitionSpec = {
+                    // Slide in from left when navigating back
+                    slideInHorizontally(initialOffsetX = { -it }) togetherWith
+                            slideOutHorizontally(targetOffsetX = { it })
+                },
+                modifier = Modifier.fillMaxSize()
+            )
         }
     }
 }
@@ -138,26 +177,26 @@ fun NavController.navigateToUser(username: String) {
 
 sealed class Screen {
     @Serializable
-    data object List
+    data object List : NavKey
 
     @Serializable
-    class Detail(val modelId: String)
+    class Detail(val modelId: String) : NavKey
 
     @Serializable
-    data object Settings {
+    data object Settings : NavKey {
         @Serializable
-        data object Screen
+        data object Screen : NavKey
 
         @Serializable
-        data object Blacklisted
+        data object Blacklisted : NavKey
     }
 
     @Serializable
-    data object Favorites
+    data object Favorites : NavKey
 
     @Serializable
-    class User(val username: String)
+    class User(val username: String) : NavKey
 
     @Serializable
-    class DetailsImage(val modelId: String, val modelName: String)
+    class DetailsImage(val modelId: String, val modelName: String) : NavKey
 }

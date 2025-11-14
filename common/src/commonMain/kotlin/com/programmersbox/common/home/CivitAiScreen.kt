@@ -1,20 +1,62 @@
 package com.programmersbox.common.home
 
-import androidx.compose.animation.*
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInHorizontally
+import androidx.compose.animation.slideOutHorizontally
+import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.combinedClickable
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.foundation.lazy.grid.LazyGridScope
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.*
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.material.icons.filled.ArrowUpward
+import androidx.compose.material.icons.filled.Clear
+import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.material.icons.filled.Refresh
+import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.AssistChipDefaults
+import androidx.compose.material3.Button
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.ElevatedAssistChip
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FloatingActionButton
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SearchBar
+import androidx.compose.material3.SearchBarDefaults
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.blur
@@ -26,30 +68,46 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
-import androidx.navigation.NavController
 import androidx.paging.CombinedLoadStates
 import androidx.paging.LoadState
-import com.programmersbox.common.*
+import com.programmersbox.common.ComposableUtils
+import com.programmersbox.common.ContextMenu
+import com.programmersbox.common.LocalDataStore
+import com.programmersbox.common.LocalDatabaseDao
+import com.programmersbox.common.LocalNetwork
+import com.programmersbox.common.ModelType
+import com.programmersbox.common.Models
+import com.programmersbox.common.Network
+import com.programmersbox.common.adaptiveGridCell
 import com.programmersbox.common.components.LoadingImage
 import com.programmersbox.common.components.PullRefreshIndicator
 import com.programmersbox.common.components.pullRefresh
 import com.programmersbox.common.components.rememberPullRefreshState
 import com.programmersbox.common.db.BlacklistedItemRoom
 import com.programmersbox.common.db.FavoriteModel
+import com.programmersbox.common.ifTrue
+import com.programmersbox.common.isScrollingUp
 import com.programmersbox.common.paging.LazyPagingItems
 import com.programmersbox.common.paging.collectAsLazyPagingItems
 import com.programmersbox.common.paging.itemContentType
 import com.programmersbox.common.paging.itemKeyIndexed
-import dev.chrisbanes.haze.*
+import com.programmersbox.common.showRefreshButton
+import dev.chrisbanes.haze.HazeProgressive
+import dev.chrisbanes.haze.HazeState
+import dev.chrisbanes.haze.LocalHazeStyle
+import dev.chrisbanes.haze.hazeEffect
+import dev.chrisbanes.haze.hazeSource
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CivitAiScreen(
     network: Network = LocalNetwork.current,
+    onNavigateToDetail: (String) -> Unit,
+    onNavigateToFavorites: () -> Unit,
+    onNavigateToSettings: () -> Unit,
 ) {
     val hazeState = remember { HazeState() }
-    val navController = LocalNavController.current
     val db = LocalDatabaseDao.current
     val database by db.getFavoriteModels().collectAsStateWithLifecycle(emptyList())
     val blacklisted by db.getBlacklisted().collectAsStateWithLifecycle(emptyList())
@@ -88,6 +146,9 @@ fun CivitAiScreen(
                 blacklisted = blacklisted,
                 onShowSearch = { searchViewModel.showSearch = it },
                 showBlur = showBlur,
+                onNavigateToFavorites = onNavigateToFavorites,
+                onNavigateToSettings = onNavigateToSettings,
+                onNavigateToDetail = onNavigateToDetail,
                 modifier = Modifier.ifTrue(showBlur) {
                     hazeEffect(hazeState) {
                         progressive = HazeProgressive.verticalGradient(
@@ -127,7 +188,7 @@ fun CivitAiScreen(
             ) {
                 modelItems(
                     lazyPagingItems = lazyPagingItems,
-                    navController = navController,
+                    onNavigateToDetail = onNavigateToDetail,
                     showNsfw = showNsfw,
                     blurStrength = blurStrength,
                     database = database.filterIsInstance<FavoriteModel.Model>(),
@@ -164,7 +225,7 @@ fun CivitAiScreen(
 @OptIn(ExperimentalFoundationApi::class)
 fun LazyGridScope.modelItems(
     lazyPagingItems: LazyPagingItems<Models>,
-    navController: NavController,
+    onNavigateToDetail: (String) -> Unit,
     showNsfw: Boolean,
     blurStrength: Float,
     database: List<FavoriteModel>,
@@ -198,7 +259,7 @@ fun LazyGridScope.modelItems(
             ) {
                 ModelItem(
                     models = models,
-                    onClick = { navController.navigateToDetail(models.id) },
+                    onClick = { onNavigateToDetail(models.id.toString()) },
                     onLongClick = { showDialog = true },
                     showNsfw = showNsfw,
                     blurStrength = blurStrength.dp,
@@ -429,10 +490,12 @@ private fun SearchAppBar(
     showNsfw: Boolean,
     blurStrength: Float,
     onShowSearch: (Boolean) -> Unit,
+    onNavigateToDetail: (String) -> Unit,
+    onNavigateToFavorites: () -> Unit,
+    onNavigateToSettings: () -> Unit,
     showBlur: Boolean,
     modifier: Modifier = Modifier,
 ) {
-    val navController = LocalNavController.current
     val lazyPagingItems = viewModel.pager.collectAsLazyPagingItems()
     SearchBar(
         expanded = viewModel.showSearch,
@@ -469,11 +532,11 @@ private fun SearchAppBar(
                         }
 
                         IconButton(
-                            onClick = { navController.navigate(Screen.Settings) }
+                            onClick = onNavigateToSettings
                         ) { Icon(Icons.Default.Settings, null) }
 
                         IconButton(
-                            onClick = { navController.navigate(Screen.Favorites) }
+                            onClick = onNavigateToFavorites
                         ) { Icon(Icons.Default.Favorite, null) }
                     }
                 },
@@ -521,7 +584,7 @@ private fun SearchAppBar(
         ) {
             modelItems(
                 lazyPagingItems = lazyPagingItems,
-                navController = navController,
+                onNavigateToDetail = onNavigateToDetail,
                 showNsfw = showNsfw,
                 blurStrength = blurStrength,
                 database = database,

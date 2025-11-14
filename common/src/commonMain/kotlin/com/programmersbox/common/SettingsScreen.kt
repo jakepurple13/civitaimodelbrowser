@@ -154,7 +154,12 @@ fun SettingsScreen(
                 onClick = { showBlur = !showBlur }
             ) {
                 ListItem(
-                    leadingContent = { Icon(if (showBlur) Icons.Default.BlurOn else Icons.Default.BlurOff, null) },
+                    leadingContent = {
+                        Icon(
+                            if (showBlur) Icons.Default.BlurOn else Icons.Default.BlurOff,
+                            null
+                        )
+                    },
                     headlineContent = { Text("Show Blur") },
                     trailingContent = {
                         Switch(
@@ -224,6 +229,13 @@ fun SettingsScreen(
                     }
                 )
             }
+
+            HorizontalDivider()
+
+            Text(
+                remember { getPlatformName() },
+                modifier = Modifier.align(Alignment.CenterHorizontally)
+            )
         }
     }
 }

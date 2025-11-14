@@ -19,7 +19,7 @@ import kotlinx.coroutines.launch
 import java.io.File
 
 public actual fun getPlatformName(): String {
-    return "civitaimodelbrowser"
+    return "Jvm ${System.getProperty("java.version")}"
 }
 
 @Composable
@@ -84,17 +84,20 @@ internal actual fun ContextMenu(
     ContextMenuArea(
         items = {
             listOfNotNull(
-                ContextMenuItem("Add to Blacklist") {
-                    scope.launch {
-                        db.blacklistItem(modelId, name, nsfw, imageUrl)
+                if (isBlacklisted) {
+                    ContextMenuItem("Remove from Blacklist") {
+                        scope.launch {
+                            blacklistItems.find { b -> b.id == modelId }
+                                ?.let { db.delete(it) }
+                        }
                     }
-                }.takeIf { !isBlacklisted },
-                ContextMenuItem("Remove from Blacklist") {
-                    scope.launch {
-                        blacklistItems.find { b -> b.id == modelId }
-                            ?.let { db.delete(it) }
+                } else {
+                    ContextMenuItem("Add to Blacklist") {
+                        scope.launch {
+                            db.blacklistItem(modelId, name, nsfw, imageUrl)
+                        }
                     }
-                }.takeIf { isBlacklisted }
+                }
             )
         },
         content = content

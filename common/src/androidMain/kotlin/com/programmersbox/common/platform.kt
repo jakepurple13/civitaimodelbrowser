@@ -26,7 +26,7 @@ import com.programmersbox.common.db.BlacklistedItemRoom
 import com.programmersbox.common.db.CivitDb
 
 public actual fun getPlatformName(): String {
-    return "civitaimodelbrowser"
+    return "Android ${android.os.Build.VERSION.SDK_INT}"
 }
 
 @Composable

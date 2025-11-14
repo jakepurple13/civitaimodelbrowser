@@ -18,7 +18,6 @@ kotlin {
                 }
             }
         }
-        withJava()
     }
     sourceSets {
         jvmMain.dependencies {

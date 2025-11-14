@@ -1,3 +1,5 @@
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
+
 plugins {
     id("org.jetbrains.compose")
     id("com.android.application")
@@ -26,8 +28,10 @@ android {
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17
     }
-    kotlinOptions {
-        jvmTarget = JavaVersion.VERSION_17.toString()
+    kotlin {
+        compilerOptions {
+            jvmTarget.set(JvmTarget.JVM_17)
+        }
     }
     buildTypes {
         getByName("release") {
@@ -47,14 +51,4 @@ dependencies {
     implementation(libs.androidx.activity.compose)
     implementation(libs.androidx.browser)
     implementation(libs.androidx.material)
-}
-
-tasks.register("BuildAndRun") {
-    doFirst {
-        exec {
-            workingDir(projectDir.parentFile)
-            commandLine("./gradlew", "android:build")
-            commandLine("./gradlew", "android:installDebug")
-        }
-    }
 }

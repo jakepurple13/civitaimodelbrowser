@@ -56,7 +56,6 @@ kotlin {
             api(libs.lifecycle.viewmodel.compose)
             api(libs.lifecycle.runtime.compose)
             //api(libs.androidx.lifecycle.runtime.compose)
-            api(libs.navigation.compose)
             api(libs.jsoup)
             api(libs.haze)
             api(libs.haze.materials)

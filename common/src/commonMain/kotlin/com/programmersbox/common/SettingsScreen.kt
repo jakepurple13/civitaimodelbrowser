@@ -39,10 +39,12 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.programmersbox.common.components.icons.Github
 import com.programmersbox.common.db.CivitDb
+import com.programmersbox.common.db.FavoritesDao
 import com.programmersbox.resources.Res
 import com.programmersbox.resources.civitai_logo
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.painterResource
+import org.koin.compose.koinInject
 import kotlin.math.roundToInt
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -57,11 +59,11 @@ fun SettingsScreen(
     val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
     val scope = rememberCoroutineScope()
 
-    val dataStore = LocalDataStore.current
+    val dataStore = koinInject<DataStore>()
     val showNsfw = remember { dataStore.showNsfw }
     val hideNsfwStrength = remember { dataStore.hideNsfwStrength }
     val includeNsfw = remember { dataStore.includeNsfw }
-    val dao = LocalDatabaseDao.current
+    val dao = koinInject<FavoritesDao>()
     var showBlur by dataStore.rememberShowBlur()
 
     Scaffold(

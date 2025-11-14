@@ -28,14 +28,11 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.lifecycle.viewmodel.compose.viewModel
 import com.programmersbox.common.BackButton
-import com.programmersbox.common.LocalDataStore
-import com.programmersbox.common.LocalDatabaseDao
-import com.programmersbox.common.LocalNetwork
-import com.programmersbox.common.Network
+import com.programmersbox.common.DataStore
 import com.programmersbox.common.adaptiveGridCell
 import com.programmersbox.common.components.LoadingImage
+import com.programmersbox.common.db.FavoritesDao
 import com.programmersbox.common.home.modelItems
 import com.programmersbox.common.ifTrue
 import com.programmersbox.common.paging.collectAsLazyPagingItems
@@ -44,22 +41,23 @@ import dev.chrisbanes.haze.HazeState
 import dev.chrisbanes.haze.LocalHazeStyle
 import dev.chrisbanes.haze.hazeEffect
 import dev.chrisbanes.haze.hazeSource
+import org.koin.compose.koinInject
+import org.koin.compose.viewmodel.koinViewModel
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
 @Composable
 fun CivitAiUserScreen(
-    network: Network = LocalNetwork.current,
     username: String,
+    viewModel: CivitAiUserViewModel = koinViewModel(),
     onNavigateToDetail: (String) -> Unit,
 ) {
     val hazeState = remember { HazeState() }
-    val dataStore = LocalDataStore.current
+    val dataStore = koinInject<DataStore>()
     val showNsfw by remember { dataStore.showNsfw.flow }.collectAsStateWithLifecycle(false)
     val blurStrength by remember { dataStore.hideNsfwStrength.flow }.collectAsStateWithLifecycle(6f)
-    val database = LocalDatabaseDao.current
+    val database = koinInject<FavoritesDao>()
     val favorites by database.getFavoriteModels().collectAsStateWithLifecycle(emptyList())
     val blacklisted by database.getBlacklisted().collectAsStateWithLifecycle(emptyList())
-    val viewModel = viewModel { CivitAiUserViewModel(network, dataStore, database, username) }
     val showBlur by dataStore.rememberShowBlur()
 
     val lazyPagingItems = viewModel.pager.collectAsLazyPagingItems()

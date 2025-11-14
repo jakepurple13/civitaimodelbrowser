@@ -15,7 +15,9 @@ import androidx.room.RoomDatabase
 import com.programmersbox.common.db.AppDatabase
 import com.programmersbox.common.db.BlacklistedItemRoom
 import com.programmersbox.common.db.CivitDb
+import com.programmersbox.common.db.FavoritesDao
 import kotlinx.coroutines.launch
+import org.koin.compose.koinInject
 import java.io.File
 
 public actual fun getPlatformName(): String {
@@ -80,7 +82,7 @@ internal actual fun ContextMenu(
     content: @Composable () -> Unit,
 ) {
     val scope = rememberCoroutineScope()
-    val db = LocalDatabaseDao.current
+    val db = koinInject<FavoritesDao>()
     ContextMenuArea(
         items = {
             listOfNotNull(

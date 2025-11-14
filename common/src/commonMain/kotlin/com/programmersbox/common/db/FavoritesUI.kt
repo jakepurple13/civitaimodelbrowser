@@ -69,12 +69,10 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.DialogProperties
 import androidx.compose.ui.zIndex
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.lifecycle.viewmodel.compose.viewModel
 import com.programmersbox.common.BackButton
 import com.programmersbox.common.ComposableUtils
 import com.programmersbox.common.CustomScrollBar
-import com.programmersbox.common.LocalDataStore
-import com.programmersbox.common.LocalDatabaseDao
+import com.programmersbox.common.DataStore
 import com.programmersbox.common.SheetDetails
 import com.programmersbox.common.adaptiveGridCell
 import com.programmersbox.common.home.CardContent
@@ -90,6 +88,8 @@ import dev.chrisbanes.haze.hazeSource
 import io.kamel.image.KamelImage
 import io.kamel.image.asyncPainterResource
 import kotlinx.coroutines.launch
+import org.koin.compose.koinInject
+import org.koin.compose.viewmodel.koinViewModel
 
 internal const val IMAGE_FILTER = "Image"
 internal const val CREATOR_FILTER = "Creator"
@@ -97,19 +97,19 @@ internal const val CREATOR_FILTER = "Creator"
 @OptIn(ExperimentalFoundationApi::class, ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
 @Composable
 fun FavoritesUI(
+    viewModel: FavoritesViewModel = koinViewModel(),
     onNavigateToDetail: (Long) -> Unit,
     onNavigateToUser: (String) -> Unit,
 ) {
     val hazeState = remember { HazeState() }
-    val dataStore = LocalDataStore.current
+    val dataStore = koinInject<DataStore>()
     val scope = rememberCoroutineScope()
     val showNsfw by remember { dataStore.showNsfw.flow }.collectAsStateWithLifecycle(false)
     val blurStrength by remember { dataStore.hideNsfwStrength.flow }.collectAsStateWithLifecycle(6f)
     var reverseFavorites by dataStore.rememberReverseFavorites()
     val showBlur by dataStore.rememberShowBlur()
     val lazyGridState = rememberLazyGridState()
-    val dao = LocalDatabaseDao.current
-    val viewModel = viewModel { FavoritesViewModel(dao, dataStore) }
+    val dao = koinInject<FavoritesDao>()
 
     var showSortedByDialog by remember { mutableStateOf(false) }
 

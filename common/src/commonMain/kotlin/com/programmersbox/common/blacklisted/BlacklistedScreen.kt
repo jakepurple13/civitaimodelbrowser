@@ -22,13 +22,14 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.programmersbox.common.BackButton
-import com.programmersbox.common.LocalDatabaseDao
+import com.programmersbox.common.db.FavoritesDao
 import kotlinx.coroutines.launch
+import org.koin.compose.koinInject
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
 @Composable
 fun BlacklistedScreen() {
-    val db = LocalDatabaseDao.current
+    val db = koinInject<FavoritesDao>()
     val blacklistedItems by db.getBlacklisted().collectAsStateWithLifecycle(emptyList())
     val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior()
     val scope = rememberCoroutineScope()

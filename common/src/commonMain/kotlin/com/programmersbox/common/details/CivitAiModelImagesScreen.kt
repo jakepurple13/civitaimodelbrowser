@@ -58,18 +58,16 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.DialogProperties
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.lifecycle.viewmodel.compose.viewModel
 import com.programmersbox.common.BackButton
 import com.programmersbox.common.ComposableUtils
 import com.programmersbox.common.ContextMenu
 import com.programmersbox.common.CustomModelImage
-import com.programmersbox.common.LocalDataStore
-import com.programmersbox.common.LocalDatabaseDao
-import com.programmersbox.common.LocalNetwork
+import com.programmersbox.common.DataStore
 import com.programmersbox.common.SheetDetails
 import com.programmersbox.common.adaptiveGridCell
 import com.programmersbox.common.components.LoadingImage
 import com.programmersbox.common.db.FavoriteModel
+import com.programmersbox.common.db.FavoritesDao
 import com.programmersbox.common.home.BlacklistHandling
 import com.programmersbox.common.ifTrue
 import com.programmersbox.common.paging.collectAsLazyPagingItems
@@ -82,28 +80,21 @@ import dev.chrisbanes.haze.hazeEffect
 import dev.chrisbanes.haze.hazeSource
 import io.kamel.image.KamelImage
 import io.kamel.image.asyncPainterResource
+import org.koin.compose.koinInject
+import org.koin.compose.viewmodel.koinViewModel
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
 @Composable
 fun CivitAiModelImagesScreen(
-    modelId: String?,
     modelName: String?,
+    viewModel: CivitAiModelImagesViewModel = koinViewModel(),
 ) {
     val hazeState = remember { HazeState() }
-    val database = LocalDatabaseDao.current
-    val dataStore = LocalDataStore.current
+    val database = koinInject<FavoritesDao>()
+    val dataStore = koinInject<DataStore>()
     val showNsfw by remember { dataStore.showNsfw.flow }.collectAsStateWithLifecycle(false)
     val nsfwBlurStrength by remember { dataStore.hideNsfwStrength.flow }.collectAsStateWithLifecycle(6f)
     val showBlur by dataStore.rememberShowBlur()
-    val network = LocalNetwork.current
-    val viewModel = viewModel {
-        CivitAiModelImagesViewModel(
-            modelId = modelId,
-            dataStore = dataStore,
-            network = network,
-            database = database
-        )
-    }
     val uriHandler = LocalUriHandler.current
     val lazyPagingItems = viewModel.pager.collectAsLazyPagingItems()
 

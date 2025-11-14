@@ -13,8 +13,21 @@ import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.browser.customtabs.CustomTabsIntent
 import androidx.compose.foundation.isSystemInDarkTheme
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.material3.Card
+import androidx.compose.material3.ListItem
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
+import androidx.compose.material3.darkColorScheme
+import androidx.compose.material3.dynamicDarkColorScheme
+import androidx.compose.material3.dynamicLightColorScheme
+import androidx.compose.material3.lightColorScheme
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.SideEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalContext
@@ -28,13 +41,18 @@ import com.dokar.sonner.Toast
 import com.dokar.sonner.ToastType
 import com.dokar.sonner.Toaster
 import com.dokar.sonner.rememberToasterState
-import com.programmersbox.common.LocalDatabaseDao
 import com.programmersbox.common.UIShow
 import com.programmersbox.common.db.CivitDb
+import com.programmersbox.common.db.FavoritesDao
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.json.Json
-import java.io.*
+import org.koin.compose.koinInject
+import java.io.BufferedReader
+import java.io.FileNotFoundException
+import java.io.FileOutputStream
+import java.io.IOException
+import java.io.InputStreamReader
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -87,7 +105,7 @@ class MainActivity : ComponentActivity() {
                         },
                         onImport = { "" },
                         import = {
-                            val dao = LocalDatabaseDao.current
+                            val dao = koinInject<FavoritesDao>()
                             val importLauncher2 = rememberLauncherForActivityResult(
                                 ActivityResultContracts.OpenDocument()
                             ) { document ->

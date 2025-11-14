@@ -67,6 +67,11 @@ kotlin {
             implementation(libs.cmp.navigation3.ui)
             implementation(libs.cmp.lifecycle.viewmodel.navigation3)
             implementation(libs.cmp.navigationevent.compose)
+            implementation(project.dependencies.platform(libs.koin.bom))
+            api(libs.koin.core)
+            api(libs.koin.compose)
+            implementation(libs.koin.viewmodel)
+            implementation(libs.koin.nav3)
         }
 
         commonTest.dependencies {
@@ -78,6 +83,7 @@ kotlin {
             api(libs.androidx.core)
             api(libs.ktor.jvm)
             implementation(libs.composeScrollbars)
+            api(libs.koin.android)
         }
 
         jvmMain.dependencies {

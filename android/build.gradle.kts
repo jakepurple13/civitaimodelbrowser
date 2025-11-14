@@ -51,4 +51,6 @@ dependencies {
     implementation(libs.androidx.activity.compose)
     implementation(libs.androidx.browser)
     implementation(libs.androidx.material)
+    implementation(project.dependencies.platform(libs.koin.bom))
+    implementation(libs.koin.core)
 }

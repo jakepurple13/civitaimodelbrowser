@@ -24,6 +24,8 @@ cmp-nav3 = "1.0.0-alpha04"
 cmp-navevent = "1.0.0-beta01"
 cmpLifecycle = "2.10.0-alpha04"
 
+koin = "4.2.0-alpha2"
+
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp-version" }
 android-library = { id = "com.android.library", version.ref = "agp-version" }
@@ -64,3 +66,10 @@ androidx-material = { group = "com.google.android.material", name = "material", 
 cmp-navigation3-ui = { group = "org.jetbrains.androidx.navigation3", name = "navigation3-ui", version.ref = "cmp-nav3" }
 cmp-lifecycle-viewmodel-navigation3 = { module = "org.jetbrains.androidx.lifecycle:lifecycle-viewmodel-navigation3", version.ref = "cmpLifecycle" }
 cmp-navigationevent-compose = { module = "org.jetbrains.androidx.navigationevent:navigationevent-compose", version.ref = "cmp-navevent" }
+
+koin-bom = { module = "io.insert-koin:koin-bom", version.ref = "koin" }
+koin-core = { module = "io.insert-koin:koin-core" }
+koin-android = { module = "io.insert-koin:koin-android" }
+koin-compose = { module = "io.insert-koin:koin-compose" }
+koin-viewmodel = { module = "io.insert-koin:koin-compose-viewmodel" }
+koin-nav3 = { module = "io.insert-koin:koin-compose-navigation3" }

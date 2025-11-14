@@ -67,17 +67,13 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.paging.CombinedLoadStates
 import androidx.paging.LoadState
 import com.programmersbox.common.ComposableUtils
 import com.programmersbox.common.ContextMenu
-import com.programmersbox.common.LocalDataStore
-import com.programmersbox.common.LocalDatabaseDao
-import com.programmersbox.common.LocalNetwork
+import com.programmersbox.common.DataStore
 import com.programmersbox.common.ModelType
 import com.programmersbox.common.Models
-import com.programmersbox.common.Network
 import com.programmersbox.common.adaptiveGridCell
 import com.programmersbox.common.components.LoadingImage
 import com.programmersbox.common.components.PullRefreshIndicator
@@ -85,6 +81,7 @@ import com.programmersbox.common.components.pullRefresh
 import com.programmersbox.common.components.rememberPullRefreshState
 import com.programmersbox.common.db.BlacklistedItemRoom
 import com.programmersbox.common.db.FavoriteModel
+import com.programmersbox.common.db.FavoritesDao
 import com.programmersbox.common.ifTrue
 import com.programmersbox.common.isScrollingUp
 import com.programmersbox.common.paging.LazyPagingItems
@@ -98,24 +95,26 @@ import dev.chrisbanes.haze.LocalHazeStyle
 import dev.chrisbanes.haze.hazeEffect
 import dev.chrisbanes.haze.hazeSource
 import kotlinx.coroutines.launch
+import org.koin.compose.koinInject
+import org.koin.compose.viewmodel.koinViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CivitAiScreen(
-    network: Network = LocalNetwork.current,
+    viewModel: CivitAiViewModel = koinViewModel(),
+    searchViewModel: CivitAiSearchViewModel = koinViewModel(),
     onNavigateToDetail: (String) -> Unit,
     onNavigateToFavorites: () -> Unit,
     onNavigateToSettings: () -> Unit,
 ) {
     val hazeState = remember { HazeState() }
-    val db = LocalDatabaseDao.current
+    val db = koinInject<FavoritesDao>()
+    val dataStore = koinInject<DataStore>()
     val database by db.getFavoriteModels().collectAsStateWithLifecycle(emptyList())
     val blacklisted by db.getBlacklisted().collectAsStateWithLifecycle(emptyList())
-    val dataStore = LocalDataStore.current
     val showBlur by dataStore.rememberShowBlur()
     val showNsfw by remember { dataStore.showNsfw.flow }.collectAsStateWithLifecycle(false)
     val blurStrength by remember { dataStore.hideNsfwStrength.flow }.collectAsStateWithLifecycle(6f)
-    val viewModel = viewModel { CivitAiViewModel(network, dataStore) }
     val lazyPagingItems = viewModel.pager.collectAsLazyPagingItems()
 
     val scope = rememberCoroutineScope()
@@ -124,8 +123,6 @@ fun CivitAiScreen(
         refreshing = lazyPagingItems.loadState.refresh == LoadState.Loading,
         onRefresh = { lazyPagingItems.refresh() }
     )
-
-    val searchViewModel = viewModel { CivitAiSearchViewModel(network, dataStore) }
 
     LaunchedEffect(searchViewModel.showSearch) {
         if (!searchViewModel.showSearch) {
@@ -604,7 +601,7 @@ fun BlacklistHandling(
     showDialog: Boolean,
     onDialogDismiss: () -> Unit,
 ) {
-    val db = LocalDatabaseDao.current
+    val db = koinInject<FavoritesDao>()
     val scope = rememberCoroutineScope()
     val isBlacklisted = blacklisted.any { b -> b.id == modelId }
 

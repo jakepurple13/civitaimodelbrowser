@@ -80,19 +80,16 @@ import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.DialogProperties
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.lifecycle.viewmodel.compose.viewModel
 import com.programmersbox.common.BackButton
 import com.programmersbox.common.ComposableUtils
 import com.programmersbox.common.ContextMenu
-import com.programmersbox.common.LocalDataStore
-import com.programmersbox.common.LocalDatabaseDao
-import com.programmersbox.common.LocalNetwork
+import com.programmersbox.common.DataStore
 import com.programmersbox.common.ModelImage
-import com.programmersbox.common.Network
 import com.programmersbox.common.SheetDetails
 import com.programmersbox.common.adaptiveGridCell
 import com.programmersbox.common.components.LoadingImage
 import com.programmersbox.common.db.FavoriteModel
+import com.programmersbox.common.db.FavoritesDao
 import com.programmersbox.common.home.BlacklistHandling
 import com.programmersbox.common.ifTrue
 import com.programmersbox.common.rememberSROState
@@ -105,6 +102,8 @@ import dev.chrisbanes.haze.hazeEffect
 import dev.chrisbanes.haze.hazeSource
 import io.kamel.image.KamelImage
 import io.kamel.image.asyncPainterResource
+import org.koin.compose.koinInject
+import org.koin.compose.viewmodel.koinViewModel
 import java.text.SimpleDateFormat
 import java.util.Locale
 
@@ -112,17 +111,16 @@ import java.util.Locale
 @Composable
 fun CivitAiDetailScreen(
     id: String?,
+    viewModel: CivitAiDetailViewModel = koinViewModel(),
     onShareClick: (String) -> Unit,
-    network: Network = LocalNetwork.current,
     onNavigateToUser: (String) -> Unit,
     onNavigateToDetailImages: (Long, String) -> Unit,
 ) {
     val scope = rememberCoroutineScope()
     val hazeState = remember { HazeState() }
-    val dao = LocalDatabaseDao.current
-    val viewModel = viewModel { CivitAiDetailViewModel(network, id, dao) }
+    val dao = koinInject<FavoritesDao>()
+    val dataStore = koinInject<DataStore>()
     val simpleDateTimeFormatter = remember { SimpleDateFormat("MM/dd/yy HH:mm", Locale.getDefault()) }
-    val dataStore = LocalDataStore.current
     val showBlur by dataStore.rememberShowBlur()
     val showNsfw by remember { dataStore.showNsfw.flow }.collectAsStateWithLifecycle(false)
     val nsfwBlurStrength by remember { dataStore.hideNsfwStrength.flow }.collectAsStateWithLifecycle(6f)

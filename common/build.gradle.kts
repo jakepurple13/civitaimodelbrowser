@@ -67,7 +67,7 @@ kotlin {
             implementation(libs.cmp.navigation3.ui)
             implementation(libs.cmp.lifecycle.viewmodel.navigation3)
             implementation(libs.cmp.navigationevent.compose)
-            implementation(project.dependencies.platform(libs.koin.bom))
+            api(project.dependencies.platform(libs.koin.bom))
             api(libs.koin.core)
             api(libs.koin.compose)
             implementation(libs.koin.viewmodel)

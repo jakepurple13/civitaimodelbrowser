@@ -39,7 +39,6 @@ import dev.chrisbanes.haze.materials.HazeMaterials
 import kotlinx.serialization.Serializable
 import org.koin.compose.koinInject
 import org.koin.compose.viewmodel.koinViewModel
-import org.koin.core.context.loadKoinModules
 import org.koin.core.module.dsl.singleOf
 import org.koin.core.module.dsl.viewModel
 import org.koin.core.module.dsl.viewModelOf
@@ -187,8 +186,6 @@ fun cmpModules() = module {
         )
     }
     viewModelOf(::FavoritesViewModel)
-
-    loadKoinModules(createPlatformModule())
 }
 
 val LocalDatabaseDao = staticCompositionLocalOf<FavoritesDao> { error("Nothing") }

@@ -2,6 +2,7 @@ package com.programmersbox.civitaimodelbrowser
 
 import android.app.Application
 import com.programmersbox.common.cmpModules
+import com.programmersbox.common.createPlatformModule
 import com.programmersbox.common.getDatabaseBuilder
 import org.koin.android.ext.koin.androidContext
 import org.koin.core.context.startKoin
@@ -17,7 +18,8 @@ class CivitApplication : Application() {
                     single { getDatabaseBuilder(get()) }
                     single<() -> String> { { filesDir.resolve("androidx.preferences_pb").absolutePath } }
                 },
-                cmpModules()
+                cmpModules(),
+                createPlatformModule()
             )
         }
     }

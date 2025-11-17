@@ -17,9 +17,7 @@ import com.programmersbox.common.db.BlacklistedItemRoom
 import com.programmersbox.common.db.CivitDb
 import com.programmersbox.common.db.FavoritesDao
 import kotlinx.coroutines.launch
-import org.koin.compose.KoinApplication
 import org.koin.compose.koinInject
-import org.koin.dsl.module
 import java.io.File
 
 public actual fun getPlatformName(): String {
@@ -35,7 +33,7 @@ public fun UIShow(
     export: @Composable () -> Unit = {},
     import: (@Composable () -> Unit)? = null,
 ) {
-    KoinApplication(
+    /*KoinApplication(
         application = {
             modules(
                 module {
@@ -45,7 +43,7 @@ public fun UIShow(
                 cmpModules()
             )
         }
-    ) {
+    ) {*/
         App(
             onShareClick = onShareClick,
             onExport = onExport,
@@ -53,7 +51,7 @@ public fun UIShow(
             export = export,
             import = import
         )
-    }
+    //}
 }
 
 internal actual fun getPagingPlaceholderKey(index: Int): Any = index

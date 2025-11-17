@@ -4,6 +4,7 @@ import androidx.compose.foundation.lazy.grid.LazyGridState
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import com.programmersbox.common.db.BlacklistedItemRoom
+import org.koin.core.module.Module
 
 public expect fun getPlatformName(): String
 
@@ -30,3 +31,9 @@ internal expect fun ContextMenu(
     imageUrl: String?,
     content: @Composable () -> Unit,
 )
+
+expect class DownloadHandler {
+    suspend fun download(url: String, name: String)
+}
+
+expect fun createPlatformModule(): Module

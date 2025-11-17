@@ -5,6 +5,9 @@ import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.Surface
+import androidx.compose.material3.adaptive.ExperimentalMaterial3AdaptiveApi
+import androidx.compose.material3.adaptive.navigation3.ListDetailSceneStrategy
+import androidx.compose.material3.adaptive.navigation3.rememberListDetailSceneStrategy
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.mutableStateListOf
@@ -13,13 +16,12 @@ import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.viewmodel.navigation3.rememberViewModelStoreNavEntryDecorator
 import androidx.navigation3.runtime.NavKey
+import androidx.navigation3.runtime.entryProvider
 import androidx.navigation3.runtime.rememberSaveableStateHolderNavEntryDecorator
 import androidx.navigation3.ui.NavDisplay
-import androidx.room.RoomDatabase
 import com.programmersbox.common.blacklisted.BlacklistedScreen
 import com.programmersbox.common.creator.CivitAiUserScreen
 import com.programmersbox.common.creator.CivitAiUserViewModel
-import com.programmersbox.common.db.AppDatabase
 import com.programmersbox.common.db.CivitDb
 import com.programmersbox.common.db.FavoritesDao
 import com.programmersbox.common.db.FavoritesUI
@@ -35,125 +37,25 @@ import com.programmersbox.common.home.CivitAiViewModel
 import dev.chrisbanes.haze.LocalHazeStyle
 import dev.chrisbanes.haze.materials.HazeMaterials
 import kotlinx.serialization.Serializable
-import org.koin.compose.KoinApplication
 import org.koin.compose.koinInject
-import org.koin.compose.navigation3.koinEntryProvider
 import org.koin.compose.viewmodel.koinViewModel
+import org.koin.core.context.loadKoinModules
 import org.koin.core.module.dsl.singleOf
 import org.koin.core.module.dsl.viewModel
 import org.koin.core.module.dsl.viewModelOf
 import org.koin.core.parameter.parametersOf
 import org.koin.dsl.module
-import org.koin.dsl.navigation3.navigation
 
+@OptIn(ExperimentalMaterial3AdaptiveApi::class)
 @Composable
 internal fun App(
     onShareClick: (String) -> Unit,
-    producePath: () -> String,
     onExport: (CivitDb) -> Unit = {},
     onImport: () -> String = { "" },
     export: @Composable () -> Unit = {},
     import: (@Composable () -> Unit)? = null,
-    builder: RoomDatabase.Builder<AppDatabase>,
 ) {
     val backStack = remember { mutableStateListOf<NavKey>(Screen.List) }
-    KoinApplication(
-        application = {
-            modules(
-                module {
-                    singleOf(::Network)
-                    single { DataStore.getStore(producePath) }
-                    single { getRoomDatabase(builder).getDao() }
-                    viewModelOf(::CivitAiViewModel)
-                    viewModelOf(::CivitAiSearchViewModel)
-                    viewModel { CivitAiDetailViewModel(get(), it.get(), get()) }
-                    viewModel {
-                        CivitAiModelImagesViewModel(
-                            modelId = it.get(),
-                            dataStore = get(),
-                            network = get(),
-                            database = get()
-                        )
-                    }
-                    viewModel {
-                        CivitAiUserViewModel(
-                            network = get(),
-                            dataStore = get(),
-                            database = get(),
-                            username = it.get()
-                        )
-                    }
-                    viewModelOf(::FavoritesViewModel)
-
-                    navigation<Screen.List> {
-                        CivitAiScreen(
-                            onNavigateToDetail = { id -> backStack.add(Screen.Detail(id)) },
-                            onNavigateToFavorites = { backStack.add(Screen.Favorites) },
-                            onNavigateToSettings = { backStack.add(Screen.Settings) }
-                        )
-                    }
-
-                    navigation<Screen.Detail> {
-                        CivitAiDetailScreen(
-                            id = it.modelId,
-                            viewModel = koinViewModel { parametersOf(it.modelId) },
-                            onShareClick = onShareClick,
-                            onNavigateToUser = { username -> backStack.add(Screen.User(username)) },
-                            onNavigateToDetailImages = { id, name ->
-                                backStack.add(
-                                    Screen.DetailsImage(
-                                        id.toString(),
-                                        name
-                                    )
-                                )
-                            }
-                        )
-                    }
-
-                    navigation<Screen.DetailsImage> {
-                        CivitAiModelImagesScreen(
-                            modelName = it.modelName,
-                            viewModel = koinViewModel { parametersOf(it.modelId) }
-                        )
-                    }
-
-                    navigation<Screen.User> {
-                        CivitAiUserScreen(
-                            viewModel = koinViewModel { parametersOf(it.username) },
-                            username = it.username,
-                            onNavigateToDetail = { id -> backStack.add(Screen.Detail(id)) }
-                        )
-                    }
-                    navigation<Screen.Favorites> {
-                        FavoritesUI(
-                            viewModel = koinViewModel(),
-                            onNavigateToDetail = { id -> backStack.add(Screen.Detail(id.toString())) },
-                            onNavigateToUser = { username -> backStack.add(Screen.User(username)) }
-                        )
-                    }
-                    navigation<Screen.Settings> {
-                        SettingsScreen(
-                            onExport = onExport,
-                            onImport = onImport,
-                            export = export,
-                            import = import,
-                            onNavigateToBlacklisted = { backStack.add(Screen.Settings.Blacklisted) }
-                        )
-                    }
-                    navigation<Screen.Settings.Blacklisted> { BlacklistedScreen() }
-                    navigation<Screen.Settings.Screen> {
-                        SettingsScreen(
-                            onExport = onExport,
-                            onImport = onImport,
-                            export = export,
-                            import = import,
-                            onNavigateToBlacklisted = { backStack.add(Screen.Settings.Blacklisted) }
-                        )
-                    }
-                }
-            )
-        }
-    ) {
         CompositionLocalProvider(
             LocalHazeStyle provides HazeMaterials.regular(),
             LocalDatabaseDao provides koinInject()
@@ -165,7 +67,81 @@ internal fun App(
                         rememberSaveableStateHolderNavEntryDecorator(),
                         rememberViewModelStoreNavEntryDecorator()
                     ),
-                    entryProvider = koinEntryProvider(),
+                    sceneStrategy = rememberListDetailSceneStrategy<NavKey>(),
+                    //entryProvider = koinEntryProvider(),
+                    entryProvider = entryProvider {
+                        entry<Screen.List> {
+                            CivitAiScreen(
+                                onNavigateToDetail = { id -> backStack.add(Screen.Detail(id)) },
+                                onNavigateToFavorites = { backStack.add(Screen.Favorites) },
+                                onNavigateToSettings = { backStack.add(Screen.Settings) }
+                            )
+                        }
+
+                        entry<Screen.Detail>(
+                            metadata = ListDetailSceneStrategy.listPane()
+                        ) {
+                            CivitAiDetailScreen(
+                                id = it.modelId,
+                                viewModel = koinViewModel { parametersOf(it.modelId) },
+                                onShareClick = onShareClick,
+                                onNavigateToUser = { username -> backStack.add(Screen.User(username)) },
+                                onNavigateToDetailImages = { id, name ->
+                                    backStack.add(
+                                        Screen.DetailsImage(
+                                            id.toString(),
+                                            name
+                                        )
+                                    )
+                                }
+                            )
+                        }
+
+                        entry<Screen.DetailsImage>(
+                            metadata = ListDetailSceneStrategy.detailPane()
+                        ) {
+                            CivitAiModelImagesScreen(
+                                modelName = it.modelName,
+                                viewModel = koinViewModel { parametersOf(it.modelId) }
+                            )
+                        }
+
+                        entry<Screen.User>(
+                            metadata = ListDetailSceneStrategy.extraPane()
+                        ) {
+                            CivitAiUserScreen(
+                                viewModel = koinViewModel { parametersOf(it.username) },
+                                username = it.username,
+                                onNavigateToDetail = { id -> backStack.add(Screen.Detail(id)) }
+                            )
+                        }
+                        entry<Screen.Favorites> {
+                            FavoritesUI(
+                                viewModel = koinViewModel(),
+                                onNavigateToDetail = { id -> backStack.add(Screen.Detail(id.toString())) },
+                                onNavigateToUser = { username -> backStack.add(Screen.User(username)) }
+                            )
+                        }
+                        entry<Screen.Settings> {
+                            SettingsScreen(
+                                onExport = onExport,
+                                onImport = onImport,
+                                export = export,
+                                import = import,
+                                onNavigateToBlacklisted = { backStack.add(Screen.Settings.Blacklisted) }
+                            )
+                        }
+                        entry<Screen.Settings.Blacklisted> { BlacklistedScreen() }
+                        entry<Screen.Settings.Screen> {
+                            SettingsScreen(
+                                onExport = onExport,
+                                onImport = onImport,
+                                export = export,
+                                import = import,
+                                onNavigateToBlacklisted = { backStack.add(Screen.Settings.Blacklisted) }
+                            )
+                        }
+                    },
                     transitionSpec = {
                         // Slide in from right when navigating forward
                         slideInHorizontally(initialOffsetX = { it }) togetherWith
@@ -184,8 +160,35 @@ internal fun App(
                     modifier = Modifier.fillMaxSize()
                 )
             }
-        }
     }
+}
+
+fun cmpModules() = module {
+    singleOf(::Network)
+    single { DataStore.getStore(get()) }
+    single { getRoomDatabase(get()).getDao() }
+    viewModelOf(::CivitAiViewModel)
+    viewModelOf(::CivitAiSearchViewModel)
+    viewModel { CivitAiDetailViewModel(get(), it.get(), get()) }
+    viewModel {
+        CivitAiModelImagesViewModel(
+            modelId = it.get(),
+            dataStore = get(),
+            network = get(),
+            database = get()
+        )
+    }
+    viewModel {
+        CivitAiUserViewModel(
+            network = get(),
+            dataStore = get(),
+            database = get(),
+            username = it.get()
+        )
+    }
+    viewModelOf(::FavoritesViewModel)
+
+    loadKoinModules(createPlatformModule())
 }
 
 val LocalDatabaseDao = staticCompositionLocalOf<FavoritesDao> { error("Nothing") }

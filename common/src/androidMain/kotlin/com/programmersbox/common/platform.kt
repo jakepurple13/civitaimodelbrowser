@@ -10,9 +10,9 @@ import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.lazy.grid.LazyGridState
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ModalBottomSheet
+import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.room.Room
 import androidx.room.RoomDatabase
 import com.gigamole.composescrollbars.Scrollbars
@@ -32,7 +32,6 @@ public actual fun getPlatformName(): String {
 @Composable
 public fun UIShow(
     onShareClick: (String) -> Unit,
-    producePath: () -> String,
     onExport: (CivitDb) -> Unit = {},
     onImport: () -> String = { "" },
     export: @Composable () -> Unit = {},
@@ -40,12 +39,10 @@ public fun UIShow(
 ) {
     App(
         onShareClick = onShareClick,
-        producePath = producePath,
         onExport = onExport,
         onImport = onImport,
         export = export,
-        import = import,
-        builder = getDatabaseBuilder(LocalContext.current)
+        import = import
     )
 }
 
@@ -82,6 +79,9 @@ internal actual fun SheetDetails(
     ModalBottomSheet(
         onDismissRequest = onDismiss,
         contentWindowInsets = { WindowInsets.systemBars.only(WindowInsetsSides.Top) },
+        sheetState = rememberModalBottomSheetState(
+            skipPartiallyExpanded = true
+        )
     ) {
         content()
     }
@@ -139,3 +139,4 @@ actual fun createRoomDatabase(): AppDatabase {
         .setQueryCoroutineContext(Dispatchers.IO)
         .build()
 }*/
+

@@ -1,6 +1,17 @@
 package com.programmersbox.common.db
 
-import androidx.room.*
+import androidx.room.AutoMigration
+import androidx.room.ConstructedBy
+import androidx.room.Dao
+import androidx.room.Database
+import androidx.room.Delete
+import androidx.room.Ignore
+import androidx.room.Insert
+import androidx.room.OnConflictStrategy
+import androidx.room.Query
+import androidx.room.RoomDatabase
+import androidx.room.RoomDatabaseConstructor
+import androidx.sqlite.driver.bundled.BundledSQLiteDriver
 import com.programmersbox.common.Creator
 import com.programmersbox.common.ImageMeta
 import com.programmersbox.common.ModelType
@@ -33,7 +44,7 @@ fun getRoomDatabase(
 ): AppDatabase {
     return builder
         //.addMigrations(MIGRATIONS)
-        //.setDriver(BundledSQLiteDriver())
+        .setDriver(BundledSQLiteDriver())
         .setQueryCoroutineContext(Dispatchers.IO)
         .build()
 }

@@ -18,6 +18,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -32,16 +33,17 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.filled.ContentCopy
+import androidx.compose.material.icons.filled.Download
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material.icons.filled.Image
 import androidx.compose.material.icons.filled.OpenInBrowser
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.Share
-import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.AssistChipDefaults
 import androidx.compose.material3.BottomAppBar
 import androidx.compose.material3.BottomAppBarDefaults
+import androidx.compose.material3.BottomSheetDefaults
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CircularProgressIndicator
@@ -57,7 +59,6 @@ import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
@@ -78,12 +79,12 @@ import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.window.DialogProperties
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.programmersbox.common.BackButton
 import com.programmersbox.common.ComposableUtils
 import com.programmersbox.common.ContextMenu
 import com.programmersbox.common.DataStore
+import com.programmersbox.common.DownloadHandler
 import com.programmersbox.common.ModelImage
 import com.programmersbox.common.SheetDetails
 import com.programmersbox.common.adaptiveGridCell
@@ -102,10 +103,10 @@ import dev.chrisbanes.haze.hazeEffect
 import dev.chrisbanes.haze.hazeSource
 import io.kamel.image.KamelImage
 import io.kamel.image.asyncPainterResource
+import kotlinx.coroutines.launch
+import okio.Path.Companion.toPath
 import org.koin.compose.koinInject
 import org.koin.compose.viewmodel.koinViewModel
-import java.text.SimpleDateFormat
-import java.util.Locale
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
 @Composable
@@ -116,14 +117,14 @@ fun CivitAiDetailScreen(
     onNavigateToUser: (String) -> Unit,
     onNavigateToDetailImages: (Long, String) -> Unit,
 ) {
-    val scope = rememberCoroutineScope()
     val hazeState = remember { HazeState() }
     val dao = koinInject<FavoritesDao>()
     val dataStore = koinInject<DataStore>()
-    val simpleDateTimeFormatter = remember { SimpleDateFormat("MM/dd/yy HH:mm", Locale.getDefault()) }
     val showBlur by dataStore.rememberShowBlur()
-    val showNsfw by remember { dataStore.showNsfw.flow }.collectAsStateWithLifecycle(false)
-    val nsfwBlurStrength by remember { dataStore.hideNsfwStrength.flow }.collectAsStateWithLifecycle(6f)
+    val showNsfw by remember { dataStore.showNsfw.flow }
+        .collectAsStateWithLifecycle(false)
+    val nsfwBlurStrength by remember { dataStore.hideNsfwStrength.flow }
+        .collectAsStateWithLifecycle(6f)
 
     val favoriteList by dao.getFavoriteModels().collectAsStateWithLifecycle(emptyList())
     val blacklisted by dao.getBlacklisted().collectAsStateWithLifecycle(emptyList())
@@ -315,7 +316,13 @@ fun CivitAiDetailScreen(
                                         version.downloadUrl?.let { downloadUrl ->
                                             val clipboard = LocalClipboardManager.current
                                             IconButton(
-                                                onClick = { clipboard.setText(AnnotatedString(downloadUrl)) }
+                                                onClick = {
+                                                    clipboard.setText(
+                                                        AnnotatedString(
+                                                            downloadUrl
+                                                        )
+                                                    )
+                                                }
                                             ) { Icon(Icons.Default.ContentCopy, null) }
                                         }
                                     },
@@ -333,7 +340,8 @@ fun CivitAiDetailScreen(
                                         headlineContent = {
                                             //Text("Last Update at: " + simpleDateTimeFormatter.format(version.createdAt.toEpochMilliseconds()))
                                         },
-                                        supportingContent = version.parsedDescription()?.let { { Text(it) } }
+                                        supportingContent = version.parsedDescription()
+                                            ?.let { { Text(it) } }
                                     )
                                 }
                             }
@@ -497,30 +505,68 @@ private fun SheetContent(
     onRemoveFromFavorite: () -> Unit,
 ) {
     val painter = asyncPainterResource(image.url)
+    val downloadHandler = koinInject<DownloadHandler>()
+    val scope = rememberCoroutineScope()
     SelectionContainer(
         modifier = Modifier.navigationBarsPadding()
     ) {
-        var imagePopup by remember { mutableStateOf(false) }
+        val sroState = rememberSROState()
+        Scaffold(
+            topBar = {
+                TopAppBar(
+                    title = {},
+                    windowInsets = WindowInsets(0.dp),
+                    colors = TopAppBarDefaults.topAppBarColors(containerColor = BottomSheetDefaults.ContainerColor),
+                    actions = {
+                        IconButton(
+                            onClick = {
+                                if (isFavorite) {
+                                    onRemoveFromFavorite()
+                                } else {
+                                    onFavorite()
+                                }
+                            }
+                        ) {
+                            Icon(
+                                if (isFavorite) Icons.Default.Favorite else Icons.Default.FavoriteBorder,
+                                null
+                            )
+                        }
+                    }
+                )
+            },
+            containerColor = BottomSheetDefaults.ContainerColor
+        ) { padding ->
+            Column(
+                modifier = Modifier
+                    .padding(padding)
+                    .verticalScroll(rememberScrollState())
+            ) {
+                val blur = 70.dp
+                val alpha = .5f
+                val saturation = 3f
+                val scaleX = 1.5f
+                val scaleY = 1.5f
 
-        if (imagePopup) {
-            val sroState = rememberSROState()
-            AlertDialog(
-                properties = DialogProperties(usePlatformDefaultWidth = false),
-                onDismissRequest = { imagePopup = false },
-                title = {
-                    TopAppBar(
-                        title = {},
-                        actions = {
-                            IconButton(
-                                onClick = sroState::reset
-                            ) { Icon(Icons.Default.Refresh, null) }
-                        },
-                        windowInsets = WindowInsets(0.dp)
-                    )
-                },
-                text = {
+                Box(
+                    modifier = Modifier
+                        .align(Alignment.CenterHorizontally)
+                        .scaleRotateOffsetReset(sroState)
+                ) {
                     KamelImage(
                         resource = { painter },
+                        contentDescription = null,
+                        colorFilter = ColorFilter.colorMatrix(ColorMatrix().apply {
+                            setToSaturation(
+                                saturation
+                            )
+                        }),
+                        modifier = Modifier.blurGradient(blur, alpha, scaleX, scaleY)
+                    )
+
+                    KamelImage(
+                        resource = { painter },
+                        contentDescription = null,
                         onLoading = {
                             val progress = animateFloatAsState(
                                 targetValue = it,
@@ -530,122 +576,89 @@ private fun SheetContent(
                                 progress = { progress }
                             )
                         },
-                        contentDescription = null,
-                        modifier = Modifier.scaleRotateOffsetReset(sroState)
                     )
-                },
-                confirmButton = { TextButton(onClick = { imagePopup = false }) { Text("Done") } }
-            )
-        }
-        Column(
-            modifier = Modifier.verticalScroll(rememberScrollState())
-        ) {
-            TopAppBar(
-                title = {},
-                windowInsets = WindowInsets(0.dp),
-                actions = {
-                    IconButton(
+                }
+
+                Row(
+                    horizontalArrangement = Arrangement.spacedBy(4.dp),
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    ElevatedAssistChip(
+                        label = { Text("Reset") },
+                        onClick = { sroState.reset() },
+                        leadingIcon = { Icon(Icons.Default.Refresh, null) }
+                    )
+
+                    ElevatedAssistChip(
+                        label = { Text("Download") },
                         onClick = {
-                            if (isFavorite) {
-                                onRemoveFromFavorite()
-                            } else {
-                                onFavorite()
+                            scope.launch {
+                                downloadHandler.download(
+                                    url = image.url,
+                                    name = image.url.toPath().name
+                                )
                             }
-                        }
+                        },
+                        leadingIcon = { Icon(Icons.Default.Download, null) }
+                    )
+                }
+
+                if (image.nsfw.canNotShow()) {
+                    Row(
+                        horizontalArrangement = Arrangement.spacedBy(4.dp),
+                        modifier = Modifier.padding(horizontal = 4.dp)
                     ) {
-                        Icon(
-                            if (isFavorite) Icons.Default.Favorite else Icons.Default.FavoriteBorder,
-                            null
+                        ElevatedAssistChip(
+                            label = { Text("NSFW") },
+                            onClick = {},
+                            colors = AssistChipDefaults.elevatedAssistChipColors(
+                                disabledLabelColor = MaterialTheme.colorScheme.error,
+                                disabledContainerColor = MaterialTheme.colorScheme.surface
+                            ),
+                            enabled = false,
+                            border = BorderStroke(
+                                1.dp,
+                                MaterialTheme.colorScheme.error,
+                            ),
+                        )
+
+                        ElevatedAssistChip(
+                            label = { Text(image.nsfw.name) },
+                            onClick = {},
+                            colors = AssistChipDefaults.elevatedAssistChipColors(
+                                disabledLabelColor = MaterialTheme.colorScheme.error,
+                                disabledContainerColor = MaterialTheme.colorScheme.surface
+                            ),
+                            enabled = false,
+                            border = BorderStroke(
+                                1.dp,
+                                MaterialTheme.colorScheme.error,
+                            ),
                         )
                     }
                 }
-            )
-
-            val blur = 70.dp
-            val alpha = .5f
-            val saturation = 3f
-            val scaleX = 1.5f
-            val scaleY = 1.5f
-
-            Box(modifier = Modifier.align(Alignment.CenterHorizontally)) {
-                KamelImage(
-                    resource = { painter },
-                    contentDescription = null,
-                    colorFilter = ColorFilter.colorMatrix(ColorMatrix().apply { setToSaturation(saturation) }),
-                    modifier = Modifier.blurGradient(blur, alpha, scaleX, scaleY)
-                )
-
-                KamelImage(
-                    resource = { painter },
-                    contentDescription = null,
-                    onLoading = {
-                        val progress = animateFloatAsState(
-                            targetValue = it,
-                            label = ""
-                        ).value
-                        CircularProgressIndicator(
-                            progress = { progress }
-                        )
-                    },
-                    modifier = Modifier.combinedClickable(onDoubleClick = { imagePopup = true }) {}
-                )
-            }
-
-            if (image.nsfw.canNotShow()) {
-                Row(
-                    horizontalArrangement = Arrangement.spacedBy(4.dp),
-                    modifier = Modifier.padding(horizontal = 4.dp)
-                ) {
-                    ElevatedAssistChip(
-                        label = { Text("NSFW") },
-                        onClick = {},
-                        colors = AssistChipDefaults.elevatedAssistChipColors(
-                            disabledLabelColor = MaterialTheme.colorScheme.error,
-                            disabledContainerColor = MaterialTheme.colorScheme.surface
-                        ),
-                        enabled = false,
-                        border = BorderStroke(
-                            1.dp,
-                            MaterialTheme.colorScheme.error,
-                        ),
-                    )
-
-                    ElevatedAssistChip(
-                        label = { Text(image.nsfw.name) },
-                        onClick = {},
-                        colors = AssistChipDefaults.elevatedAssistChipColors(
-                            disabledLabelColor = MaterialTheme.colorScheme.error,
-                            disabledContainerColor = MaterialTheme.colorScheme.surface
-                        ),
-                        enabled = false,
-                        border = BorderStroke(
-                            1.dp,
-                            MaterialTheme.colorScheme.error,
-                        ),
-                    )
-                }
-            }
-            image.meta?.let { meta ->
-                Column(
-                    modifier = Modifier.padding(4.dp)
-                ) {
-                    meta.model?.let { Text("Model: $it") }
-                    HorizontalDivider()
-                    meta.prompt?.let { Text("Prompt: $it") }
-                    HorizontalDivider()
-                    meta.negativePrompt?.let { Text("Negative Prompt: $it") }
-                    HorizontalDivider()
-                    meta.seed?.let { Text("Seed: $it") }
-                    HorizontalDivider()
-                    meta.sampler?.let { Text("Sampler: $it") }
-                    HorizontalDivider()
-                    meta.steps?.let { Text("Steps: $it") }
-                    HorizontalDivider()
-                    meta.clipSkip?.let { Text("Clip Skip: $it") }
-                    HorizontalDivider()
-                    meta.size?.let { Text("Size: $it") }
-                    HorizontalDivider()
-                    meta.cfgScale?.let { Text("Cfg Scale: $it") }
+                image.meta?.let { meta ->
+                    Column(
+                        modifier = Modifier.padding(4.dp)
+                    ) {
+                        meta.model?.let { Text("Model: $it") }
+                        HorizontalDivider()
+                        meta.prompt?.let { Text("Prompt: $it") }
+                        HorizontalDivider()
+                        meta.negativePrompt?.let { Text("Negative Prompt: $it") }
+                        HorizontalDivider()
+                        meta.seed?.let { Text("Seed: $it") }
+                        HorizontalDivider()
+                        meta.sampler?.let { Text("Sampler: $it") }
+                        HorizontalDivider()
+                        meta.steps?.let { Text("Steps: $it") }
+                        HorizontalDivider()
+                        meta.clipSkip?.let { Text("Clip Skip: $it") }
+                        HorizontalDivider()
+                        meta.size?.let { Text("Size: $it") }
+                        HorizontalDivider()
+                        meta.cfgScale?.let { Text("Cfg Scale: $it") }
+                    }
                 }
             }
         }

@@ -44,6 +44,13 @@ import com.dokar.sonner.rememberToasterState
 import com.programmersbox.common.UIShow
 import com.programmersbox.common.db.CivitDb
 import com.programmersbox.common.db.FavoritesDao
+import io.kamel.core.config.KamelConfig
+import io.kamel.core.config.takeFrom
+import io.kamel.image.config.Default
+import io.kamel.image.config.LocalKamelConfig
+import io.kamel.image.config.animatedImageDecoder
+import io.kamel.image.config.imageBitmapResizingDecoder
+import io.kamel.image.config.resourcesFetcher
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.json.Json
@@ -65,7 +72,8 @@ class MainActivity : ComponentActivity() {
                 val defaultUriHandler = LocalUriHandler.current
                 val customUriHandler = remember { customTabsUriHandler { defaultUriHandler.openUri(it) } }
                 CompositionLocalProvider(
-                    LocalUriHandler provides customUriHandler
+                    LocalUriHandler provides customUriHandler,
+                    LocalKamelConfig provides customKamelConfig()
                 ) {
                     var listToExport by remember { mutableStateOf(CivitDb(emptyList(), emptyList())) }
                     val exportLauncher = rememberLauncherForActivityResult(
@@ -98,7 +106,6 @@ class MainActivity : ComponentActivity() {
                                 )
                             )
                         },
-                        producePath = { filesDir.resolve("androidx.preferences_pb").absolutePath },
                         onExport = {
                             listToExport = it
                             exportLauncher.launch("civitmodelbrowser.json")
@@ -188,6 +195,17 @@ fun Context.customTabsUriHandler(
                 .build()
                 .launchUrl(this@customTabsUriHandler, uri.toUri())
         }.onFailure { onFailure(uri) }
+    }
+}
+
+@Composable
+private fun customKamelConfig(): KamelConfig {
+    val context = LocalContext.current
+    return KamelConfig {
+        takeFrom(KamelConfig.Default)
+        imageBitmapResizingDecoder()
+        animatedImageDecoder()
+        resourcesFetcher(context)
     }
 }
 

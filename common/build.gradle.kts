@@ -60,12 +60,14 @@ kotlin {
             api(libs.haze)
             api(libs.haze.materials)
             api(libs.sonner)
-            implementation(libs.androidx.room.runtime)
+            api(libs.androidx.room.runtime)
+            implementation(libs.androidx.sqlite.bundled)
             //add("ksp", libs.androidx.room.compiler)
 
             implementation(libs.cmp.navigation3.ui)
             implementation(libs.cmp.lifecycle.viewmodel.navigation3)
             implementation(libs.cmp.navigationevent.compose)
+            implementation(libs.cmp.material3.adaptive.nav3)
             api(project.dependencies.platform(libs.koin.bom))
             api(libs.koin.core)
             api(libs.koin.compose)
@@ -83,11 +85,13 @@ kotlin {
             api(libs.ktor.jvm)
             implementation(libs.composeScrollbars)
             api(libs.koin.android)
+            api(libs.kamel.image.bitmap.resizing)
         }
 
         jvmMain.dependencies {
             api(compose.preview)
             api(libs.ktor.jvm)
+            api(libs.kotlinx.coroutines.swing)
         }
 
         //val desktopTest by getting

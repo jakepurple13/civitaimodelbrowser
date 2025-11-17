@@ -18,7 +18,6 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -535,6 +534,29 @@ private fun SheetContent(
                     }
                 )
             },
+            bottomBar = {
+                BottomAppBar {
+                    NavigationBarItem(
+                        selected = false,
+                        onClick = { sroState.reset() },
+                        icon = { Icon(Icons.Default.Refresh, null) },
+                        label = { Text("Refresh") },
+                    )
+                    NavigationBarItem(
+                        selected = false,
+                        onClick = {
+                            scope.launch {
+                                downloadHandler.download(
+                                    url = image.url,
+                                    name = image.url.toPath().name
+                                )
+                            }
+                        },
+                        icon = { Icon(Icons.Default.Download, null) },
+                        label = { Text("Download") },
+                    )
+                }
+            },
             containerColor = BottomSheetDefaults.ContainerColor
         ) { padding ->
             Column(
@@ -550,6 +572,7 @@ private fun SheetContent(
 
                 Box(
                     modifier = Modifier
+                        .fillMaxSize()
                         .align(Alignment.CenterHorizontally)
                         .scaleRotateOffsetReset(sroState)
                 ) {
@@ -576,30 +599,6 @@ private fun SheetContent(
                                 progress = { progress }
                             )
                         },
-                    )
-                }
-
-                Row(
-                    horizontalArrangement = Arrangement.spacedBy(4.dp),
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-                    ElevatedAssistChip(
-                        label = { Text("Reset") },
-                        onClick = { sroState.reset() },
-                        leadingIcon = { Icon(Icons.Default.Refresh, null) }
-                    )
-
-                    ElevatedAssistChip(
-                        label = { Text("Download") },
-                        onClick = {
-                            scope.launch {
-                                downloadHandler.download(
-                                    url = image.url,
-                                    name = image.url.toPath().name
-                                )
-                            }
-                        },
-                        leadingIcon = { Icon(Icons.Default.Download, null) }
                     )
                 }
 

@@ -27,18 +27,10 @@ actual class DownloadHandler(
 ) {
     actual suspend fun download(url: String, name: String) {
         val parent = File(dataStoreHandler.downloadPath.get())
-        val file = File(
-            parent,
-            name
-        )
+        if (!parent.exists()) parent.mkdirs()
 
-        if (!parent.exists()) {
-            parent.mkdirs()
-        }
-
-        if (!file.exists()) {
-            file.createNewFile()
-        }
+        val file = File(parent, name)
+        if (!file.exists()) file.createNewFile()
 
         file.writeBytes(network.client.get(url).body())
 

@@ -60,7 +60,14 @@ fun main() {
                     createPlatformModule(),
                     module {
                         //single { producePath() }
-                        single { { "androidx.preferences_pb" } }
+                        single {
+                            {
+                                File(
+                                    System.getProperty("user.home") + File.separator + "Downloads" + File.separator + "CivitAi",
+                                    "androidx.preferences_pb"
+                                )
+                            }
+                        }
                         single { getDatabaseBuilder() }
                         single { TrayState() }
                     }

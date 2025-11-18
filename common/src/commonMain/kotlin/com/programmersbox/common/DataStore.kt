@@ -1,11 +1,20 @@
 package com.programmersbox.common
 
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.datastore.core.DataStore
-import androidx.datastore.preferences.core.*
+import androidx.datastore.preferences.core.PreferenceDataStoreFactory
+import androidx.datastore.preferences.core.Preferences
+import androidx.datastore.preferences.core.booleanPreferencesKey
+import androidx.datastore.preferences.core.edit
+import androidx.datastore.preferences.core.floatPreferencesKey
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.mapNotNull
 import kotlinx.coroutines.launch
@@ -15,7 +24,7 @@ import okio.Path.Companion.toPath
 class DataStore private constructor(
     producePath: () -> String = { "androidx.preferences_pb" },
 ) {
-    private val dataStore = PreferenceDataStoreFactory.createWithPath { producePath().toPath() }
+    val dataStore = PreferenceDataStoreFactory.createWithPath { producePath().toPath() }
 
     companion object {
         lateinit var dataStore: com.programmersbox.common.DataStore
@@ -65,7 +74,7 @@ class DataStore private constructor(
     )
 
     open class DataStoreType<T>(
-        protected val key: Preferences.Key<T>,
+        val key: Preferences.Key<T>,
         protected val dataStore: DataStore<Preferences>,
     ) {
         open val flow: Flow<T?> = dataStore.data
@@ -75,16 +84,20 @@ class DataStore private constructor(
         open suspend fun update(value: T) {
             dataStore.edit { it[key] = value }
         }
+
+        open suspend fun get(): T? = flow.firstOrNull()
     }
 
     open class DataStoreTypeNonNull<T>(
         key: Preferences.Key<T>,
         dataStore: DataStore<Preferences>,
-        defaultValue: T,
+        val defaultValue: T,
     ) : DataStoreType<T>(key, dataStore) {
         override val flow: Flow<T> = dataStore.data
             .mapNotNull { it[key] ?: defaultValue }
             .distinctUntilChanged()
+
+        override suspend fun get(): T = flow.firstOrNull() ?: defaultValue
     }
 
     @Composable

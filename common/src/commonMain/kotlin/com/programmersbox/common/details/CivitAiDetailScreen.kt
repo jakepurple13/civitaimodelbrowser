@@ -102,6 +102,7 @@ import dev.chrisbanes.haze.hazeEffect
 import dev.chrisbanes.haze.hazeSource
 import io.kamel.image.KamelImage
 import io.kamel.image.asyncPainterResource
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import okio.Path.Companion.toPath
 import org.koin.compose.koinInject
@@ -545,7 +546,7 @@ private fun SheetContent(
                     NavigationBarItem(
                         selected = false,
                         onClick = {
-                            scope.launch {
+                            scope.launch(Dispatchers.IO) {
                                 downloadHandler.download(
                                     url = image.url,
                                     name = image.url.toPath().name

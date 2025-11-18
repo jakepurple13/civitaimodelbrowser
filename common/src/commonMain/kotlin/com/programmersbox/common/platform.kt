@@ -1,6 +1,7 @@
 package com.programmersbox.common
 
 import androidx.compose.foundation.lazy.grid.LazyGridState
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import com.programmersbox.common.db.BlacklistedItemRoom
@@ -12,6 +13,7 @@ internal expect fun getPagingPlaceholderKey(index: Int): Any
 
 internal expect val showRefreshButton: Boolean
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 internal expect fun SheetDetails(
     onDismiss: () -> Unit,

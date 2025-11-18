@@ -3,6 +3,7 @@ package com.programmersbox.common
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -194,6 +195,8 @@ fun SettingsScreen(
                 )
             }
 
+            ExtraSettings()
+
             HorizontalDivider()
 
             val uriHandler = LocalUriHandler.current
@@ -241,3 +244,6 @@ fun SettingsScreen(
         }
     }
 }
+
+@Composable
+expect fun ColumnScope.ExtraSettings()

@@ -92,6 +92,9 @@ kotlin {
             api(compose.preview)
             api(libs.ktor.jvm)
             api(libs.kotlinx.coroutines.swing)
+            api(libs.filekit.core)
+            api(libs.filekit.dialogs)
+            api(libs.filekit.dialogs.compose)
         }
 
         //val desktopTest by getting

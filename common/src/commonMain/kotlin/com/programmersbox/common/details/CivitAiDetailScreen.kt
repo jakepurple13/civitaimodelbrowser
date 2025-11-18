@@ -36,9 +36,11 @@ import androidx.compose.material.icons.filled.Download
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material.icons.filled.Image
+import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.OpenInBrowser
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.Share
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.AssistChipDefaults
 import androidx.compose.material3.BottomAppBar
 import androidx.compose.material3.BottomAppBarDefaults
@@ -58,6 +60,7 @@ import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
@@ -510,13 +513,97 @@ private fun SheetContent(
     SelectionContainer(
         modifier = Modifier.navigationBarsPadding()
     ) {
+        var showInfo by remember { mutableStateOf(false) }
+        if (showInfo) {
+            AlertDialog(
+                onDismissRequest = { showInfo = false },
+                title = { Text("Info") },
+                text = {
+                    Column(
+                        modifier = Modifier.verticalScroll(rememberScrollState())
+                    ) {
+                        if (image.nsfw.canNotShow()) {
+                            Row(
+                                horizontalArrangement = Arrangement.spacedBy(4.dp),
+                                modifier = Modifier.padding(horizontal = 4.dp)
+                            ) {
+                                ElevatedAssistChip(
+                                    label = { Text("NSFW") },
+                                    onClick = {},
+                                    colors = AssistChipDefaults.elevatedAssistChipColors(
+                                        disabledLabelColor = MaterialTheme.colorScheme.error,
+                                        disabledContainerColor = MaterialTheme.colorScheme.surface
+                                    ),
+                                    enabled = false,
+                                    border = BorderStroke(
+                                        1.dp,
+                                        MaterialTheme.colorScheme.error,
+                                    ),
+                                )
+
+                                ElevatedAssistChip(
+                                    label = { Text(image.nsfw.name) },
+                                    onClick = {},
+                                    colors = AssistChipDefaults.elevatedAssistChipColors(
+                                        disabledLabelColor = MaterialTheme.colorScheme.error,
+                                        disabledContainerColor = MaterialTheme.colorScheme.surface
+                                    ),
+                                    enabled = false,
+                                    border = BorderStroke(
+                                        1.dp,
+                                        MaterialTheme.colorScheme.error,
+                                    ),
+                                )
+                            }
+                        }
+                        image.meta?.let { meta ->
+                            Column(
+                                modifier = Modifier.padding(4.dp)
+                            ) {
+                                meta.model?.let { Text("Model: $it") }
+                                HorizontalDivider()
+                                meta.prompt?.let { Text("Prompt: $it") }
+                                HorizontalDivider()
+                                meta.negativePrompt?.let { Text("Negative Prompt: $it") }
+                                HorizontalDivider()
+                                meta.seed?.let { Text("Seed: $it") }
+                                HorizontalDivider()
+                                meta.sampler?.let { Text("Sampler: $it") }
+                                HorizontalDivider()
+                                meta.steps?.let { Text("Steps: $it") }
+                                HorizontalDivider()
+                                meta.clipSkip?.let { Text("Clip Skip: $it") }
+                                HorizontalDivider()
+                                meta.size?.let { Text("Size: $it") }
+                                HorizontalDivider()
+                                meta.cfgScale?.let { Text("Cfg Scale: $it") }
+                            }
+                        }
+                    }
+                },
+                confirmButton = {
+                    TextButton(
+                        onClick = { showInfo = false }
+                    ) { Text("Done") }
+                }
+            )
+        }
+
         val sroState = rememberSROState()
         Scaffold(
             topBar = {
                 TopAppBar(
                     title = {},
                     windowInsets = WindowInsets(0.dp),
-                    colors = TopAppBarDefaults.topAppBarColors(containerColor = BottomSheetDefaults.ContainerColor),
+                    colors = TopAppBarDefaults.topAppBarColors(
+                        //containerColor = BottomSheetDefaults.ContainerColor
+                        containerColor = Color.Transparent
+                    ),
+                    navigationIcon = {
+                        IconButton(
+                            onClick = { showInfo = true }
+                        ) { Icon(Icons.Default.Info, null) }
+                    },
                     actions = {
                         IconButton(
                             onClick = {
@@ -536,7 +623,9 @@ private fun SheetContent(
                 )
             },
             bottomBar = {
-                BottomAppBar {
+                BottomAppBar(
+                    containerColor = Color.Transparent
+                ) {
                     NavigationBarItem(
                         selected = false,
                         onClick = { sroState.reset() },
@@ -560,106 +649,42 @@ private fun SheetContent(
             },
             containerColor = BottomSheetDefaults.ContainerColor
         ) { padding ->
-            Column(
+            val blur = 70.dp
+            val alpha = .5f
+            val saturation = 3f
+            val scaleX = 1.5f
+            val scaleY = 1.5f
+
+            Box(
                 modifier = Modifier
+                    .fillMaxSize()
                     .padding(padding)
-                    .verticalScroll(rememberScrollState())
+                    .scaleRotateOffsetReset(sroState)
             ) {
-                val blur = 70.dp
-                val alpha = .5f
-                val saturation = 3f
-                val scaleX = 1.5f
-                val scaleY = 1.5f
-
-                Box(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .align(Alignment.CenterHorizontally)
-                        .scaleRotateOffsetReset(sroState)
-                ) {
-                    KamelImage(
-                        resource = { painter },
-                        contentDescription = null,
-                        colorFilter = ColorFilter.colorMatrix(ColorMatrix().apply {
-                            setToSaturation(
-                                saturation
-                            )
-                        }),
-                        modifier = Modifier.blurGradient(blur, alpha, scaleX, scaleY)
-                    )
-
-                    KamelImage(
-                        resource = { painter },
-                        contentDescription = null,
-                        onLoading = {
-                            val progress = animateFloatAsState(
-                                targetValue = it,
-                                label = ""
-                            ).value
-                            CircularProgressIndicator(
-                                progress = { progress }
-                            )
-                        },
-                    )
-                }
-
-                if (image.nsfw.canNotShow()) {
-                    Row(
-                        horizontalArrangement = Arrangement.spacedBy(4.dp),
-                        modifier = Modifier.padding(horizontal = 4.dp)
-                    ) {
-                        ElevatedAssistChip(
-                            label = { Text("NSFW") },
-                            onClick = {},
-                            colors = AssistChipDefaults.elevatedAssistChipColors(
-                                disabledLabelColor = MaterialTheme.colorScheme.error,
-                                disabledContainerColor = MaterialTheme.colorScheme.surface
-                            ),
-                            enabled = false,
-                            border = BorderStroke(
-                                1.dp,
-                                MaterialTheme.colorScheme.error,
-                            ),
+                KamelImage(
+                    resource = { painter },
+                    contentDescription = null,
+                    colorFilter = ColorFilter.colorMatrix(ColorMatrix().apply {
+                        setToSaturation(
+                            saturation
                         )
+                    }),
+                    modifier = Modifier.blurGradient(blur, alpha, scaleX, scaleY)
+                )
 
-                        ElevatedAssistChip(
-                            label = { Text(image.nsfw.name) },
-                            onClick = {},
-                            colors = AssistChipDefaults.elevatedAssistChipColors(
-                                disabledLabelColor = MaterialTheme.colorScheme.error,
-                                disabledContainerColor = MaterialTheme.colorScheme.surface
-                            ),
-                            enabled = false,
-                            border = BorderStroke(
-                                1.dp,
-                                MaterialTheme.colorScheme.error,
-                            ),
+                KamelImage(
+                    resource = { painter },
+                    contentDescription = null,
+                    onLoading = {
+                        val progress = animateFloatAsState(
+                            targetValue = it,
+                            label = ""
+                        ).value
+                        CircularProgressIndicator(
+                            progress = { progress }
                         )
-                    }
-                }
-                image.meta?.let { meta ->
-                    Column(
-                        modifier = Modifier.padding(4.dp)
-                    ) {
-                        meta.model?.let { Text("Model: $it") }
-                        HorizontalDivider()
-                        meta.prompt?.let { Text("Prompt: $it") }
-                        HorizontalDivider()
-                        meta.negativePrompt?.let { Text("Negative Prompt: $it") }
-                        HorizontalDivider()
-                        meta.seed?.let { Text("Seed: $it") }
-                        HorizontalDivider()
-                        meta.sampler?.let { Text("Sampler: $it") }
-                        HorizontalDivider()
-                        meta.steps?.let { Text("Steps: $it") }
-                        HorizontalDivider()
-                        meta.clipSkip?.let { Text("Clip Skip: $it") }
-                        HorizontalDivider()
-                        meta.size?.let { Text("Size: $it") }
-                        HorizontalDivider()
-                        meta.cfgScale?.let { Text("Cfg Scale: $it") }
-                    }
-                }
+                    },
+                )
             }
         }
     }

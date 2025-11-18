@@ -65,7 +65,7 @@ fun main() {
                                 File(
                                     System.getProperty("user.home") + File.separator + "Downloads" + File.separator + "CivitAi",
                                     "androidx.preferences_pb"
-                                )
+                                ).absolutePath
                             }
                         }
                         single { getDatabaseBuilder() }

@@ -37,6 +37,9 @@ compose.desktop {
             packageVersion = "1.0.0"
             vendor = "jakepurple13"
 
+            modules("jdk.unsupported")
+            modules("jdk.unsupported.desktop")
+
             appResourcesRootDir.set(project.layout.projectDirectory.dir("resources"))
             fun iconFile(extension: String) = project
                 .file("src/jvmMain/resources/")

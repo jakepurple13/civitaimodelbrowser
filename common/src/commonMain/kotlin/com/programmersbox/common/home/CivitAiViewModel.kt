@@ -5,14 +5,27 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import androidx.paging.*
+import androidx.paging.LoadState
+import androidx.paging.LoadStates
+import androidx.paging.Pager
+import androidx.paging.PagingConfig
+import androidx.paging.PagingData
+import androidx.paging.cachedIn
 import com.programmersbox.common.DataStore
 import com.programmersbox.common.Models
 import com.programmersbox.common.Network
 import com.programmersbox.common.PAGE_LIMIT
 import com.programmersbox.common.paging.CivitBrowserPagingSource
 import com.programmersbox.common.paging.CivitBrowserSearchPagingSource
-import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.emptyFlow
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.flow.flowOn
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 
 class CivitAiViewModel(
@@ -33,6 +46,7 @@ class CivitAiViewModel(
                     ),
                 ) { CivitBrowserPagingSource(network, it) }
                     .flow
+                    .flowOn(Dispatchers.IO)
                     .cachedIn(viewModelScope)
             }
             .launchIn(viewModelScope)

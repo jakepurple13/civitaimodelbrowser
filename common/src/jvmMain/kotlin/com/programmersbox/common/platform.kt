@@ -12,6 +12,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.window.Window
 import androidx.room.Room
 import androidx.room.RoomDatabase
+import ca.gosyer.appdirs.AppDirs
 import com.programmersbox.common.db.AppDatabase
 import com.programmersbox.common.db.BlacklistedItemRoom
 import com.programmersbox.common.db.CivitDb
@@ -44,13 +45,13 @@ public fun UIShow(
             )
         }
     ) {*/
-        App(
-            onShareClick = onShareClick,
-            onExport = onExport,
-            onImport = onImport,
-            export = export,
-            import = import
-        )
+    App(
+        onShareClick = onShareClick,
+        onExport = onExport,
+        onImport = onImport,
+        export = export,
+        import = import
+    )
     //}
 }
 
@@ -116,8 +117,13 @@ internal actual fun ContextMenu(
     )
 }
 
-fun getDatabaseBuilder(): RoomDatabase.Builder<AppDatabase> {
-    val dbFile = File(System.getProperty("java.io.tmpdir"), "my_room.db")
+fun getDatabaseBuilder(
+    appDirs: AppDirs
+): RoomDatabase.Builder<AppDatabase> {
+    val dbFile = File(
+        appDirs.getUserDataDir(),
+        "my_room.db"
+    )
     return Room.databaseBuilder<AppDatabase>(
         name = dbFile.absolutePath,
     )

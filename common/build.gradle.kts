@@ -95,6 +95,7 @@ kotlin {
             api(libs.filekit.core)
             api(libs.filekit.dialogs)
             api(libs.filekit.dialogs.compose)
+            api("ca.gosyer:kotlin-multiplatform-appdirs:2.0.0")
         }
 
         //val desktopTest by getting

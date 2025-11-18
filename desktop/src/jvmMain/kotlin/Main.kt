@@ -12,6 +12,7 @@ import androidx.compose.ui.window.AwtWindow
 import androidx.compose.ui.window.Tray
 import androidx.compose.ui.window.TrayState
 import androidx.compose.ui.window.application
+import ca.gosyer.appdirs.AppDirs
 import com.dokar.sonner.Toast
 import com.dokar.sonner.ToastType
 import com.dokar.sonner.Toaster
@@ -61,14 +62,20 @@ fun main() {
                     module {
                         //single { producePath() }
                         single {
+                            AppDirs {
+                                appName = "CivitAiModelBrowser"
+                                appAuthor = "jakepurple13"
+                            }
+                        }
+                        single {
                             {
                                 File(
-                                    System.getProperty("user.home") + File.separator + "Downloads" + File.separator + "CivitAi",
+                                    get<AppDirs>().getUserDataDir(),
                                     "androidx.preferences_pb"
                                 ).absolutePath
                             }
                         }
-                        single { getDatabaseBuilder() }
+                        single { getDatabaseBuilder(get()) }
                         single { TrayState() }
                     }
                 )

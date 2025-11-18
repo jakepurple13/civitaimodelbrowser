@@ -1,6 +1,10 @@
 package com.programmersbox.common.db
 
-import androidx.compose.runtime.*
+import androidx.compose.runtime.derivedStateOf
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateListOf
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.programmersbox.common.DataStore
@@ -8,9 +12,10 @@ import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.launch
 
 class FavoritesViewModel(
-    dao: FavoritesDao,
+    private val dao: FavoritesDao,
     dataStore: DataStore,
 ) : ViewModel() {
     var search by mutableStateOf("")
@@ -61,6 +66,12 @@ class FavoritesViewModel(
             filterList.remove(filter)
         } else {
             filterList.add(filter)
+        }
+    }
+
+    fun removeImage(imageUrl: String) {
+        viewModelScope.launch {
+            dao.removeImage(imageUrl)
         }
     }
 }

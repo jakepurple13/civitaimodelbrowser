@@ -94,7 +94,11 @@ import org.koin.compose.viewmodel.koinViewModel
 internal const val IMAGE_FILTER = "Image"
 internal const val CREATOR_FILTER = "Creator"
 
-@OptIn(ExperimentalFoundationApi::class, ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
+@OptIn(
+    ExperimentalFoundationApi::class,
+    ExperimentalMaterial3Api::class,
+    ExperimentalLayoutApi::class
+)
 @Composable
 fun FavoritesUI(
     viewModel: FavoritesViewModel = koinViewModel(),
@@ -104,12 +108,13 @@ fun FavoritesUI(
     val hazeState = remember { HazeState() }
     val dataStore = koinInject<DataStore>()
     val scope = rememberCoroutineScope()
-    val showNsfw by remember { dataStore.showNsfw.flow }.collectAsStateWithLifecycle(false)
-    val blurStrength by remember { dataStore.hideNsfwStrength.flow }.collectAsStateWithLifecycle(6f)
+    val showNsfw by remember { dataStore.showNsfw.flow }
+        .collectAsStateWithLifecycle(false)
+    val blurStrength by remember { dataStore.hideNsfwStrength.flow }
+        .collectAsStateWithLifecycle(6f)
     var reverseFavorites by dataStore.rememberReverseFavorites()
     val showBlur by dataStore.rememberShowBlur()
     val lazyGridState = rememberLazyGridState()
-    val dao = koinInject<FavoritesDao>()
 
     var showSortedByDialog by remember { mutableStateOf(false) }
 
@@ -302,9 +307,7 @@ fun FavoritesUI(
                                             onNavigateToDetail(sheetModel.modelId)
                                         },
                                         onRemoveFavorite = {
-                                            scope.launch {
-                                                dao.removeImage(sheetModel.imageUrl.orEmpty())
-                                            }
+                                            viewModel.removeImage(sheetModel.imageUrl.orEmpty())
                                         }
                                     )
                                 }

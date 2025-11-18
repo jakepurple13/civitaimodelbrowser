@@ -1,15 +1,18 @@
 package com.programmersbox.common
 
+import androidx.compose.runtime.Stable
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import org.jsoup.Jsoup
 
+@Stable
 @Serializable
 data class CivitAi(
     val items: List<Models>,
     val metadata: PageData,
 )
 
+@Stable
 @Serializable
 data class Models(
     val id: Long,
@@ -27,6 +30,7 @@ data class Models(
     fun parsedDescription() = Jsoup.parse(description.orEmpty()).text()
 }
 
+@Stable
 @Serializable
 data class Creator(
     val username: String? = null,
@@ -45,6 +49,7 @@ enum class ModelType {
     Other
 }
 
+@Stable
 @Serializable
 data class ModelVersion(
     val id: Long,
@@ -62,6 +67,7 @@ data class ModelVersion(
     fun parsedDescription() = description?.let { Jsoup.parse(it).text() }
 }
 
+@Stable
 @Serializable
 data class ModelImage(
     val id: String? = "",
@@ -72,6 +78,7 @@ data class ModelImage(
     val meta: ImageMeta? = null,
 )
 
+@Stable
 @Serializable
 data class CivitAiCustomImages(
     val items: List<CustomModelImage>,
@@ -79,6 +86,7 @@ data class CivitAiCustomImages(
     val prevPage: String? = null,
 )
 
+@Stable
 @Serializable
 data class CustomModelImage(
     val id: String? = "",
@@ -103,6 +111,7 @@ enum class NsfwLevel {
     fun canNotShow() = !(this == None || this == Soft)
 }
 
+@Stable
 @Serializable
 data class ImageMeta(
     @SerialName("Size")
@@ -119,6 +128,7 @@ data class ImageMeta(
     val negativePrompt: String? = null,
 )
 
+@Stable
 @Serializable
 data class PageData(
     val totalItems: Long? = null,

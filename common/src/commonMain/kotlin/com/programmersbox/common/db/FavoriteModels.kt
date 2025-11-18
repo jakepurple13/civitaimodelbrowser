@@ -2,6 +2,7 @@
 
 package com.programmersbox.common.db
 
+import androidx.compose.runtime.Stable
 import androidx.room.Entity
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
@@ -60,6 +61,7 @@ sealed interface FavoriteModel {
     val modelType: String?
     val dateAdded: Long
 
+    @Stable
     @Serializable
     data class Model(
         override val id: Long,
@@ -73,6 +75,7 @@ sealed interface FavoriteModel {
         override val dateAdded: Long = Clock.System.now().toEpochMilliseconds(),
     ) : FavoriteModel
 
+    @Stable
     @Serializable
     data class Image(
         override val id: Long,
@@ -85,6 +88,7 @@ sealed interface FavoriteModel {
         override val dateAdded: Long = Clock.System.now().toEpochMilliseconds(),
     ) : FavoriteModel
 
+    @Stable
     @Serializable
     data class Creator(
         override val id: Long,

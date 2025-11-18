@@ -5,6 +5,8 @@ import androidx.paging.PagingState
 import com.programmersbox.common.CivitAi
 import com.programmersbox.common.Models
 import com.programmersbox.common.Network
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 
 abstract class CivitAiPagingSource(
     protected val network: Network,
@@ -26,14 +28,16 @@ abstract class CivitAiPagingSource(
     ): Result<CivitAi>
 
     override suspend fun load(params: LoadParams<String>): LoadResult<String, Models> {
-        val request = if (params.key == null) {
-            networkLoad(
-                params = params,
-                page = 1,
-                includeNsfw = includeNsfw
-            )
-        } else {
-            network.fetchRequest<CivitAi>(params.key.orEmpty())
+        val request = withContext(Dispatchers.IO) {
+            if (params.key == null) {
+                networkLoad(
+                    params = params,
+                    page = 1,
+                    includeNsfw = includeNsfw
+                )
+            } else {
+                network.fetchRequest<CivitAi>(params.key.orEmpty())
+            }
         }
         return request.fold(
             onSuccess = { response ->

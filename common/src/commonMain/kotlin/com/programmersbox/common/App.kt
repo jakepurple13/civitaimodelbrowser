@@ -152,7 +152,10 @@ internal fun App(
                         ScanQrCode(
                             viewModel = koinViewModel(),
                             onBack = { backStack.removeLastOrNull() },
-                            onNavigate = { backStack.add(it) }
+                            onNavigate = { navKey ->
+                                backStack.removeIf { it == Screen.QrCode }
+                                backStack.add(navKey)
+                            }
                         )
                     }
                 },

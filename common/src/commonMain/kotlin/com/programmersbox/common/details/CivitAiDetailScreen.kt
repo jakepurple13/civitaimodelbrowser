@@ -37,6 +37,8 @@ import androidx.compose.material3.BottomAppBarDefaults
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ElevatedAssistChip
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
@@ -79,6 +81,8 @@ import com.programmersbox.common.db.FavoriteModel
 import com.programmersbox.common.db.FavoritesDao
 import com.programmersbox.common.home.BlacklistHandling
 import com.programmersbox.common.ifTrue
+import com.programmersbox.common.qrcode.QrCodeType
+import com.programmersbox.common.qrcode.ShareViaQrCode
 import dev.chrisbanes.haze.HazeProgressive
 import dev.chrisbanes.haze.HazeState
 import dev.chrisbanes.haze.LocalHazeStyle
@@ -113,6 +117,27 @@ fun CivitAiDetailScreen(
 
     when (val model = viewModel.models) {
         is DetailViewState.Content -> {
+            var showQrCode by remember { mutableStateOf(false) }
+
+            if (showQrCode) {
+                ShareViaQrCode(
+                    title = model.models.name,
+                    url = viewModel.modelUrl,
+                    qrCodeType = QrCodeType.Model,
+                    id = model.models.id.toString(),
+                    username = model.models.creator?.username,
+                    imageUrl = model
+                        .models
+                        .modelVersions
+                        .firstOrNull()
+                        ?.images
+                        ?.firstOrNull()
+                        ?.url
+                        .orEmpty(),
+                    onClose = { showQrCode = false }
+                )
+            }
+
             var sheetDetails by remember { mutableStateOf<ModelImage?>(null) }
 
             sheetDetails?.let { sheetModel ->
@@ -210,9 +235,30 @@ fun CivitAiDetailScreen(
                             }
                         },
                         actions = {
+                            var showDropDown by remember { mutableStateOf(false) }
+                            DropdownMenu(
+                                expanded = showDropDown,
+                                onDismissRequest = { showDropDown = false }
+                            ) {
+                                DropdownMenuItem(
+                                    text = { Text("Share Link") },
+                                    onClick = {
+                                        onShareClick(viewModel.modelUrl)
+                                        showDropDown = false
+                                    }
+                                )
+
+                                DropdownMenuItem(
+                                    text = { Text("Share QR Code") },
+                                    onClick = {
+                                        showQrCode = true
+                                        showDropDown = false
+                                    }
+                                )
+                            }
                             NavigationBarItem(
                                 selected = false,
-                                onClick = { onShareClick(viewModel.modelUrl) },
+                                onClick = { showDropDown = true },
                                 icon = { Icon(Icons.Default.Share, null) },
                                 label = { Text("Share") },
                             )

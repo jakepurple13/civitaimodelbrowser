@@ -56,6 +56,7 @@ fun SettingsScreen(
     export: @Composable () -> Unit = {},
     import: (@Composable () -> Unit)? = null,
     onNavigateToBlacklisted: () -> Unit,
+    onNavigateToQrCode: () -> Unit,
 ) {
     val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
     val scope = rememberCoroutineScope()
@@ -83,6 +84,16 @@ fun SettingsScreen(
                 .fillMaxSize()
                 .padding(padding)
         ) {
+            Card(
+                onClick = onNavigateToQrCode
+            ) {
+                ListItem(
+                    headlineContent = { Text("Scan QR Code") },
+                )
+            }
+
+            HorizontalDivider()
+
             val isNsfwEnabled by showNsfw.flow.collectAsStateWithLifecycle(false)
             val includeNsfwEnabled by includeNsfw.flow.collectAsStateWithLifecycle(false)
 

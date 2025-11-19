@@ -68,10 +68,10 @@ fun CivitAiModelImagesScreen(
     val hazeState = remember { HazeState() }
     val database = koinInject<FavoritesDao>()
     val dataStore = koinInject<DataStore>()
-    val showNsfw by remember { dataStore.showNsfw.flow }.collectAsStateWithLifecycle(false)
-    val nsfwBlurStrength by remember { dataStore.hideNsfwStrength.flow }.collectAsStateWithLifecycle(
-        6f
-    )
+    val showNsfw by remember { dataStore.showNsfw.flow }
+        .collectAsStateWithLifecycle(false)
+    val nsfwBlurStrength by remember { dataStore.hideNsfwStrength.flow }
+        .collectAsStateWithLifecycle(6f)
     val showBlur by dataStore.rememberShowBlur()
     val uriHandler = LocalUriHandler.current
     val lazyPagingItems = viewModel.pager.collectAsLazyPagingItems()

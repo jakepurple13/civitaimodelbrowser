@@ -30,6 +30,12 @@ koin = "4.2.0-alpha2"
 
 filekit = "0.12.0"
 
+qrose = "1.0.1"
+scanner = "0.5.0"
+javase = "3.5.3"
+coreVersion = "3.5.3"
+barcodeScanning = "17.3.0"
+
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp-version" }
 android-library = { id = "com.android.library", version.ref = "agp-version" }
@@ -87,3 +93,12 @@ koin-nav3 = { module = "io.insert-koin:koin-compose-navigation3" }
 filekit-core = { module = "io.github.vinceglb:filekit-core", version.ref = "filekit" }
 filekit-dialogs = { module = "io.github.vinceglb:filekit-dialogs", version.ref = "filekit" }
 filekit-dialogs-compose = { module = "io.github.vinceglb:filekit-dialogs-compose", version.ref = "filekit" }
+
+qrose = { module = "io.github.alexzhirkevich:qrose", version.ref = "qrose" }
+scanner = { module = "io.github.kalinjul.easyqrscan:scanner", version.ref = "scanner" }
+
+barcode-scanning = { module = "com.google.mlkit:barcode-scanning", version.ref = "barcodeScanning" }
+zxing-javase = { module = "com.google.zxing:javase", version.ref = "javase" }
+zxing-core = { module = "com.google.zxing:core", version.ref = "coreVersion" }
+
+coroutinesPlayServices = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-play-services", version.ref = "kotlinx-coroutines-core" }

@@ -4,8 +4,10 @@ import android.app.Application
 import com.programmersbox.common.cmpModules
 import com.programmersbox.common.createPlatformModule
 import com.programmersbox.common.getDatabaseBuilder
+import com.programmersbox.common.qrcode.QrCodeRepository
 import org.koin.android.ext.koin.androidContext
 import org.koin.core.context.startKoin
+import org.koin.core.module.dsl.singleOf
 import org.koin.dsl.module
 
 class CivitApplication : Application() {
@@ -17,6 +19,7 @@ class CivitApplication : Application() {
                 module {
                     single { getDatabaseBuilder(get()) }
                     single<() -> String> { { filesDir.resolve("androidx.preferences_pb").absolutePath } }
+                    singleOf(::QrCodeRepository)
                 },
                 cmpModules(),
                 createPlatformModule()

@@ -83,7 +83,7 @@ fun ImageSheet(
                 onRemoveFromFavorite = onRemoveFromFavorite,
                 nsfwText = nsfwText,
                 moreInfo = moreInfo,
-                actions = actions
+                actions = actions,
             )
         }
     )

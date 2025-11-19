@@ -23,6 +23,7 @@ import com.programmersbox.common.UIShow
 import com.programmersbox.common.cmpModules
 import com.programmersbox.common.createPlatformModule
 import com.programmersbox.common.getDatabaseBuilder
+import com.programmersbox.common.qrcode.QrCodeRepository
 import com.programmersbox.resources.Res
 import com.programmersbox.resources.civitai_logo
 import kotlinx.coroutines.launch
@@ -31,6 +32,7 @@ import kotlinx.serialization.json.Json
 import org.jetbrains.compose.resources.painterResource
 import org.koin.compose.KoinApplication
 import org.koin.compose.koinInject
+import org.koin.core.module.dsl.singleOf
 import org.koin.dsl.module
 import java.awt.FileDialog
 import java.awt.Frame
@@ -52,7 +54,6 @@ fun main() {
     application {
         val toaster = rememberToasterState()
         val scope = rememberCoroutineScope()
-
 
         KoinApplication(
             application = {
@@ -77,6 +78,7 @@ fun main() {
                         }
                         single { getDatabaseBuilder(get()) }
                         single { TrayState() }
+                        singleOf(::QrCodeRepository)
                     }
                 )
             }

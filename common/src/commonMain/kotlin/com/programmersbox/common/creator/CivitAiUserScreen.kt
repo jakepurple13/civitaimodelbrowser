@@ -12,6 +12,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.FavoriteBorder
+import androidx.compose.material.icons.filled.Share
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -22,7 +23,9 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
@@ -36,6 +39,8 @@ import com.programmersbox.common.db.FavoritesDao
 import com.programmersbox.common.home.modelItems
 import com.programmersbox.common.ifTrue
 import com.programmersbox.common.paging.collectAsLazyPagingItems
+import com.programmersbox.common.qrcode.QrCodeType
+import com.programmersbox.common.qrcode.ShareViaQrCode
 import dev.chrisbanes.haze.HazeProgressive
 import dev.chrisbanes.haze.HazeState
 import dev.chrisbanes.haze.LocalHazeStyle
@@ -64,6 +69,20 @@ fun CivitAiUserScreen(
 
     val hazeStyle = LocalHazeStyle.current
 
+    var showQrCode by remember { mutableStateOf(false) }
+
+    if (showQrCode) {
+        ShareViaQrCode(
+            title = username,
+            url = username,
+            qrCodeType = QrCodeType.User,
+            id = username,
+            username = username,
+            imageUrl = "",
+            onClose = { showQrCode = false }
+        )
+    }
+
     Scaffold(
         topBar = {
             TopAppBar(
@@ -77,6 +96,9 @@ fun CivitAiUserScreen(
                 actions = {
                     if (lazyPagingItems.itemSnapshotList.isNotEmpty()) {
                         lazyPagingItems[0]?.creator?.let { creator ->
+                            IconButton(
+                                onClick = { showQrCode = true }
+                            ) { Icon(Icons.Default.Share, null) }
                             IconButton(
                                 onClick = {
                                     if (favorites.any { it.name == viewModel.username }) {

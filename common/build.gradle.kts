@@ -73,6 +73,11 @@ kotlin {
             api(libs.koin.compose)
             implementation(libs.koin.viewmodel)
             implementation(libs.koin.nav3)
+            api(libs.qrose)
+            api(libs.scanner)
+            api(libs.filekit.core)
+            api(libs.filekit.dialogs)
+            api(libs.filekit.dialogs.compose)
         }
 
         commonTest.dependencies {
@@ -86,16 +91,17 @@ kotlin {
             implementation(libs.composeScrollbars)
             api(libs.koin.android)
             api(libs.kamel.image.bitmap.resizing)
+            api(libs.barcode.scanning)
+            api(libs.coroutinesPlayServices)
         }
 
         jvmMain.dependencies {
             api(compose.preview)
             api(libs.ktor.jvm)
             api(libs.kotlinx.coroutines.swing)
-            api(libs.filekit.core)
-            api(libs.filekit.dialogs)
-            api(libs.filekit.dialogs.compose)
             api("ca.gosyer:kotlin-multiplatform-appdirs:2.0.0")
+            api(libs.zxing.javase)
+            api(libs.zxing.core)
         }
 
         //val desktopTest by getting

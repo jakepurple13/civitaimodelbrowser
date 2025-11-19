@@ -5,9 +5,7 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideOutHorizontally
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.ExperimentalFoundationApi
-import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
@@ -24,23 +22,14 @@ import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.text.selection.SelectionContainer
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowRightAlt
 import androidx.compose.material.icons.automirrored.filled.Sort
 import androidx.compose.material.icons.filled.ArrowUpward
 import androidx.compose.material.icons.filled.Clear
-import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.Image
-import androidx.compose.material.icons.filled.Refresh
-import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.AssistChipDefaults
 import androidx.compose.material3.CenterAlignedTopAppBar
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DockedSearchBar
-import androidx.compose.material3.ElevatedAssistChip
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilledIconToggleButton
 import androidx.compose.material3.FilterChip
@@ -54,7 +43,6 @@ import androidx.compose.material3.SearchBarDefaults
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
-import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -66,7 +54,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.window.DialogProperties
 import androidx.compose.ui.zIndex
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.programmersbox.common.BackButton
@@ -75,18 +62,15 @@ import com.programmersbox.common.CustomScrollBar
 import com.programmersbox.common.DataStore
 import com.programmersbox.common.SheetDetails
 import com.programmersbox.common.adaptiveGridCell
+import com.programmersbox.common.components.ImageSheet
 import com.programmersbox.common.home.CardContent
 import com.programmersbox.common.ifTrue
 import com.programmersbox.common.isScrollingUp
-import com.programmersbox.common.rememberSROState
-import com.programmersbox.common.scaleRotateOffsetReset
 import dev.chrisbanes.haze.HazeProgressive
 import dev.chrisbanes.haze.HazeState
 import dev.chrisbanes.haze.LocalHazeStyle
 import dev.chrisbanes.haze.hazeEffect
 import dev.chrisbanes.haze.hazeSource
-import io.kamel.image.KamelImage
-import io.kamel.image.asyncPainterResource
 import kotlinx.coroutines.launch
 import org.koin.compose.koinInject
 import org.koin.compose.viewmodel.koinViewModel
@@ -297,19 +281,51 @@ fun FavoritesUI(
                         var sheetDetails by remember { mutableStateOf<FavoriteModel.Image?>(null) }
 
                         sheetDetails?.let { sheetModel ->
-                            SheetDetails(
+                            ImageSheet(
+                                url = sheetModel.imageUrl.orEmpty(),
+                                isNsfw = sheetModel.nsfw,
+                                isFavorite = true,
+                                onFavorite = {},
+                                onRemoveFromFavorite = {
+                                    viewModel.removeImage(sheetModel.imageUrl.orEmpty())
+                                },
                                 onDismiss = { sheetDetails = null },
-                                content = {
-                                    SheetContent(
-                                        image = sheetModel,
-                                        onNavigate = {
+                                nsfwText = "NSFW",
+                                actions = {
+                                    TextButton(
+                                        onClick = {
                                             sheetDetails = null
                                             onNavigateToDetail(sheetModel.modelId)
-                                        },
-                                        onRemoveFavorite = {
-                                            viewModel.removeImage(sheetModel.imageUrl.orEmpty())
                                         }
-                                    )
+                                    ) {
+                                        Text("View Model")
+                                        Icon(Icons.AutoMirrored.Filled.ArrowRightAlt, null)
+                                    }
+                                },
+                                moreInfo = {
+                                    sheetModel.imageMetaDb?.let { meta ->
+                                        Column(
+                                            modifier = Modifier.padding(4.dp)
+                                        ) {
+                                            meta.model?.let { Text("Model: $it") }
+                                            HorizontalDivider()
+                                            meta.prompt?.let { Text("Prompt: $it") }
+                                            HorizontalDivider()
+                                            meta.negativePrompt?.let { Text("Negative Prompt: $it") }
+                                            HorizontalDivider()
+                                            meta.seed?.let { Text("Seed: $it") }
+                                            HorizontalDivider()
+                                            meta.sampler?.let { Text("Sampler: $it") }
+                                            HorizontalDivider()
+                                            meta.steps?.let { Text("Steps: $it") }
+                                            HorizontalDivider()
+                                            meta.clipSkip?.let { Text("Clip Skip: $it") }
+                                            HorizontalDivider()
+                                            meta.size?.let { Text("Size: $it") }
+                                            HorizontalDivider()
+                                            meta.cfgScale?.let { Text("Cfg Scale: $it") }
+                                        }
+                                    }
                                 }
                             )
                         }
@@ -341,123 +357,6 @@ fun FavoritesUI(
                 .padding(4.dp)
                 .padding(padding)
         )
-    }
-}
-
-@OptIn(ExperimentalFoundationApi::class, ExperimentalMaterial3Api::class)
-@Composable
-private fun SheetContent(
-    image: FavoriteModel.Image,
-    onRemoveFavorite: () -> Unit,
-    onNavigate: () -> Unit,
-) {
-    val painter = asyncPainterResource(image.imageUrl.orEmpty())
-    SelectionContainer {
-        var imagePopup by remember { mutableStateOf(false) }
-
-        if (imagePopup) {
-            val sroState = rememberSROState()
-            AlertDialog(
-                properties = DialogProperties(usePlatformDefaultWidth = false),
-                onDismissRequest = { imagePopup = false },
-                title = {
-                    TopAppBar(
-                        title = {},
-                        actions = {
-                            IconButton(
-                                onClick = sroState::reset
-                            ) { Icon(Icons.Default.Refresh, null) }
-                        },
-                        windowInsets = WindowInsets(0.dp)
-                    )
-                },
-                text = {
-                    KamelImage(
-                        resource = { painter },
-                        onLoading = {
-                            CircularProgressIndicator({ it })
-                        },
-                        contentDescription = null,
-                        modifier = Modifier.scaleRotateOffsetReset(sroState)
-                    )
-                },
-                confirmButton = { TextButton(onClick = { imagePopup = false }) { Text("Done") } }
-            )
-        }
-        Column(
-            modifier = Modifier.verticalScroll(rememberScrollState())
-        ) {
-            TopAppBar(
-                title = {},
-                navigationIcon = {
-                    IconButton(onClick = onRemoveFavorite) {
-                        Icon(Icons.Default.Favorite, null)
-                    }
-                },
-                windowInsets = WindowInsets(0.dp),
-                actions = {
-                    TextButton(
-                        onClick = onNavigate
-                    ) {
-                        Text("View Model")
-                        Icon(Icons.AutoMirrored.Filled.ArrowRightAlt, null)
-                    }
-                }
-            )
-            KamelImage(
-                resource = { painter },
-                onLoading = {
-                    CircularProgressIndicator({ it })
-                },
-                contentDescription = null,
-                modifier = Modifier
-                    .combinedClickable(onDoubleClick = { imagePopup = true }) {}
-                    .align(Alignment.CenterHorizontally)
-            )
-            if (image.nsfw) {
-                Row(
-                    horizontalArrangement = Arrangement.spacedBy(4.dp),
-                    modifier = Modifier.padding(horizontal = 4.dp)
-                ) {
-                    ElevatedAssistChip(
-                        label = { Text("NSFW") },
-                        onClick = {},
-                        colors = AssistChipDefaults.elevatedAssistChipColors(
-                            disabledLabelColor = MaterialTheme.colorScheme.error,
-                            disabledContainerColor = MaterialTheme.colorScheme.surface
-                        ),
-                        enabled = false,
-                        border = BorderStroke(
-                            1.dp,
-                            MaterialTheme.colorScheme.error,
-                        ),
-                    )
-                }
-            }
-            image.imageMetaDb?.let { meta ->
-                Column(
-                    modifier = Modifier.padding(4.dp)
-                ) {
-                    meta.model?.let { Text("Model: $it") }
-                    HorizontalDivider()
-                    meta.prompt?.let { Text("Prompt: $it") }
-                    HorizontalDivider()
-                    meta.negativePrompt?.let { Text("Negative Prompt: $it") }
-                    HorizontalDivider()
-                    meta.seed?.let { Text("Seed: $it") }
-                    HorizontalDivider()
-                    meta.sampler?.let { Text("Sampler: $it") }
-                    HorizontalDivider()
-                    meta.steps?.let { Text("Steps: $it") }
-                    HorizontalDivider()
-                    meta.clipSkip?.let { Text("Clip Skip: $it") }
-                    HorizontalDivider()
-                    meta.size?.let { Text("Size: $it") }
-                    HorizontalDivider()
-                    meta.cfgScale?.let { Text("Cfg Scale: $it") }
-                }
-            }
-        }
     }
 }
 

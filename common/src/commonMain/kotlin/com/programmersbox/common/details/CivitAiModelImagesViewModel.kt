@@ -5,11 +5,17 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import androidx.paging.*
+import androidx.paging.LoadState
+import androidx.paging.LoadStates
+import androidx.paging.Pager
+import androidx.paging.PagingConfig
+import androidx.paging.PagingData
+import androidx.paging.cachedIn
 import com.programmersbox.common.CustomModelImage
 import com.programmersbox.common.DataStore
 import com.programmersbox.common.Network
 import com.programmersbox.common.PAGE_LIMIT
+import com.programmersbox.common.db.FavoriteModel
 import com.programmersbox.common.db.FavoriteType
 import com.programmersbox.common.db.FavoritesDao
 import com.programmersbox.common.db.toDb
@@ -17,6 +23,7 @@ import com.programmersbox.common.paging.CivitDetailsImagePagingSource
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import kotlin.random.Random
 
@@ -39,6 +46,11 @@ class CivitAiModelImagesViewModel(
             )
         )
     )
+
+    val favoriteList = database
+        .getFavoriteModels()
+        .map { it.filterIsInstance<FavoriteModel.Image>() }
+
 
     init {
         viewModelScope.launch {

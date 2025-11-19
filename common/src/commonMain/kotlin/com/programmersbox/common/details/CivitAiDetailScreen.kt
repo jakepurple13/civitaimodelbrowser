@@ -2,7 +2,6 @@ package com.programmersbox.common.details
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateContentSize
-import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.expandVertically
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -15,36 +14,26 @@ import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.selection.toggleable
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.text.selection.SelectionContainer
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.filled.ContentCopy
-import androidx.compose.material.icons.filled.Download
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material.icons.filled.Image
-import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.OpenInBrowser
-import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.Share
-import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.AssistChipDefaults
 import androidx.compose.material3.BottomAppBar
 import androidx.compose.material3.BottomAppBarDefaults
-import androidx.compose.material3.BottomSheetDefaults
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CircularProgressIndicator
@@ -60,14 +49,12 @@ import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -75,8 +62,6 @@ import androidx.compose.ui.draw.blur
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.ColorFilter
-import androidx.compose.ui.graphics.ColorMatrix
 import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.text.AnnotatedString
@@ -86,28 +71,20 @@ import com.programmersbox.common.BackButton
 import com.programmersbox.common.ComposableUtils
 import com.programmersbox.common.ContextMenu
 import com.programmersbox.common.DataStore
-import com.programmersbox.common.DownloadHandler
 import com.programmersbox.common.ModelImage
-import com.programmersbox.common.SheetDetails
 import com.programmersbox.common.adaptiveGridCell
+import com.programmersbox.common.components.ImageSheet
 import com.programmersbox.common.components.LoadingImage
 import com.programmersbox.common.db.FavoriteModel
 import com.programmersbox.common.db.FavoritesDao
 import com.programmersbox.common.home.BlacklistHandling
 import com.programmersbox.common.ifTrue
-import com.programmersbox.common.rememberSROState
-import com.programmersbox.common.scaleRotateOffsetReset
 import dev.chrisbanes.haze.HazeProgressive
 import dev.chrisbanes.haze.HazeState
 import dev.chrisbanes.haze.LocalHazeStyle
 import dev.chrisbanes.haze.hazeChild
 import dev.chrisbanes.haze.hazeEffect
 import dev.chrisbanes.haze.hazeSource
-import io.kamel.image.KamelImage
-import io.kamel.image.asyncPainterResource
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
-import okio.Path.Companion.toPath
 import org.koin.compose.koinInject
 import org.koin.compose.viewmodel.koinViewModel
 
@@ -139,17 +116,40 @@ fun CivitAiDetailScreen(
             var sheetDetails by remember { mutableStateOf<ModelImage?>(null) }
 
             sheetDetails?.let { sheetModel ->
-                SheetDetails(
+                ImageSheet(
+                    url = sheetModel.url,
+                    isNsfw = sheetModel.nsfw.canNotShow(),
+                    isFavorite = favoriteList
+                        .filterIsInstance<FavoriteModel.Image>()
+                        .any { f -> f.imageUrl == sheetModel.url },
+                    onFavorite = { viewModel.addImageToFavorites(sheetModel) },
+                    onRemoveFromFavorite = { viewModel.removeImageFromFavorites(sheetModel) },
                     onDismiss = { sheetDetails = null },
-                    content = {
-                        SheetContent(
-                            image = sheetModel,
-                            isFavorite = favoriteList
-                                .filterIsInstance<FavoriteModel.Image>()
-                                .any { f -> f.imageUrl == sheetModel.url },
-                            onFavorite = { viewModel.addImageToFavorites(sheetModel) },
-                            onRemoveFromFavorite = { viewModel.removeImageFromFavorites(sheetModel) }
-                        )
+                    nsfwText = sheetModel.nsfw.name,
+                    moreInfo = {
+                        sheetModel.meta?.let { meta ->
+                            Column(
+                                modifier = Modifier.padding(4.dp)
+                            ) {
+                                meta.model?.let { Text("Model: $it") }
+                                HorizontalDivider()
+                                meta.prompt?.let { Text("Prompt: $it") }
+                                HorizontalDivider()
+                                meta.negativePrompt?.let { Text("Negative Prompt: $it") }
+                                HorizontalDivider()
+                                meta.seed?.let { Text("Seed: $it") }
+                                HorizontalDivider()
+                                meta.sampler?.let { Text("Sampler: $it") }
+                                HorizontalDivider()
+                                meta.steps?.let { Text("Steps: $it") }
+                                HorizontalDivider()
+                                meta.clipSkip?.let { Text("Clip Skip: $it") }
+                                HorizontalDivider()
+                                meta.size?.let { Text("Size: $it") }
+                                HorizontalDivider()
+                                meta.cfgScale?.let { Text("Cfg Scale: $it") }
+                            }
+                        }
                     }
                 )
             }
@@ -493,197 +493,6 @@ private fun ImageCard(
                     modifier = Modifier
                         .padding(horizontal = 4.dp)
                         .align(Alignment.TopEnd)
-                )
-            }
-        }
-    }
-}
-
-@OptIn(ExperimentalFoundationApi::class, ExperimentalMaterial3Api::class)
-@Composable
-private fun SheetContent(
-    image: ModelImage,
-    isFavorite: Boolean,
-    onFavorite: () -> Unit,
-    onRemoveFromFavorite: () -> Unit,
-) {
-    val painter = asyncPainterResource(image.url)
-    val downloadHandler = koinInject<DownloadHandler>()
-    val scope = rememberCoroutineScope()
-    SelectionContainer(
-        modifier = Modifier.navigationBarsPadding()
-    ) {
-        var showInfo by remember { mutableStateOf(false) }
-        if (showInfo) {
-            AlertDialog(
-                onDismissRequest = { showInfo = false },
-                title = { Text("Info") },
-                text = {
-                    Column(
-                        modifier = Modifier.verticalScroll(rememberScrollState())
-                    ) {
-                        if (image.nsfw.canNotShow()) {
-                            Row(
-                                horizontalArrangement = Arrangement.spacedBy(4.dp),
-                                modifier = Modifier.padding(horizontal = 4.dp)
-                            ) {
-                                ElevatedAssistChip(
-                                    label = { Text("NSFW") },
-                                    onClick = {},
-                                    colors = AssistChipDefaults.elevatedAssistChipColors(
-                                        disabledLabelColor = MaterialTheme.colorScheme.error,
-                                        disabledContainerColor = MaterialTheme.colorScheme.surface
-                                    ),
-                                    enabled = false,
-                                    border = BorderStroke(
-                                        1.dp,
-                                        MaterialTheme.colorScheme.error,
-                                    ),
-                                )
-
-                                ElevatedAssistChip(
-                                    label = { Text(image.nsfw.name) },
-                                    onClick = {},
-                                    colors = AssistChipDefaults.elevatedAssistChipColors(
-                                        disabledLabelColor = MaterialTheme.colorScheme.error,
-                                        disabledContainerColor = MaterialTheme.colorScheme.surface
-                                    ),
-                                    enabled = false,
-                                    border = BorderStroke(
-                                        1.dp,
-                                        MaterialTheme.colorScheme.error,
-                                    ),
-                                )
-                            }
-                        }
-                        image.meta?.let { meta ->
-                            Column(
-                                modifier = Modifier.padding(4.dp)
-                            ) {
-                                meta.model?.let { Text("Model: $it") }
-                                HorizontalDivider()
-                                meta.prompt?.let { Text("Prompt: $it") }
-                                HorizontalDivider()
-                                meta.negativePrompt?.let { Text("Negative Prompt: $it") }
-                                HorizontalDivider()
-                                meta.seed?.let { Text("Seed: $it") }
-                                HorizontalDivider()
-                                meta.sampler?.let { Text("Sampler: $it") }
-                                HorizontalDivider()
-                                meta.steps?.let { Text("Steps: $it") }
-                                HorizontalDivider()
-                                meta.clipSkip?.let { Text("Clip Skip: $it") }
-                                HorizontalDivider()
-                                meta.size?.let { Text("Size: $it") }
-                                HorizontalDivider()
-                                meta.cfgScale?.let { Text("Cfg Scale: $it") }
-                            }
-                        }
-                    }
-                },
-                confirmButton = {
-                    TextButton(
-                        onClick = { showInfo = false }
-                    ) { Text("Done") }
-                }
-            )
-        }
-
-        val sroState = rememberSROState()
-        Scaffold(
-            topBar = {
-                TopAppBar(
-                    title = {},
-                    windowInsets = WindowInsets(0.dp),
-                    colors = TopAppBarDefaults.topAppBarColors(
-                        //containerColor = BottomSheetDefaults.ContainerColor
-                        containerColor = Color.Transparent
-                    ),
-                    navigationIcon = {
-                        IconButton(
-                            onClick = { showInfo = true }
-                        ) { Icon(Icons.Default.Info, null) }
-                    },
-                    actions = {
-                        IconButton(
-                            onClick = {
-                                if (isFavorite) {
-                                    onRemoveFromFavorite()
-                                } else {
-                                    onFavorite()
-                                }
-                            }
-                        ) {
-                            Icon(
-                                if (isFavorite) Icons.Default.Favorite else Icons.Default.FavoriteBorder,
-                                null
-                            )
-                        }
-                    }
-                )
-            },
-            bottomBar = {
-                BottomAppBar(
-                    containerColor = Color.Transparent
-                ) {
-                    NavigationBarItem(
-                        selected = false,
-                        onClick = { sroState.reset() },
-                        icon = { Icon(Icons.Default.Refresh, null) },
-                        label = { Text("Refresh") },
-                    )
-                    NavigationBarItem(
-                        selected = false,
-                        onClick = {
-                            scope.launch(Dispatchers.IO) {
-                                downloadHandler.download(
-                                    url = image.url,
-                                    name = image.url.toPath().name
-                                )
-                            }
-                        },
-                        icon = { Icon(Icons.Default.Download, null) },
-                        label = { Text("Download") },
-                    )
-                }
-            },
-            containerColor = BottomSheetDefaults.ContainerColor
-        ) { padding ->
-            val blur = 70.dp
-            val alpha = .5f
-            val saturation = 3f
-            val scaleX = 1.5f
-            val scaleY = 1.5f
-
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(padding)
-                    .scaleRotateOffsetReset(sroState)
-            ) {
-                KamelImage(
-                    resource = { painter },
-                    contentDescription = null,
-                    colorFilter = ColorFilter.colorMatrix(ColorMatrix().apply {
-                        setToSaturation(
-                            saturation
-                        )
-                    }),
-                    modifier = Modifier.blurGradient(blur, alpha, scaleX, scaleY)
-                )
-
-                KamelImage(
-                    resource = { painter },
-                    contentDescription = null,
-                    onLoading = {
-                        val progress = animateFloatAsState(
-                            targetValue = it,
-                            label = ""
-                        ).value
-                        CircularProgressIndicator(
-                            progress = { progress }
-                        )
-                    },
                 )
             }
         }

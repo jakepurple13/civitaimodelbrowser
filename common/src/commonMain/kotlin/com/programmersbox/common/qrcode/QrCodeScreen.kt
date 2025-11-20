@@ -117,7 +117,9 @@ fun ShareViaQrCode(
     onClose: () -> Unit,
 ) {
     val scope = rememberCoroutineScope()
-    val sheetState = rememberModalBottomSheetState()
+    val sheetState = rememberModalBottomSheetState(
+        skipPartiallyExpanded = true
+    )
     val onDismiss: () -> Unit = {
         scope.launch { sheetState.hide() }
         onClose()

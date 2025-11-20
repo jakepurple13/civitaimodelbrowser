@@ -1,0 +1,8 @@
+<paths>
+    <cache-path
+        name="temp_images"
+        path="/" />
+    <files-path
+        name="files"
+        path="/" />
+</paths>

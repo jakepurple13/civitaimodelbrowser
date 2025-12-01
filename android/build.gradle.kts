@@ -21,8 +21,8 @@ android {
         applicationId = "com.programmersbox.civitaimodelbrowser"
         minSdk = 28
         targetSdk = 36
-        versionCode = 9
-        versionName = "3.0.11"
+        versionCode = 10
+        versionName = "3.1.0"
     }
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_17

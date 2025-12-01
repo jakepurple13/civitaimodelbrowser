@@ -34,7 +34,7 @@ compose.desktop {
         nativeDistributions {
             targetFormats(TargetFormat.Dmg, TargetFormat.Msi, TargetFormat.Deb)
             packageName = "CivitAi Model Browser"
-            packageVersion = "1.0.0"
+            packageVersion = "1.0.1"
             vendor = "jakepurple13"
 
             modules("jdk.unsupported")

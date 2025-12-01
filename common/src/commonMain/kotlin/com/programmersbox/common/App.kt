@@ -16,7 +16,6 @@ import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.viewmodel.navigation3.rememberViewModelStoreNavEntryDecorator
 import androidx.navigation3.runtime.NavKey
-import androidx.navigation3.runtime.entryProvider
 import androidx.navigation3.runtime.rememberSaveableStateHolderNavEntryDecorator
 import androidx.navigation3.scene.DialogSceneStrategy
 import androidx.navigation3.ui.NavDisplay
@@ -41,12 +40,14 @@ import dev.chrisbanes.haze.LocalHazeStyle
 import dev.chrisbanes.haze.materials.HazeMaterials
 import kotlinx.serialization.Serializable
 import org.koin.compose.koinInject
+import org.koin.compose.navigation3.koinEntryProvider
 import org.koin.compose.viewmodel.koinViewModel
 import org.koin.core.module.dsl.singleOf
 import org.koin.core.module.dsl.viewModel
 import org.koin.core.module.dsl.viewModelOf
 import org.koin.core.parameter.parametersOf
 import org.koin.dsl.module
+import org.koin.dsl.navigation3.navigation
 
 @OptIn(ExperimentalMaterial3AdaptiveApi::class)
 @Composable
@@ -57,22 +58,31 @@ internal fun App(
     export: @Composable () -> Unit = {},
     import: (@Composable () -> Unit)? = null,
 ) {
-    val backStack = remember { mutableStateListOf<NavKey>(Screen.List) }
+    //val backStack = remember { mutableStateListOf<NavKey>(Screen.List) }
     CompositionLocalProvider(
         LocalHazeStyle provides HazeMaterials.regular(),
-        LocalDatabaseDao provides koinInject()
+        LocalDatabaseDao provides koinInject(),
+        LocalActions provides remember {
+            Actions(
+                shareUrl = onShareClick,
+                onExport = onExport,
+                onImport = onImport,
+                export = export,
+                import = import,
+            )
+        }
     ) {
         Surface {
             NavDisplay(
-                backStack = backStack,
+                backStack = koinInject<NavigationHandler>().backStack,
                 entryDecorators = listOf(
                     rememberSaveableStateHolderNavEntryDecorator(),
                     rememberViewModelStoreNavEntryDecorator()
                 ),
-                sceneStrategy = rememberListDetailSceneStrategy<NavKey>()
+                sceneStrategy = rememberListDetailSceneStrategy<Any>()
                         then DialogSceneStrategy(),
-                //entryProvider = koinEntryProvider(),
-                entryProvider = entryProvider {
+                entryProvider = koinEntryProvider(),
+                /*entryProvider = entryProvider {
                     entry<Screen.List> {
                         CivitAiScreen(
                             onNavigateToDetail = { id -> backStack.add(Screen.Detail(id)) },
@@ -158,7 +168,7 @@ internal fun App(
                             }
                         )
                     }
-                },
+                },*/
                 transitionSpec = {
                     // Slide in from right when navigating forward
                     slideInHorizontally(initialOffsetX = { it }) togetherWith
@@ -180,6 +190,7 @@ internal fun App(
     }
 }
 
+@OptIn(ExperimentalMaterial3AdaptiveApi::class)
 fun cmpModules() = module {
     singleOf(::Network)
     single { DataStore.getStore(get()) }
@@ -205,7 +216,119 @@ fun cmpModules() = module {
     }
     viewModelOf(::FavoritesViewModel)
     viewModelOf(::QrCodeScannerViewModel)
+
+    singleOf(::NavigationHandler)
+
+    navigation<Screen.List> {
+        val backStack = koinInject<NavigationHandler>().backStack
+        CivitAiScreen(
+            onNavigateToDetail = { id -> backStack.add(Screen.Detail(id)) },
+            onNavigateToFavorites = { backStack.add(Screen.Favorites) },
+            onNavigateToSettings = { backStack.add(Screen.Settings) }
+        )
+    }
+
+    navigation<Screen.Detail>(
+        metadata = ListDetailSceneStrategy.listPane()
+    ) {
+        val backStack = koinInject<NavigationHandler>().backStack
+        val actions = LocalActions.current
+        CivitAiDetailScreen(
+            id = it.modelId,
+            viewModel = koinViewModel { parametersOf(it.modelId) },
+            onShareClick = actions.shareUrl,
+            onNavigateToUser = { username -> backStack.add(Screen.User(username)) },
+            onNavigateToDetailImages = { id, name ->
+                backStack.add(
+                    Screen.DetailsImage(
+                        id.toString(),
+                        name
+                    )
+                )
+            }
+        )
+    }
+
+    navigation<Screen.DetailsImage>(
+        metadata = ListDetailSceneStrategy.detailPane()
+    ) {
+        CivitAiModelImagesScreen(
+            modelName = it.modelName,
+            viewModel = koinViewModel { parametersOf(it.modelId) }
+        )
+    }
+
+    navigation<Screen.User>(
+        metadata = ListDetailSceneStrategy.extraPane()
+    ) {
+        val backStack = koinInject<NavigationHandler>().backStack
+        CivitAiUserScreen(
+            viewModel = koinViewModel { parametersOf(it.username) },
+            username = it.username,
+            onNavigateToDetail = { id -> backStack.add(Screen.Detail(id)) }
+        )
+    }
+    navigation<Screen.Favorites> {
+        val backStack = koinInject<NavigationHandler>().backStack
+        FavoritesUI(
+            viewModel = koinViewModel(),
+            onNavigateToDetail = { id -> backStack.add(Screen.Detail(id.toString())) },
+            onNavigateToUser = { username -> backStack.add(Screen.User(username)) }
+        )
+    }
+    navigation<Screen.Settings> {
+        val backStack = koinInject<NavigationHandler>().backStack
+        val actions = LocalActions.current
+        SettingsScreen(
+            onExport = actions.onExport,
+            onImport = actions.onImport,
+            export = actions.export,
+            import = actions.import,
+            onNavigateToBlacklisted = { backStack.add(Screen.Settings.Blacklisted) },
+            onNavigateToQrCode = { backStack.add(Screen.QrCode) }
+        )
+    }
+    navigation<Screen.Settings.Blacklisted> { BlacklistedScreen() }
+    navigation<Screen.Settings.Screen> {
+        val backStack = koinInject<NavigationHandler>().backStack
+        val actions = LocalActions.current
+        SettingsScreen(
+            onExport = actions.onExport,
+            onImport = actions.onImport,
+            export = actions.export,
+            import = actions.import,
+            onNavigateToBlacklisted = { backStack.add(Screen.Settings.Blacklisted) },
+            onNavigateToQrCode = { backStack.add(Screen.QrCode) }
+        )
+    }
+    navigation<Screen.QrCode>(
+        metadata = DialogSceneStrategy.dialog()
+    ) {
+        val backStack = koinInject<NavigationHandler>().backStack
+        ScanQrCode(
+            viewModel = koinViewModel(),
+            onBack = { backStack.removeLastOrNull() },
+            onNavigate = { navKey ->
+                backStack.removeIf { it == Screen.QrCode }
+                backStack.add(navKey)
+            }
+        )
+    }
 }
+
+class NavigationHandler {
+    val backStack = mutableStateListOf<NavKey>(Screen.List)
+}
+
+val LocalActions = staticCompositionLocalOf<Actions> { error("Nothing") }
+
+data class Actions(
+    val shareUrl: (String) -> Unit,
+    val onImport: () -> String,
+    val onExport: (CivitDb) -> Unit,
+    val export: @Composable () -> Unit,
+    val import: (@Composable () -> Unit)? = null,
+)
 
 val LocalDatabaseDao = staticCompositionLocalOf<FavoritesDao> { error("Nothing") }
 

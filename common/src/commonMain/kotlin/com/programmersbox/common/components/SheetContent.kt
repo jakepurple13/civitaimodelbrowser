@@ -21,6 +21,7 @@ import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Refresh
+import androidx.compose.material.icons.filled.Share
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.AssistChipDefaults
 import androidx.compose.material3.BottomAppBar
@@ -49,6 +50,7 @@ import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.ColorMatrix
 import androidx.compose.ui.unit.dp
 import com.programmersbox.common.DownloadHandler
+import com.programmersbox.common.LocalActions
 import com.programmersbox.common.SheetDetails
 import com.programmersbox.common.details.blurGradient
 import com.programmersbox.common.rememberSROState
@@ -104,6 +106,7 @@ private fun SheetContent(
     val painter = asyncPainterResource(image)
     val downloadHandler = koinInject<DownloadHandler>()
     val scope = rememberCoroutineScope()
+    val actions = LocalActions.current
     SelectionContainer(
         modifier = Modifier.navigationBarsPadding()
     ) {
@@ -203,7 +206,13 @@ private fun SheetContent(
                         selected = false,
                         onClick = { sroState.reset() },
                         icon = { Icon(Icons.Default.Refresh, null) },
-                        label = { Text("Refresh") },
+                        label = { Text("Reset") },
+                    )
+                    NavigationBarItem(
+                        selected = false,
+                        onClick = { actions.shareUrl(image) },
+                        icon = { Icon(Icons.Default.Share, null) },
+                        label = { Text("Share") },
                     )
                     NavigationBarItem(
                         selected = false,

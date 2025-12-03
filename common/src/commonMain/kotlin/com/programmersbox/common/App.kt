@@ -224,7 +224,8 @@ fun cmpModules() = module {
         CivitAiScreen(
             onNavigateToDetail = { id -> backStack.add(Screen.Detail(id)) },
             onNavigateToFavorites = { backStack.add(Screen.Favorites) },
-            onNavigateToSettings = { backStack.add(Screen.Settings) }
+            onNavigateToSettings = { backStack.add(Screen.Settings) },
+            onNavigateToQrCode = { backStack.add(Screen.QrCode) }
         )
     }
 

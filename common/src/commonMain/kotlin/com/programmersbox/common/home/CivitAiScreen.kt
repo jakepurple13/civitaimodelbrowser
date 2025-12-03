@@ -31,31 +31,26 @@ import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.ArrowUpward
 import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.material.icons.filled.QrCodeScanner
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.AssistChipDefaults
 import androidx.compose.material3.Button
-import androidx.compose.material3.Card
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ElevatedAssistChip
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.ListItem
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SearchBar
 import androidx.compose.material3.SearchBarDefaults
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
-import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -82,12 +77,12 @@ import com.programmersbox.common.ModelType
 import com.programmersbox.common.Models
 import com.programmersbox.common.adaptiveGridCell
 import com.programmersbox.common.components.LoadingImage
+import com.programmersbox.common.components.ModelOptionsSheet
 import com.programmersbox.common.components.PullRefreshIndicator
 import com.programmersbox.common.components.pullRefresh
 import com.programmersbox.common.components.rememberPullRefreshState
 import com.programmersbox.common.db.BlacklistedItemRoom
 import com.programmersbox.common.db.FavoriteModel
-import com.programmersbox.common.db.FavoriteType
 import com.programmersbox.common.db.FavoritesDao
 import com.programmersbox.common.ifTrue
 import com.programmersbox.common.isScrollingUp
@@ -113,6 +108,7 @@ fun CivitAiScreen(
     onNavigateToDetail: (String) -> Unit,
     onNavigateToFavorites: () -> Unit,
     onNavigateToSettings: () -> Unit,
+    onNavigateToQrCode: () -> Unit,
 ) {
     val hazeState = remember { HazeState() }
     val db = koinInject<FavoritesDao>()
@@ -153,6 +149,7 @@ fun CivitAiScreen(
                 onNavigateToFavorites = onNavigateToFavorites,
                 onNavigateToSettings = onNavigateToSettings,
                 onNavigateToDetail = onNavigateToDetail,
+                onNavigateToQrCode = onNavigateToQrCode,
                 modifier = Modifier.ifTrue(showBlur) {
                     hazeEffect(hazeState) {
                         progressive = HazeProgressive.verticalGradient(
@@ -195,7 +192,7 @@ fun CivitAiScreen(
                     onNavigateToDetail = onNavigateToDetail,
                     showNsfw = showNsfw,
                     blurStrength = blurStrength,
-                    database = database.filterIsInstance<FavoriteModel.Model>(),
+                    database = database,
                     blacklisted = blacklisted,
                 )
             }
@@ -241,112 +238,18 @@ fun LazyGridScope.modelItems(
         key = lazyPagingItems.itemKeyIndexed { model, index -> "${model.id}$index" }
     ) {
         lazyPagingItems[it]?.let { models ->
-            val scope = rememberCoroutineScope()
-            val dao = koinInject<FavoritesDao>()
             val isBlacklisted = blacklisted.any { b -> b.id == models.id }
-            var showDialog by remember { mutableStateOf(false) }
-
-            BlacklistHandling(
-                blacklisted = blacklisted,
-                modelId = models.id,
-                name = models.name,
-                nsfw = models.nsfw,
-                showDialog = showDialog,
-                onDialogDismiss = { showDialog = false }
-            )
-
             var showSheet by remember { mutableStateOf(false) }
-            if (showSheet) {
-                val sheetState = rememberModalBottomSheetState()
-                ModalBottomSheet(
-                    onDismissRequest = { showSheet = false },
-                    sheetState = sheetState,
-                    containerColor = MaterialTheme.colorScheme.surface,
-                ) {
-                    TopAppBar(
-                        title = { Text(models.name) },
-                    )
 
-                    Card(
-                        onClick = {
-                            onNavigateToDetail(models.id.toString())
-                            scope.launch { sheetState.hide() }
-                                .invokeOnCompletion { showSheet = false }
-                        }
-                    ) {
-                        ListItem(
-                            headlineContent = { Text("Open") }
-                        )
-                    }
-
-                    HorizontalDivider()
-
-                    if (database.any { m -> m.id == models.id }) {
-                        Card(
-                            onClick = {
-                                scope.launch {
-                                    dao.removeModel(models.id)
-                                    sheetState.hide()
-                                }.invokeOnCompletion { showSheet = false }
-                            }
-                        ) {
-                            ListItem(
-                                headlineContent = { Text("Unfavorite") }
-                            )
-                        }
-                    } else {
-                        Card(
-                            onClick = {
-                                scope.launch {
-                                    dao.addFavorite(
-                                        id = models.id,
-                                        name = models.name,
-                                        description = models.description,
-                                        type = models.type,
-                                        nsfw = models.nsfw,
-                                        imageUrl = models.modelVersions.firstOrNull()?.images?.firstOrNull()?.url,
-                                        favoriteType = FavoriteType.Model,
-                                        modelId = models.id
-                                    )
-                                    sheetState.hide()
-                                }.invokeOnCompletion { showSheet = false }
-                            }
-                        ) {
-                            ListItem(
-                                headlineContent = { Text("Favorite") }
-                            )
-                        }
-                    }
-
-                    HorizontalDivider()
-
-                    if (isBlacklisted) {
-                        Card(
-                            onClick = {
-                                showDialog = true
-                                scope.launch { sheetState.hide() }
-                                    .invokeOnCompletion { showSheet = false }
-                            }
-                        ) {
-                            ListItem(
-                                headlineContent = { Text("Unblacklist") }
-                            )
-                        }
-                    } else {
-                        Card(
-                            onClick = {
-                                showDialog = true
-                                scope.launch { sheetState.hide() }
-                                    .invokeOnCompletion { showSheet = false }
-                            }
-                        ) {
-                            ListItem(
-                                headlineContent = { Text("Blacklist") }
-                            )
-                        }
-                    }
-                }
-            }
+            ModelOptionsSheet(
+                models = models,
+                database = database,
+                blacklisted = blacklisted,
+                isBlacklisted = isBlacklisted,
+                showSheet = showSheet,
+                onDialogDismiss = { showSheet = false },
+                onNavigateToDetail = onNavigateToDetail,
+            )
 
             ContextMenu(
                 isBlacklisted = isBlacklisted,
@@ -362,7 +265,9 @@ fun LazyGridScope.modelItems(
                     onLongClick = { showSheet = true },
                     showNsfw = showNsfw,
                     blurStrength = blurStrength.dp,
-                    isFavorite = database.any { m -> m.id == models.id },
+                    isFavorite = database
+                        .filterIsInstance<FavoriteModel.Model>()
+                        .any { m -> m.id == models.id },
                     isBlacklisted = isBlacklisted,
                     checkIfImageUrlIsBlacklisted = { url ->
                         blacklisted.none { b -> b.imageUrl == url }
@@ -596,6 +501,7 @@ private fun SearchAppBar(
     onNavigateToDetail: (String) -> Unit,
     onNavigateToFavorites: () -> Unit,
     onNavigateToSettings: () -> Unit,
+    onNavigateToQrCode: () -> Unit,
     showBlur: Boolean,
     modifier: Modifier = Modifier,
 ) {
@@ -633,6 +539,10 @@ private fun SearchAppBar(
                                 onClick = { onShowSearch(true) }
                             ) { Icon(Icons.Default.Search, null) }
                         }
+
+                        IconButton(
+                            onClick = onNavigateToQrCode
+                        ) { Icon(Icons.Default.QrCodeScanner, null) }
 
                         IconButton(
                             onClick = onNavigateToSettings

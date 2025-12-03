@@ -6,6 +6,7 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
@@ -22,12 +23,18 @@ import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.CornerSize
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowRightAlt
 import androidx.compose.material.icons.automirrored.filled.Sort
 import androidx.compose.material.icons.filled.ArrowUpward
 import androidx.compose.material.icons.filled.Clear
+import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.Image
+import androidx.compose.material.icons.filled.Preview
+import androidx.compose.material.icons.filled.Share
+import androidx.compose.material3.Card
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.DockedSearchBar
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -37,20 +44,26 @@ import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.ListItem
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SearchBarDefaults
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.saveable.rememberSaveableStateHolder
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
@@ -63,9 +76,12 @@ import com.programmersbox.common.DataStore
 import com.programmersbox.common.SheetDetails
 import com.programmersbox.common.adaptiveGridCell
 import com.programmersbox.common.components.ImageSheet
+import com.programmersbox.common.components.rememberModelOptionsScope
 import com.programmersbox.common.home.CardContent
 import com.programmersbox.common.ifTrue
 import com.programmersbox.common.isScrollingUp
+import com.programmersbox.common.qrcode.QrCodeType
+import com.programmersbox.common.qrcode.ShareViaQrCode
 import dev.chrisbanes.haze.HazeProgressive
 import dev.chrisbanes.haze.HazeState
 import dev.chrisbanes.haze.LocalHazeStyle
@@ -270,9 +286,19 @@ fun FavoritesUI(
             ) { model ->
                 when (model) {
                     is FavoriteModel.Creator -> {
+                        var showSheet by remember { mutableStateOf(false) }
+
+                        FavoritesCreatorOptionsSheet(
+                            models = model,
+                            showSheet = showSheet,
+                            onDialogDismiss = { showSheet = false },
+                            onNavigateToUser = onNavigateToUser,
+                        )
+
                         CreatorItem(
                             models = model,
                             onClick = { onNavigateToUser(model.name) },
+                            onLongClick = { showSheet = true },
                             modifier = Modifier.animateItem()
                         )
                     }
@@ -339,11 +365,21 @@ fun FavoritesUI(
                     }
 
                     is FavoriteModel.Model -> {
+                        var showSheet by remember { mutableStateOf(false) }
+
+                        FavoritesModelOptionsSheet(
+                            models = model,
+                            showSheet = showSheet,
+                            onDialogDismiss = { showSheet = false },
+                            onNavigateToDetail = onNavigateToDetail,
+                        )
+
                         ModelItem(
                             models = model,
                             onClick = { onNavigateToDetail(model.id) },
                             showNsfw = showNsfw,
                             blurStrength = blurStrength.dp,
+                            onLongClick = { showSheet = true },
                             modifier = Modifier.animateItem()
                         )
                     }
@@ -364,6 +400,7 @@ fun FavoritesUI(
 private fun CreatorItem(
     models: FavoriteModel.Creator,
     onClick: () -> Unit,
+    onLongClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     CoverCard(
@@ -374,6 +411,7 @@ private fun CreatorItem(
         showNsfw = true,
         blurStrength = 0.dp,
         onClick = onClick,
+        onLongClick = onLongClick,
         modifier = modifier.size(
             width = ComposableUtils.IMAGE_WIDTH,
             height = ComposableUtils.IMAGE_HEIGHT
@@ -410,6 +448,7 @@ private fun ModelItem(
     showNsfw: Boolean,
     blurStrength: Dp,
     onClick: () -> Unit,
+    onLongClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     CoverCard(
@@ -420,6 +459,7 @@ private fun ModelItem(
         showNsfw = showNsfw,
         blurStrength = blurStrength,
         onClick = onClick,
+        onLongClick = onLongClick,
         modifier = modifier.size(
             width = ComposableUtils.IMAGE_WIDTH,
             height = ComposableUtils.IMAGE_HEIGHT
@@ -452,5 +492,264 @@ fun CoverCard(
             showNsfw = showNsfw,
             blurStrength = blurStrength
         )
+    }
+}
+
+@Composable
+fun CoverCard(
+    imageUrl: String,
+    name: String,
+    type: String,
+    isNsfw: Boolean,
+    showNsfw: Boolean,
+    blurStrength: Dp,
+    modifier: Modifier = Modifier,
+    onClick: () -> Unit = {},
+    onLongClick: () -> Unit = {},
+) {
+    Surface(
+        tonalElevation = 4.dp,
+        shape = MaterialTheme.shapes.medium,
+        modifier = modifier
+            .clip(MaterialTheme.shapes.medium)
+            .combinedClickable(
+                onLongClick = onLongClick,
+                onClick = onClick
+            )
+    ) {
+        CardContent(
+            imageUrl = imageUrl,
+            name = name,
+            type = type,
+            isNsfw = isNsfw,
+            showNsfw = showNsfw,
+            blurStrength = blurStrength
+        )
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun FavoritesCreatorOptionsSheet(
+    models: FavoriteModel.Creator,
+    showSheet: Boolean,
+    onDialogDismiss: () -> Unit,
+    onNavigateToUser: (String) -> Unit,
+) {
+    if (showSheet) {
+        val dao = koinInject<FavoritesDao>()
+        val scope = rememberCoroutineScope()
+
+        val sheetState = rememberModalBottomSheetState(
+            skipPartiallyExpanded = true
+        )
+
+        val modelOptionsScope = rememberModelOptionsScope {
+            item {
+                Card(
+                    onClick = {
+                        onNavigateToUser(models.name)
+                        scope.launch { sheetState.hide() }
+                            .invokeOnCompletion { onDialogDismiss() }
+                    },
+                    shape = it
+                ) {
+                    ListItem(
+                        leadingContent = { Icon(Icons.Default.Preview, null) },
+                        headlineContent = { Text("Open") }
+                    )
+                }
+            }
+
+            item {
+                var showQrCode by remember { mutableStateOf(false) }
+
+                if (showQrCode) {
+                    ShareViaQrCode(
+                        title = models.name,
+                        url = "https://civitai.com/models/${models.id}",
+                        qrCodeType = QrCodeType.User,
+                        id = models.id.toString(),
+                        username = models.name,
+                        imageUrl = models.imageUrl.orEmpty(),
+                        onClose = { showQrCode = false }
+                    )
+                }
+                Card(
+                    onClick = { showQrCode = true },
+                    shape = it
+                ) {
+                    ListItem(
+                        leadingContent = { Icon(Icons.Default.Share, null) },
+                        headlineContent = { Text("Share") }
+                    )
+                }
+            }
+
+            item {
+                Card(
+                    onClick = {
+                        scope.launch {
+                            dao.removeModel(models.id)
+                            sheetState.hide()
+                        }.invokeOnCompletion { onDialogDismiss() }
+                    },
+                    shape = it
+                ) {
+                    ListItem(
+                        leadingContent = { Icon(Icons.Default.Favorite, null) },
+                        headlineContent = { Text("Unfavorite") }
+                    )
+                }
+            }
+        }
+
+        ModalBottomSheet(
+            onDismissRequest = onDialogDismiss,
+            sheetState = sheetState,
+            containerColor = MaterialTheme.colorScheme.surface,
+        ) {
+            TopAppBar(
+                title = { Text(models.name) },
+            )
+
+            val stateHolder = rememberSaveableStateHolder()
+
+            for (index in 0 until modelOptionsScope.size) {
+                stateHolder.SaveableStateProvider(index) {
+                    modelOptionsScope[index](
+                        when (index) {
+                            0 -> MaterialTheme.shapes.medium.copy(
+                                bottomStart = CornerSize(0.dp),
+                                bottomEnd = CornerSize(0.dp)
+                            )
+
+                            modelOptionsScope.size - 1 -> MaterialTheme.shapes.medium.copy(
+                                topStart = CornerSize(0.dp),
+                                topEnd = CornerSize(0.dp)
+                            )
+
+                            else -> RoundedCornerShape(0.dp)
+                        }
+                    )
+                    if (index < modelOptionsScope.size - 1) {
+                        HorizontalDivider()
+                    }
+                }
+            }
+        }
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun FavoritesModelOptionsSheet(
+    models: FavoriteModel.Model,
+    showSheet: Boolean,
+    onDialogDismiss: () -> Unit,
+    onNavigateToDetail: (Long) -> Unit,
+) {
+    if (showSheet) {
+        val dao = koinInject<FavoritesDao>()
+        val scope = rememberCoroutineScope()
+
+        val sheetState = rememberModalBottomSheetState(
+            skipPartiallyExpanded = true
+        )
+
+        val modelOptionsScope = rememberModelOptionsScope {
+            item {
+                Card(
+                    onClick = {
+                        onNavigateToDetail(models.id)
+                        scope.launch { sheetState.hide() }
+                            .invokeOnCompletion { onDialogDismiss() }
+                    },
+                    shape = it
+                ) {
+                    ListItem(
+                        leadingContent = { Icon(Icons.Default.Preview, null) },
+                        headlineContent = { Text("Open") }
+                    )
+                }
+            }
+
+            item {
+                var showQrCode by remember { mutableStateOf(false) }
+
+                if (showQrCode) {
+                    ShareViaQrCode(
+                        title = models.name,
+                        url = "https://civitai.com/models/${models.id}",
+                        qrCodeType = QrCodeType.Model,
+                        id = models.id.toString(),
+                        username = "",
+                        imageUrl = models.imageUrl.orEmpty(),
+                        onClose = { showQrCode = false }
+                    )
+                }
+                Card(
+                    onClick = { showQrCode = true },
+                    shape = it
+                ) {
+                    ListItem(
+                        leadingContent = { Icon(Icons.Default.Share, null) },
+                        headlineContent = { Text("Share") }
+                    )
+                }
+            }
+
+            item {
+                Card(
+                    onClick = {
+                        scope.launch {
+                            dao.removeModel(models.id)
+                            sheetState.hide()
+                        }.invokeOnCompletion { onDialogDismiss() }
+                    },
+                    shape = it
+                ) {
+                    ListItem(
+                        leadingContent = { Icon(Icons.Default.Favorite, null) },
+                        headlineContent = { Text("Unfavorite") }
+                    )
+                }
+            }
+        }
+
+        ModalBottomSheet(
+            onDismissRequest = onDialogDismiss,
+            sheetState = sheetState,
+            containerColor = MaterialTheme.colorScheme.surface,
+        ) {
+            TopAppBar(
+                title = { Text(models.name) },
+            )
+
+            val stateHolder = rememberSaveableStateHolder()
+
+            for (index in 0 until modelOptionsScope.size) {
+                stateHolder.SaveableStateProvider(index) {
+                    modelOptionsScope[index](
+                        when (index) {
+                            0 -> MaterialTheme.shapes.medium.copy(
+                                bottomStart = CornerSize(0.dp),
+                                bottomEnd = CornerSize(0.dp)
+                            )
+
+                            modelOptionsScope.size - 1 -> MaterialTheme.shapes.medium.copy(
+                                topStart = CornerSize(0.dp),
+                                topEnd = CornerSize(0.dp)
+                            )
+
+                            else -> RoundedCornerShape(0.dp)
+                        }
+                    )
+                    if (index < modelOptionsScope.size - 1) {
+                        HorizontalDivider()
+                    }
+                }
+            }
+        }
     }
 }

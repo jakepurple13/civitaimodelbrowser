@@ -25,6 +25,7 @@ import com.programmersbox.common.cmpModules
 import com.programmersbox.common.createPlatformModule
 import com.programmersbox.common.getDatabaseBuilder
 import com.programmersbox.common.qrcode.QrCodeRepository
+import com.programmersbox.desktop.BuildKonfig
 import com.programmersbox.resources.Res
 import com.programmersbox.resources.civitai_logo
 import kotlinx.coroutines.launch
@@ -63,7 +64,7 @@ fun main() {
                     createPlatformModule(),
                     module {
                         //single { producePath() }
-                        factory { ApplicationInfo("1.0.0") }
+                        factory { ApplicationInfo(BuildKonfig.VERSION_NAME) }
                         single {
                             AppDirs {
                                 appName = "CivitAiModelBrowser"

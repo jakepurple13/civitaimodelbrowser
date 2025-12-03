@@ -25,6 +25,7 @@ class Network {
         prettyPrint = true
         ignoreUnknownKeys = true
         coerceInputValues = true
+        explicitNulls = false
     }
 
     val client: HttpClient = HttpClient {
@@ -35,13 +36,12 @@ class Network {
         defaultRequest {
             url(URL)
             bearerAuth(BuildKonfig.API_KEY) //Token goes here!
+            contentType(ContentType.Application.Json)
         }
     }
 
     suspend inline fun <reified T> fetchRequest(url: String) = runCatching {
-        client.get(url) {
-            contentType(ContentType.Application.Json)
-        }.body<T>()
+        client.get(url).body<T>()
     }
 
     suspend fun getModels(
@@ -49,9 +49,8 @@ class Network {
         perPage: Int = PAGE_LIMIT,
         includeNsfw: Boolean = true,
     ) = runCatching {
-        client.get("models?page=$page&sort=Newest&limit=$perPage&nsfw=$includeNsfw") {
-            contentType(ContentType.Application.Json)
-        }.body<CivitAi>()
+        client.get("models?page=$page&sort=Newest&limit=$perPage&nsfw=$includeNsfw")
+            .body<CivitAi>()
     }
 
     suspend fun getModels(
@@ -60,9 +59,8 @@ class Network {
         perPage: Int = PAGE_LIMIT,
         includeNsfw: Boolean = true,
     ) = runCatching {
-        client.get("models?page=$page&sort=Newest&limit=$perPage&nsfw=$includeNsfw&username=$creatorUsername") {
-            contentType(ContentType.Application.Json)
-        }.body<CivitAi>()
+        client.get("models?page=$page&sort=Newest&limit=$perPage&nsfw=$includeNsfw&username=$creatorUsername")
+            .body<CivitAi>()
     }
 
     suspend fun searchModels(
@@ -71,15 +69,13 @@ class Network {
         perPage: Int = PAGE_LIMIT,
         includeNsfw: Boolean = true,
     ) = runCatching {
-        client.get("models?&sort=Newest&limit=$perPage&nsfw=$includeNsfw&query=$searchQuery".encodeURLQueryComponent()) {
-            contentType(ContentType.Application.Json)
-        }.body<CivitAi>()
+        client.get("models?&sort=Newest&limit=$perPage&nsfw=$includeNsfw&query=$searchQuery".encodeURLQueryComponent())
+            .body<CivitAi>()
     }
 
     suspend fun fetchModel(id: String) = runCatching {
-        client.get("models/$id") {
-            contentType(ContentType.Application.Json)
-        }.body<Models>()
+        client.get("models/$id")
+            .body<Models>()
     }
 
     suspend fun fetchAllImagesByModel(
@@ -89,8 +85,7 @@ class Network {
         includeNsfw: Boolean = true,
 
         ) = runCatching {
-        client.get("images?limit=$perPage&page=$page&modelId=$modelId${if (!includeNsfw) "&nsfw=None" else ""}") {
-            contentType(ContentType.Application.Json)
-        }.body<CivitAiCustomImages>()
+        client.get("images?limit=$perPage&page=$page&modelId=$modelId${if (!includeNsfw) "&nsfw=None" else ""}")
+            .body<CivitAiCustomImages>()
     }
 }

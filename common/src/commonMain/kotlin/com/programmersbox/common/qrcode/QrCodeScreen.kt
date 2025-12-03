@@ -6,6 +6,7 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -16,6 +17,9 @@ import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.FlashOff
+import androidx.compose.material.icons.filled.FlashOn
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CenterAlignedTopAppBar
@@ -23,6 +27,8 @@ import androidx.compose.material3.ElevatedButton
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.FilledTonalButton
+import androidx.compose.material3.FilledTonalIconButton
+import androidx.compose.material3.Icon
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
@@ -262,47 +268,66 @@ fun ScanQrCode(
                     .padding(padding)
                     .fillMaxWidth()
             ) {
-                ScannerWithPermissions(
-                    onScanned = { scan ->
-                        runCatching { Json.decodeFromString<QrCodeInfo>(scan) }
-                            .onSuccess {
-                                viewModel.qrCodeInfo = it
-                                scope.launch { sheetState.expand() }
-                            }
-                            .onFailure { it.printStackTrace() }
-
-                        false
-                    },
-                    types = listOf(CodeType.QR),
-                    cameraPosition = CameraPosition.BACK,
-                    permissionDeniedContent = { permissionState ->
-                        Column(
-                            horizontalAlignment = Alignment.CenterHorizontally,
-                            modifier = Modifier
-                                .align(Alignment.CenterHorizontally)
-                                .sizeIn(maxWidth = 250.dp, maxHeight = 250.dp)
-                                .clip(MaterialTheme.shapes.medium)
-                                .border(
-                                    1.dp,
-                                    MaterialTheme.colorScheme.onSurface,
-                                    MaterialTheme.shapes.medium
-                                )
-                        ) {
-                            Text(
-                                text = "Camera is required for QR Code scanning",
-                                textAlign = TextAlign.Center,
-                                modifier = Modifier.padding(6.dp)
-                            )
-                            ElevatedButton(
-                                onClick = { permissionState.goToSettings() }
-                            ) { Text("Open Settings") }
-                        }
-                    },
-                    modifier = Modifier
+                Box(
+                    Modifier
                         .align(Alignment.CenterHorizontally)
                         .sizeIn(maxWidth = 250.dp, maxHeight = 250.dp)
                         .clip(MaterialTheme.shapes.medium)
-                )
+                ) {
+                    var torchState by remember { mutableStateOf(false) }
+                    ScannerWithPermissions(
+                        onScanned = { scan ->
+                            runCatching { Json.decodeFromString<QrCodeInfo>(scan) }
+                                .onSuccess {
+                                    viewModel.qrCodeInfo = it
+                                    scope.launch { sheetState.expand() }
+                                }
+                                .onFailure { it.printStackTrace() }
+
+                            false
+                        },
+                        types = listOf(CodeType.QR),
+                        cameraPosition = CameraPosition.BACK,
+                        enableTorch = torchState,
+                        permissionDeniedContent = { permissionState ->
+                            Column(
+                                horizontalAlignment = Alignment.CenterHorizontally,
+                                modifier = Modifier
+                                    .sizeIn(maxWidth = 250.dp, maxHeight = 250.dp)
+                                    .clip(MaterialTheme.shapes.medium)
+                                    .border(
+                                        1.dp,
+                                        MaterialTheme.colorScheme.onSurface,
+                                        MaterialTheme.shapes.medium
+                                    )
+                            ) {
+                                Text(
+                                    text = "Camera is required for QR Code scanning",
+                                    textAlign = TextAlign.Center,
+                                    modifier = Modifier.padding(6.dp)
+                                )
+                                ElevatedButton(
+                                    onClick = { permissionState.goToSettings() }
+                                ) { Text("Open Settings") }
+                            }
+                        },
+                        modifier = Modifier
+                            .sizeIn(maxWidth = 250.dp, maxHeight = 250.dp)
+                            .clip(MaterialTheme.shapes.medium)
+                    )
+
+                    FilledTonalIconButton(
+                        onClick = { torchState = !torchState },
+                        modifier = Modifier
+                            .align(Alignment.TopEnd)
+                            .padding(8.dp)
+                    ) {
+                        Icon(
+                            if (torchState) Icons.Default.FlashOn else Icons.Default.FlashOff,
+                            null
+                        )
+                    }
+                }
 
                 val filePicker = rememberFilePickerLauncher(
                     type = FileKitType.Image

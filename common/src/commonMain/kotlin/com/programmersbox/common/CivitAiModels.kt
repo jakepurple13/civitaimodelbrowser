@@ -61,7 +61,7 @@ data class ModelVersion(
     val baseModel: String,
     //val baseModelType: String?,
     val description: String? = null,
-    val images: List<ModelImage>,
+    val images: List<ModelImage> = emptyList(),
     val downloadUrl: String? = null,
 ) {
     fun parsedDescription() = description?.let { Jsoup.parse(it).text() }

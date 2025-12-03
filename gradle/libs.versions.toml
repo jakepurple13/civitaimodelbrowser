@@ -1,4 +1,6 @@
 [versions]
+appVersion = "3.2.3"
+
 browser = "1.9.0"
 composeScrollbars = "1.0.4"
 haze = "1.7.1"
@@ -10,7 +12,7 @@ ktor-version = "3.3.3"
 kotlinx-datetime = "0.7.1"
 datastore-version = "1.2.0"
 navigationCompose = "2.9.1"
-lifecycleViewmodelCompose = "2.10.0-alpha05"
+lifecycleViewmodelCompose = "2.10.0-alpha06"
 paging-version = "3.3.6"
 kamel-image = "1.0.8"
 kotlinx-coroutines-core = "1.10.2"
@@ -18,8 +20,8 @@ sonner = "0.3.8"
 androidx-material = "1.13.0"
 
 ksp = "2.3.2"
-androidx-room = "2.8.3"
-sqlite = "2.6.1"
+androidx-room = "2.8.4"
+sqlite = "2.6.2"
 
 cmp-nav3 = "1.0.0-alpha06"
 cmp-navevent = "1.0.0-rc01"
@@ -31,9 +33,9 @@ koin = "4.2.0-alpha3"
 filekit = "0.12.0"
 
 qrose = "1.0.1"
-scanner = "0.5.0"
-javase = "3.5.3"
-coreVersion = "3.5.3"
+scanner = "0.6.0"
+javase = "3.5.4"
+coreVersion = "3.5.4"
 barcodeScanning = "17.3.0"
 
 [plugins]
@@ -48,7 +50,7 @@ room = { id = "androidx.room", version.ref = "androidx-room" }
 androidx-appcompat = { module = "androidx.appcompat:appcompat", version = "1.7.1" }
 androidx-browser = { module = "androidx.browser:browser", version.ref = "browser" }
 androidx-core = { module = "androidx.core:core-ktx", version = "1.17.0" }
-androidx-activity-compose = "androidx.activity:activity-compose:1.11.0"
+androidx-activity-compose = "androidx.activity:activity-compose:1.12.0"
 composeScrollbars = { module = "com.github.GIGAMOLE:ComposeScrollbars", version.ref = "composeScrollbars" }
 datastore-core = { module = "androidx.datastore:datastore-core", version.ref = "datastore-version" }
 datastore-preferences = { module = "androidx.datastore:datastore-preferences-core", version.ref = "datastore-version" }

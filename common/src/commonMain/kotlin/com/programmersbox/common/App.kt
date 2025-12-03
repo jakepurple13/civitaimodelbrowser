@@ -225,7 +225,16 @@ fun cmpModules() = module {
             onNavigateToDetail = { id -> backStack.add(Screen.Detail(id)) },
             onNavigateToFavorites = { backStack.add(Screen.Favorites) },
             onNavigateToSettings = { backStack.add(Screen.Settings) },
-            onNavigateToQrCode = { backStack.add(Screen.QrCode) }
+            onNavigateToQrCode = { backStack.add(Screen.QrCode) },
+            onNavigateToUser = { username -> backStack.add(Screen.User(username)) },
+            onNavigateToDetailImages = { id, name ->
+                backStack.addAll(
+                    listOf(
+                        Screen.Detail(id.toString()),
+                        Screen.DetailsImage(id.toString(), name)
+                    )
+                )
+            }
         )
     }
 

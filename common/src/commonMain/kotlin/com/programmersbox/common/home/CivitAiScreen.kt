@@ -109,6 +109,8 @@ fun CivitAiScreen(
     onNavigateToFavorites: () -> Unit,
     onNavigateToSettings: () -> Unit,
     onNavigateToQrCode: () -> Unit,
+    onNavigateToUser: (String) -> Unit,
+    onNavigateToDetailImages: (Long, String) -> Unit,
 ) {
     val hazeState = remember { HazeState() }
     val db = koinInject<FavoritesDao>()
@@ -194,6 +196,8 @@ fun CivitAiScreen(
                     blurStrength = blurStrength,
                     database = database,
                     blacklisted = blacklisted,
+                    onNavigateToUser = onNavigateToUser,
+                    onNavigateToDetailImages = onNavigateToDetailImages,
                 )
             }
 
@@ -231,6 +235,8 @@ fun LazyGridScope.modelItems(
     blurStrength: Float,
     database: List<FavoriteModel>,
     blacklisted: List<BlacklistedItemRoom>,
+    onNavigateToUser: ((String) -> Unit)? = null,
+    onNavigateToDetailImages: ((Long, String) -> Unit)? = null,
 ) {
     items(
         count = lazyPagingItems.itemCount,
@@ -249,6 +255,8 @@ fun LazyGridScope.modelItems(
                 showSheet = showSheet,
                 onDialogDismiss = { showSheet = false },
                 onNavigateToDetail = onNavigateToDetail,
+                onNavigateToUser = onNavigateToUser,
+                onNavigateToDetailImages = onNavigateToDetailImages,
             )
 
             ContextMenu(

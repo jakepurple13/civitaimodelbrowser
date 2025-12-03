@@ -6,6 +6,8 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Block
 import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.material.icons.filled.Image
+import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Preview
 import androidx.compose.material.icons.filled.Share
 import androidx.compose.material3.Card
@@ -32,13 +34,11 @@ import com.programmersbox.common.db.BlacklistedItemRoom
 import com.programmersbox.common.db.FavoriteModel
 import com.programmersbox.common.db.FavoriteType
 import com.programmersbox.common.db.FavoritesDao
-import com.programmersbox.common.db.toDb
 import com.programmersbox.common.home.BlacklistHandling
 import com.programmersbox.common.qrcode.QrCodeType
 import com.programmersbox.common.qrcode.ShareViaQrCode
 import kotlinx.coroutines.launch
 import org.koin.compose.koinInject
-import kotlin.random.Random
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -50,6 +50,8 @@ fun ModelOptionsSheet(
     showSheet: Boolean,
     onDialogDismiss: () -> Unit,
     onNavigateToDetail: (String) -> Unit,
+    onNavigateToUser: ((String) -> Unit)? = null,
+    onNavigateToDetailImages: ((Long, String) -> Unit)? = null,
 ) {
     if (showSheet) {
         val dao = koinInject<FavoritesDao>()
@@ -122,6 +124,42 @@ fun ModelOptionsSheet(
                 }
             }
 
+            onNavigateToUser?.let { onNav ->
+                item {
+                    Card(
+                        onClick = {
+                            onNav(models.creator?.username.orEmpty())
+                            scope.launch { sheetState.hide() }
+                                .invokeOnCompletion { onDialogDismiss() }
+                        },
+                        shape = it
+                    ) {
+                        ListItem(
+                            leadingContent = { Icon(Icons.Default.Person, null) },
+                            headlineContent = { Text("Open Creator") }
+                        )
+                    }
+                }
+            }
+
+            onNavigateToDetailImages?.let { onNav ->
+                item {
+                    Card(
+                        onClick = {
+                            onNav(models.id, models.name)
+                            scope.launch { sheetState.hide() }
+                                .invokeOnCompletion { onDialogDismiss() }
+                        },
+                        shape = it
+                    ) {
+                        ListItem(
+                            leadingContent = { Icon(Icons.Default.Image, null) },
+                            headlineContent = { Text("Open Images") }
+                        )
+                    }
+                }
+            }
+
             item {
                 var showQrCode by remember { mutableStateOf(false) }
 
@@ -160,7 +198,7 @@ fun ModelOptionsSheet(
                     ) {
                         ListItem(
                             leadingContent = { Icon(Icons.Default.Favorite, null) },
-                            headlineContent = { Text("Unfavorite") }
+                            headlineContent = { Text("Unfavorite Model") }
                         )
                     }
                 } else {
@@ -184,52 +222,8 @@ fun ModelOptionsSheet(
                     ) {
                         ListItem(
                             leadingContent = { Icon(Icons.Default.Favorite, null) },
-                            headlineContent = { Text("Favorite") }
+                            headlineContent = { Text("Favorite Model") }
                         )
-                    }
-                }
-            }
-
-            if (modelImage != null) {
-                item {
-                    if (database.any { m -> m.imageUrl == modelImage.url }) {
-                        Card(
-                            onClick = {
-                                scope.launch {
-                                    dao.removeImage(modelImage.url)
-                                    sheetState.hide()
-                                }.invokeOnCompletion { onDialogDismiss() }
-                            },
-                            shape = it
-                        ) {
-                            ListItem(
-                                leadingContent = { Icon(Icons.Default.Favorite, null) },
-                                headlineContent = { Text("Unfavorite Image") }
-                            )
-                        }
-                    } else {
-                        Card(
-                            onClick = {
-                                scope.launch {
-                                    dao.addFavorite(
-                                        id = modelImage.id?.toLongOrNull() ?: Random.nextLong(),
-                                        name = modelImage.meta?.model.orEmpty(),
-                                        imageMetaDb = modelImage.meta?.toDb(),
-                                        nsfw = modelImage.nsfw.canNotShow(),
-                                        imageUrl = modelImage.url,
-                                        favoriteType = FavoriteType.Image,
-                                        modelId = modelImage.id?.toLongOrNull() ?: models.id
-                                    )
-                                    sheetState.hide()
-                                }.invokeOnCompletion { onDialogDismiss() }
-                            },
-                            shape = it
-                        ) {
-                            ListItem(
-                                leadingContent = { Icon(Icons.Default.Favorite, null) },
-                                headlineContent = { Text("Favorite Image") }
-                            )
-                        }
                     }
                 }
             }

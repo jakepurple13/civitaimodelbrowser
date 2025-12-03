@@ -164,7 +164,7 @@ fun CivitAiScreen(
         },
         floatingActionButton = {
             AnimatedVisibility(
-                visible = lazyGridState.isScrollingUp() && lazyGridState.firstVisibleItemIndex > 0,
+                visible = lazyGridState.isScrollingUp(),
                 enter = fadeIn() + slideInHorizontally { it },
                 exit = slideOutHorizontally { it } + fadeOut()
             ) {

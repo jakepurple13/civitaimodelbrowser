@@ -104,7 +104,6 @@ import org.koin.compose.viewmodel.koinViewModel
 @Composable
 fun CivitAiScreen(
     viewModel: CivitAiViewModel = koinViewModel(),
-    searchViewModel: CivitAiSearchViewModel = koinViewModel(),
     onNavigateToDetail: (String) -> Unit,
     onNavigateToFavorites: () -> Unit,
     onNavigateToSettings: () -> Unit,
@@ -129,24 +128,15 @@ fun CivitAiScreen(
         onRefresh = { lazyPagingItems.refresh() }
     )
 
-    LaunchedEffect(searchViewModel.showSearch) {
-        if (!searchViewModel.showSearch) {
-            searchViewModel.searchQuery = ""
-            searchViewModel.onSearch("")
-        }
-    }
-
     val hazeStyle = LocalHazeStyle.current
 
     Scaffold(
         topBar = {
             SearchAppBar(
-                viewModel = searchViewModel,
                 database = database.filterIsInstance<FavoriteModel.Model>(),
                 showNsfw = showNsfw,
                 blurStrength = blurStrength,
                 blacklisted = blacklisted,
-                onShowSearch = { searchViewModel.showSearch = it },
                 showBlur = showBlur,
                 onNavigateToFavorites = onNavigateToFavorites,
                 onNavigateToSettings = onNavigateToSettings,
@@ -507,12 +497,11 @@ fun CardContent(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun SearchAppBar(
-    viewModel: CivitAiSearchViewModel,
+    viewModel: CivitAiSearchViewModel = koinViewModel(),
     database: List<FavoriteModel>,
     blacklisted: List<BlacklistedItemRoom>,
     showNsfw: Boolean,
     blurStrength: Float,
-    onShowSearch: (Boolean) -> Unit,
     onNavigateToDetail: (String) -> Unit,
     onNavigateToFavorites: () -> Unit,
     onNavigateToSettings: () -> Unit,
@@ -522,6 +511,13 @@ private fun SearchAppBar(
     showBlur: Boolean,
     modifier: Modifier = Modifier,
 ) {
+    LaunchedEffect(viewModel.showSearch) {
+        if (!viewModel.showSearch) {
+            viewModel.searchQuery = ""
+            viewModel.onSearch("")
+        }
+    }
+
     val lazyPagingItems = viewModel.pager.collectAsLazyPagingItems()
     SearchBar(
         expanded = viewModel.showSearch,
@@ -553,7 +549,7 @@ private fun SearchAppBar(
 
                         if (showRefreshButton) {
                             IconButton(
-                                onClick = { onShowSearch(true) }
+                                onClick = { viewModel.showSearch = true }
                             ) { Icon(Icons.Default.Search, null) }
                         }
 

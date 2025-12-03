@@ -152,6 +152,8 @@ fun CivitAiScreen(
                 onNavigateToSettings = onNavigateToSettings,
                 onNavigateToDetail = onNavigateToDetail,
                 onNavigateToQrCode = onNavigateToQrCode,
+                onNavigateToUser = onNavigateToUser,
+                onNavigateToDetailImages = onNavigateToDetailImages,
                 modifier = Modifier.ifTrue(showBlur) {
                     hazeEffect(hazeState) {
                         progressive = HazeProgressive.verticalGradient(
@@ -515,6 +517,8 @@ private fun SearchAppBar(
     onNavigateToFavorites: () -> Unit,
     onNavigateToSettings: () -> Unit,
     onNavigateToQrCode: () -> Unit,
+    onNavigateToUser: (String) -> Unit,
+    onNavigateToDetailImages: (Long, String) -> Unit,
     showBlur: Boolean,
     modifier: Modifier = Modifier,
 ) {
@@ -615,6 +619,8 @@ private fun SearchAppBar(
                 blurStrength = blurStrength,
                 database = database,
                 blacklisted = blacklisted,
+                onNavigateToUser = onNavigateToUser,
+                onNavigateToDetailImages = onNavigateToDetailImages,
             )
         }
     }

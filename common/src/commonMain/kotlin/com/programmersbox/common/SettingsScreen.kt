@@ -252,6 +252,11 @@ fun SettingsScreen(
                 remember { getPlatformName() },
                 modifier = Modifier.align(Alignment.CenterHorizontally)
             )
+
+            Text(
+                koinInject<ApplicationInfo>().versionName,
+                modifier = Modifier.align(Alignment.CenterHorizontally)
+            )
         }
     }
 }

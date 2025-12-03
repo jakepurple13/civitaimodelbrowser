@@ -516,6 +516,7 @@ private fun ImageCard(
                 LoadingImage(
                     imageUrl = images.url,
                     name = images.url,
+                    hash = images.hash,
                     isNsfw = images.nsfw.canNotShow(),
                     modifier = Modifier.let {
                         if (!showNsfw && images.nsfw.canNotShow()) {

@@ -1,6 +1,7 @@
 package com.programmersbox.civitaimodelbrowser
 
 import android.app.Application
+import com.programmersbox.common.ApplicationInfo
 import com.programmersbox.common.cmpModules
 import com.programmersbox.common.createPlatformModule
 import com.programmersbox.common.getDatabaseBuilder
@@ -19,6 +20,7 @@ class CivitApplication : Application() {
                 module {
                     single { getDatabaseBuilder(get()) }
                     single<() -> String> { { filesDir.resolve("androidx.preferences_pb").absolutePath } }
+                    factory { ApplicationInfo(BuildConfig.VERSION_NAME) }
                     singleOf(::QrCodeRepository)
                 },
                 cmpModules(),

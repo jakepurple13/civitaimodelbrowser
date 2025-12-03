@@ -78,6 +78,8 @@ kotlin {
             api(libs.filekit.core)
             api(libs.filekit.dialogs)
             api(libs.filekit.dialogs.compose)
+
+            implementation("io.github.brys0:blurhash:0.0-4-ALPHA")
         }
 
         commonTest.dependencies {

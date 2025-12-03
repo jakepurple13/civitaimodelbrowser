@@ -75,7 +75,9 @@ class CivitAiModelImagesViewModel(
                 nsfw = modelImage.nsfwLevel.canNotShow(),
                 imageUrl = modelImage.url,
                 favoriteType = FavoriteType.Image,
-                modelId = modelId?.toLongOrNull() ?: modelImage.id?.toLongOrNull() ?: Random.nextLong()
+                modelId = modelId?.toLongOrNull() ?: modelImage.id?.toLongOrNull()
+                ?: Random.nextLong(),
+                hash = modelImage.hash
             )
         }
     }

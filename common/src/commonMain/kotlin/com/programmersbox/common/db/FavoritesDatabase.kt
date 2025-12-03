@@ -23,9 +23,10 @@ import kotlinx.serialization.json.Json
 
 @Database(
     entities = [FavoriteRoom::class, BlacklistedItemRoom::class],
-    version = 2,
+    version = 3,
     autoMigrations = [
-        AutoMigration(from = 1, to = 2)
+        AutoMigration(from = 1, to = 2),
+        AutoMigration(from = 2, to = 3),
     ]
 )
 
@@ -63,6 +64,7 @@ interface FavoritesDao {
         type: ModelType = ModelType.Other,
         nsfw: Boolean = false,
         imageUrl: String? = null,
+        hash: String? = null,
         favoriteType: FavoriteType = FavoriteType.Model,
         imageMetaDb: ImageMetaDb? = null,
         json: Json = Json {
@@ -79,6 +81,7 @@ interface FavoritesDao {
             type = type.name,
             nsfw = nsfw,
             imageUrl = imageUrl,
+            hash = hash,
             favoriteType = favoriteType,
             imageMeta = imageMetaDb?.let { json.encodeToString(it) },
             modelId = modelId
@@ -125,6 +128,7 @@ interface FavoritesDao {
                 type = type,
                 nsfw = nsfw,
                 modelType = favoriteType.name,
+                hash = hash,
             )
         }
 
@@ -137,6 +141,7 @@ interface FavoritesDao {
                 imageMetaDb = imageMeta?.let { json.decodeFromString(it) },
                 modelId = modelId,
                 modelType = favoriteType.name,
+                hash = hash,
             )
         }
 

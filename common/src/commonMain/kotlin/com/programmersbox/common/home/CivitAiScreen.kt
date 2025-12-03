@@ -343,6 +343,7 @@ private fun ModelItem(
         isFavorite = isFavorite,
         isBlacklisted = isBlacklisted,
         onLongClick = onLongClick,
+        blurHash = imageModel?.hash,
         modifier = modifier.size(
             width = ComposableUtils.IMAGE_WIDTH,
             height = ComposableUtils.IMAGE_HEIGHT
@@ -354,6 +355,7 @@ private fun ModelItem(
 @Composable
 fun CoverCard(
     imageUrl: String,
+    blurHash: String? = null,
     name: String,
     type: ModelType,
     isNsfw: Boolean,
@@ -383,7 +385,8 @@ fun CoverCard(
             isNsfw = isNsfw,
             isBlacklisted = isBlacklisted,
             showNsfw = showNsfw,
-            blurStrength = blurStrength
+            blurStrength = blurStrength,
+            blurHash = blurHash,
         )
     }
 }
@@ -398,6 +401,7 @@ fun CardContent(
     showNsfw: Boolean,
     blurStrength: Dp,
     isBlacklisted: Boolean = false,
+    blurHash: String? = null,
 ) {
     Box(
         modifier = Modifier.fillMaxSize(),
@@ -414,6 +418,7 @@ fun CardContent(
                 imageUrl = imageUrl,
                 isNsfw = isNsfw,
                 name = name,
+                hash = blurHash,
                 modifier = Modifier
                     .matchParentSize()
                     .let {

@@ -24,7 +24,7 @@ data class Models(
     val allowDerivatives: Boolean,
     val allowDifferentLicense: Boolean,
     val tags: List<String>,
-    val modelVersions: List<ModelVersion>,
+    val modelVersions: List<ModelVersion> = emptyList(),
     val creator: Creator? = null,
 ) {
     fun parsedDescription() = Jsoup.parse(description.orEmpty()).text()
@@ -76,6 +76,7 @@ data class ModelImage(
     val width: Int,
     val height: Int,
     val meta: ImageMeta? = null,
+    val hash: String? = null,
 )
 
 @Stable
@@ -97,6 +98,7 @@ data class CustomModelImage(
     val meta: ImageMeta? = null,
     val postId: Long? = null,
     val username: String? = null,
+    val hash: String? = null,
 )
 
 @Serializable

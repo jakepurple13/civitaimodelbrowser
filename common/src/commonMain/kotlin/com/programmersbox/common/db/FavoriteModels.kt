@@ -20,6 +20,7 @@ data class FavoriteRoom(
     val imageUrl: String? = null,
     val favoriteType: FavoriteType = FavoriteType.Model,
     val imageMeta: String? = null,
+    val hash: String? = null,
     val modelId: Long = id,
     val dateAdded: Long = Clock.System.now().toEpochMilliseconds(),
 )
@@ -71,6 +72,7 @@ sealed interface FavoriteModel {
         @SerialName("favorite_type")
         val type: String,
         val nsfw: Boolean,
+        val hash: String?,
         override val modelType: String = "Model",
         override val dateAdded: Long = Clock.System.now().toEpochMilliseconds(),
     ) : FavoriteModel
@@ -84,6 +86,7 @@ sealed interface FavoriteModel {
         val imageMetaDb: ImageMetaDb?,
         val nsfw: Boolean,
         val modelId: Long,
+        val hash: String?,
         override val modelType: String = "Image",
         override val dateAdded: Long = Clock.System.now().toEpochMilliseconds(),
     ) : FavoriteModel

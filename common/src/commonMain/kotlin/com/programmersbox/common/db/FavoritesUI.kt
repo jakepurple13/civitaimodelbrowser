@@ -360,6 +360,7 @@ fun FavoritesUI(
                             onClick = { sheetDetails = model },
                             showNsfw = showNsfw,
                             blurStrength = blurStrength.dp,
+                            blurHash = model.hash,
                             modifier = Modifier.animateItem()
                         )
                     }
@@ -380,6 +381,7 @@ fun FavoritesUI(
                             showNsfw = showNsfw,
                             blurStrength = blurStrength.dp,
                             onLongClick = { showSheet = true },
+                            blurHash = model.hash,
                             modifier = Modifier.animateItem()
                         )
                     }
@@ -412,6 +414,7 @@ private fun CreatorItem(
         blurStrength = 0.dp,
         onClick = onClick,
         onLongClick = onLongClick,
+        blurHash = null,
         modifier = modifier.size(
             width = ComposableUtils.IMAGE_WIDTH,
             height = ComposableUtils.IMAGE_HEIGHT
@@ -425,6 +428,7 @@ private fun ImageItem(
     showNsfw: Boolean,
     blurStrength: Dp,
     onClick: () -> Unit,
+    blurHash: String? = null,
     modifier: Modifier = Modifier,
 ) {
     CoverCard(
@@ -435,6 +439,7 @@ private fun ImageItem(
         showNsfw = showNsfw,
         blurStrength = blurStrength,
         onClick = onClick,
+        blurHash = blurHash,
         modifier = modifier.size(
             width = ComposableUtils.IMAGE_WIDTH,
             height = ComposableUtils.IMAGE_HEIGHT
@@ -449,6 +454,7 @@ private fun ModelItem(
     blurStrength: Dp,
     onClick: () -> Unit,
     onLongClick: () -> Unit,
+    blurHash: String?,
     modifier: Modifier = Modifier,
 ) {
     CoverCard(
@@ -460,6 +466,7 @@ private fun ModelItem(
         blurStrength = blurStrength,
         onClick = onClick,
         onLongClick = onLongClick,
+        blurHash = blurHash,
         modifier = modifier.size(
             width = ComposableUtils.IMAGE_WIDTH,
             height = ComposableUtils.IMAGE_HEIGHT
@@ -475,6 +482,7 @@ fun CoverCard(
     isNsfw: Boolean,
     showNsfw: Boolean,
     blurStrength: Dp,
+    blurHash: String?,
     modifier: Modifier = Modifier,
     onClick: () -> Unit = {},
 ) {
@@ -490,6 +498,7 @@ fun CoverCard(
             type = type,
             isNsfw = isNsfw,
             showNsfw = showNsfw,
+            blurHash = blurHash,
             blurStrength = blurStrength
         )
     }
@@ -503,6 +512,7 @@ fun CoverCard(
     isNsfw: Boolean,
     showNsfw: Boolean,
     blurStrength: Dp,
+    blurHash: String?,
     modifier: Modifier = Modifier,
     onClick: () -> Unit = {},
     onLongClick: () -> Unit = {},
@@ -523,7 +533,8 @@ fun CoverCard(
             type = type,
             isNsfw = isNsfw,
             showNsfw = showNsfw,
-            blurStrength = blurStrength
+            blurStrength = blurStrength,
+            blurHash = blurHash,
         )
     }
 }

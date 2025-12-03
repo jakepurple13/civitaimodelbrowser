@@ -17,6 +17,7 @@ import com.dokar.sonner.Toast
 import com.dokar.sonner.ToastType
 import com.dokar.sonner.Toaster
 import com.dokar.sonner.rememberToasterState
+import com.programmersbox.common.ApplicationInfo
 import com.programmersbox.common.LocalDatabaseDao
 import com.programmersbox.common.Network
 import com.programmersbox.common.UIShow
@@ -62,6 +63,7 @@ fun main() {
                     createPlatformModule(),
                     module {
                         //single { producePath() }
+                        factory { ApplicationInfo("1.0.0") }
                         single {
                             AppDirs {
                                 appName = "CivitAiModelBrowser"

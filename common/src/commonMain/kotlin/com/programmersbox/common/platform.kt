@@ -39,3 +39,8 @@ expect class DownloadHandler {
 }
 
 expect fun createPlatformModule(): Module
+
+@JvmInline
+value class ApplicationInfo(
+    val versionName: String
+)

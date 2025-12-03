@@ -242,6 +242,7 @@ private fun ImageCard(
                         imageUrl = images.url,
                         name = images.url,
                         isNsfw = images.nsfwLevel.canNotShow(),
+                        hash = images.hash,
                         modifier = Modifier.let {
                             if (!showNsfw && images.nsfwLevel.canNotShow()) {
                                 it.blur(nsfwBlurStrength.dp)

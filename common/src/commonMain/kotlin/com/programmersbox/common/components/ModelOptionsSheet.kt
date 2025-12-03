@@ -56,17 +56,21 @@ fun ModelOptionsSheet(
         val scope = rememberCoroutineScope()
         var showDialog by remember { mutableStateOf(false) }
 
+        val sheetState = rememberModalBottomSheetState(
+            skipPartiallyExpanded = true
+        )
+
         BlacklistHandling(
             blacklisted = blacklisted,
             modelId = models.id,
             name = models.name,
             nsfw = models.nsfw,
             showDialog = showDialog,
-            onDialogDismiss = { showDialog = false }
-        )
-
-        val sheetState = rememberModalBottomSheetState(
-            skipPartiallyExpanded = true
+            onDialogDismiss = {
+                showDialog = false
+                scope.launch { sheetState.hide() }
+                    .invokeOnCompletion { onDialogDismiss() }
+            }
         )
 
         val modelImage = remember(models) {
@@ -81,11 +85,7 @@ fun ModelOptionsSheet(
             item {
                 if (isBlacklisted) {
                     Card(
-                        onClick = {
-                            showDialog = true
-                            scope.launch { sheetState.hide() }
-                                .invokeOnCompletion { onDialogDismiss() }
-                        },
+                        onClick = { showDialog = true },
                         shape = it
                     ) {
                         ListItem(
@@ -95,11 +95,7 @@ fun ModelOptionsSheet(
                     }
                 } else {
                     Card(
-                        onClick = {
-                            showDialog = true
-                            scope.launch { sheetState.hide() }
-                                .invokeOnCompletion { onDialogDismiss() }
-                        },
+                        onClick = { showDialog = true },
                         shape = it
                     ) {
                         ListItem(

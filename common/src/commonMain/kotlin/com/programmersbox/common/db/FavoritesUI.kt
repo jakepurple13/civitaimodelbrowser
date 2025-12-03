@@ -200,6 +200,7 @@ fun FavoritesUI(
                                         }
                                     }
                                 },
+                                modifier = Modifier.fillMaxWidth()
                             )
                         },
                         colors = if (showBlur) SearchBarDefaults.colors(

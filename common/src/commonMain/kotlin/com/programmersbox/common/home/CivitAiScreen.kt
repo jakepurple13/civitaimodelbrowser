@@ -16,7 +16,6 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -26,6 +25,7 @@ import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.foundation.lazy.grid.LazyGridScope
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.rememberLazyGridState
+import androidx.compose.foundation.text.input.clearText
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.ArrowUpward
@@ -36,21 +36,24 @@ import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.AppBarWithSearch
 import androidx.compose.material3.AssistChipDefaults
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ElevatedAssistChip
+import androidx.compose.material3.ExpandedFullScreenSearchBar
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.SearchBar
 import androidx.compose.material3.SearchBarDefaults
+import androidx.compose.material3.SearchBarValue
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.material3.rememberSearchBarState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -132,7 +135,7 @@ fun CivitAiScreen(
 
     Scaffold(
         topBar = {
-            SearchAppBar(
+            AppSearchAppBar(
                 database = database.filterIsInstance<FavoriteModel.Model>(),
                 showNsfw = showNsfw,
                 blurStrength = blurStrength,
@@ -355,7 +358,6 @@ private fun ModelItem(
 @Composable
 fun CoverCard(
     imageUrl: String,
-    blurHash: String? = null,
     name: String,
     type: ModelType,
     isNsfw: Boolean,
@@ -364,6 +366,7 @@ fun CoverCard(
     isFavorite: Boolean,
     isBlacklisted: Boolean,
     modifier: Modifier = Modifier,
+    blurHash: String? = null,
     onLongClick: () -> Unit = {},
     onClick: () -> Unit = {},
 ) {
@@ -496,8 +499,7 @@ fun CardContent(
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun SearchAppBar(
-    viewModel: CivitAiSearchViewModel = koinViewModel(),
+private fun AppSearchAppBar(
     database: List<FavoriteModel>,
     blacklisted: List<BlacklistedItemRoom>,
     showNsfw: Boolean,
@@ -510,95 +512,115 @@ private fun SearchAppBar(
     onNavigateToDetailImages: (Long, String) -> Unit,
     showBlur: Boolean,
     modifier: Modifier = Modifier,
+    viewModel: CivitAiSearchViewModel = koinViewModel(),
 ) {
-    LaunchedEffect(viewModel.showSearch) {
-        if (!viewModel.showSearch) {
-            viewModel.searchQuery = ""
+    val searchBarState = rememberSearchBarState()
+
+    LaunchedEffect(searchBarState.currentValue) {
+        if (searchBarState.currentValue != SearchBarValue.Expanded) {
+            viewModel.searchQuery.clearText()
             viewModel.onSearch("")
         }
     }
 
     val lazyPagingItems = viewModel.pager.collectAsLazyPagingItems()
-    SearchBar(
-        expanded = viewModel.showSearch,
-        onExpandedChange = { viewModel.showSearch = it },
-        inputField = {
-            SearchBarDefaults.InputField(
-                query = viewModel.searchQuery,
-                onQueryChange = { viewModel.searchQuery = it },
-                onSearch = viewModel::onSearch,
-                expanded = viewModel.showSearch,
-                onExpandedChange = { viewModel.showSearch = it },
-                placeholder = { Text("Search CivitAi") },
-                trailingIcon = {
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        AnimatedVisibility(
-                            viewModel.searchQuery.isNotEmpty(),
-                            enter = slideInHorizontally { it } + fadeIn(),
-                            exit = slideOutHorizontally { it } + fadeOut()
-                        ) {
+    val scope = rememberCoroutineScope()
+    val appBarWithSearchColors = SearchBarDefaults.appBarWithSearchColors(
+        searchBarColors = SearchBarDefaults.colors(
+            containerColor = if (showBlur)
+                Color.Transparent
+            else
+                MaterialTheme.colorScheme.surfaceContainerHigh
+        ),
+        appBarContainerColor = if (showBlur)
+            Color.Transparent
+        else
+            MaterialTheme.colorScheme.surface
+    )
+
+    val inputField = @Composable {
+        SearchBarDefaults.InputField(
+            searchBarState = searchBarState,
+            textFieldState = viewModel.searchQuery,
+            onSearch = viewModel::onSearch,
+            placeholder = {
+                if (searchBarState.currentValue == SearchBarValue.Collapsed) {
+                    Text(
+                        modifier = Modifier.fillMaxWidth(),
+                        text = "Search",
+                        textAlign = TextAlign.Center,
+                    )
+                }
+            },
+            leadingIcon = {
+                if (searchBarState.currentValue == SearchBarValue.Expanded) {
+                    AnimatedContent(
+                        searchBarState.currentValue == SearchBarValue.Expanded,
+                        transitionSpec = {
+                            slideInHorizontally { -it } + fadeIn() togetherWith slideOutHorizontally { -it } + fadeOut()
+                        },
+                        contentAlignment = Alignment.Center
+                    ) { target ->
+                        if (target) {
                             IconButton(
                                 onClick = {
-                                    viewModel.searchQuery = ""
-                                    viewModel.onSearch("")
+                                    scope.launch { searchBarState.animateToCollapsed() }
                                 }
-                            ) { Icon(Icons.Default.Clear, null) }
-                        }
-
-                        if (showRefreshButton) {
-                            IconButton(
-                                onClick = { viewModel.showSearch = true }
-                            ) { Icon(Icons.Default.Search, null) }
-                        }
-
-                        IconButton(
-                            onClick = onNavigateToQrCode
-                        ) { Icon(Icons.Default.QrCodeScanner, null) }
-
-                        IconButton(
-                            onClick = onNavigateToSettings
-                        ) { Icon(Icons.Default.Settings, null) }
-
-                        IconButton(
-                            onClick = onNavigateToFavorites
-                        ) { Icon(Icons.Default.Favorite, null) }
-                    }
-                },
-                leadingIcon = {
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        if (showRefreshButton) {
-                            IconButton(
-                                onClick = { lazyPagingItems.refresh() },
-                            ) { Icon(Icons.Default.Refresh, null) }
-                        }
-
-                        AnimatedContent(
-                            viewModel.showSearch,
-                            transitionSpec = {
-                                slideInHorizontally { -it } + fadeIn() togetherWith slideOutHorizontally { -it } + fadeOut()
-                            },
-                            contentAlignment = Alignment.Center
-                        ) { target ->
-                            if (target) {
-                                IconButton(
-                                    onClick = { viewModel.showSearch = false }
-                                ) { Icon(Icons.AutoMirrored.Filled.ArrowBack, null) }
-                            } else {
-                                Icon(Icons.Default.Search, null)
-                            }
+                            ) { Icon(Icons.AutoMirrored.Filled.ArrowBack, null) }
+                        } else {
+                            Icon(Icons.Default.Search, null)
                         }
                     }
-                },
-            )
+                } else {
+                    Icon(Icons.Default.Search, contentDescription = null)
+                }
+            },
+            trailingIcon = {
+                AnimatedVisibility(
+                    viewModel.searchQuery.text.isNotEmpty(),
+                    enter = slideInHorizontally { it } + fadeIn(),
+                    exit = slideOutHorizontally { it } + fadeOut()
+                ) {
+                    IconButton(
+                        onClick = {
+                            viewModel.searchQuery.clearText()
+                            viewModel.onSearch("")
+                        }
+                    ) { Icon(Icons.Default.Clear, null) }
+                }
+            },
+        )
+    }
+
+    AppBarWithSearch(
+        state = searchBarState,
+        inputField = inputField,
+        navigationIcon = {
+            if (showRefreshButton) {
+                IconButton(
+                    onClick = { lazyPagingItems.refresh() },
+                ) { Icon(Icons.Default.Refresh, null) }
+            }
         },
-        colors = if (showBlur) SearchBarDefaults.colors(
-            containerColor = Color.Transparent
-        ) else SearchBarDefaults.colors(),
-        modifier = modifier.fillMaxWidth()
+        actions = {
+            IconButton(
+                onClick = onNavigateToQrCode
+            ) { Icon(Icons.Default.QrCodeScanner, null) }
+
+            IconButton(
+                onClick = onNavigateToSettings
+            ) { Icon(Icons.Default.Settings, null) }
+
+            IconButton(
+                onClick = onNavigateToFavorites
+            ) { Icon(Icons.Default.Favorite, null) }
+        },
+        colors = appBarWithSearchColors,
+        modifier = modifier
+    )
+    ExpandedFullScreenSearchBar(
+        state = searchBarState,
+        inputField = inputField,
     ) {
         LazyVerticalGrid(
             columns = adaptiveGridCell(),
@@ -621,6 +643,7 @@ private fun SearchAppBar(
         }
     }
 }
+
 
 @Composable
 fun BlacklistHandling(

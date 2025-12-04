@@ -1,5 +1,7 @@
 package com.programmersbox.common.home
 
+import androidx.compose.foundation.text.input.TextFieldState
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -54,14 +56,11 @@ class CivitAiViewModel(
 
 }
 
-class CivitAiSearchViewModel(
+class CivitAiSearchViewModel @OptIn(ExperimentalMaterial3Api::class) constructor(
     private val network: Network,
     private val dataStore: DataStore,
 ) : ViewModel() {
-
-    var showSearch by mutableStateOf(false)
-
-    var searchQuery by mutableStateOf("")
+    val searchQuery = TextFieldState("")
 
     var pager by mutableStateOf<Flow<PagingData<Models>>>(
         flowOf(

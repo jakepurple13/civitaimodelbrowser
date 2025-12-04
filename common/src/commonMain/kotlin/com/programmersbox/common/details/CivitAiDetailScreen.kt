@@ -94,7 +94,6 @@ import dev.chrisbanes.haze.HazeProgressive
 import dev.chrisbanes.haze.HazeState
 import dev.chrisbanes.haze.HazeStyle
 import dev.chrisbanes.haze.LocalHazeStyle
-import dev.chrisbanes.haze.hazeChild
 import dev.chrisbanes.haze.hazeEffect
 import dev.chrisbanes.haze.hazeSource
 import org.koin.compose.koinInject
@@ -334,11 +333,7 @@ fun CivitAiDetailScreen(
                                             val clipboard = LocalClipboardManager.current
                                             IconButton(
                                                 onClick = {
-                                                    clipboard.setText(
-                                                        AnnotatedString(
-                                                            downloadUrl
-                                                        )
-                                                    )
+                                                    clipboard.setText(AnnotatedString(downloadUrl))
                                                 }
                                             ) { Icon(Icons.Default.ContentCopy, null) }
                                         }
@@ -644,8 +639,7 @@ private fun BottomBarContent(
         },
         containerColor = if (showBlur) Color.Transparent else BottomAppBarDefaults.containerColor,
         modifier = Modifier.ifTrue(showBlur) {
-            hazeChild(hazeState, hazeStyle) {
-                //TODO: Fix this
+            hazeEffect(hazeState, hazeStyle) {
                 progressive = HazeProgressive.verticalGradient(
                     startIntensity = 0f,
                     endIntensity = 1f,

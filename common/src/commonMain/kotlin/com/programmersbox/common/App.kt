@@ -242,11 +242,9 @@ fun cmpModules() = module {
         metadata = ListDetailSceneStrategy.listPane()
     ) {
         val backStack = koinInject<NavigationHandler>().backStack
-        val actions = LocalActions.current
         CivitAiDetailScreen(
             id = it.modelId,
             viewModel = koinViewModel { parametersOf(it.modelId) },
-            onShareClick = actions.shareUrl,
             onNavigateToUser = { username -> backStack.add(Screen.User(username)) },
             onNavigateToDetailImages = { id, name ->
                 backStack.add(

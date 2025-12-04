@@ -39,10 +39,11 @@ import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.AppBarWithSearch
 import androidx.compose.material3.AssistChipDefaults
 import androidx.compose.material3.Button
-import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.CircularWavyProgressIndicator
 import androidx.compose.material3.ElevatedAssistChip
 import androidx.compose.material3.ExpandedFullScreenSearchBar
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -222,7 +223,10 @@ fun CivitAiScreen(
     )*/
 }
 
-@OptIn(ExperimentalFoundationApi::class, ExperimentalMaterial3Api::class)
+@OptIn(
+    ExperimentalFoundationApi::class, ExperimentalMaterial3Api::class,
+    ExperimentalMaterial3ExpressiveApi::class
+)
 fun LazyGridScope.modelItems(
     lazyPagingItems: LazyPagingItems<Models>,
     onNavigateToDetail: (String) -> Unit,
@@ -285,7 +289,7 @@ fun LazyGridScope.modelItems(
         item(
             span = { GridItemSpan(maxLineSpan) }
         ) {
-            CircularProgressIndicator(
+            CircularWavyProgressIndicator(
                 modifier = Modifier
                     .fillMaxWidth()
                     .wrapContentWidth(Alignment.CenterHorizontally)
@@ -553,21 +557,21 @@ private fun AppSearchAppBar(
                 }
             },
             leadingIcon = {
-                    AnimatedContent(
-                        searchBarState.currentValue == SearchBarValue.Expanded,
-                        transitionSpec = {
-                            slideInHorizontally { -it } + fadeIn() togetherWith slideOutHorizontally { -it } + fadeOut()
-                        },
-                        contentAlignment = Alignment.Center
-                    ) { target ->
-                        if (target) {
-                            IconButton(
-                                onClick = { scope.launch { searchBarState.animateToCollapsed() } }
-                            ) { Icon(Icons.AutoMirrored.Filled.ArrowBack, null) }
-                        } else {
-                            Icon(Icons.Default.Search, null)
-                        }
+                AnimatedContent(
+                    searchBarState.currentValue == SearchBarValue.Expanded,
+                    transitionSpec = {
+                        slideInHorizontally { -it } + fadeIn() togetherWith slideOutHorizontally { -it } + fadeOut()
+                    },
+                    contentAlignment = Alignment.Center
+                ) { target ->
+                    if (target) {
+                        IconButton(
+                            onClick = { scope.launch { searchBarState.animateToCollapsed() } }
+                        ) { Icon(Icons.AutoMirrored.Filled.ArrowBack, null) }
+                    } else {
+                        Icon(Icons.Default.Search, null)
                     }
+                }
             },
             trailingIcon = {
                 AnimatedVisibility(

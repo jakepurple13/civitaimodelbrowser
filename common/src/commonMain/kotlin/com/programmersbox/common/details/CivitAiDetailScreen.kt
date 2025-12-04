@@ -36,11 +36,10 @@ import androidx.compose.material3.BottomAppBar
 import androidx.compose.material3.BottomAppBarDefaults
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
-import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.DropdownMenu
-import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.CircularWavyProgressIndicator
 import androidx.compose.material3.ElevatedAssistChip
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -92,12 +91,14 @@ import dev.chrisbanes.haze.hazeSource
 import org.koin.compose.koinInject
 import org.koin.compose.viewmodel.koinViewModel
 
-@OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
+@OptIn(
+    ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class,
+    ExperimentalMaterial3ExpressiveApi::class
+)
 @Composable
 fun CivitAiDetailScreen(
     id: String?,
     viewModel: CivitAiDetailViewModel = koinViewModel(),
-    onShareClick: (String) -> Unit,
     onNavigateToUser: (String) -> Unit,
     onNavigateToDetailImages: (Long, String) -> Unit,
 ) {
@@ -235,30 +236,9 @@ fun CivitAiDetailScreen(
                             }
                         },
                         actions = {
-                            var showDropDown by remember { mutableStateOf(false) }
-                            DropdownMenu(
-                                expanded = showDropDown,
-                                onDismissRequest = { showDropDown = false }
-                            ) {
-                                DropdownMenuItem(
-                                    text = { Text("Share Link") },
-                                    onClick = {
-                                        onShareClick(viewModel.modelUrl)
-                                        showDropDown = false
-                                    }
-                                )
-
-                                DropdownMenuItem(
-                                    text = { Text("Share QR Code") },
-                                    onClick = {
-                                        showQrCode = true
-                                        showDropDown = false
-                                    }
-                                )
-                            }
                             NavigationBarItem(
                                 selected = false,
-                                onClick = { showDropDown = true },
+                                onClick = { showQrCode = true },
                                 icon = { Icon(Icons.Default.Share, null) },
                                 label = { Text("Share") },
                             )
@@ -465,7 +445,7 @@ fun CivitAiDetailScreen(
                     contentAlignment = Alignment.Center,
                     modifier = Modifier.fillMaxSize()
                 ) {
-                    CircularProgressIndicator()
+                    CircularWavyProgressIndicator()
                 }
             }
         }

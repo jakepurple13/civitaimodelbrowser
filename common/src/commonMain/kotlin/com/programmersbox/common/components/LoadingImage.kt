@@ -3,7 +3,8 @@ package com.programmersbox.common.components
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.CircularWavyProgressIndicator
+import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -19,7 +20,7 @@ import io.kamel.image.asyncPainterResource
 import org.jetbrains.compose.resources.ExperimentalResourceApi
 import org.jetbrains.compose.resources.painterResource
 
-@OptIn(ExperimentalResourceApi::class)
+@OptIn(ExperimentalResourceApi::class, ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun LoadingImage(
     imageUrl: String,
@@ -38,7 +39,7 @@ fun LoadingImage(
                     modifier = Modifier.fillMaxSize()
                 )
             }
-            CircularProgressIndicator(
+            CircularWavyProgressIndicator(
                 progress = { it },
                 modifier = Modifier.align(Alignment.Center)
             )

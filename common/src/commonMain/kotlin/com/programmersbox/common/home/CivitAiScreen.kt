@@ -553,7 +553,6 @@ private fun AppSearchAppBar(
                 }
             },
             leadingIcon = {
-                if (searchBarState.currentValue == SearchBarValue.Expanded) {
                     AnimatedContent(
                         searchBarState.currentValue == SearchBarValue.Expanded,
                         transitionSpec = {
@@ -563,17 +562,12 @@ private fun AppSearchAppBar(
                     ) { target ->
                         if (target) {
                             IconButton(
-                                onClick = {
-                                    scope.launch { searchBarState.animateToCollapsed() }
-                                }
+                                onClick = { scope.launch { searchBarState.animateToCollapsed() } }
                             ) { Icon(Icons.AutoMirrored.Filled.ArrowBack, null) }
                         } else {
                             Icon(Icons.Default.Search, null)
                         }
                     }
-                } else {
-                    Icon(Icons.Default.Search, contentDescription = null)
-                }
             },
             trailingIcon = {
                 AnimatedVisibility(

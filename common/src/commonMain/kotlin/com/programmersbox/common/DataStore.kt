@@ -73,6 +73,12 @@ class DataStore private constructor(
         true
     )
 
+    @Composable
+    fun rememberUseToolbar() = rememberPreference(
+        booleanPreferencesKey("use_toolbar"),
+        true
+    )
+
     open class DataStoreType<T>(
         val key: Preferences.Key<T>,
         protected val dataStore: DataStore<Preferences>,

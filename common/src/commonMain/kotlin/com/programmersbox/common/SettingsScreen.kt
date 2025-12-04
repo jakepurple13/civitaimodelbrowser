@@ -14,6 +14,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.BlurOff
 import androidx.compose.material.icons.filled.BlurOn
+import androidx.compose.material.icons.filled.BorderBottom
 import androidx.compose.material3.Card
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
@@ -65,6 +66,7 @@ fun SettingsScreen(
     val showNsfw = remember { dataStore.showNsfw }
     val hideNsfwStrength = remember { dataStore.hideNsfwStrength }
     val includeNsfw = remember { dataStore.includeNsfw }
+    var useToolbar by dataStore.rememberUseToolbar()
     val dao = koinInject<FavoritesDao>()
     var showBlur by dataStore.rememberShowBlur()
 
@@ -179,6 +181,21 @@ fun SettingsScreen(
                         Switch(
                             checked = showBlur,
                             onCheckedChange = { showBlur = it }
+                        )
+                    }
+                )
+            }
+
+            Card(
+                onClick = { useToolbar = !useToolbar }
+            ) {
+                ListItem(
+                    leadingContent = { Icon(Icons.Default.BorderBottom, null) },
+                    headlineContent = { Text("Use Toolbar") },
+                    trailingContent = {
+                        Switch(
+                            checked = useToolbar,
+                            onCheckedChange = { useToolbar = it }
                         )
                     }
                 )

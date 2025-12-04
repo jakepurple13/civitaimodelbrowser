@@ -2,6 +2,7 @@ package com.programmersbox.common.details
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateContentSize
+import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.expandVertically
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -25,12 +26,14 @@ import androidx.compose.foundation.selection.toggleable
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowDropDown
+import androidx.compose.material.icons.filled.ArrowUpward
 import androidx.compose.material.icons.filled.ContentCopy
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material.icons.filled.Image
 import androidx.compose.material.icons.filled.OpenInBrowser
 import androidx.compose.material.icons.filled.Share
+import androidx.compose.material3.AppBarRow
 import androidx.compose.material3.AssistChipDefaults
 import androidx.compose.material3.BottomAppBar
 import androidx.compose.material3.BottomAppBarDefaults
@@ -40,8 +43,12 @@ import androidx.compose.material3.CircularWavyProgressIndicator
 import androidx.compose.material3.ElevatedAssistChip
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
+import androidx.compose.material3.FabPosition
 import androidx.compose.material3.FloatingActionButton
+import androidx.compose.material3.FloatingToolbarDefaults
+import androidx.compose.material3.FloatingToolbarDefaults.floatingToolbarVerticalNestedScroll
 import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.HorizontalFloatingToolbar
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.ListItem
@@ -67,6 +74,7 @@ import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.zIndex
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.programmersbox.common.BackButton
 import com.programmersbox.common.ComposableUtils
@@ -84,6 +92,7 @@ import com.programmersbox.common.qrcode.QrCodeType
 import com.programmersbox.common.qrcode.ShareViaQrCode
 import dev.chrisbanes.haze.HazeProgressive
 import dev.chrisbanes.haze.HazeState
+import dev.chrisbanes.haze.HazeStyle
 import dev.chrisbanes.haze.LocalHazeStyle
 import dev.chrisbanes.haze.hazeChild
 import dev.chrisbanes.haze.hazeEffect
@@ -110,6 +119,7 @@ fun CivitAiDetailScreen(
         .collectAsStateWithLifecycle(false)
     val nsfwBlurStrength by remember { dataStore.hideNsfwStrength.flow }
         .collectAsStateWithLifecycle(6f)
+    val useToolbar by dataStore.rememberUseToolbar()
 
     val favoriteList by dao.getFavoriteModels().collectAsStateWithLifecycle(emptyList())
     val blacklisted by dao.getBlacklisted().collectAsStateWithLifecycle(emptyList())
@@ -180,6 +190,8 @@ fun CivitAiDetailScreen(
                 )
             }
 
+            var toolBarExpanded by remember { mutableStateOf(false) }
+
             Scaffold(
                 topBar = {
                     TopAppBar(
@@ -218,62 +230,38 @@ fun CivitAiDetailScreen(
                     )
                 },
                 bottomBar = {
-                    BottomAppBar(
-                        floatingActionButton = {
-                            FloatingActionButton(
-                                onClick = {
-                                    if (viewModel.isFavorite) {
-                                        viewModel.removeFromFavorites()
-                                    } else {
-                                        viewModel.addToFavorites()
-                                    }
-                                }
-                            ) {
-                                Icon(
-                                    if (viewModel.isFavorite) Icons.Default.Favorite else Icons.Default.FavoriteBorder,
-                                    null
-                                )
-                            }
-                        },
-                        actions = {
-                            NavigationBarItem(
-                                selected = false,
-                                onClick = { showQrCode = true },
-                                icon = { Icon(Icons.Default.Share, null) },
-                                label = { Text("Share") },
-                            )
-
-                            val uriHandler = LocalUriHandler.current
-                            NavigationBarItem(
-                                selected = false,
-                                onClick = { uriHandler.openUri(viewModel.modelUrl) },
-                                icon = { Icon(Icons.Default.OpenInBrowser, null) },
-                                label = { Text("Browser") },
-                            )
-
-                            NavigationBarItem(
-                                selected = false,
-                                onClick = {
-                                    id?.toLongOrNull()
-                                        ?.let { onNavigateToDetailImages(it, model.models.name) }
-                                },
-                                icon = { Icon(Icons.Default.Image, null) },
-                                label = { Text("Images") },
-                            )
-                        },
-                        containerColor = if (showBlur) Color.Transparent else BottomAppBarDefaults.containerColor,
-                        modifier = Modifier.ifTrue(showBlur) {
-                            hazeChild(hazeState, hazeStyle) {
-                                //TODO: Fix this
-                                progressive = HazeProgressive.verticalGradient(
-                                    startIntensity = 0f,
-                                    endIntensity = 1f,
-                                    preferPerformance = true
-                                )
-                            }
-                        }
-                    )
+                    if (!useToolbar) {
+                        BottomBarContent(
+                            viewModel = viewModel,
+                            id = id,
+                            showBlur = showBlur,
+                            hazeState = hazeState,
+                            hazeStyle = hazeStyle,
+                            onNavigateToDetailImages = onNavigateToDetailImages,
+                            onShowQrCode = { showQrCode = true },
+                            model = model,
+                        )
+                    }
                 },
+                floatingActionButton = {
+                    if (useToolbar) {
+                        HorizontalToolbarContent(
+                            viewModel = viewModel,
+                            id = id,
+                            onNavigateToDetailImages = onNavigateToDetailImages,
+                            onShowQrCode = { showQrCode = true },
+                            model = model,
+                            toolBarExpanded = toolBarExpanded,
+                            onToggleToolbar = { toolBarExpanded = it }
+                        )
+                    }
+                },
+                floatingActionButtonPosition = FabPosition.End,
+                modifier = Modifier.floatingToolbarVerticalNestedScroll(
+                    expanded = toolBarExpanded,
+                    onExpand = { toolBarExpanded = true },
+                    onCollapse = { toolBarExpanded = false }
+                )
             ) { paddingValues ->
                 LazyVerticalGrid(
                     columns = adaptiveGridCell(),
@@ -524,4 +512,146 @@ private fun ImageCard(
             }
         }
     }
+}
+
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
+@Composable
+private fun HorizontalToolbarContent(
+    viewModel: CivitAiDetailViewModel,
+    id: String?,
+    onNavigateToDetailImages: (Long, String) -> Unit,
+    onShowQrCode: () -> Unit,
+    model: DetailViewState.Content,
+    toolBarExpanded: Boolean,
+    onToggleToolbar: (Boolean) -> Unit,
+) {
+    val vibrantColors = FloatingToolbarDefaults.vibrantFloatingToolbarColors()
+    val uriHandler = LocalUriHandler.current
+
+    HorizontalFloatingToolbar(
+        expanded = toolBarExpanded,
+        colors = vibrantColors,
+        floatingActionButton = {
+            FloatingToolbarDefaults.StandardFloatingActionButton(
+                onClick = { onToggleToolbar(!toolBarExpanded) }
+            ) {
+                Icon(
+                    imageVector = Icons.Default.ArrowUpward,
+                    contentDescription = null,
+                    modifier = Modifier.rotate(
+                        animateFloatAsState(if (toolBarExpanded) 180f else 0f).value
+                    )
+                )
+            }
+        },
+        modifier = Modifier.zIndex(1f)
+    ) {
+        AppBarRow {
+            clickableItem(
+                onClick = onShowQrCode,
+                icon = { Icon(Icons.Default.Share, null) },
+                label = "Share"
+            )
+            clickableItem(
+                onClick = { uriHandler.openUri(viewModel.modelUrl) },
+                icon = { Icon(Icons.Default.OpenInBrowser, null) },
+                label = "Browser"
+            )
+            clickableItem(
+                onClick = {
+                    id?.toLongOrNull()
+                        ?.let { onNavigateToDetailImages(it, model.models.name) }
+                },
+                icon = { Icon(Icons.Default.Image, null) },
+                label = "Images"
+            )
+            clickableItem(
+                onClick = {
+                    if (viewModel.isFavorite) {
+                        viewModel.removeFromFavorites()
+                    } else {
+                        viewModel.addToFavorites()
+                    }
+                },
+                icon = {
+                    Icon(
+                        if (viewModel.isFavorite)
+                            Icons.Default.Favorite
+                        else
+                            Icons.Default.FavoriteBorder,
+                        null
+                    )
+                },
+                label = if (viewModel.isFavorite) "Unfavorite" else "Favorite"
+            )
+        }
+    }
+}
+
+@Composable
+private fun BottomBarContent(
+    viewModel: CivitAiDetailViewModel,
+    id: String?,
+    showBlur: Boolean,
+    hazeState: HazeState,
+    hazeStyle: HazeStyle,
+    onNavigateToDetailImages: (Long, String) -> Unit,
+    onShowQrCode: () -> Unit,
+    model: DetailViewState.Content,
+) {
+    BottomAppBar(
+        floatingActionButton = {
+            FloatingActionButton(
+                onClick = {
+                    if (viewModel.isFavorite) {
+                        viewModel.removeFromFavorites()
+                    } else {
+                        viewModel.addToFavorites()
+                    }
+                }
+            ) {
+                Icon(
+                    if (viewModel.isFavorite) Icons.Default.Favorite else Icons.Default.FavoriteBorder,
+                    null
+                )
+            }
+        },
+        actions = {
+            NavigationBarItem(
+                selected = false,
+                onClick = onShowQrCode,
+                icon = { Icon(Icons.Default.Share, null) },
+                label = { Text("Share") },
+            )
+
+            val uriHandler = LocalUriHandler.current
+            NavigationBarItem(
+                selected = false,
+                onClick = { uriHandler.openUri(viewModel.modelUrl) },
+                icon = { Icon(Icons.Default.OpenInBrowser, null) },
+                label = { Text("Browser") },
+            )
+
+            NavigationBarItem(
+                selected = false,
+                onClick = {
+                    id?.toLongOrNull()
+                        ?.let { onNavigateToDetailImages(it, model.models.name) }
+                },
+                icon = { Icon(Icons.Default.Image, null) },
+                label = { Text("Images") },
+            )
+        },
+        containerColor = if (showBlur) Color.Transparent else BottomAppBarDefaults.containerColor,
+        modifier = Modifier.ifTrue(showBlur) {
+            hazeChild(hazeState, hazeStyle) {
+                //TODO: Fix this
+                progressive = HazeProgressive.verticalGradient(
+                    startIntensity = 0f,
+                    endIntensity = 1f,
+                    preferPerformance = true
+                )
+            }
+        }
+    )
 }

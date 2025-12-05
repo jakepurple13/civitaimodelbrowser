@@ -1,5 +1,5 @@
 [versions]
-appVersion = "3.2.5"
+appVersion = "3.2.6"
 
 browser = "1.9.0"
 composeScrollbars = "1.0.4"

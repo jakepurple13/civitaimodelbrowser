@@ -189,7 +189,7 @@ fun CivitAiDetailScreen(
                 )
             }
 
-            var toolBarExpanded by remember { mutableStateOf(model.models.modelVersions.size == 1) }
+            var toolBarExpanded by remember { mutableStateOf(true) }
 
             Scaffold(
                 topBar = {

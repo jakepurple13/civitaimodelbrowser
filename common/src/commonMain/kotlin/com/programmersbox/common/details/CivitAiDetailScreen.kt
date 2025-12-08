@@ -15,6 +15,7 @@ import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -32,6 +33,7 @@ import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material.icons.filled.Image
 import androidx.compose.material.icons.filled.OpenInBrowser
+import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Share
 import androidx.compose.material3.AppBarRow
 import androidx.compose.material3.AssistChipDefaults
@@ -70,12 +72,14 @@ import androidx.compose.ui.draw.blur
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import chaintech.videoplayer.ui.preview.VideoPreviewComposable
 import com.programmersbox.common.BackButton
 import com.programmersbox.common.ComposableUtils
 import com.programmersbox.common.ContextMenu
@@ -476,19 +480,42 @@ private fun ImageCard(
                         .matchParentSize()
                 )
             } else {
-                LoadingImage(
-                    imageUrl = images.url,
-                    name = images.url,
-                    hash = images.hash,
-                    isNsfw = images.nsfw.canNotShow(),
-                    modifier = Modifier.let {
-                        if (!showNsfw && images.nsfw.canNotShow()) {
-                            it.blur(nsfwBlurStrength.dp)
-                        } else {
-                            it
+                if (images.url.endsWith("mp4")) {
+                    Box(
+                        contentAlignment = Alignment.Center,
+                        modifier = Modifier
+                            .background(Color.Black)
+                            .matchParentSize()
+                    ) {
+                        VideoPreviewComposable(
+                            url = images.url,
+                            frameCount = 5,
+                            contentScale = ContentScale.Crop
+                        )
+                        Row(
+                            verticalAlignment = Alignment.Bottom,
+                            horizontalArrangement = Arrangement.SpaceEvenly,
+                            modifier = Modifier.matchParentSize()
+                        ) {
+                            Text("Click to Play")
+                            Icon(Icons.Default.PlayArrow, null)
                         }
                     }
-                )
+                } else {
+                    LoadingImage(
+                        imageUrl = images.url,
+                        name = images.url,
+                        hash = images.hash,
+                        isNsfw = images.nsfw.canNotShow(),
+                        modifier = Modifier.let {
+                            if (!showNsfw && images.nsfw.canNotShow()) {
+                                it.blur(nsfwBlurStrength.dp)
+                            } else {
+                                it
+                            }
+                        }
+                    )
+                }
             }
 
             if (images.nsfw.canNotShow()) {

@@ -50,6 +50,9 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.ColorMatrix
 import androidx.compose.ui.unit.dp
+import chaintech.videoplayer.host.MediaPlayerHost
+import chaintech.videoplayer.model.VideoPlayerConfig
+import chaintech.videoplayer.ui.video.VideoPlayerComposable
 import com.programmersbox.common.DownloadHandler
 import com.programmersbox.common.LocalActions
 import com.programmersbox.common.SheetDetails
@@ -78,16 +81,29 @@ fun ImageSheet(
     SheetDetails(
         onDismiss = onDismiss,
         content = {
-            SheetContent(
-                image = url,
-                isNsfw = isNsfw,
-                isFavorite = isFavorite,
-                onFavorite = onFavorite,
-                onRemoveFromFavorite = onRemoveFromFavorite,
-                nsfwText = nsfwText,
-                moreInfo = moreInfo,
-                actions = actions,
-            )
+            if (url.endsWith("mp4")) {
+                VideoSheetContent(
+                    video = url,
+                    isNsfw = isNsfw,
+                    isFavorite = isFavorite,
+                    onFavorite = onFavorite,
+                    onRemoveFromFavorite = onRemoveFromFavorite,
+                    nsfwText = nsfwText,
+                    actions = actions,
+                    moreInfo = moreInfo,
+                )
+            } else {
+                SheetContent(
+                    image = url,
+                    isNsfw = isNsfw,
+                    isFavorite = isFavorite,
+                    onFavorite = onFavorite,
+                    onRemoveFromFavorite = onRemoveFromFavorite,
+                    nsfwText = nsfwText,
+                    moreInfo = moreInfo,
+                    actions = actions,
+                )
+            }
         }
     )
 }
@@ -270,6 +286,164 @@ private fun SheetContent(
                             progress = { progress }
                         )
                     },
+                )
+            }
+        }
+    }
+}
+
+@OptIn(
+    ExperimentalFoundationApi::class, ExperimentalMaterial3Api::class,
+    ExperimentalMaterial3ExpressiveApi::class
+)
+@Composable
+private fun VideoSheetContent(
+    video: String,
+    isNsfw: Boolean,
+    nsfwText: String,
+    isFavorite: Boolean,
+    onFavorite: () -> Unit,
+    onRemoveFromFavorite: () -> Unit,
+    actions: @Composable RowScope.() -> Unit = {},
+    moreInfo: @Composable () -> Unit = {},
+) {
+    val downloadHandler = koinInject<DownloadHandler>()
+    val scope = rememberCoroutineScope()
+    val actions = LocalActions.current
+    SelectionContainer(
+        modifier = Modifier.navigationBarsPadding()
+    ) {
+        var showInfo by remember { mutableStateOf(false) }
+        if (showInfo) {
+            AlertDialog(
+                onDismissRequest = { showInfo = false },
+                title = { Text("Info") },
+                text = {
+                    Column(
+                        modifier = Modifier.verticalScroll(rememberScrollState())
+                    ) {
+                        if (isNsfw) {
+                            Row(
+                                horizontalArrangement = Arrangement.spacedBy(4.dp),
+                                modifier = Modifier.padding(horizontal = 4.dp)
+                            ) {
+                                ElevatedAssistChip(
+                                    label = { Text("NSFW") },
+                                    onClick = {},
+                                    colors = AssistChipDefaults.elevatedAssistChipColors(
+                                        disabledLabelColor = MaterialTheme.colorScheme.error,
+                                        disabledContainerColor = MaterialTheme.colorScheme.surface
+                                    ),
+                                    enabled = false,
+                                    border = BorderStroke(
+                                        1.dp,
+                                        MaterialTheme.colorScheme.error,
+                                    ),
+                                )
+
+                                ElevatedAssistChip(
+                                    label = { Text(nsfwText) },
+                                    onClick = {},
+                                    colors = AssistChipDefaults.elevatedAssistChipColors(
+                                        disabledLabelColor = MaterialTheme.colorScheme.error,
+                                        disabledContainerColor = MaterialTheme.colorScheme.surface
+                                    ),
+                                    enabled = false,
+                                    border = BorderStroke(
+                                        1.dp,
+                                        MaterialTheme.colorScheme.error,
+                                    ),
+                                )
+                            }
+                        }
+                        moreInfo()
+                    }
+                },
+                confirmButton = {
+                    TextButton(
+                        onClick = { showInfo = false }
+                    ) { Text("Done") }
+                }
+            )
+        }
+
+        Scaffold(
+            topBar = {
+                TopAppBar(
+                    title = {},
+                    windowInsets = WindowInsets(0.dp),
+                    colors = TopAppBarDefaults.topAppBarColors(
+                        //containerColor = BottomSheetDefaults.ContainerColor
+                        containerColor = Color.Transparent
+                    ),
+                    navigationIcon = {
+                        IconButton(
+                            onClick = { showInfo = true }
+                        ) { Icon(Icons.Default.Info, null) }
+                    },
+                    actions = {
+                        actions()
+                        IconButton(
+                            onClick = {
+                                if (isFavorite) {
+                                    onRemoveFromFavorite()
+                                } else {
+                                    onFavorite()
+                                }
+                            }
+                        ) {
+                            Icon(
+                                if (isFavorite) Icons.Default.Favorite else Icons.Default.FavoriteBorder,
+                                null
+                            )
+                        }
+                    }
+                )
+            },
+            bottomBar = {
+                BottomAppBar(
+                    containerColor = Color.Transparent
+                ) {
+                    NavigationBarItem(
+                        selected = false,
+                        onClick = { actions.shareUrl(video) },
+                        icon = { Icon(Icons.Default.Share, null) },
+                        label = { Text("Share") },
+                    )
+                    NavigationBarItem(
+                        selected = false,
+                        onClick = {
+                            scope.launch(Dispatchers.IO) {
+                                downloadHandler.download(
+                                    url = video,
+                                    name = video.toPath().name
+                                )
+                            }
+                        },
+                        icon = { Icon(Icons.Default.Download, null) },
+                        label = { Text("Download") },
+                    )
+                }
+            },
+            containerColor = BottomSheetDefaults.ContainerColor
+        ) { padding ->
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(padding)
+            ) {
+                val playerHost = remember {
+                    MediaPlayerHost(
+                        mediaUrl = video
+                    )
+                }
+
+                VideoPlayerComposable(
+                    playerHost = playerHost,
+                    playerConfig = VideoPlayerConfig(
+                        isGestureVolumeControlEnabled = false
+                    ),
+                    modifier = Modifier.fillMaxSize(),
                 )
             }
         }

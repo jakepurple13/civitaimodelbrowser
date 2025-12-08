@@ -79,7 +79,8 @@ kotlin {
             api(libs.filekit.dialogs)
             api(libs.filekit.dialogs.compose)
 
-            implementation("io.github.brys0:blurhash:0.0-4-ALPHA")
+            implementation(libs.blurhash)
+            implementation(libs.compose.multiplatform.media.player)
         }
 
         commonTest.dependencies {

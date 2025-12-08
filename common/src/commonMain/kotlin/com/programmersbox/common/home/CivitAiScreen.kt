@@ -16,6 +16,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -31,6 +32,7 @@ import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.ArrowUpward
 import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.QrCodeScanner
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.Search
@@ -56,7 +58,6 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.rememberSearchBarState
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -68,12 +69,14 @@ import androidx.compose.ui.draw.blur
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.paging.CombinedLoadStates
 import androidx.paging.LoadState
+import chaintech.videoplayer.ui.preview.VideoPreviewComposable
 import com.programmersbox.common.ComposableUtils
 import com.programmersbox.common.ContextMenu
 import com.programmersbox.common.DataStore
@@ -421,21 +424,44 @@ fun CardContent(
                     .matchParentSize()
             )
         } else {
-            LoadingImage(
-                imageUrl = imageUrl,
-                isNsfw = isNsfw,
-                name = name,
-                hash = blurHash,
-                modifier = Modifier
-                    .matchParentSize()
-                    .let {
-                        if (!showNsfw && isNsfw) {
-                            it.blur(blurStrength)
-                        } else {
-                            it
-                        }
-                    },
-            )
+            if (imageUrl.endsWith("mp4")) {
+                Box(
+                    contentAlignment = Alignment.Center,
+                    modifier = Modifier
+                        .background(Color.Black)
+                        .matchParentSize()
+                ) {
+                    VideoPreviewComposable(
+                        url = imageUrl,
+                        frameCount = 5,
+                        contentScale = ContentScale.Crop
+                    )
+                    Row(
+                        verticalAlignment = Alignment.Bottom,
+                        horizontalArrangement = Arrangement.SpaceEvenly,
+                        modifier = Modifier.matchParentSize()
+                    ) {
+                        Text("Click to Play")
+                        Icon(Icons.Default.PlayArrow, null)
+                    }
+                }
+            } else {
+                LoadingImage(
+                    imageUrl = imageUrl,
+                    isNsfw = isNsfw,
+                    name = name,
+                    hash = blurHash,
+                    modifier = Modifier
+                        .matchParentSize()
+                        .let {
+                            if (!showNsfw && isNsfw) {
+                                it.blur(blurStrength)
+                            } else {
+                                it
+                            }
+                        },
+                )
+            }
         }
 
         Box(
@@ -520,12 +546,12 @@ private fun AppSearchAppBar(
 ) {
     val searchBarState = rememberSearchBarState()
 
-    LaunchedEffect(searchBarState.currentValue) {
+    /*LaunchedEffect(searchBarState.currentValue) {
         if (searchBarState.currentValue != SearchBarValue.Expanded) {
             viewModel.searchQuery.clearText()
             viewModel.onSearch("")
         }
-    }
+    }*/
 
     val lazyPagingItems = viewModel.pager.collectAsLazyPagingItems()
     val scope = rememberCoroutineScope()
@@ -630,13 +656,22 @@ private fun AppSearchAppBar(
         ) {
             modelItems(
                 lazyPagingItems = lazyPagingItems,
-                onNavigateToDetail = onNavigateToDetail,
+                onNavigateToDetail = { id ->
+                    scope.launch { searchBarState.animateToCollapsed() }
+                        .invokeOnCompletion { onNavigateToDetail(id) }
+                },
                 showNsfw = showNsfw,
                 blurStrength = blurStrength,
                 database = database,
                 blacklisted = blacklisted,
-                onNavigateToUser = onNavigateToUser,
-                onNavigateToDetailImages = onNavigateToDetailImages,
+                onNavigateToUser = { username ->
+                    scope.launch { searchBarState.animateToCollapsed() }
+                        .invokeOnCompletion { onNavigateToUser(username) }
+                },
+                onNavigateToDetailImages = { id, name ->
+                    scope.launch { searchBarState.animateToCollapsed() }
+                        .invokeOnCompletion { onNavigateToDetailImages(id, name) }
+                },
             )
         }
     }

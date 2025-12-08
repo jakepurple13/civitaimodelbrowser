@@ -13,6 +13,7 @@ buildscript {
         maven {
             url = uri("https://storage.googleapis.com/r8-releases/raw")
         }
+        maven("https://jogamp.org/deployment/maven/")
     }
     dependencies {
         classpath("com.android.tools:r8:8.11.18")

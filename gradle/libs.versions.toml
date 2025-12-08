@@ -52,7 +52,7 @@ room = { id = "androidx.room", version.ref = "androidx-room" }
 androidx-appcompat = { module = "androidx.appcompat:appcompat", version = "1.7.1" }
 androidx-browser = { module = "androidx.browser:browser", version.ref = "browser" }
 androidx-core = { module = "androidx.core:core-ktx", version = "1.17.0" }
-androidx-activity-compose = "androidx.activity:activity-compose:1.12.0"
+androidx-activity-compose = "androidx.activity:activity-compose:1.12.1"
 compose-multiplatform-media-player = { module = "network.chaintech:compose-multiplatform-media-player", version.ref = "composeMultiplatformMediaPlayerVersion" }
 blurhash = { module = "io.github.brys0:blurhash", version.ref = "blurhashVersion" }
 composeScrollbars = { module = "com.github.GIGAMOLE:ComposeScrollbars", version.ref = "composeScrollbars" }

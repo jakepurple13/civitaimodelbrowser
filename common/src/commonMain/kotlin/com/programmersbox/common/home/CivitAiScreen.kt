@@ -205,7 +205,8 @@ fun CivitAiScreen(
             }
 
             PullRefreshIndicator(
-                refreshing = lazyPagingItems.loadState.refresh == LoadState.Loading || lazyPagingItems.loadState.append == LoadState.Loading,
+                refreshing = lazyPagingItems.loadState.refresh == LoadState.Loading
+                        || lazyPagingItems.loadState.append == LoadState.Loading,
                 state = pullToRefreshState,
                 modifier = Modifier
                     .padding(padding)

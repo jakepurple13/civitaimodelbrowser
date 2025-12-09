@@ -676,13 +676,22 @@ private fun AppSearchAppBar(
         ) {
             modelItems(
                 lazyPagingItems = lazyPagingItems,
-                onNavigateToDetail = onNavigateToDetail,
+                onNavigateToDetail = { id ->
+                    scope.launch { searchBarState.animateToCollapsed() }
+                        .invokeOnCompletion { onNavigateToDetail(id) }
+                },
                 showNsfw = showNsfw,
                 blurStrength = blurStrength,
                 database = database,
                 blacklisted = blacklisted,
-                onNavigateToUser = onNavigateToUser,
-                onNavigateToDetailImages = onNavigateToDetailImages,
+                onNavigateToUser = { username ->
+                    scope.launch { searchBarState.animateToCollapsed() }
+                        .invokeOnCompletion { onNavigateToUser(username) }
+                },
+                onNavigateToDetailImages = { id, name ->
+                    scope.launch { searchBarState.animateToCollapsed() }
+                        .invokeOnCompletion { onNavigateToDetailImages(id, name) }
+                },
             )
         }
     }

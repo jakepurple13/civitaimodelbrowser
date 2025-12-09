@@ -1,5 +1,6 @@
 package com.programmersbox.common
 
+import androidx.compose.animation.SharedTransitionLayout
 import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.animation.togetherWith
@@ -72,120 +73,35 @@ internal fun App(
             )
         }
     ) {
-        Surface {
-            NavDisplay(
-                backStack = koinInject<NavigationHandler>().backStack,
-                entryDecorators = listOf(
-                    rememberSaveableStateHolderNavEntryDecorator(),
-                    rememberViewModelStoreNavEntryDecorator()
-                ),
-                sceneStrategy = rememberListDetailSceneStrategy<Any>()
-                        then DialogSceneStrategy(),
-                entryProvider = koinEntryProvider(),
-                /*entryProvider = entryProvider {
-                    entry<Screen.List> {
-                        CivitAiScreen(
-                            onNavigateToDetail = { id -> backStack.add(Screen.Detail(id)) },
-                            onNavigateToFavorites = { backStack.add(Screen.Favorites) },
-                            onNavigateToSettings = { backStack.add(Screen.Settings) }
-                        )
-                    }
-
-                    entry<Screen.Detail>(
-                        metadata = ListDetailSceneStrategy.listPane()
-                    ) {
-                        CivitAiDetailScreen(
-                            id = it.modelId,
-                            viewModel = koinViewModel { parametersOf(it.modelId) },
-                            onShareClick = onShareClick,
-                            onNavigateToUser = { username -> backStack.add(Screen.User(username)) },
-                            onNavigateToDetailImages = { id, name ->
-                                backStack.add(
-                                    Screen.DetailsImage(
-                                        id.toString(),
-                                        name
-                                    )
-                                )
-                            }
-                        )
-                    }
-
-                    entry<Screen.DetailsImage>(
-                        metadata = ListDetailSceneStrategy.detailPane()
-                    ) {
-                        CivitAiModelImagesScreen(
-                            modelName = it.modelName,
-                            viewModel = koinViewModel { parametersOf(it.modelId) }
-                        )
-                    }
-
-                    entry<Screen.User>(
-                        metadata = ListDetailSceneStrategy.extraPane()
-                    ) {
-                        CivitAiUserScreen(
-                            viewModel = koinViewModel { parametersOf(it.username) },
-                            username = it.username,
-                            onNavigateToDetail = { id -> backStack.add(Screen.Detail(id)) }
-                        )
-                    }
-                    entry<Screen.Favorites> {
-                        FavoritesUI(
-                            viewModel = koinViewModel(),
-                            onNavigateToDetail = { id -> backStack.add(Screen.Detail(id.toString())) },
-                            onNavigateToUser = { username -> backStack.add(Screen.User(username)) }
-                        )
-                    }
-                    entry<Screen.Settings> {
-                        SettingsScreen(
-                            onExport = onExport,
-                            onImport = onImport,
-                            export = export,
-                            import = import,
-                            onNavigateToBlacklisted = { backStack.add(Screen.Settings.Blacklisted) },
-                            onNavigateToQrCode = { backStack.add(Screen.QrCode) }
-                        )
-                    }
-                    entry<Screen.Settings.Blacklisted> { BlacklistedScreen() }
-                    entry<Screen.Settings.Screen> {
-                        SettingsScreen(
-                            onExport = onExport,
-                            onImport = onImport,
-                            export = export,
-                            import = import,
-                            onNavigateToBlacklisted = { backStack.add(Screen.Settings.Blacklisted) },
-                            onNavigateToQrCode = { backStack.add(Screen.QrCode) }
-                        )
-                    }
-                    entry<Screen.QrCode>(
-                        metadata = DialogSceneStrategy.dialog()
-                    ) {
-                        ScanQrCode(
-                            viewModel = koinViewModel(),
-                            onBack = { backStack.removeLastOrNull() },
-                            onNavigate = { navKey ->
-                                backStack.removeIf { it == Screen.QrCode }
-                                backStack.add(navKey)
-                            }
-                        )
-                    }
-                },*/
-                transitionSpec = {
-                    // Slide in from right when navigating forward
-                    slideInHorizontally(initialOffsetX = { it }) togetherWith
-                            slideOutHorizontally(targetOffsetX = { -it })
-                },
-                popTransitionSpec = {
-                    // Slide in from left when navigating back
-                    slideInHorizontally(initialOffsetX = { -it }) togetherWith
-                            slideOutHorizontally(targetOffsetX = { it })
-                },
-                predictivePopTransitionSpec = {
-                    // Slide in from left when navigating back
-                    slideInHorizontally(initialOffsetX = { -it }) togetherWith
-                            slideOutHorizontally(targetOffsetX = { it })
-                },
-                modifier = Modifier.fillMaxSize()
-            )
+        SharedTransitionLayout {
+            Surface {
+                NavDisplay(
+                    backStack = koinInject<NavigationHandler>().backStack,
+                    entryDecorators = listOf(
+                        rememberSaveableStateHolderNavEntryDecorator(),
+                        rememberViewModelStoreNavEntryDecorator()
+                    ),
+                    sceneStrategy = rememberListDetailSceneStrategy<Any>()
+                            then DialogSceneStrategy(),
+                    entryProvider = koinEntryProvider(),
+                    transitionSpec = {
+                        // Slide in from right when navigating forward
+                        slideInHorizontally(initialOffsetX = { it }) togetherWith
+                                slideOutHorizontally(targetOffsetX = { -it })
+                    },
+                    popTransitionSpec = {
+                        // Slide in from left when navigating back
+                        slideInHorizontally(initialOffsetX = { -it }) togetherWith
+                                slideOutHorizontally(targetOffsetX = { it })
+                    },
+                    predictivePopTransitionSpec = {
+                        // Slide in from left when navigating back
+                        slideInHorizontally(initialOffsetX = { -it }) togetherWith
+                                slideOutHorizontally(targetOffsetX = { it })
+                    },
+                    modifier = Modifier.fillMaxSize()
+                )
+            }
         }
     }
 }

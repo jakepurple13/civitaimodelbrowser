@@ -16,7 +16,7 @@ buildscript {
         maven("https://jogamp.org/deployment/maven/")
     }
     dependencies {
-        classpath("com.android.tools:r8:8.11.18")
+        classpath("com.android.tools:r8:8.13.17")
     }
 }
 

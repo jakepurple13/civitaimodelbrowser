@@ -30,8 +30,10 @@ import androidx.compose.foundation.text.input.clearText
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.ArrowUpward
+import androidx.compose.material.icons.filled.Block
 import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.QrCodeScanner
 import androidx.compose.material.icons.filled.Refresh
@@ -42,6 +44,8 @@ import androidx.compose.material3.AppBarWithSearch
 import androidx.compose.material3.AssistChipDefaults
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularWavyProgressIndicator
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ElevatedAssistChip
 import androidx.compose.material3.ExpandedFullScreenSearchBar
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -117,6 +121,7 @@ fun CivitAiScreen(
     onNavigateToQrCode: () -> Unit,
     onNavigateToUser: (String) -> Unit,
     onNavigateToDetailImages: (Long, String) -> Unit,
+    onNavigateToBlacklisted: () -> Unit,
 ) {
     val hazeState = remember { HazeState() }
     val db = koinInject<FavoritesDao>()
@@ -151,6 +156,7 @@ fun CivitAiScreen(
                 onNavigateToQrCode = onNavigateToQrCode,
                 onNavigateToUser = onNavigateToUser,
                 onNavigateToDetailImages = onNavigateToDetailImages,
+                onNavigateToBlacklisted = onNavigateToBlacklisted,
                 modifier = Modifier.ifTrue(showBlur) {
                     hazeEffect(hazeState) {
                         progressive = HazeProgressive.verticalGradient(
@@ -200,13 +206,6 @@ fun CivitAiScreen(
                 )
             }
 
-            /*VerticalScrollbar(
-                rememberScrollbarAdapter(lazyGridState),
-                modifier = Modifier
-                    .align(Alignment.CenterEnd)
-                    .fillMaxHeight(),
-            )*/
-
             PullRefreshIndicator(
                 refreshing = lazyPagingItems.loadState.refresh == LoadState.Loading || lazyPagingItems.loadState.append == LoadState.Loading,
                 state = pullToRefreshState,
@@ -216,14 +215,6 @@ fun CivitAiScreen(
             )
         }
     }
-
-    /*SearchView(
-        viewModel = searchViewModel,
-        database = database.filterIsInstance<FavoriteModel.Model>(),
-        showNsfw = showNsfw,
-        blurStrength = blurStrength,
-        blacklisted = blacklisted,
-    )*/
 }
 
 @OptIn(
@@ -540,11 +531,13 @@ private fun AppSearchAppBar(
     onNavigateToQrCode: () -> Unit,
     onNavigateToUser: (String) -> Unit,
     onNavigateToDetailImages: (Long, String) -> Unit,
+    onNavigateToBlacklisted: () -> Unit,
     showBlur: Boolean,
     modifier: Modifier = Modifier,
     viewModel: CivitAiSearchViewModel = koinViewModel(),
 ) {
     val searchBarState = rememberSearchBarState()
+    val lazyGridState = rememberLazyGridState()
 
     /*LaunchedEffect(searchBarState.currentValue) {
         if (searchBarState.currentValue != SearchBarValue.Expanded) {
@@ -632,12 +625,38 @@ private fun AppSearchAppBar(
             ) { Icon(Icons.Default.QrCodeScanner, null) }
 
             IconButton(
-                onClick = onNavigateToSettings
-            ) { Icon(Icons.Default.Settings, null) }
-
-            IconButton(
                 onClick = onNavigateToFavorites
             ) { Icon(Icons.Default.Favorite, null) }
+
+            Box {
+                var showDropDown by remember { mutableStateOf(false) }
+
+                DropdownMenu(
+                    expanded = showDropDown,
+                    onDismissRequest = { showDropDown = false }
+                ) {
+                    DropdownMenuItem(
+                        text = { Text("Settings") },
+                        leadingIcon = { Icon(Icons.Default.Settings, null) },
+                        onClick = {
+                            showDropDown = false
+                            onNavigateToSettings()
+                        }
+                    )
+                    DropdownMenuItem(
+                        text = { Text("Blacklisted") },
+                        leadingIcon = { Icon(Icons.Default.Block, null) },
+                        onClick = {
+                            showDropDown = false
+                            onNavigateToBlacklisted()
+                        }
+                    )
+                }
+
+                IconButton(
+                    onClick = { showDropDown = !showDropDown }
+                ) { Icon(Icons.Default.MoreVert, null) }
+            }
         },
         colors = appBarWithSearchColors,
         modifier = modifier
@@ -650,28 +669,20 @@ private fun AppSearchAppBar(
             columns = adaptiveGridCell(),
             verticalArrangement = Arrangement.spacedBy(4.dp),
             horizontalArrangement = Arrangement.spacedBy(4.dp),
+            state = lazyGridState,
             modifier = Modifier
                 .padding(4.dp)
                 .fillMaxSize()
         ) {
             modelItems(
                 lazyPagingItems = lazyPagingItems,
-                onNavigateToDetail = { id ->
-                    scope.launch { searchBarState.animateToCollapsed() }
-                        .invokeOnCompletion { onNavigateToDetail(id) }
-                },
+                onNavigateToDetail = onNavigateToDetail,
                 showNsfw = showNsfw,
                 blurStrength = blurStrength,
                 database = database,
                 blacklisted = blacklisted,
-                onNavigateToUser = { username ->
-                    scope.launch { searchBarState.animateToCollapsed() }
-                        .invokeOnCompletion { onNavigateToUser(username) }
-                },
-                onNavigateToDetailImages = { id, name ->
-                    scope.launch { searchBarState.animateToCollapsed() }
-                        .invokeOnCompletion { onNavigateToDetailImages(id, name) }
-                },
+                onNavigateToUser = onNavigateToUser,
+                onNavigateToDetailImages = onNavigateToDetailImages,
             )
         }
     }

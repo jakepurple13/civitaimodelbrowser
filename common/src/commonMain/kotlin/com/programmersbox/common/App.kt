@@ -234,7 +234,8 @@ fun cmpModules() = module {
                         Screen.DetailsImage(id.toString(), name)
                     )
                 )
-            }
+            },
+            onNavigateToBlacklisted = { backStack.add(Screen.Settings.Blacklisted) }
         )
     }
 
@@ -292,7 +293,6 @@ fun cmpModules() = module {
             onImport = actions.onImport,
             export = actions.export,
             import = actions.import,
-            onNavigateToBlacklisted = { backStack.add(Screen.Settings.Blacklisted) },
             onNavigateToQrCode = { backStack.add(Screen.QrCode) }
         )
     }
@@ -305,7 +305,6 @@ fun cmpModules() = module {
             onImport = actions.onImport,
             export = actions.export,
             import = actions.import,
-            onNavigateToBlacklisted = { backStack.add(Screen.Settings.Blacklisted) },
             onNavigateToQrCode = { backStack.add(Screen.QrCode) }
         )
     }

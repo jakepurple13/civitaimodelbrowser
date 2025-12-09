@@ -40,7 +40,7 @@ kotlin {
             api(compose.foundation)
             api(compose.materialIconsExtended)
             //api(compose.material3)
-            api("org.jetbrains.compose.material3:material3:1.10.0-alpha05")
+            api(libs.material3)
             api(compose.components.resources)
             api(libs.ktor.core)
             api(libs.ktor.content.negotiation)

@@ -56,7 +56,6 @@ fun SettingsScreen(
     onImport: () -> String = { "" },
     export: @Composable () -> Unit = {},
     import: (@Composable () -> Unit)? = null,
-    onNavigateToBlacklisted: () -> Unit,
     onNavigateToQrCode: () -> Unit,
 ) {
     val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
@@ -152,16 +151,6 @@ fun SettingsScreen(
                             .blur(nsfwBlurStrength.dp)
                     )
                 }
-            }
-
-            HorizontalDivider()
-
-            Card(
-                onClick = onNavigateToBlacklisted
-            ) {
-                ListItem(
-                    headlineContent = { Text("View Blacklisted Models") }
-                )
             }
 
             HorizontalDivider()

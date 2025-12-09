@@ -33,19 +33,17 @@ import androidx.compose.material.icons.filled.ArrowUpward
 import androidx.compose.material.icons.filled.Block
 import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.Favorite
-import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.QrCodeScanner
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.AppBarRow
 import androidx.compose.material3.AppBarWithSearch
 import androidx.compose.material3.AssistChipDefaults
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularWavyProgressIndicator
-import androidx.compose.material3.DropdownMenu
-import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ElevatedAssistChip
 import androidx.compose.material3.ExpandedFullScreenSearchBar
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -620,42 +618,29 @@ private fun AppSearchAppBar(
             }
         },
         actions = {
-            IconButton(
-                onClick = onNavigateToQrCode
-            ) { Icon(Icons.Default.QrCodeScanner, null) }
-
-            IconButton(
-                onClick = onNavigateToFavorites
-            ) { Icon(Icons.Default.Favorite, null) }
-
-            Box {
-                var showDropDown by remember { mutableStateOf(false) }
-
-                DropdownMenu(
-                    expanded = showDropDown,
-                    onDismissRequest = { showDropDown = false }
-                ) {
-                    DropdownMenuItem(
-                        text = { Text("Settings") },
-                        leadingIcon = { Icon(Icons.Default.Settings, null) },
-                        onClick = {
-                            showDropDown = false
-                            onNavigateToSettings()
-                        }
-                    )
-                    DropdownMenuItem(
-                        text = { Text("Blacklisted") },
-                        leadingIcon = { Icon(Icons.Default.Block, null) },
-                        onClick = {
-                            showDropDown = false
-                            onNavigateToBlacklisted()
-                        }
-                    )
-                }
-
-                IconButton(
-                    onClick = { showDropDown = !showDropDown }
-                ) { Icon(Icons.Default.MoreVert, null) }
+            AppBarRow(
+                maxItemCount = 3
+            ) {
+                clickableItem(
+                    onClick = onNavigateToQrCode,
+                    icon = { Icon(Icons.Default.QrCodeScanner, null) },
+                    label = "QR Code Scanner"
+                )
+                clickableItem(
+                    onClick = onNavigateToFavorites,
+                    icon = { Icon(Icons.Default.Favorite, null) },
+                    label = "Favorites"
+                )
+                clickableItem(
+                    onClick = onNavigateToSettings,
+                    icon = { Icon(Icons.Default.Settings, null) },
+                    label = "Settings"
+                )
+                clickableItem(
+                    onClick = onNavigateToBlacklisted,
+                    icon = { Icon(Icons.Default.Block, null) },
+                    label = "Blacklisted"
+                )
             }
         },
         colors = appBarWithSearchColors,

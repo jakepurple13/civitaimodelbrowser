@@ -33,6 +33,7 @@ import androidx.compose.material.icons.filled.ArrowUpward
 import androidx.compose.material.icons.filled.Block
 import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.material.icons.filled.Image
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.QrCodeScanner
 import androidx.compose.material.icons.filled.Refresh
@@ -120,6 +121,7 @@ fun CivitAiScreen(
     onNavigateToUser: (String) -> Unit,
     onNavigateToDetailImages: (Long, String) -> Unit,
     onNavigateToBlacklisted: () -> Unit,
+    onNavigateToImages: () -> Unit,
 ) {
     val hazeState = remember { HazeState() }
     val db = koinInject<FavoritesDao>()
@@ -154,6 +156,7 @@ fun CivitAiScreen(
                 onNavigateToQrCode = onNavigateToQrCode,
                 onNavigateToUser = onNavigateToUser,
                 onNavigateToDetailImages = onNavigateToDetailImages,
+                onNavigateToImages = onNavigateToImages,
                 onNavigateToBlacklisted = onNavigateToBlacklisted,
                 modifier = Modifier.ifTrue(showBlur) {
                     hazeEffect(hazeState) {
@@ -528,6 +531,7 @@ private fun AppSearchAppBar(
     onNavigateToFavorites: () -> Unit,
     onNavigateToSettings: () -> Unit,
     onNavigateToQrCode: () -> Unit,
+    onNavigateToImages: () -> Unit,
     onNavigateToUser: (String) -> Unit,
     onNavigateToDetailImages: (Long, String) -> Unit,
     onNavigateToBlacklisted: () -> Unit,
@@ -631,6 +635,11 @@ private fun AppSearchAppBar(
                     onClick = onNavigateToFavorites,
                     icon = { Icon(Icons.Default.Favorite, null) },
                     label = "Favorites"
+                )
+                clickableItem(
+                    onClick = onNavigateToImages,
+                    icon = { Icon(Icons.Default.Image, null) },
+                    label = "Images"
                 )
                 clickableItem(
                     onClick = onNavigateToSettings,

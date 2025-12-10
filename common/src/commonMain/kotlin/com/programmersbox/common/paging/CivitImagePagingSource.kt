@@ -5,12 +5,10 @@ import androidx.paging.PagingState
 import com.programmersbox.common.CivitAiCustomImages
 import com.programmersbox.common.CustomModelImage
 import com.programmersbox.common.Network
-import com.programmersbox.common.PAGE_LIMIT
 
-class CivitDetailsImagePagingSource(
+class CivitImagePagingSource(
     private val network: Network,
     private val includeNsfw: Boolean = true,
-    private val modelId: String?,
 ) : PagingSource<String, CustomModelImage>() {
     override val keyReuseSupported: Boolean get() = true
 
@@ -22,10 +20,8 @@ class CivitDetailsImagePagingSource(
 
     override suspend fun load(params: LoadParams<String>): LoadResult<String, CustomModelImage> {
         val request = if (params.key == null) {
-            network.fetchAllImagesByModel(
-                modelId = modelId.orEmpty(),
+            network.fetchAllImages(
                 page = 1,
-                perPage = PAGE_LIMIT,
                 includeNsfw = includeNsfw
             )
         } else {

@@ -20,9 +20,9 @@ data class Models(
     val description: String?,
     val type: ModelType = ModelType.Other,
     val nsfw: Boolean,
-    val allowNoCredit: Boolean,
-    val allowDerivatives: Boolean,
-    val allowDifferentLicense: Boolean,
+    val allowNoCredit: Boolean = false,
+    val allowDerivatives: Boolean = false,
+    val allowDifferentLicense: Boolean = false,
     val tags: List<String>,
     val modelVersions: List<ModelVersion> = emptyList(),
     val creator: Creator? = null,
@@ -83,8 +83,7 @@ data class ModelImage(
 @Serializable
 data class CivitAiCustomImages(
     val items: List<CustomModelImage>,
-    val nextPage: String? = null,
-    val prevPage: String? = null,
+    val metadata: PageData,
 )
 
 @Stable

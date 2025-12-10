@@ -34,7 +34,6 @@ class CivitAiViewModel(
     network: Network,
     dataStore: DataStore,
 ) : ViewModel() {
-
     var pager by mutableStateOf<Flow<PagingData<Models>>>(emptyFlow())
 
     init {
@@ -53,7 +52,6 @@ class CivitAiViewModel(
             }
             .launchIn(viewModelScope)
     }
-
 }
 
 class CivitAiSearchViewModel @OptIn(ExperimentalMaterial3Api::class) constructor(

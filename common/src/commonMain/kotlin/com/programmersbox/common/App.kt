@@ -35,6 +35,8 @@ import com.programmersbox.common.details.CivitAiModelImagesViewModel
 import com.programmersbox.common.home.CivitAiScreen
 import com.programmersbox.common.home.CivitAiSearchViewModel
 import com.programmersbox.common.home.CivitAiViewModel
+import com.programmersbox.common.images.CivitAiImagesScreen
+import com.programmersbox.common.images.CivitAiImagesViewModel
 import com.programmersbox.common.qrcode.QrCodeScannerViewModel
 import com.programmersbox.common.qrcode.ScanQrCode
 import dev.chrisbanes.haze.LocalHazeStyle
@@ -133,6 +135,8 @@ fun cmpModules() = module {
     viewModelOf(::FavoritesViewModel)
     viewModelOf(::QrCodeScannerViewModel)
 
+    viewModelOf(::CivitAiImagesViewModel)
+
     singleOf(::NavigationHandler)
 
     navigation<Screen.List> {
@@ -143,6 +147,7 @@ fun cmpModules() = module {
             onNavigateToSettings = { backStack.add(Screen.Settings) },
             onNavigateToQrCode = { backStack.add(Screen.QrCode) },
             onNavigateToUser = { username -> backStack.add(Screen.User(username)) },
+            onNavigateToImages = { backStack.add(Screen.Images) },
             onNavigateToDetailImages = { id, name ->
                 backStack.addAll(
                     listOf(
@@ -155,6 +160,7 @@ fun cmpModules() = module {
         )
     }
 
+    //TODO: Maybe add an image searcher?
     navigation<Screen.Detail>(
         metadata = ListDetailSceneStrategy.listPane()
     ) {
@@ -237,6 +243,12 @@ fun cmpModules() = module {
             }
         )
     }
+    navigation<Screen.Images> {
+        val backStack = koinInject<NavigationHandler>().backStack
+        CivitAiImagesScreen(
+            onNavigateToUser = { username -> backStack.add(Screen.User(username)) }
+        )
+    }
 }
 
 class NavigationHandler {
@@ -282,4 +294,7 @@ sealed class Screen {
 
     @Serializable
     data object QrCode : NavKey
+
+    @Serializable
+    data object Images : NavKey
 }

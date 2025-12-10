@@ -88,4 +88,12 @@ class Network {
         client.get("images?limit=$perPage&page=$page&modelId=$modelId${if (!includeNsfw) "&nsfw=None" else ""}")
             .body<CivitAiCustomImages>()
     }
+
+    suspend fun fetchAllImages(
+        page: Int,
+        includeNsfw: Boolean = true,
+    ) = runCatching {
+        client.get("images?page=$page&nsfw=$includeNsfw")
+            .body<CivitAiCustomImages>()
+    }
 }

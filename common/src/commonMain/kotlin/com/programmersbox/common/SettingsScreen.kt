@@ -15,6 +15,9 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.BlurOff
 import androidx.compose.material.icons.filled.BlurOn
 import androidx.compose.material.icons.filled.BorderBottom
+import androidx.compose.material.icons.filled.NoAdultContent
+import androidx.compose.material.icons.filled.Visibility
+import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material3.Card
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
@@ -105,7 +108,8 @@ fun SettingsScreen(
                         checked = includeNsfwEnabled,
                         onCheckedChange = { scope.launch { includeNsfw.update(it) } }
                     )
-                }
+                },
+                leadingContent = { Icon(Icons.Default.NoAdultContent, null) }
             )
 
             AnimatedVisibility(includeNsfwEnabled) {
@@ -115,6 +119,15 @@ fun SettingsScreen(
                         Switch(
                             checked = isNsfwEnabled,
                             onCheckedChange = { scope.launch { showNsfw.update(it) } }
+                        )
+                    },
+                    leadingContent = {
+                        Icon(
+                            if (isNsfwEnabled)
+                                Icons.Default.Visibility
+                            else
+                                Icons.Default.VisibilityOff,
+                            null
                         )
                     }
                 )

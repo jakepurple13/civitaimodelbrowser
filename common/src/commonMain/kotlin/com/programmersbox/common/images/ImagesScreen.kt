@@ -43,7 +43,6 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import chaintech.videoplayer.ui.preview.VideoPreviewComposable
 import com.programmersbox.common.BackButton
 import com.programmersbox.common.ComposableUtils
-import com.programmersbox.common.ContextMenu
 import com.programmersbox.common.CustomModelImage
 import com.programmersbox.common.DataStore
 import com.programmersbox.common.adaptiveGridCell
@@ -67,7 +66,6 @@ fun CivitAiImagesScreen(
     viewModel: CivitAiImagesViewModel = koinViewModel(),
     onNavigateToUser: (String) -> Unit,
 ) {
-
     val hazeState = remember { HazeState() }
     val database = koinInject<FavoritesDao>()
     val dataStore = koinInject<DataStore>()
@@ -77,7 +75,9 @@ fun CivitAiImagesScreen(
         .collectAsStateWithLifecycle(6f)
     val showBlur by dataStore.rememberShowBlur()
     val uriHandler = LocalUriHandler.current
-    val lazyPagingItems = viewModel.pager.collectAsLazyPagingItems()
+    val lazyPagingItems = viewModel
+        .pager
+        .collectAsLazyPagingItems()
 
     val favoriteList by viewModel
         .favoriteList
@@ -173,30 +173,21 @@ fun CivitAiImagesScreen(
                         onDialogDismiss = { showDialog = false }
                     )
 
-                    ContextMenu(
+                    ImageCard(
+                        images = models,
+                        showNsfw = showNsfw,
+                        nsfwBlurStrength = nsfwBlurStrength,
+                        isFavorite = favoriteList.any { f -> f.imageUrl == models.url },
                         isBlacklisted = blacklisted.any { it.imageUrl == models.url },
-                        blacklistItems = blacklisted,
-                        modelId = models.postId ?: 0L,
-                        name = models.url,
-                        nsfw = models.nsfwLevel.canNotShow(),
-                        imageUrl = models.url,
-                    ) {
-                        ImageCard(
-                            images = models,
-                            showNsfw = showNsfw,
-                            nsfwBlurStrength = nsfwBlurStrength,
-                            isFavorite = favoriteList.any { f -> f.imageUrl == models.url },
-                            isBlacklisted = blacklisted.any { it.imageUrl == models.url },
-                            onClick = {
-                                if (models.height < 2000 || models.width < 2000) {
-                                    sheetDetails = models
-                                } else {
-                                    uriHandler.openUri(models.url)
-                                }
-                            },
-                            onLongClick = { showDialog = true }
-                        )
-                    }
+                        onClick = {
+                            if (models.height < 2000 || models.width < 2000) {
+                                sheetDetails = models
+                            } else {
+                                uriHandler.openUri(models.url)
+                            }
+                        },
+                        onLongClick = { showDialog = true }
+                    )
                 }
             }
         }

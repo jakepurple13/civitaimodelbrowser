@@ -1,5 +1,5 @@
 [versions]
-appVersion = "3.4.0"
+appVersion = "3.4.1"
 
 blurhashVersion = "0.0-4-ALPHA"
 browser = "1.9.0"

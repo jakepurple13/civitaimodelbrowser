@@ -93,7 +93,7 @@ class Network {
         page: Int,
         includeNsfw: Boolean = true,
     ) = runCatching {
-        client.get("images?page=$page&nsfw=$includeNsfw")
+        client.get("images?page=$page&nsfw=$includeNsfw&sort=Newest")
             .body<CivitAiCustomImages>()
     }
 }

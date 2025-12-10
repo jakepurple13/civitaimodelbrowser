@@ -3,6 +3,8 @@ package com.programmersbox.common.components
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -10,9 +12,14 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.pager.HorizontalPager
+import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
@@ -46,6 +53,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.ColorMatrix
@@ -448,4 +456,76 @@ private fun VideoSheetContent(
             }
         }
     }
+}
+
+@Composable
+fun MultipleImageSheet(
+    urls: List<String>,
+    onDismiss: () -> Unit,
+    actions: @Composable RowScope.() -> Unit = {},
+    moreInfo: @Composable () -> Unit = {},
+) {
+    val scope = rememberCoroutineScope()
+    SheetDetails(
+        onDismiss = onDismiss,
+        content = {
+            val state = rememberPagerState { urls.size }
+            Column {
+                Row(
+                    horizontalArrangement = Arrangement.Center,
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    repeat(state.pageCount) { iteration ->
+                        val color = if (state.currentPage == iteration)
+                            Color.DarkGray
+                        else
+                            Color.LightGray
+                        Box(
+                            modifier = Modifier
+                                .padding(2.dp)
+                                .clip(CircleShape)
+                                .background(color)
+                                .size(16.dp)
+                                .clickable {
+                                    scope.launch {
+                                        state.animateScrollToPage(
+                                            iteration
+                                        )
+                                    }
+                                }
+                        )
+                    }
+                }
+                HorizontalPager(
+                    state = state
+                ) { page ->
+                    val image = urls[page]
+
+                    if (image.endsWith("mp4")) {
+                        VideoSheetContent(
+                            video = image,
+                            isNsfw = false,
+                            isFavorite = false,
+                            onFavorite = {},
+                            onRemoveFromFavorite = {},
+                            nsfwText = "",
+                            actions = actions,
+                            moreInfo = moreInfo,
+                        )
+                    } else {
+                        SheetContent(
+                            image = image,
+                            isNsfw = false,
+                            isFavorite = false,
+                            onFavorite = {},
+                            onRemoveFromFavorite = {},
+                            nsfwText = "",
+                            moreInfo = moreInfo,
+                            actions = actions,
+                        )
+                    }
+                }
+            }
+        }
+    )
 }

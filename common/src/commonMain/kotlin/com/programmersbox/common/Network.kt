@@ -90,10 +90,9 @@ class Network {
     }
 
     suspend fun fetchAllImages(
-        page: Int,
         includeNsfw: Boolean = true,
     ) = runCatching {
-        client.get("images?page=$page&nsfw=$includeNsfw&sort=Newest")
+        client.get("images?nsfw=$includeNsfw&sort=Newest")
             .body<CivitAiCustomImages>()
     }
 }

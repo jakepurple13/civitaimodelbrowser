@@ -9,21 +9,18 @@ import com.programmersbox.common.Network
 class CivitImagePagingSource(
     private val network: Network,
     private val includeNsfw: Boolean = true,
-) : PagingSource<String, CustomModelImage>() {
+) : PagingSource<String, Pair<Long, List<CustomModelImage>>>() {
     override val keyReuseSupported: Boolean get() = true
 
-    override fun getRefreshKey(state: PagingState<String, CustomModelImage>): String? {
+    override fun getRefreshKey(state: PagingState<String, Pair<Long, List<CustomModelImage>>>): String? {
         return state.anchorPosition
             ?.let { state.closestPageToPosition(it) }
             ?.let { it.prevKey ?: it.nextKey }
     }
 
-    override suspend fun load(params: LoadParams<String>): LoadResult<String, CustomModelImage> {
+    override suspend fun load(params: LoadParams<String>): LoadResult<String, Pair<Long, List<CustomModelImage>>> {
         val request = if (params.key == null) {
-            network.fetchAllImages(
-                page = 1,
-                includeNsfw = includeNsfw
-            )
+            network.fetchAllImages(includeNsfw = includeNsfw)
         } else {
             network.fetchRequest<CivitAiCustomImages>(params.key.orEmpty())
         }
@@ -31,7 +28,10 @@ class CivitImagePagingSource(
             .fold(
                 onSuccess = { response ->
                     LoadResult.Page(
-                        data = response.items,
+                        data = response
+                            .items
+                            .groupBy { it.postId ?: 0L }
+                            .toList(),
                         prevKey = response.metadata.prevPage,
                         nextKey = response.metadata.nextPage
                     )

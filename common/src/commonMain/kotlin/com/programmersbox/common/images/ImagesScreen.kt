@@ -1,5 +1,6 @@
 package com.programmersbox.common.images
 
+import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
@@ -9,9 +10,12 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.sizeIn
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material3.AssistChipDefaults
@@ -48,12 +52,13 @@ import com.programmersbox.common.DataStore
 import com.programmersbox.common.adaptiveGridCell
 import com.programmersbox.common.components.ImageSheet
 import com.programmersbox.common.components.LoadingImage
+import com.programmersbox.common.components.MultipleImageSheet
 import com.programmersbox.common.db.FavoritesDao
 import com.programmersbox.common.home.BlacklistHandling
 import com.programmersbox.common.ifTrue
 import com.programmersbox.common.paging.collectAsLazyPagingItems
 import com.programmersbox.common.paging.itemContentType
-import com.programmersbox.common.paging.itemKey
+import com.programmersbox.common.paging.itemKeyIndexed
 import dev.chrisbanes.haze.HazeState
 import dev.chrisbanes.haze.hazeEffect
 import dev.chrisbanes.haze.hazeSource
@@ -133,14 +138,33 @@ fun CivitAiImagesScreen(
         )
     }
 
+    var sheetDetailsMultiple by remember { mutableStateOf<List<CustomModelImage>?>(null) }
+
+    sheetDetailsMultiple?.let { sheetModel ->
+        MultipleImageSheet(
+            urls = sheetModel.map { it.url },
+            onDismiss = { sheetDetailsMultiple = null },
+            actions = {
+                sheetModel.firstOrNull()?.username?.let { creator ->
+                    TextButton(
+                        onClick = { onNavigateToUser(creator) },
+                    ) { Text(creator) }
+                }
+            },
+            moreInfo = { }
+        )
+    }
+
     Scaffold(
         topBar = {
             TopAppBar(
                 title = { Text("Images") },
                 navigationIcon = { BackButton() },
                 actions = { Text("(${lazyPagingItems.itemCount})") },
-                colors = if (showBlur) TopAppBarDefaults.topAppBarColors(containerColor = Color.Transparent)
-                else TopAppBarDefaults.topAppBarColors(),
+                colors = if (showBlur)
+                    TopAppBarDefaults.topAppBarColors(containerColor = Color.Transparent)
+                else
+                    TopAppBarDefaults.topAppBarColors(),
                 modifier = Modifier.ifTrue(showBlur) { hazeEffect(hazeState) }
             )
         },
@@ -157,37 +181,48 @@ fun CivitAiImagesScreen(
             items(
                 count = lazyPagingItems.itemCount,
                 contentType = lazyPagingItems.itemContentType(),
-                key = lazyPagingItems.itemKey { it.url }
+                //key = lazyPagingItems.itemKey { it.url }
+                key = lazyPagingItems.itemKeyIndexed { item, index -> "$item$index" }
             ) {
                 lazyPagingItems[it]?.let { models ->
+                    if (models.second.size > 1) {
+                        ImageCard2(
+                            images = models.second,
+                            showNsfw = showNsfw,
+                            nsfwBlurStrength = nsfwBlurStrength,
+                            onClick = { sheetDetailsMultiple = models.second },
+                            onLongClick = {}
+                        )
+                    } else {
+                        val modelInfo = models.second.first()
+                        var showDialog by remember { mutableStateOf(false) }
 
-                    var showDialog by remember { mutableStateOf(false) }
+                        BlacklistHandling(
+                            blacklisted = blacklisted,
+                            modelId = modelInfo.postId ?: 0L,
+                            name = modelInfo.url,
+                            nsfw = modelInfo.nsfwLevel.canNotShow(),
+                            imageUrl = modelInfo.url,
+                            showDialog = showDialog,
+                            onDialogDismiss = { showDialog = false }
+                        )
 
-                    BlacklistHandling(
-                        blacklisted = blacklisted,
-                        modelId = models.postId ?: 0L,
-                        name = models.url,
-                        nsfw = models.nsfwLevel.canNotShow(),
-                        imageUrl = models.url,
-                        showDialog = showDialog,
-                        onDialogDismiss = { showDialog = false }
-                    )
-
-                    ImageCard(
-                        images = models,
-                        showNsfw = showNsfw,
-                        nsfwBlurStrength = nsfwBlurStrength,
-                        isFavorite = favoriteList.any { f -> f.imageUrl == models.url },
-                        isBlacklisted = blacklisted.any { it.imageUrl == models.url },
-                        onClick = {
-                            if (models.height < 2000 || models.width < 2000) {
-                                sheetDetails = models
-                            } else {
-                                uriHandler.openUri(models.url)
-                            }
-                        },
-                        onLongClick = { showDialog = true }
-                    )
+                        ImageCard(
+                            images = modelInfo,
+                            showNsfw = showNsfw,
+                            nsfwBlurStrength = nsfwBlurStrength,
+                            isFavorite = favoriteList.any { f -> f.imageUrl == modelInfo.url },
+                            isBlacklisted = blacklisted.any { it.imageUrl == modelInfo.url },
+                            onClick = {
+                                if (modelInfo.height < 2000 || modelInfo.width < 2000) {
+                                    sheetDetails = modelInfo
+                                } else {
+                                    uriHandler.openUri(modelInfo.url)
+                                }
+                            },
+                            onLongClick = { showDialog = true }
+                        )
+                    }
                 }
             }
         }
@@ -196,7 +231,7 @@ fun CivitAiImagesScreen(
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-fun ImageCard(
+private fun ImageCard(
     images: CustomModelImage,
     showNsfw: Boolean,
     isFavorite: Boolean,
@@ -215,19 +250,21 @@ fun ImageCard(
             else -> null
         }?.let { BorderStroke(1.dp, it) },
         modifier = Modifier
-            .size(
-                width = ComposableUtils.IMAGE_WIDTH,
-                height = ComposableUtils.IMAGE_HEIGHT
+            .sizeIn(
+                minHeight = 100.dp,
+                maxHeight = ComposableUtils.IMAGE_HEIGHT / 2,
+                maxWidth = ComposableUtils.IMAGE_WIDTH
             )
             .clip(MaterialTheme.shapes.medium)
             .combinedClickable(
                 onClick = onClick,
                 onLongClick = onLongClick
             )
+            .animateContentSize()
     ) {
         Box(
-            modifier = Modifier.fillMaxSize(),
-            contentAlignment = Alignment.Center
+            contentAlignment = Alignment.Center,
+            modifier = Modifier.fillMaxSize()
         ) {
             if (images.height < 2000 || images.width < 2000) {
                 if (isBlacklisted) {
@@ -279,6 +316,105 @@ fun ImageCard(
             }
 
             if (images.nsfwLevel.canNotShow()) {
+                ElevatedAssistChip(
+                    label = { Text("NSFW") },
+                    onClick = {},
+                    colors = AssistChipDefaults.elevatedAssistChipColors(
+                        disabledLabelColor = MaterialTheme.colorScheme.error,
+                        disabledContainerColor = MaterialTheme.colorScheme.surface
+                    ),
+                    enabled = false,
+                    modifier = Modifier
+                        .padding(horizontal = 4.dp)
+                        .align(Alignment.TopEnd)
+                )
+            }
+        }
+    }
+}
+
+@OptIn(ExperimentalFoundationApi::class)
+@Composable
+private fun ImageCard2(
+    images: List<CustomModelImage>,
+    showNsfw: Boolean,
+    nsfwBlurStrength: Float,
+    onClick: () -> Unit,
+    onLongClick: () -> Unit,
+) {
+    Surface(
+        tonalElevation = 4.dp,
+        shape = MaterialTheme.shapes.medium,
+        modifier = Modifier
+            .sizeIn(
+                minHeight = 100.dp,
+                maxHeight = ComposableUtils.IMAGE_HEIGHT / 2,
+                maxWidth = ComposableUtils.IMAGE_WIDTH,
+            )
+            .clip(MaterialTheme.shapes.medium)
+            .combinedClickable(
+                onClick = onClick,
+                onLongClick = onLongClick
+            )
+            .animateContentSize()
+    ) {
+        Box(
+            contentAlignment = Alignment.Center,
+            modifier = Modifier.fillMaxSize()
+        ) {
+            Column(
+                modifier = Modifier.matchParentSize()
+            ) {
+                images.chunked(3).forEach { chunk ->
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .weight(1f, true)
+                    ) {
+                        chunk.forEach { image ->
+                            if (image.url.endsWith("mp4")) {
+                                Box(
+                                    contentAlignment = Alignment.Center,
+                                    modifier = Modifier
+                                        .background(Color.Black)
+                                        .weight(1f)
+                                ) {
+                                    Text(
+                                        "Video",
+                                        modifier = Modifier.padding(4.dp)
+                                    )
+                                }
+                            } else {
+                                LoadingImage(
+                                    imageUrl = image.url,
+                                    name = image.url,
+                                    isNsfw = image.nsfwLevel.canNotShow(),
+                                    hash = image.hash,
+                                    modifier = Modifier
+                                        .let {
+                                            if (!showNsfw && image.nsfwLevel.canNotShow()) {
+                                                it.blur(nsfwBlurStrength.dp)
+                                            } else {
+                                                it
+                                            }
+                                        }
+                                        .weight(1f)
+                                        .fillMaxWidth()
+                                )
+                            }
+                        }
+                    }
+                }
+            }
+
+            Box(
+                contentAlignment = Alignment.Center,
+                modifier = Modifier
+                    .size(48.dp)
+                    .background(Color.Black.copy(alpha = .5f), CircleShape)
+            ) { Text(images.size.toString()) }
+
+            if (images.any { it.nsfwLevel.canNotShow() }) {
                 ElevatedAssistChip(
                     label = { Text("NSFW") },
                     onClick = {},

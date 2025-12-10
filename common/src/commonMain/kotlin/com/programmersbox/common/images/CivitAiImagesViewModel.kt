@@ -34,7 +34,8 @@ class CivitAiImagesViewModel(
     network: Network,
     private val database: FavoritesDao,
 ) : ViewModel() {
-    var pager by mutableStateOf<Flow<PagingData<CustomModelImage>>>(emptyFlow())
+    var pager by
+    mutableStateOf<Flow<PagingData<Pair<Long, List<CustomModelImage>>>>>(emptyFlow())
 
     val favoriteList = database
         .getFavoriteModels()

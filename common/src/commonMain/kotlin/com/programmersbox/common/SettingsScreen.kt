@@ -265,6 +265,23 @@ fun SettingsScreen(
                 )
             }
 
+            Card(
+                onClick = { uriHandler.openUri("https://github.com/jakepurple13/civitaimodelbrowser/") }
+            ) {
+                ListItem(
+                    headlineContent = { Text("Open CivitAi Model Browser GitHub") },
+                    leadingContent = {
+                        Icon(
+                            Icons.Github,
+                            contentDescription = null,
+                            modifier = Modifier
+                                .size(48.dp)
+                                .clip(CircleShape)
+                        )
+                    }
+                )
+            }
+
             HorizontalDivider()
 
             Text(

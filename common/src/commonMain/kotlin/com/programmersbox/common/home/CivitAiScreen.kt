@@ -29,6 +29,7 @@ import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.foundation.text.input.clearText
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.List
 import androidx.compose.material.icons.filled.ArrowUpward
 import androidx.compose.material.icons.filled.Block
 import androidx.compose.material.icons.filled.Clear
@@ -85,6 +86,8 @@ import com.programmersbox.common.ContextMenu
 import com.programmersbox.common.DataStore
 import com.programmersbox.common.ModelType
 import com.programmersbox.common.Models
+import com.programmersbox.common.NavigationHandler
+import com.programmersbox.common.Screen
 import com.programmersbox.common.adaptiveGridCell
 import com.programmersbox.common.components.LoadingImage
 import com.programmersbox.common.components.ModelOptionsSheet
@@ -612,6 +615,8 @@ private fun AppSearchAppBar(
         )
     }
 
+    val navigationHandler = koinInject<NavigationHandler>()
+
     AppBarWithSearch(
         state = searchBarState,
         inputField = inputField,
@@ -650,6 +655,11 @@ private fun AppSearchAppBar(
                     onClick = onNavigateToBlacklisted,
                     icon = { Icon(Icons.Default.Block, null) },
                     label = "Blacklisted"
+                )
+                clickableItem(
+                    onClick = { navigationHandler.backStack.add(Screen.CustomList) },
+                    icon = { Icon(Icons.AutoMirrored.Filled.List, null) },
+                    label = "Lists"
                 )
             }
         },

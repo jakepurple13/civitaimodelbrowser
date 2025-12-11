@@ -12,6 +12,7 @@ import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyGridState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.runtime.Composable
@@ -224,4 +225,20 @@ fun BackButton() {
     IconButton(
         onClick = { navInput.backCompleted() }
     ) { Icon(Icons.AutoMirrored.Filled.ArrowBack, null) }
+}
+
+@Composable
+fun CloseButton() {
+    val navEvent = LocalNavigationEventDispatcherOwner.current?.navigationEventDispatcher
+
+    val navInput = remember { DirectNavigationEventInput() }
+
+    DisposableEffect(Unit) {
+        navEvent?.addInput(navInput)
+        onDispose { navEvent?.removeInput(navInput) }
+    }
+
+    IconButton(
+        onClick = { navInput.backCompleted() }
+    ) { Icon(Icons.Default.Close, null) }
 }

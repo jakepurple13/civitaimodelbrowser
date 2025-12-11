@@ -27,9 +27,11 @@ import androidx.compose.foundation.shape.CornerSize
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowRightAlt
+import androidx.compose.material.icons.automirrored.filled.PlaylistAdd
 import androidx.compose.material.icons.automirrored.filled.Sort
 import androidx.compose.material.icons.filled.ArrowUpward
 import androidx.compose.material.icons.filled.Clear
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.Image
 import androidx.compose.material.icons.filled.Preview
@@ -76,6 +78,7 @@ import com.programmersbox.common.DataStore
 import com.programmersbox.common.SheetDetails
 import com.programmersbox.common.adaptiveGridCell
 import com.programmersbox.common.components.ImageSheet
+import com.programmersbox.common.components.ListChoiceScreen
 import com.programmersbox.common.components.rememberModelOptionsScope
 import com.programmersbox.common.home.CardContent
 import com.programmersbox.common.ifTrue
@@ -599,6 +602,53 @@ fun FavoritesCreatorOptionsSheet(
             }
 
             item {
+                val listDao = koinInject<ListDao>()
+                val listState = rememberModalBottomSheetState(true)
+                var showLists by remember { mutableStateOf(false) }
+                if (showLists) {
+                    ModalBottomSheet(
+                        onDismissRequest = { showLists = false },
+                        containerColor = MaterialTheme.colorScheme.surface,
+                        sheetState = listState
+                    ) {
+                        ListChoiceScreen(
+                            id = models.id,
+                            onClick = { item ->
+                                scope.launch {
+                                    listDao.addToList(
+                                        uuid = item.item.uuid,
+                                        id = models.id,
+                                        name = models.name,
+                                        description = models.name,
+                                        type = models.modelType,
+                                        nsfw = false,
+                                        imageUrl = models.imageUrl,
+                                        favoriteType = FavoriteType.Model,
+                                        hash = null
+                                    )
+                                    listState.hide()
+                                }.invokeOnCompletion { showLists = false }
+                            },
+                            navigationIcon = {
+                                IconButton(
+                                    onClick = { showLists = false }
+                                ) { Icon(Icons.Default.Close, null) }
+                            },
+                        )
+                    }
+                }
+                Card(
+                    onClick = { showLists = true },
+                    shape = it
+                ) {
+                    ListItem(
+                        leadingContent = { Icon(Icons.AutoMirrored.Filled.PlaylistAdd, null) },
+                        headlineContent = { Text("Add to List") }
+                    )
+                }
+            }
+
+            item {
                 Card(
                     onClick = {
                         scope.launch {
@@ -707,6 +757,53 @@ fun FavoritesModelOptionsSheet(
                     ListItem(
                         leadingContent = { Icon(Icons.Default.Share, null) },
                         headlineContent = { Text("Share") }
+                    )
+                }
+            }
+
+            item {
+                val listDao = koinInject<ListDao>()
+                val listState = rememberModalBottomSheetState(true)
+                var showLists by remember { mutableStateOf(false) }
+                if (showLists) {
+                    ModalBottomSheet(
+                        onDismissRequest = { showLists = false },
+                        containerColor = MaterialTheme.colorScheme.surface,
+                        sheetState = listState
+                    ) {
+                        ListChoiceScreen(
+                            id = models.id,
+                            onClick = { item ->
+                                scope.launch {
+                                    listDao.addToList(
+                                        uuid = item.item.uuid,
+                                        id = models.id,
+                                        name = models.name,
+                                        description = models.description,
+                                        type = models.type,
+                                        nsfw = models.nsfw,
+                                        imageUrl = models.imageUrl,
+                                        favoriteType = FavoriteType.Model,
+                                        hash = models.hash
+                                    )
+                                    listState.hide()
+                                }.invokeOnCompletion { showLists = false }
+                            },
+                            navigationIcon = {
+                                IconButton(
+                                    onClick = { showLists = false }
+                                ) { Icon(Icons.Default.Close, null) }
+                            },
+                        )
+                    }
+                }
+                Card(
+                    onClick = { showLists = true },
+                    shape = it
+                ) {
+                    ListItem(
+                        leadingContent = { Icon(Icons.AutoMirrored.Filled.PlaylistAdd, null) },
+                        headlineContent = { Text("Add to List") }
                     )
                 }
             }

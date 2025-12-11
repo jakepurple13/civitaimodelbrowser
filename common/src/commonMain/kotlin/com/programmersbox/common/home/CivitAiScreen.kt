@@ -29,6 +29,7 @@ import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.foundation.text.input.clearText
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.List
 import androidx.compose.material.icons.filled.ArrowUpward
 import androidx.compose.material.icons.filled.Block
 import androidx.compose.material.icons.filled.Clear
@@ -73,6 +74,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalWindowInfo
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
@@ -122,6 +124,7 @@ fun CivitAiScreen(
     onNavigateToDetailImages: (Long, String) -> Unit,
     onNavigateToBlacklisted: () -> Unit,
     onNavigateToImages: () -> Unit,
+    onNavigateToCustomList: () -> Unit,
 ) {
     val hazeState = remember { HazeState() }
     val db = koinInject<FavoritesDao>()
@@ -158,6 +161,7 @@ fun CivitAiScreen(
                 onNavigateToDetailImages = onNavigateToDetailImages,
                 onNavigateToImages = onNavigateToImages,
                 onNavigateToBlacklisted = onNavigateToBlacklisted,
+                onNavigateToCustomList = onNavigateToCustomList,
                 modifier = Modifier.ifTrue(showBlur) {
                     hazeEffect(hazeState) {
                         progressive = HazeProgressive.verticalGradient(
@@ -535,6 +539,7 @@ private fun AppSearchAppBar(
     onNavigateToUser: (String) -> Unit,
     onNavigateToDetailImages: (Long, String) -> Unit,
     onNavigateToBlacklisted: () -> Unit,
+    onNavigateToCustomList: () -> Unit,
     showBlur: Boolean,
     modifier: Modifier = Modifier,
     viewModel: CivitAiSearchViewModel = koinViewModel(),
@@ -568,6 +573,7 @@ private fun AppSearchAppBar(
         SearchBarDefaults.InputField(
             searchBarState = searchBarState,
             textFieldState = viewModel.searchQuery,
+            enabled = LocalWindowInfo.current.isWindowFocused,
             onSearch = viewModel::onSearch,
             placeholder = {
                 if (searchBarState.currentValue == SearchBarValue.Collapsed) {
@@ -651,11 +657,18 @@ private fun AppSearchAppBar(
                     icon = { Icon(Icons.Default.Block, null) },
                     label = "Blacklisted"
                 )
+                clickableItem(
+                    onClick = onNavigateToCustomList,
+                    icon = { Icon(Icons.AutoMirrored.Filled.List, null) },
+                    label = "Lists"
+                )
             }
         },
         colors = appBarWithSearchColors,
         modifier = modifier
     )
+
+    //TODO: this is taking focus, preventing typing for the list name
     ExpandedFullScreenSearchBar(
         state = searchBarState,
         inputField = inputField,

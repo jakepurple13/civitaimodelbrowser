@@ -23,6 +23,7 @@ import androidx.navigation3.ui.NavDisplay
 import com.programmersbox.common.blacklisted.BlacklistedScreen
 import com.programmersbox.common.creator.CivitAiUserScreen
 import com.programmersbox.common.creator.CivitAiUserViewModel
+import com.programmersbox.common.db.AppDatabase
 import com.programmersbox.common.db.CivitDb
 import com.programmersbox.common.db.FavoritesDao
 import com.programmersbox.common.db.FavoritesUI
@@ -37,6 +38,10 @@ import com.programmersbox.common.home.CivitAiSearchViewModel
 import com.programmersbox.common.home.CivitAiViewModel
 import com.programmersbox.common.images.CivitAiImagesScreen
 import com.programmersbox.common.images.CivitAiImagesViewModel
+import com.programmersbox.common.lists.ListDetailScreen
+import com.programmersbox.common.lists.ListDetailViewModel
+import com.programmersbox.common.lists.ListScreen
+import com.programmersbox.common.lists.ListViewModel
 import com.programmersbox.common.qrcode.QrCodeScannerViewModel
 import com.programmersbox.common.qrcode.ScanQrCode
 import dev.chrisbanes.haze.LocalHazeStyle
@@ -112,7 +117,9 @@ internal fun App(
 fun cmpModules() = module {
     singleOf(::Network)
     single { DataStore.getStore(get()) }
-    single { getRoomDatabase(get()).getDao() }
+    single { getRoomDatabase(get()) }
+    single { get<AppDatabase>().getDao() }
+    single { get<AppDatabase>().getListDao() }
     viewModelOf(::CivitAiViewModel)
     viewModelOf(::CivitAiSearchViewModel)
     viewModel { CivitAiDetailViewModel(get(), it.get(), get()) }
@@ -134,8 +141,14 @@ fun cmpModules() = module {
     }
     viewModelOf(::FavoritesViewModel)
     viewModelOf(::QrCodeScannerViewModel)
-
     viewModelOf(::CivitAiImagesViewModel)
+    viewModelOf(::ListViewModel)
+    viewModel {
+        ListDetailViewModel(
+            listDao = get(),
+            uuid = it.get()
+        )
+    }
 
     singleOf(::NavigationHandler)
 
@@ -156,7 +169,8 @@ fun cmpModules() = module {
                     )
                 )
             },
-            onNavigateToBlacklisted = { backStack.add(Screen.Settings.Blacklisted) }
+            onNavigateToBlacklisted = { backStack.add(Screen.Settings.Blacklisted) },
+            onNavigateToCustomList = { backStack.add(Screen.CustomList) }
         )
     }
 
@@ -249,6 +263,24 @@ fun cmpModules() = module {
             onNavigateToUser = { username -> backStack.add(Screen.User(username)) }
         )
     }
+    navigation<Screen.CustomList>(
+        metadata = ListDetailSceneStrategy.listPane()
+    ) {
+        val backStack = koinInject<NavigationHandler>().backStack
+        ListScreen(
+            onNavigateToDetail = { id -> backStack.add(Screen.CustomListDetail(id)) }
+        )
+    }
+    navigation<Screen.CustomListDetail>(
+        metadata = ListDetailSceneStrategy.detailPane()
+    ) {
+        val backStack = koinInject<NavigationHandler>().backStack
+        ListDetailScreen(
+            viewModel = koinViewModel { parametersOf(it.uuid) },
+            onNavigateToDetail = { id -> backStack.add(Screen.Detail(id)) },
+            onNavigateToUser = { username -> backStack.add(Screen.User(username)) }
+        )
+    }
 }
 
 class NavigationHandler {
@@ -272,7 +304,7 @@ sealed class Screen {
     data object List : NavKey
 
     @Serializable
-    class Detail(val modelId: String) : NavKey
+    data class Detail(val modelId: String) : NavKey
 
     @Serializable
     data object Settings : NavKey {
@@ -287,14 +319,20 @@ sealed class Screen {
     data object Favorites : NavKey
 
     @Serializable
-    class User(val username: String) : NavKey
+    data class User(val username: String) : NavKey
 
     @Serializable
-    class DetailsImage(val modelId: String, val modelName: String) : NavKey
+    data class DetailsImage(val modelId: String, val modelName: String) : NavKey
 
     @Serializable
     data object QrCode : NavKey
 
     @Serializable
     data object Images : NavKey
+
+    @Serializable
+    data object CustomList : NavKey
+
+    @Serializable
+    data class CustomListDetail(val uuid: String) : NavKey
 }

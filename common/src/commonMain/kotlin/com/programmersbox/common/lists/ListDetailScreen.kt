@@ -1,6 +1,7 @@
 package com.programmersbox.common.lists
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.basicMarquee
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -8,14 +9,18 @@ import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.RemoveCircle
 import androidx.compose.material3.AlertDialog
@@ -31,10 +36,14 @@ import androidx.compose.material3.ListItemDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SheetState
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -51,26 +60,128 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import chaintech.videoplayer.ui.preview.VideoPreviewComposable
+import com.programmersbox.common.BackButton
 import com.programmersbox.common.ComposableUtils
 import com.programmersbox.common.DataStore
+import com.programmersbox.common.adaptiveGridCell
 import com.programmersbox.common.components.LoadingImage
+import com.programmersbox.common.db.CoverCard
 import com.programmersbox.common.db.CustomList
+import com.programmersbox.common.db.FavoriteType
 import com.programmersbox.common.db.toImageHash
+import com.programmersbox.common.ifTrue
+import dev.chrisbanes.haze.HazeProgressive
+import dev.chrisbanes.haze.HazeState
+import dev.chrisbanes.haze.LocalHazeStyle
+import dev.chrisbanes.haze.hazeEffect
+import dev.chrisbanes.haze.hazeSource
 import kotlinx.coroutines.launch
 import org.koin.compose.koinInject
 import org.koin.compose.viewmodel.koinViewModel
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ListDetailScreen(
     viewModel: ListDetailViewModel = koinViewModel(),
+    onNavigateToDetail: (String) -> Unit,
+    onNavigateToUser: (String) -> Unit,
 ) {
     val dataStore = koinInject<DataStore>()
+    val showBlur by dataStore.rememberShowBlur()
     val showNsfw by remember { dataStore.showNsfw.flow }
         .collectAsStateWithLifecycle(false)
     val blurStrength by remember { dataStore.hideNsfwStrength.flow }
         .collectAsStateWithLifecycle(6f)
 
+    val hazeState = remember { HazeState() }
+    val hazeStyle = LocalHazeStyle.current
 
+    val list = viewModel.customList
+
+    var showInfo by remember { mutableStateOf(false) }
+    val sheetState = rememberModalBottomSheetState(true)
+
+    if (showInfo) {
+        list?.let { list ->
+            InfoSheet(
+                customItem = list,
+                sheetState = sheetState,
+                showNsfw = showNsfw,
+                blurStrength = blurStrength.dp,
+                rename = viewModel::rename,
+                onDismiss = { showInfo = false },
+                onDeleteListAction = viewModel::deleteAll,
+                //TODO: Need to put in
+                onRemoveItemsAction = {}//viewModel::removeItems,
+            )
+        }
+    }
+
+    Scaffold(
+        topBar = {
+            //TODO: This needs to be a search
+            TopAppBar(
+                title = { Text(list?.item?.name.orEmpty(), modifier = Modifier.basicMarquee()) },
+                navigationIcon = { BackButton() },
+                actions = {
+                    Text("(${list?.list?.size ?: 0})")
+                    IconButton(
+                        onClick = { showInfo = true }
+                    ) { Icon(Icons.Default.Info, null) }
+                },
+                colors = if (showBlur) TopAppBarDefaults.topAppBarColors(containerColor = Color.Transparent)
+                else TopAppBarDefaults.topAppBarColors(),
+                modifier = Modifier.ifTrue(showBlur) {
+                    hazeEffect(hazeState, hazeStyle) {
+                        progressive = HazeProgressive.verticalGradient(
+                            startIntensity = 1f,
+                            endIntensity = 0f,
+                            preferPerformance = true
+                        )
+                    }
+                }
+            )
+        }
+    ) { padding ->
+        LazyVerticalGrid(
+            contentPadding = padding,
+            verticalArrangement = Arrangement.spacedBy(4.dp),
+            horizontalArrangement = Arrangement.spacedBy(4.dp),
+            columns = adaptiveGridCell(),
+            modifier = Modifier
+                .fillMaxSize()
+                .ifTrue(showBlur) { hazeSource(state = hazeState) }
+        ) {
+            items(list?.list.orEmpty()) { item ->
+                CoverCard(
+                    imageUrl = item.imageUrl.orEmpty(),
+                    name = item.name,
+                    type = item.type,
+                    isNsfw = item.nsfw,
+                    showNsfw = showNsfw,
+                    blurStrength = blurStrength.dp,
+                    blurHash = item.hash,
+                    onClick = {
+                        when (item.favoriteType) {
+                            FavoriteType.Model -> onNavigateToDetail(item.id.toString())
+                            FavoriteType.Image -> TODO()
+                            FavoriteType.Creator -> onNavigateToUser(item.name)
+                        }
+                    },
+                    onLongClick = {
+
+                    },
+                    modifier = Modifier
+                        .size(
+                            width = ComposableUtils.IMAGE_WIDTH,
+                            height = ComposableUtils.IMAGE_HEIGHT
+                        )
+                        .clip(MaterialTheme.shapes.medium)
+                        .animateItem()
+                )
+            }
+        }
+    }
 }
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)

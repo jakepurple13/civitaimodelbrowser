@@ -274,8 +274,11 @@ fun cmpModules() = module {
     navigation<Screen.CustomListDetail>(
         metadata = ListDetailSceneStrategy.detailPane()
     ) {
+        val backStack = koinInject<NavigationHandler>().backStack
         ListDetailScreen(
-            viewModel = koinViewModel { parametersOf(it.uuid) }
+            viewModel = koinViewModel { parametersOf(it.uuid) },
+            onNavigateToDetail = { id -> backStack.add(Screen.Detail(id)) },
+            onNavigateToUser = { username -> backStack.add(Screen.User(username)) }
         )
     }
 }

@@ -25,6 +25,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -48,6 +49,12 @@ import com.programmersbox.common.DataStore
 import com.programmersbox.common.components.LoadingImage
 import com.programmersbox.common.db.CustomList
 import com.programmersbox.common.db.toImageHash
+import com.programmersbox.common.ifTrue
+import dev.chrisbanes.haze.HazeProgressive
+import dev.chrisbanes.haze.HazeState
+import dev.chrisbanes.haze.LocalHazeStyle
+import dev.chrisbanes.haze.hazeEffect
+import dev.chrisbanes.haze.hazeSource
 import kotlinx.coroutines.launch
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.LocalDateTime
@@ -70,12 +77,15 @@ fun ListScreen(
 ) {
     val dataTimeFormatter = remember { DateTimeFormatItem(true) }
     val dataStore = koinInject<DataStore>()
+    val showBlur by dataStore.rememberShowBlur()
     val showNsfw by remember { dataStore.showNsfw.flow }
         .collectAsStateWithLifecycle(false)
     val blurStrength by remember { dataStore.hideNsfwStrength.flow }
         .collectAsStateWithLifecycle(6f)
 
     val scope = rememberCoroutineScope()
+    val hazeState = remember { HazeState() }
+    val hazeStyle = LocalHazeStyle.current
 
     Scaffold(
         topBar = {
@@ -122,6 +132,17 @@ fun ListScreen(
                     IconButton(
                         onClick = { showAdd = !showAdd }
                     ) { Icon(Icons.Default.Add, null) }
+                },
+                colors = if (showBlur) TopAppBarDefaults.topAppBarColors(containerColor = Color.Transparent)
+                else TopAppBarDefaults.topAppBarColors(),
+                modifier = Modifier.ifTrue(showBlur) {
+                    hazeEffect(hazeState, hazeStyle) {
+                        progressive = HazeProgressive.verticalGradient(
+                            startIntensity = 1f,
+                            endIntensity = 0f,
+                            preferPerformance = true
+                        )
+                    }
                 }
             )
         }
@@ -129,7 +150,9 @@ fun ListScreen(
         LazyColumn(
             contentPadding = padding,
             verticalArrangement = Arrangement.spacedBy(4.dp),
-            modifier = Modifier.fillMaxSize()
+            modifier = Modifier
+                .fillMaxSize()
+                .ifTrue(showBlur) { hazeSource(state = hazeState) }
         ) {
             items(viewModel.list) { list ->
                 ElevatedCard(

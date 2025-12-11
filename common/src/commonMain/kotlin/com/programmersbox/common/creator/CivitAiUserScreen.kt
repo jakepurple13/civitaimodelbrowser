@@ -11,22 +11,29 @@ import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.PlaylistAdd
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material.icons.filled.SearchOff
 import androidx.compose.material.icons.filled.Share
+import androidx.compose.material3.AppBarRow
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -37,8 +44,11 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.programmersbox.common.BackButton
 import com.programmersbox.common.DataStore
 import com.programmersbox.common.adaptiveGridCell
+import com.programmersbox.common.components.ListChoiceScreen
 import com.programmersbox.common.components.LoadingImage
+import com.programmersbox.common.db.FavoriteType
 import com.programmersbox.common.db.FavoritesDao
+import com.programmersbox.common.db.ListDao
 import com.programmersbox.common.home.modelItems
 import com.programmersbox.common.ifTrue
 import com.programmersbox.common.paging.collectAsLazyPagingItems
@@ -49,6 +59,7 @@ import dev.chrisbanes.haze.HazeState
 import dev.chrisbanes.haze.LocalHazeStyle
 import dev.chrisbanes.haze.hazeEffect
 import dev.chrisbanes.haze.hazeSource
+import kotlinx.coroutines.launch
 import org.koin.compose.koinInject
 import org.koin.compose.viewmodel.koinViewModel
 
@@ -86,6 +97,46 @@ fun CivitAiUserScreen(
         )
     }
 
+    val scope = rememberCoroutineScope()
+    var showLists by remember { mutableStateOf(false) }
+    val listState = rememberModalBottomSheetState(true)
+
+    if (showLists) {
+        val listDao = koinInject<ListDao>()
+        lazyPagingItems[0]?.creator?.let { creator ->
+            ModalBottomSheet(
+                onDismissRequest = { showLists = false },
+                containerColor = MaterialTheme.colorScheme.surface,
+                sheetState = listState
+            ) {
+                ListChoiceScreen(
+                    username = username,
+                    onClick = { item ->
+                        scope.launch {
+                            listDao.addToList(
+                                uuid = item.item.uuid,
+                                id = 0,
+                                name = creator.username.orEmpty(),
+                                description = null,
+                                type = "Creator",
+                                nsfw = false,
+                                imageUrl = creator.image,
+                                favoriteType = FavoriteType.Creator,
+                                hash = null
+                            )
+                            listState.hide()
+                        }.invokeOnCompletion { showLists = false }
+                    },
+                    navigationIcon = {
+                        IconButton(
+                            onClick = { showLists = false }
+                        ) { Icon(Icons.Default.Close, null) }
+                    },
+                )
+            }
+        }
+    }
+
     Scaffold(
         topBar = {
             TopAppBar(
@@ -99,26 +150,42 @@ fun CivitAiUserScreen(
                 actions = {
                     if (lazyPagingItems.itemSnapshotList.isNotEmpty()) {
                         lazyPagingItems[0]?.creator?.let { creator ->
-                            IconButton(
-                                onClick = { showQrCode = true }
-                            ) { Icon(Icons.Default.Share, null) }
-                            IconButton(
-                                onClick = {
-                                    if (favorites.any { it.name == viewModel.username }) {
-                                        viewModel.removeToFavorites(creator)
-                                    } else {
-                                        viewModel.addToFavorites(creator)
-                                    }
-                                }
+                            AppBarRow(
+                                maxItemCount = 2
                             ) {
-                                Icon(
-                                    if (favorites.any { it.name == viewModel.username })
-                                        Icons.Default.Favorite
-                                    else
-                                        Icons.Default.FavoriteBorder,
-                                    null
+                                clickableItem(
+                                    onClick = {
+                                        if (favorites.any { it.name == viewModel.username }) {
+                                            viewModel.removeToFavorites(creator)
+                                        } else {
+                                            viewModel.addToFavorites(creator)
+                                        }
+                                    },
+                                    icon = {
+                                        Icon(
+                                            if (favorites.any { it.name == viewModel.username })
+                                                Icons.Default.Favorite
+                                            else
+                                                Icons.Default.FavoriteBorder,
+                                            null
+                                        )
+                                    },
+                                    label = "Favorite"
+                                )
+
+                                clickableItem(
+                                    onClick = { showLists = true },
+                                    icon = { Icon(Icons.AutoMirrored.Filled.PlaylistAdd, null) },
+                                    label = "Lists"
+                                )
+
+                                clickableItem(
+                                    onClick = { showQrCode = true },
+                                    icon = { Icon(Icons.Default.Share, null) },
+                                    label = "Share"
                                 )
                             }
+
                             LoadingImage(
                                 creator.image.orEmpty(),
                                 modifier = Modifier

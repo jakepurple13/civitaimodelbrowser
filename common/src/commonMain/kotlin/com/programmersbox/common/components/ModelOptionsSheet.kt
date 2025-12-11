@@ -406,6 +406,82 @@ fun ListChoiceScreen(
     )
 }
 
+@Composable
+fun ListChoiceScreen(
+    username: String,
+    navigationIcon: @Composable () -> Unit = { CloseButton() },
+    onClick: (CustomList) -> Unit,
+) {
+    val dao = koinInject<ListDao>()
+    val scope = rememberCoroutineScope()
+    val list by dao
+        .getAllLists()
+        .collectAsStateWithLifecycle(emptyList())
+    ListBottomScreen(
+        title = "Choose a list",
+        list = list,
+        navigationIcon = navigationIcon,
+        onClick = onClick,
+        lazyListContent = {
+            item {
+                var showAdd by remember { mutableStateOf(false) }
+                ElevatedCard(
+                    onClick = { showAdd = !showAdd }
+                ) {
+                    ListItem(
+                        headlineContent = {
+                            Text(
+                                "Create New List",
+                                style = MaterialTheme.typography.titleLarge
+                            )
+                        },
+                        trailingContent = { Icon(Icons.Default.Add, null) }
+                    )
+                }
+                if (showAdd) {
+                    var name by remember { mutableStateOf("") }
+                    AlertDialog(
+                        onDismissRequest = { showAdd = false },
+                        title = { Text("Create New List") },
+                        text = {
+                            OutlinedTextField(
+                                value = name,
+                                onValueChange = { name = it },
+                                label = { Text("List Name") },
+                                singleLine = true,
+                                modifier = Modifier.fillMaxWidth()
+                            )
+                        },
+                        confirmButton = {
+                            TextButton(
+                                onClick = {
+                                    scope.launch {
+                                        dao.create(name)
+                                        showAdd = false
+                                    }
+                                },
+                                enabled = name.isNotEmpty()
+                            ) { Text("Confirm") }
+                        },
+                        dismissButton = {
+                            TextButton(
+                                onClick = { showAdd = false }
+                            ) { Text("Cancel") }
+                        }
+                    )
+                }
+            }
+        },
+        itemContent = {
+            ListBottomSheetItemModel(
+                primaryText = it.item.name,
+                trailingText = "(${it.list.size})",
+                icon = it.list.find { l -> l.name == username }?.let { Icons.Default.Check }
+            )
+        }
+    )
+}
+
 interface ModelOptionsScope {
     fun item(content: @Composable (Shape) -> Unit)
 

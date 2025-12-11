@@ -1,18 +1,25 @@
 package com.programmersbox.common.lists
 
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.animateColor
+import androidx.compose.animation.core.animateDp
+import androidx.compose.animation.core.updateTransition
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideOutHorizontally
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -32,9 +39,12 @@ import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.RemoveCircle
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.AppBarWithSearch
+import androidx.compose.material3.BottomAppBar
+import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardColors
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -55,6 +65,7 @@ import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.material3.rememberSearchBarState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -78,7 +89,9 @@ import com.programmersbox.common.adaptiveGridCell
 import com.programmersbox.common.components.LoadingImage
 import com.programmersbox.common.db.CoverCard
 import com.programmersbox.common.db.CustomList
+import com.programmersbox.common.db.CustomListInfo
 import com.programmersbox.common.db.FavoriteType
+import com.programmersbox.common.db.ListDao
 import com.programmersbox.common.db.toImageHash
 import com.programmersbox.common.ifTrue
 import dev.chrisbanes.haze.HazeProgressive
@@ -112,6 +125,48 @@ fun ListDetailScreen(
     var showInfo by remember { mutableStateOf(false) }
     val sheetState = rememberModalBottomSheetState(true)
 
+    var showRemoveItems by remember { mutableStateOf(false) }
+
+    if (showRemoveItems) {
+        list?.let {
+            ModalBottomSheet(
+                onDismissRequest = { showRemoveItems = false },
+                sheetState = rememberModalBottomSheetState(true),
+                containerColor = MaterialTheme.colorScheme.surface,
+            ) {
+                RemoveItemsSheet(
+                    customList = it,
+                    showNsfw = showNsfw,
+                    blurStrength = blurStrength.dp,
+                    onDismiss = { showRemoveItems = false },
+                )
+            }
+        }
+    }
+
+    var showDeleteDialog by remember { mutableStateOf(false) }
+
+    if (showDeleteDialog) {
+        AlertDialog(
+            onDismissRequest = { showDeleteDialog = false },
+            title = { Text("Delete List") },
+            text = { Text("Are you sure you want to delete this list?") },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        viewModel.deleteAll()
+                        showDeleteDialog = false
+                    }
+                ) { Text("Yes") }
+            },
+            dismissButton = {
+                TextButton(
+                    onClick = { showDeleteDialog = false }
+                ) { Text("No") }
+            }
+        )
+    }
+
     if (showInfo) {
         list?.let { list ->
             InfoSheet(
@@ -121,9 +176,8 @@ fun ListDetailScreen(
                 blurStrength = blurStrength.dp,
                 rename = viewModel::rename,
                 onDismiss = { showInfo = false },
-                onDeleteListAction = viewModel::deleteAll,
-                //TODO: Need to put in
-                onRemoveItemsAction = {},//viewModel::removeItems,
+                onDeleteListAction = { showDeleteDialog = true },
+                onRemoveItemsAction = { showRemoveItems = true },
                 setNewCoverImage = { url, hash ->
                     viewModel.setCoverImage(url, hash)
                 },
@@ -442,8 +496,8 @@ private fun InfoSheet(
                     onClick = {
                         scope.launch { sheetState.hide() }
                             .invokeOnCompletion {
-                                onDismiss()
                                 onRemoveItemsAction()
+                                onDismiss()
                             }
                     },
                     colors = CardDefaults.cardColors(
@@ -459,8 +513,8 @@ private fun InfoSheet(
                     onClick = {
                         scope.launch { sheetState.hide() }
                             .invokeOnCompletion {
-                                onDismiss()
                                 onDeleteListAction()
+                                onDismiss()
                             }
                     },
                     colors = CardDefaults.cardColors(
@@ -541,5 +595,132 @@ fun ImageLoad(
                 }
             },
         )
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun RemoveItemsSheet(
+    customList: CustomList,
+    listRepository: ListDao = koinInject(),
+    showNsfw: Boolean,
+    blurStrength: Dp,
+    onDismiss: () -> Unit,
+) {
+    val itemsToDelete = remember { mutableStateListOf<CustomListInfo>() }
+    var showPopup by remember { mutableStateOf(false) }
+    var removing by remember { mutableStateOf(false) }
+
+    val scope = rememberCoroutineScope()
+
+    if (showPopup) {
+        val onPopupDismiss = { showPopup = false }
+
+        AlertDialog(
+            onDismissRequest = if (removing) {
+                {}
+            } else onPopupDismiss,
+            title = { Text("Delete") },
+            text = { Text("Are you sure you want to remove ${itemsToDelete.size} items from ${customList.item.name}?") },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        removing = true
+                        scope.launch {
+                            runCatching {
+                                itemsToDelete.forEach { item -> listRepository.removeItem(item) }
+                                listRepository.updateFullList(customList.item)
+                            }.onSuccess {
+                                removing = false
+                                itemsToDelete.clear()
+                                onPopupDismiss()
+                                onDismiss()
+                            }
+                        }
+                    },
+                    enabled = !removing
+                ) { Text("Yes") }
+            },
+            dismissButton = { TextButton(onClick = onDismiss) { Text("No") } },
+        )
+    }
+
+    Scaffold(
+        topBar = {
+            CenterAlignedTopAppBar(
+                title = { Text("Delete Multiple?") },
+                windowInsets = WindowInsets(0.dp),
+            )
+        },
+        bottomBar = {
+            BottomAppBar(
+                contentPadding = PaddingValues(0.dp),
+                windowInsets = WindowInsets(0.dp)
+            ) {
+                Button(
+                    onClick = onDismiss,
+                    modifier = Modifier
+                        .weight(1f)
+                        .padding(horizontal = 4.dp)
+                ) { Text("Cancel") }
+
+                Button(
+                    onClick = { showPopup = true },
+                    enabled = itemsToDelete.isNotEmpty(),
+                    modifier = Modifier
+                        .weight(1f)
+                        .padding(horizontal = 4.dp)
+                ) { Text("Remove") }
+            }
+        }
+    ) { padding ->
+        LazyVerticalGrid(
+            columns = adaptiveGridCell(),
+            verticalArrangement = Arrangement.spacedBy(4.dp),
+            horizontalArrangement = Arrangement.spacedBy(4.dp),
+            contentPadding = padding,
+            modifier = Modifier.padding(4.dp),
+        ) {
+            items(customList.list) { item ->
+                val transition = updateTransition(targetState = item in itemsToDelete, label = "")
+                val outlineColor = MaterialTheme.colorScheme.outline
+                Surface(
+                    onClick = {
+                        if (item in itemsToDelete)
+                            itemsToDelete.remove(item)
+                        else
+                            itemsToDelete.add(item)
+                    },
+                    modifier = Modifier
+                        .animateItem()
+                        .border(
+                            border = BorderStroke(
+                                transition.animateDp(label = "border_width") { target -> if (target) 4.dp else 1.dp }.value,
+                                transition.animateColor(label = "border_color") { target ->
+                                    if (target) Color(
+                                        0xfff44336
+                                    ) else outlineColor
+                                }.value
+                            ),
+                            shape = MaterialTheme.shapes.medium
+                        )
+                ) {
+                    ImageLoad(
+                        url = item.imageUrl,
+                        hash = item.hash,
+                        nsfw = item.nsfw,
+                        name = item.name,
+                        showNsfw = showNsfw,
+                        blurStrength = blurStrength,
+                        modifier = Modifier
+                            .size(
+                                width = ComposableUtils.IMAGE_WIDTH,
+                                height = ComposableUtils.IMAGE_HEIGHT
+                            )
+                            .clip(MaterialTheme.shapes.medium)
+                    )
+                }
+            }
+        }
     }
 }

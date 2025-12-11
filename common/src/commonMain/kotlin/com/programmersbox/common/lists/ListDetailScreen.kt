@@ -1,7 +1,11 @@
 package com.programmersbox.common.lists
 
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInHorizontally
+import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.foundation.background
-import androidx.compose.foundation.basicMarquee
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -16,14 +20,17 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.text.input.clearText
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.RemoveCircle
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.AppBarWithSearch
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardColors
 import androidx.compose.material3.CardDefaults
@@ -37,13 +44,14 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SearchBarDefaults
+import androidx.compose.material3.SearchBarValue
 import androidx.compose.material3.SheetState
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
-import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberModalBottomSheetState
+import androidx.compose.material3.rememberSearchBarState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -56,6 +64,8 @@ import androidx.compose.ui.draw.blur
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalWindowInfo
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -117,11 +127,55 @@ fun ListDetailScreen(
         }
     }
 
+    val searchBarState = rememberSearchBarState()
+
     Scaffold(
         topBar = {
-            //TODO: This needs to be a search
-            TopAppBar(
-                title = { Text(list?.item?.name.orEmpty(), modifier = Modifier.basicMarquee()) },
+            val appBarWithSearchColors = SearchBarDefaults.appBarWithSearchColors(
+                searchBarColors = SearchBarDefaults.colors(
+                    containerColor = if (showBlur)
+                        Color.Transparent
+                    else
+                        MaterialTheme.colorScheme.surfaceContainerHigh
+                ),
+                appBarContainerColor = if (showBlur)
+                    Color.Transparent
+                else
+                    MaterialTheme.colorScheme.surface
+            )
+
+            val inputField = @Composable {
+                SearchBarDefaults.InputField(
+                    searchBarState = searchBarState,
+                    textFieldState = viewModel.search,
+                    enabled = LocalWindowInfo.current.isWindowFocused,
+                    onSearch = {},
+                    placeholder = {
+                        if (searchBarState.currentValue == SearchBarValue.Collapsed) {
+                            Text(
+                                modifier = Modifier.fillMaxWidth(),
+                                text = "Search",
+                                textAlign = TextAlign.Center,
+                            )
+                        }
+                    },
+                    trailingIcon = {
+                        AnimatedVisibility(
+                            viewModel.search.text.isNotEmpty(),
+                            enter = slideInHorizontally { it } + fadeIn(),
+                            exit = slideOutHorizontally { it } + fadeOut()
+                        ) {
+                            IconButton(
+                                onClick = { viewModel.search.clearText() }
+                            ) { Icon(Icons.Default.Clear, null) }
+                        }
+                    },
+                )
+            }
+
+            AppBarWithSearch(
+                state = searchBarState,
+                inputField = inputField,
                 navigationIcon = { BackButton() },
                 actions = {
                     Text("(${list?.list?.size ?: 0})")
@@ -129,15 +183,15 @@ fun ListDetailScreen(
                         onClick = { showInfo = true }
                     ) { Icon(Icons.Default.Info, null) }
                 },
-                colors = if (showBlur) TopAppBarDefaults.topAppBarColors(containerColor = Color.Transparent)
-                else TopAppBarDefaults.topAppBarColors(),
+                colors = appBarWithSearchColors,
                 modifier = Modifier.ifTrue(showBlur) {
-                    hazeEffect(hazeState, hazeStyle) {
+                    hazeEffect(hazeState) {
                         progressive = HazeProgressive.verticalGradient(
                             startIntensity = 1f,
                             endIntensity = 0f,
                             preferPerformance = true
                         )
+                        style = hazeStyle
                     }
                 }
             )
@@ -152,7 +206,7 @@ fun ListDetailScreen(
                 .fillMaxSize()
                 .ifTrue(showBlur) { hazeSource(state = hazeState) }
         ) {
-            items(list?.list.orEmpty()) { item ->
+            items(viewModel.searchedList) { item ->
                 CoverCard(
                     imageUrl = item.imageUrl.orEmpty(),
                     name = item.name,

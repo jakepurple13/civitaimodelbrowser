@@ -26,8 +26,10 @@ import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.selection.toggleable
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.PlaylistAdd
 import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.filled.ArrowUpward
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.ContentCopy
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.FavoriteBorder
@@ -55,16 +57,19 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -87,9 +92,12 @@ import com.programmersbox.common.DataStore
 import com.programmersbox.common.ModelImage
 import com.programmersbox.common.adaptiveGridCell
 import com.programmersbox.common.components.ImageSheet
+import com.programmersbox.common.components.ListChoiceScreen
 import com.programmersbox.common.components.LoadingImage
 import com.programmersbox.common.db.FavoriteModel
+import com.programmersbox.common.db.FavoriteType
 import com.programmersbox.common.db.FavoritesDao
+import com.programmersbox.common.db.ListDao
 import com.programmersbox.common.home.BlacklistHandling
 import com.programmersbox.common.ifTrue
 import com.programmersbox.common.qrcode.QrCodeType
@@ -100,6 +108,7 @@ import dev.chrisbanes.haze.HazeStyle
 import dev.chrisbanes.haze.LocalHazeStyle
 import dev.chrisbanes.haze.hazeEffect
 import dev.chrisbanes.haze.hazeSource
+import kotlinx.coroutines.launch
 import org.koin.compose.koinInject
 import org.koin.compose.viewmodel.koinViewModel
 
@@ -536,7 +545,7 @@ private fun ImageCard(
     }
 }
 
-@OptIn(ExperimentalMaterial3ExpressiveApi::class)
+@OptIn(ExperimentalMaterial3ExpressiveApi::class, ExperimentalMaterial3Api::class)
 @Composable
 private fun HorizontalToolbarContent(
     viewModel: CivitAiDetailViewModel,
@@ -549,6 +558,45 @@ private fun HorizontalToolbarContent(
 ) {
     val vibrantColors = FloatingToolbarDefaults.vibrantFloatingToolbarColors()
     val uriHandler = LocalUriHandler.current
+
+    val scope = rememberCoroutineScope()
+    var showLists by remember { mutableStateOf(false) }
+    val listState = rememberModalBottomSheetState(true)
+
+    if (showLists) {
+        val listDao = koinInject<ListDao>()
+        val models = model.models
+        ModalBottomSheet(
+            onDismissRequest = { showLists = false },
+            containerColor = MaterialTheme.colorScheme.surface,
+            sheetState = listState
+        ) {
+            ListChoiceScreen(
+                id = models.id,
+                onClick = { item ->
+                    scope.launch {
+                        listDao.addToList(
+                            uuid = item.item.uuid,
+                            id = models.id,
+                            name = models.name,
+                            description = models.description,
+                            type = models.type.name,
+                            nsfw = models.nsfw,
+                            imageUrl = models.modelVersions.firstOrNull()?.images?.firstOrNull()?.url,
+                            favoriteType = FavoriteType.Model,
+                            hash = models.modelVersions.firstOrNull()?.images?.firstOrNull()?.hash
+                        )
+                        listState.hide()
+                    }.invokeOnCompletion { showLists = false }
+                },
+                navigationIcon = {
+                    IconButton(
+                        onClick = { showLists = false }
+                    ) { Icon(Icons.Default.Close, null) }
+                },
+            )
+        }
+    }
 
     HorizontalFloatingToolbar(
         expanded = toolBarExpanded,
@@ -569,6 +617,11 @@ private fun HorizontalToolbarContent(
         modifier = Modifier.zIndex(1f)
     ) {
         AppBarRow {
+            clickableItem(
+                onClick = { showLists = true },
+                icon = { Icon(Icons.AutoMirrored.Filled.PlaylistAdd, null) },
+                label = "Lists"
+            )
             clickableItem(
                 onClick = onShowQrCode,
                 icon = { Icon(Icons.Default.Share, null) },

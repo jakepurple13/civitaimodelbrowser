@@ -104,27 +104,23 @@ interface ListDao {
         dateAdded: Long = Clock.System.now().toEpochMilliseconds(),
     ): Boolean {
         val item = getCustomListItem(uuid)
-        return if (item.list.any { it.uuid == uuid }) {
-            false
-        } else {
-            addItem(
-                CustomListInfo(
-                    uuid = uuid,
-                    id = id,
-                    name = name,
-                    description = description,
-                    type = type,
-                    nsfw = nsfw,
-                    imageUrl = imageUrl,
-                    favoriteType = favoriteType,
-                    imageMeta = imageMeta,
-                    hash = hash,
-                    modelId = modelId,
-                    dateAdded = dateAdded,
-                )
+        addItem(
+            CustomListInfo(
+                uuid = uuid,
+                id = id,
+                name = name,
+                description = description,
+                type = type,
+                nsfw = nsfw,
+                imageUrl = imageUrl,
+                favoriteType = favoriteType,
+                imageMeta = imageMeta,
+                hash = hash,
+                modelId = modelId,
+                dateAdded = dateAdded,
             )
-            updateFullList(item.item)
-            true
-        }
+        )
+        updateFullList(item.item)
+        return true
     }
 }

@@ -38,6 +38,8 @@ import com.programmersbox.common.home.CivitAiSearchViewModel
 import com.programmersbox.common.home.CivitAiViewModel
 import com.programmersbox.common.images.CivitAiImagesScreen
 import com.programmersbox.common.images.CivitAiImagesViewModel
+import com.programmersbox.common.lists.ListDetailScreen
+import com.programmersbox.common.lists.ListDetailViewModel
 import com.programmersbox.common.lists.ListScreen
 import com.programmersbox.common.lists.ListViewModel
 import com.programmersbox.common.qrcode.QrCodeScannerViewModel
@@ -141,6 +143,12 @@ fun cmpModules() = module {
     viewModelOf(::QrCodeScannerViewModel)
     viewModelOf(::CivitAiImagesViewModel)
     viewModelOf(::ListViewModel)
+    viewModel {
+        ListDetailViewModel(
+            listDao = get(),
+            uuid = it.get()
+        )
+    }
 
     singleOf(::NavigationHandler)
 
@@ -255,10 +263,19 @@ fun cmpModules() = module {
             onNavigateToUser = { username -> backStack.add(Screen.User(username)) }
         )
     }
-    navigation<Screen.CustomList> {
+    navigation<Screen.CustomList>(
+        metadata = ListDetailSceneStrategy.listPane()
+    ) {
         val backStack = koinInject<NavigationHandler>().backStack
         ListScreen(
             onNavigateToDetail = { id -> backStack.add(Screen.CustomListDetail(id)) }
+        )
+    }
+    navigation<Screen.CustomListDetail>(
+        metadata = ListDetailSceneStrategy.detailPane()
+    ) {
+        ListDetailScreen(
+            viewModel = koinViewModel { parametersOf(it.uuid) }
         )
     }
 }

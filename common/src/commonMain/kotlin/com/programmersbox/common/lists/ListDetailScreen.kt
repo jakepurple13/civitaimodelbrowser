@@ -30,6 +30,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.input.clearText
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowRightAlt
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Clear
@@ -86,6 +87,7 @@ import com.programmersbox.common.BackButton
 import com.programmersbox.common.ComposableUtils
 import com.programmersbox.common.DataStore
 import com.programmersbox.common.adaptiveGridCell
+import com.programmersbox.common.components.ImageSheet
 import com.programmersbox.common.components.LoadingImage
 import com.programmersbox.common.db.CoverCard
 import com.programmersbox.common.db.CustomList
@@ -265,6 +267,40 @@ fun ListDetailScreen(
                 .ifTrue(showBlur) { hazeSource(state = hazeState) }
         ) {
             items(viewModel.searchedList) { item ->
+
+                var sheetDetails by remember { mutableStateOf(false) }
+                when (item.favoriteType) {
+                    FavoriteType.Model -> {}
+                    FavoriteType.Image -> {
+
+                        if (sheetDetails) {
+                            ImageSheet(
+                                url = item.imageUrl.orEmpty(),
+                                isNsfw = item.nsfw,
+                                isFavorite = false,
+                                onFavorite = {},
+                                onRemoveFromFavorite = {},
+                                onDismiss = { sheetDetails = false },
+                                nsfwText = "NSFW",
+                                actions = {
+                                    TextButton(
+                                        onClick = {
+                                            sheetDetails = false
+                                            onNavigateToDetail(item.modelId.toString())
+                                        }
+                                    ) {
+                                        Text("View Model")
+                                        Icon(Icons.AutoMirrored.Filled.ArrowRightAlt, null)
+                                    }
+                                },
+                                moreInfo = {}
+                            )
+                        }
+                    }
+
+                    FavoriteType.Creator -> {}
+                }
+
                 CoverCard(
                     imageUrl = item.imageUrl.orEmpty(),
                     name = item.name,
@@ -276,7 +312,7 @@ fun ListDetailScreen(
                     onClick = {
                         when (item.favoriteType) {
                             FavoriteType.Model -> onNavigateToDetail(item.id.toString())
-                            FavoriteType.Image -> TODO()
+                            FavoriteType.Image -> sheetDetails = true
                             FavoriteType.Creator -> onNavigateToUser(item.name)
                         }
                     },

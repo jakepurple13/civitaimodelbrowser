@@ -11,7 +11,7 @@ import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 
 class ListViewModel(
-    private val listDao: ListDao,
+    val listDao: ListDao,
 ) : ViewModel() {
 
     var list by mutableStateOf<List<CustomList>>(emptyList())

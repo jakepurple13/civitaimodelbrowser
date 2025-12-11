@@ -74,6 +74,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalWindowInfo
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
@@ -572,6 +573,7 @@ private fun AppSearchAppBar(
         SearchBarDefaults.InputField(
             searchBarState = searchBarState,
             textFieldState = viewModel.searchQuery,
+            enabled = LocalWindowInfo.current.isWindowFocused,
             onSearch = viewModel::onSearch,
             placeholder = {
                 if (searchBarState.currentValue == SearchBarValue.Collapsed) {
@@ -665,6 +667,8 @@ private fun AppSearchAppBar(
         colors = appBarWithSearchColors,
         modifier = modifier
     )
+
+    //TODO: this is taking focus, preventing typing for the list name
     ExpandedFullScreenSearchBar(
         state = searchBarState,
         inputField = inputField,

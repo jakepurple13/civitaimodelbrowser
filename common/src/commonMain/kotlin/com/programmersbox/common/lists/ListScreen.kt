@@ -6,24 +6,35 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.PlayArrow
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.ListItem
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.blur
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.style.TextOverflow
@@ -37,6 +48,7 @@ import com.programmersbox.common.DataStore
 import com.programmersbox.common.components.LoadingImage
 import com.programmersbox.common.db.CustomList
 import com.programmersbox.common.db.toImageHash
+import kotlinx.coroutines.launch
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.LocalDateTime
 import kotlinx.datetime.LocalTime
@@ -63,6 +75,8 @@ fun ListScreen(
     val blurStrength by remember { dataStore.hideNsfwStrength.flow }
         .collectAsStateWithLifecycle(6f)
 
+    val scope = rememberCoroutineScope()
+
     Scaffold(
         topBar = {
             TopAppBar(
@@ -70,6 +84,44 @@ fun ListScreen(
                 navigationIcon = { BackButton() },
                 actions = {
                     Text("(${viewModel.list.size})")
+
+                    var showAdd by remember { mutableStateOf(false) }
+                    if (showAdd) {
+                        var name by remember { mutableStateOf("") }
+                        AlertDialog(
+                            onDismissRequest = { showAdd = false },
+                            title = { Text("Create New List") },
+                            text = {
+                                OutlinedTextField(
+                                    value = name,
+                                    onValueChange = { name = it },
+                                    label = { Text("List Name") },
+                                    singleLine = true,
+                                    modifier = Modifier.fillMaxWidth()
+                                )
+                            },
+                            confirmButton = {
+                                TextButton(
+                                    onClick = {
+                                        scope.launch {
+                                            viewModel.listDao.create(name)
+                                            showAdd = false
+                                        }
+                                    },
+                                    enabled = name.isNotEmpty()
+                                ) { Text("Confirm") }
+                            },
+                            dismissButton = {
+                                TextButton(
+                                    onClick = { showAdd = false }
+                                ) { Text("Cancel") }
+                            }
+                        )
+                    }
+
+                    IconButton(
+                        onClick = { showAdd = !showAdd }
+                    ) { Icon(Icons.Default.Add, null) }
                 }
             )
         }
@@ -81,7 +133,8 @@ fun ListScreen(
         ) {
             items(viewModel.list) { list ->
                 ElevatedCard(
-                    onClick = { onNavigateToDetail(list.item.uuid) }
+                    onClick = { onNavigateToDetail(list.item.uuid) },
+                    modifier = Modifier.animateItem()
                 ) {
                     ListCard(
                         list = list,
@@ -110,12 +163,16 @@ private fun ListCard(
         trailingContent = { Text("(${list.list.size})") },
         headlineContent = { Text(list.item.name) },
         leadingContent = {
+            val imageModifier = Modifier
+                .size(ComposableUtils.IMAGE_WIDTH / 3, ComposableUtils.IMAGE_HEIGHT / 3)
+                .clip(MaterialTheme.shapes.medium)
+
             if (imageHashing?.url?.endsWith("mp4") == true) {
                 Box(
                     contentAlignment = Alignment.Center,
                     modifier = Modifier
                         .background(Color.Black)
-                        .size(ComposableUtils.IMAGE_WIDTH, ComposableUtils.IMAGE_HEIGHT)
+                        .then(imageModifier)
                 ) {
                     VideoPreviewComposable(
                         url = imageHashing.url,
@@ -137,15 +194,13 @@ private fun ListCard(
                     isNsfw = list.list.any { it.nsfw },
                     name = list.item.name,
                     hash = imageHashing?.hash,
-                    modifier = Modifier
-                        .size(ComposableUtils.IMAGE_WIDTH, ComposableUtils.IMAGE_HEIGHT)
-                        .let {
-                            if (!showNsfw && list.list.any { it.nsfw }) {
-                                it.blur(blurStrength)
-                            } else {
-                                it
-                            }
-                        },
+                    modifier = imageModifier.let {
+                        if (!showNsfw && list.list.any { it.nsfw }) {
+                            it.blur(blurStrength)
+                        } else {
+                            it
+                        }
+                    },
                 )
             }
         },

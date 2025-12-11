@@ -1,24 +1,33 @@
 package com.programmersbox.common.components
 
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.lazy.layout.MutableIntervalList
 import androidx.compose.foundation.shape.CornerSize
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.PlaylistAdd
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Block
+import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.Image
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Preview
 import androidx.compose.material.icons.filled.Share
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Card
+import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
@@ -28,13 +37,18 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveableStateHolder
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.programmersbox.common.CloseButton
 import com.programmersbox.common.Models
 import com.programmersbox.common.db.BlacklistedItemRoom
+import com.programmersbox.common.db.CustomList
 import com.programmersbox.common.db.FavoriteModel
 import com.programmersbox.common.db.FavoriteType
 import com.programmersbox.common.db.FavoritesDao
+import com.programmersbox.common.db.ListDao
 import com.programmersbox.common.home.BlacklistHandling
 import com.programmersbox.common.qrcode.QrCodeType
 import com.programmersbox.common.qrcode.ShareViaQrCode
@@ -56,6 +70,7 @@ fun ModelOptionsSheet(
 ) {
     if (showSheet) {
         val dao = koinInject<FavoritesDao>()
+        val listDao = koinInject<ListDao>()
         val scope = rememberCoroutineScope()
         var showDialog by remember { mutableStateOf(false) }
 
@@ -230,10 +245,44 @@ fun ModelOptionsSheet(
             }
 
             item {
+                var showLists by remember { mutableStateOf(false) }
+                val listState = rememberModalBottomSheetState(true)
+
+                if (showLists) {
+                    ModalBottomSheet(
+                        onDismissRequest = { showLists = false },
+                        containerColor = MaterialTheme.colorScheme.surface,
+                        sheetState = listState
+                    ) {
+                        ListChoiceScreen(
+                            id = models.id,
+                            onClick = { item ->
+                                scope.launch {
+                                    listDao.addToList(
+                                        uuid = item.item.uuid,
+                                        id = models.id,
+                                        name = models.name,
+                                        description = models.description,
+                                        type = models.type.name,
+                                        nsfw = models.nsfw,
+                                        imageUrl = modelImage?.url,
+                                        favoriteType = FavoriteType.Model,
+                                        hash = modelImage?.hash
+                                    )
+                                    listState.hide()
+                                }.invokeOnCompletion { showLists = false }
+                            },
+                            navigationIcon = {
+                                IconButton(
+                                    onClick = { showLists = false }
+                                ) { Icon(Icons.Default.Close, null) }
+                            },
+                        )
+                    }
+                }
+
                 Card(
-                    onClick = {
-                        TODO("Add to list")
-                    },
+                    onClick = { showLists = true },
                     shape = it
                 ) {
                     ListItem(
@@ -279,6 +328,82 @@ fun ModelOptionsSheet(
             }
         }
     }
+}
+
+@Composable
+fun ListChoiceScreen(
+    id: Long,
+    navigationIcon: @Composable () -> Unit = { CloseButton() },
+    onClick: (CustomList) -> Unit,
+) {
+    val dao = koinInject<ListDao>()
+    val scope = rememberCoroutineScope()
+    val list by dao
+        .getAllLists()
+        .collectAsStateWithLifecycle(emptyList())
+    ListBottomScreen(
+        title = "Choose a list",
+        list = list,
+        navigationIcon = navigationIcon,
+        onClick = onClick,
+        lazyListContent = {
+            item {
+                var showAdd by remember { mutableStateOf(false) }
+                ElevatedCard(
+                    onClick = { showAdd = !showAdd }
+                ) {
+                    ListItem(
+                        headlineContent = {
+                            Text(
+                                "Create New List",
+                                style = MaterialTheme.typography.titleLarge
+                            )
+                        },
+                        trailingContent = { Icon(Icons.Default.Add, null) }
+                    )
+                }
+                if (showAdd) {
+                    var name by remember { mutableStateOf("") }
+                    AlertDialog(
+                        onDismissRequest = { showAdd = false },
+                        title = { Text("Create New List") },
+                        text = {
+                            OutlinedTextField(
+                                value = name,
+                                onValueChange = { name = it },
+                                label = { Text("List Name") },
+                                singleLine = true,
+                                modifier = Modifier.fillMaxWidth()
+                            )
+                        },
+                        confirmButton = {
+                            TextButton(
+                                onClick = {
+                                    scope.launch {
+                                        dao.create(name)
+                                        showAdd = false
+                                    }
+                                },
+                                enabled = name.isNotEmpty()
+                            ) { Text("Confirm") }
+                        },
+                        dismissButton = {
+                            TextButton(
+                                onClick = { showAdd = false }
+                            ) { Text("Cancel") }
+                        }
+                    )
+                }
+            }
+        },
+        itemContent = {
+            ListBottomSheetItemModel(
+                primaryText = it.item.name,
+                trailingText = "(${it.list.size})",
+                icon = it.list.find { l -> l.id == id }?.let { Icons.Default.Check }
+            )
+        }
+    )
 }
 
 interface ModelOptionsScope {

@@ -54,4 +54,10 @@ class ListDetailViewModel(
     fun deleteAll() {
         viewModelScope.launch { customList?.let { item -> listDao.removeList(item) } }
     }
+
+    fun setCoverImage(url: String?, hash: String?) {
+        viewModelScope.launch {
+            customList?.item?.uuid?.let { listDao.updateCoverImage(it, url, hash) }
+        }
+    }
 }

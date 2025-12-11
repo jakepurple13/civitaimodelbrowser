@@ -23,6 +23,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.input.clearText
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.Delete
@@ -122,7 +123,10 @@ fun ListDetailScreen(
                 onDismiss = { showInfo = false },
                 onDeleteListAction = viewModel::deleteAll,
                 //TODO: Need to put in
-                onRemoveItemsAction = {}//viewModel::removeItems,
+                onRemoveItemsAction = {},//viewModel::removeItems,
+                setNewCoverImage = { url, hash ->
+                    viewModel.setCoverImage(url, hash)
+                },
             )
         }
     }
@@ -249,6 +253,7 @@ private fun InfoSheet(
     onDismiss: () -> Unit,
     onDeleteListAction: () -> Unit,
     onRemoveItemsAction: () -> Unit,
+    setNewCoverImage: (String?, String?) -> Unit,
 ) {
     val scope = rememberCoroutineScope()
 
@@ -273,6 +278,49 @@ private fun InfoSheet(
                 TextButton(onClick = { showAdd = false }) { Text("Cancel") }
             }
         )
+    }
+
+    var showCoverChange by remember { mutableStateOf(false) }
+
+    if (showCoverChange) {
+        val coverState = rememberModalBottomSheetState(true)
+        ModalBottomSheet(
+            onDismissRequest = { showCoverChange = false },
+            sheetState = coverState,
+            containerColor = MaterialTheme.colorScheme.surface,
+        ) {
+            LazyVerticalGrid(
+                columns = adaptiveGridCell(),
+                verticalArrangement = Arrangement.spacedBy(4.dp),
+                horizontalArrangement = Arrangement.spacedBy(4.dp),
+                modifier = Modifier.fillMaxSize()
+            ) {
+                items(customItem.list) { item ->
+                    Surface(
+                        onClick = {
+                            setNewCoverImage(item.imageUrl, item.hash)
+                            scope.launch { coverState.hide() }
+                                .invokeOnCompletion { showCoverChange = false }
+                        }
+                    ) {
+                        ImageLoad(
+                            url = item.imageUrl,
+                            hash = item.hash,
+                            nsfw = item.nsfw,
+                            name = item.name,
+                            showNsfw = showNsfw,
+                            blurStrength = blurStrength,
+                            modifier = Modifier
+                                .size(
+                                    width = ComposableUtils.IMAGE_WIDTH,
+                                    height = ComposableUtils.IMAGE_HEIGHT
+                                )
+                                .clip(MaterialTheme.shapes.medium)
+                        )
+                    }
+                }
+            }
+        }
     }
 
     ModalBottomSheet(
@@ -302,54 +350,76 @@ private fun InfoSheet(
                 shape = MaterialTheme.shapes.large
             ) {
                 ListItem(
+                    overlineContent = {
+                        val dataTimeFormatter = remember { DateTimeFormatItem(true) }
+                        Text("Last time updated: ${dataTimeFormatter.format(customItem.item.time.toLocalDateTime())}")
+                    },
                     headlineContent = {},
                     leadingContent = {
-                        val imageModifier = Modifier
-                            .size(ComposableUtils.IMAGE_WIDTH / 3, ComposableUtils.IMAGE_HEIGHT / 3)
-                            .clip(MaterialTheme.shapes.medium)
-
-                        val imageHashing = customItem.toImageHash()
-
-                        if (imageHashing?.url?.endsWith("mp4") == true) {
+                        Surface(
+                            onClick = { showCoverChange = true }
+                        ) {
                             Box(
                                 contentAlignment = Alignment.Center,
-                                modifier = Modifier
-                                    .background(Color.Black)
-                                    .then(imageModifier)
                             ) {
-                                VideoPreviewComposable(
-                                    url = imageHashing.url,
-                                    frameCount = 5,
-                                    contentScale = ContentScale.Crop,
-                                )
-                                Row(
-                                    verticalAlignment = Alignment.Bottom,
-                                    horizontalArrangement = Arrangement.SpaceEvenly,
-                                    modifier = Modifier.matchParentSize()
-                                ) {
-                                    Text("Click to Play")
-                                    Icon(Icons.Default.PlayArrow, null)
-                                }
-                            }
-                        } else {
-                            LoadingImage(
-                                imageUrl = imageHashing?.url.orEmpty(),
-                                isNsfw = customItem.list.any { it.nsfw },
-                                name = customItem.item.name,
-                                hash = imageHashing?.hash,
-                                modifier = imageModifier.let {
-                                    if (!showNsfw && customItem.list.any { it.nsfw }) {
-                                        it.blur(blurStrength)
-                                    } else {
-                                        it
+                                val imageModifier = Modifier
+                                    .size(
+                                        ComposableUtils.IMAGE_WIDTH / 3,
+                                        ComposableUtils.IMAGE_HEIGHT / 3
+                                    )
+                                    .clip(MaterialTheme.shapes.medium)
+
+                                val imageHashing = customItem.toImageHash()
+
+                                if (imageHashing?.url?.endsWith("mp4") == true) {
+                                    Box(
+                                        contentAlignment = Alignment.Center,
+                                        modifier = Modifier
+                                            .background(Color.Black)
+                                            .then(imageModifier)
+                                    ) {
+                                        VideoPreviewComposable(
+                                            url = imageHashing.url,
+                                            frameCount = 5,
+                                            contentScale = ContentScale.Crop,
+                                        )
+                                        Row(
+                                            verticalAlignment = Alignment.Bottom,
+                                            horizontalArrangement = Arrangement.SpaceEvenly,
+                                            modifier = Modifier.matchParentSize()
+                                        ) {
+                                            Text("Click to Play")
+                                            Icon(Icons.Default.PlayArrow, null)
+                                        }
                                     }
-                                },
-                            )
+                                } else {
+                                    LoadingImage(
+                                        imageUrl = imageHashing?.url.orEmpty(),
+                                        isNsfw = customItem.list.any { it.nsfw },
+                                        name = customItem.item.name,
+                                        hash = imageHashing?.hash,
+                                        modifier = imageModifier.let {
+                                            if (!showNsfw && customItem.list.any { it.nsfw }) {
+                                                it.blur(blurStrength)
+                                            } else {
+                                                it
+                                            }
+                                        },
+                                    )
+                                }
+                                Icon(
+                                    Icons.Default.Add,
+                                    null
+                                )
+                            }
                         }
                     },
                     supportingContent = {
                         Column {
-
+                            Text("Items: ${customItem.list.size}")
+                            Text("Models: ${customItem.list.filter { it.favoriteType == FavoriteType.Model }.size}")
+                            Text("Images: ${customItem.list.filter { it.favoriteType == FavoriteType.Image }.size}")
+                            Text("Creators: ${customItem.list.filter { it.favoriteType == FavoriteType.Creator }.size}")
                         }
                     },
                     colors = ListItemDefaults.colors(
@@ -422,6 +492,54 @@ private fun ActionItem(
             horizontalAlignment = Alignment.CenterHorizontally,
             modifier = Modifier.padding(8.dp),
             content = content
+        )
+    }
+}
+
+@Composable
+fun ImageLoad(
+    url: String?,
+    hash: String?,
+    nsfw: Boolean,
+    name: String,
+    showNsfw: Boolean,
+    blurStrength: Dp,
+    modifier: Modifier,
+) {
+    if (url?.endsWith("mp4") == true) {
+        Box(
+            contentAlignment = Alignment.Center,
+            modifier = Modifier
+                .background(Color.Black)
+                .then(modifier)
+        ) {
+            VideoPreviewComposable(
+                url = url,
+                frameCount = 5,
+                contentScale = ContentScale.Crop,
+            )
+            Row(
+                verticalAlignment = Alignment.Bottom,
+                horizontalArrangement = Arrangement.SpaceEvenly,
+                modifier = Modifier.matchParentSize()
+            ) {
+                Text("Click to Play")
+                Icon(Icons.Default.PlayArrow, null)
+            }
+        }
+    } else {
+        LoadingImage(
+            imageUrl = url.orEmpty(),
+            isNsfw = nsfw,
+            name = name,
+            hash = hash,
+            modifier = modifier.let {
+                if (!showNsfw && nsfw) {
+                    it.blur(blurStrength)
+                } else {
+                    it
+                }
+            },
         )
     }
 }

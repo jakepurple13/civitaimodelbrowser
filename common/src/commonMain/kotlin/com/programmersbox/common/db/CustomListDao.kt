@@ -104,6 +104,7 @@ interface ListDao {
         dateAdded: Long = Clock.System.now().toEpochMilliseconds(),
     ): Boolean {
         val item = getCustomListItem(uuid)
+        if (item.list.any { it.id == id }) return false
         addItem(
             CustomListInfo(
                 uuid = uuid,

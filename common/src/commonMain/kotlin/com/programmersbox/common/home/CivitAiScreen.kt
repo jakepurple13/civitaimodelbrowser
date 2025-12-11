@@ -86,8 +86,6 @@ import com.programmersbox.common.ContextMenu
 import com.programmersbox.common.DataStore
 import com.programmersbox.common.ModelType
 import com.programmersbox.common.Models
-import com.programmersbox.common.NavigationHandler
-import com.programmersbox.common.Screen
 import com.programmersbox.common.adaptiveGridCell
 import com.programmersbox.common.components.LoadingImage
 import com.programmersbox.common.components.ModelOptionsSheet
@@ -125,6 +123,7 @@ fun CivitAiScreen(
     onNavigateToDetailImages: (Long, String) -> Unit,
     onNavigateToBlacklisted: () -> Unit,
     onNavigateToImages: () -> Unit,
+    onNavigateToCustomList: () -> Unit,
 ) {
     val hazeState = remember { HazeState() }
     val db = koinInject<FavoritesDao>()
@@ -161,6 +160,7 @@ fun CivitAiScreen(
                 onNavigateToDetailImages = onNavigateToDetailImages,
                 onNavigateToImages = onNavigateToImages,
                 onNavigateToBlacklisted = onNavigateToBlacklisted,
+                onNavigateToCustomList = onNavigateToCustomList,
                 modifier = Modifier.ifTrue(showBlur) {
                     hazeEffect(hazeState) {
                         progressive = HazeProgressive.verticalGradient(
@@ -538,6 +538,7 @@ private fun AppSearchAppBar(
     onNavigateToUser: (String) -> Unit,
     onNavigateToDetailImages: (Long, String) -> Unit,
     onNavigateToBlacklisted: () -> Unit,
+    onNavigateToCustomList: () -> Unit,
     showBlur: Boolean,
     modifier: Modifier = Modifier,
     viewModel: CivitAiSearchViewModel = koinViewModel(),
@@ -615,8 +616,6 @@ private fun AppSearchAppBar(
         )
     }
 
-    val navigationHandler = koinInject<NavigationHandler>()
-
     AppBarWithSearch(
         state = searchBarState,
         inputField = inputField,
@@ -657,7 +656,7 @@ private fun AppSearchAppBar(
                     label = "Blacklisted"
                 )
                 clickableItem(
-                    onClick = { navigationHandler.backStack.add(Screen.CustomList) },
+                    onClick = onNavigateToCustomList,
                     icon = { Icon(Icons.AutoMirrored.Filled.List, null) },
                     label = "Lists"
                 )

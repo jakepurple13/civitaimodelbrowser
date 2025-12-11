@@ -54,8 +54,6 @@ import org.koin.core.module.dsl.viewModelOf
 import org.koin.core.parameter.parametersOf
 import org.koin.dsl.module
 import org.koin.dsl.navigation3.navigation
-import kotlin.uuid.ExperimentalUuidApi
-import kotlin.uuid.Uuid
 
 @OptIn(ExperimentalMaterial3AdaptiveApi::class)
 @Composable
@@ -163,7 +161,8 @@ fun cmpModules() = module {
                     )
                 )
             },
-            onNavigateToBlacklisted = { backStack.add(Screen.Settings.Blacklisted) }
+            onNavigateToBlacklisted = { backStack.add(Screen.Settings.Blacklisted) },
+            onNavigateToCustomList = { backStack.add(Screen.CustomList) }
         )
     }
 
@@ -257,7 +256,10 @@ fun cmpModules() = module {
         )
     }
     navigation<Screen.CustomList> {
-        ListScreen()
+        val backStack = koinInject<NavigationHandler>().backStack
+        ListScreen(
+            onNavigateToDetail = { id -> backStack.add(Screen.CustomListDetail(id)) }
+        )
     }
 }
 
@@ -282,7 +284,7 @@ sealed class Screen {
     data object List : NavKey
 
     @Serializable
-    class Detail(val modelId: String) : NavKey
+    data class Detail(val modelId: String) : NavKey
 
     @Serializable
     data object Settings : NavKey {
@@ -297,10 +299,10 @@ sealed class Screen {
     data object Favorites : NavKey
 
     @Serializable
-    class User(val username: String) : NavKey
+    data class User(val username: String) : NavKey
 
     @Serializable
-    class DetailsImage(val modelId: String, val modelName: String) : NavKey
+    data class DetailsImage(val modelId: String, val modelName: String) : NavKey
 
     @Serializable
     data object QrCode : NavKey
@@ -312,5 +314,5 @@ sealed class Screen {
     data object CustomList : NavKey
 
     @Serializable
-    class CustomListDetail @OptIn(ExperimentalUuidApi::class) constructor(val uuid: Uuid) : NavKey
+    data class CustomListDetail(val uuid: String) : NavKey
 }

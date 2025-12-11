@@ -1,44 +1,194 @@
 package com.programmersbox.common.lists
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
-import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.PlayArrow
+import androidx.compose.material3.ElevatedCard
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.ListItem
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.blur
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import chaintech.videoplayer.ui.preview.VideoPreviewComposable
+import com.programmersbox.common.BackButton
 import com.programmersbox.common.ComposableUtils
-import com.programmersbox.common.adaptiveGridCell
+import com.programmersbox.common.DataStore
 import com.programmersbox.common.components.LoadingImage
+import com.programmersbox.common.db.CustomList
+import com.programmersbox.common.db.toImageHash
+import kotlinx.datetime.LocalDate
+import kotlinx.datetime.LocalDateTime
+import kotlinx.datetime.LocalTime
+import kotlinx.datetime.TimeZone
+import kotlinx.datetime.format.DateTimeFormat
+import kotlinx.datetime.format.Padding
+import kotlinx.datetime.format.char
+import kotlinx.datetime.toLocalDateTime
+import org.koin.compose.koinInject
 import org.koin.compose.viewmodel.koinViewModel
+import kotlin.time.ExperimentalTime
+import kotlin.time.Instant
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ListScreen(
     viewModel: ListViewModel = koinViewModel(),
+    onNavigateToDetail: (String) -> Unit,
 ) {
-    Scaffold { padding ->
-        LazyVerticalGrid(
+    val dataTimeFormatter = remember { DateTimeFormatItem(true) }
+    val dataStore = koinInject<DataStore>()
+    val showNsfw by remember { dataStore.showNsfw.flow }
+        .collectAsStateWithLifecycle(false)
+    val blurStrength by remember { dataStore.hideNsfwStrength.flow }
+        .collectAsStateWithLifecycle(6f)
+
+    Scaffold(
+        topBar = {
+            TopAppBar(
+                title = { Text("Custom Lists") },
+                navigationIcon = { BackButton() },
+                actions = {
+                    Text("(${viewModel.list.size})")
+                }
+            )
+        }
+    ) { padding ->
+        LazyColumn(
             contentPadding = padding,
-            columns = adaptiveGridCell(),
             verticalArrangement = Arrangement.spacedBy(4.dp),
-            horizontalArrangement = Arrangement.spacedBy(4.dp),
             modifier = Modifier.fillMaxSize()
         ) {
-            items(
-                viewModel.list,
-                key = { it.item.uuid }
-            ) {
-                LoadingImage(
-                    imageUrl = it.item.coverImage ?: it.list.firstOrNull()?.imageUrl.orEmpty(),
-                    name = it.item.name,
-                    modifier = Modifier.size(
-                        ComposableUtils.IMAGE_WIDTH,
-                        ComposableUtils.IMAGE_HEIGHT
+            items(viewModel.list) { list ->
+                ElevatedCard(
+                    onClick = { onNavigateToDetail(list.item.uuid) }
+                ) {
+                    ListCard(
+                        list = list,
+                        dateTimeFormatter = dataTimeFormatter,
+                        showNsfw = showNsfw,
+                        blurStrength = blurStrength.dp
                     )
-                )
+                }
             }
         }
     }
 }
+
+@Composable
+private fun ListCard(
+    list: CustomList,
+    dateTimeFormatter: DateTimeFormat<LocalDateTime>,
+    showNsfw: Boolean,
+    blurStrength: Dp,
+    modifier: Modifier = Modifier,
+) {
+    val imageHashing = list.toImageHash()
+    val time = remember { dateTimeFormatter.format(list.item.time.toLocalDateTime()) }
+    ListItem(
+        overlineContent = { Text("Last Updated: $time") },
+        trailingContent = { Text("(${list.list.size})") },
+        headlineContent = { Text(list.item.name) },
+        leadingContent = {
+            if (imageHashing?.url?.endsWith("mp4") == true) {
+                Box(
+                    contentAlignment = Alignment.Center,
+                    modifier = Modifier
+                        .background(Color.Black)
+                        .size(ComposableUtils.IMAGE_WIDTH, ComposableUtils.IMAGE_HEIGHT)
+                ) {
+                    VideoPreviewComposable(
+                        url = imageHashing.url,
+                        frameCount = 5,
+                        contentScale = ContentScale.Crop,
+                    )
+                    Row(
+                        verticalAlignment = Alignment.Bottom,
+                        horizontalArrangement = Arrangement.SpaceEvenly,
+                        modifier = Modifier.matchParentSize()
+                    ) {
+                        Text("Click to Play")
+                        Icon(Icons.Default.PlayArrow, null)
+                    }
+                }
+            } else {
+                LoadingImage(
+                    imageUrl = imageHashing?.url.orEmpty(),
+                    isNsfw = list.list.any { it.nsfw },
+                    name = list.item.name,
+                    hash = imageHashing?.hash,
+                    modifier = Modifier
+                        .size(ComposableUtils.IMAGE_WIDTH, ComposableUtils.IMAGE_HEIGHT)
+                        .let {
+                            if (!showNsfw && list.list.any { it.nsfw }) {
+                                it.blur(blurStrength)
+                            } else {
+                                it
+                            }
+                        },
+                )
+            }
+        },
+        supportingContent = {
+            Column {
+                list.list.take(3).forEach { info ->
+                    Text(info.name, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                }
+            }
+        },
+        modifier = modifier
+    )
+}
+
+val DateFormatItem = LocalDate.Format {
+    monthNumber()
+    char('/')
+    day(padding = Padding.ZERO)
+    char('/')
+    year()
+}
+
+private val Format24 = LocalTime.Format {
+    hour()
+    char(':')
+    minute()
+}
+
+private val Format12 = LocalTime.Format {
+    amPmHour()
+    char(':')
+    minute()
+    char(' ')
+    amPmMarker("AM", "PM")
+}
+
+internal fun DateTimeFormatItem(isUsing24HourTime: Boolean) = LocalDateTime.Format {
+    date(DateFormatItem)
+    chars(", ")
+    time(if (isUsing24HourTime) Format24 else Format12)
+}
+
+@OptIn(ExperimentalTime::class)
+fun Long.toLocalDateTime() = Instant
+    .fromEpochMilliseconds(this)
+    .toLocalDateTime(TimeZone.currentSystemDefault())

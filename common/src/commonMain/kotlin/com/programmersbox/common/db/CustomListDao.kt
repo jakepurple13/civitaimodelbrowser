@@ -20,6 +20,10 @@ interface ListDao {
     @Query("SELECT * FROM CustomListItem ORDER BY time DESC")
     fun getAllLists(): Flow<List<CustomList>>
 
+    @Transaction
+    @Query("SELECT * FROM CustomListItem WHERE name LIKE '%' || :search || '%' ORDER BY time DESC")
+    fun getAllLists(search: String): Flow<List<CustomList>>
+
     @Query("SELECT COUNT(uuid) FROM CustomListItem")
     fun getAllListsCount(): Flow<Int>
 
@@ -74,8 +78,8 @@ interface ListDao {
         removeList(item.item)
     }
 
-    @Query("UPDATE CustomListItem SET coverImage = :coverImage WHERE uuid = :uuid")
-    suspend fun updateCoverImage(uuid: String, coverImage: String?)
+    @Query("UPDATE CustomListItem SET coverImage = :coverImage, hash = :hash WHERE uuid = :uuid")
+    suspend fun updateCoverImage(uuid: String, coverImage: String?, hash: String? = null)
 
     @OptIn(ExperimentalTime::class)
     @Ignore

@@ -4,6 +4,7 @@ import androidx.compose.foundation.lazy.layout.MutableIntervalList
 import androidx.compose.foundation.shape.CornerSize
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.PlaylistAdd
 import androidx.compose.material.icons.filled.Block
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.Image
@@ -225,6 +226,20 @@ fun ModelOptionsSheet(
                             headlineContent = { Text("Favorite Model") }
                         )
                     }
+                }
+            }
+
+            item {
+                Card(
+                    onClick = {
+                        TODO("Add to list")
+                    },
+                    shape = it
+                ) {
+                    ListItem(
+                        leadingContent = { Icon(Icons.AutoMirrored.Filled.PlaylistAdd, null) },
+                        headlineContent = { Text("Add to List") }
+                    )
                 }
             }
         }

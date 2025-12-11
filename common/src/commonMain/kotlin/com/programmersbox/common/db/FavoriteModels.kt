@@ -130,6 +130,7 @@ data class CustomListItem(
     @ColumnInfo(name = "time")
     val time: Long = Clock.System.now().toEpochMilliseconds(),
     val coverImage: String?,
+    val hash: String? = null,
 )
 
 @Serializable
@@ -151,4 +152,29 @@ data class CustomListInfo @OptIn(ExperimentalUuidApi::class) constructor(
     val hash: String? = null,
     val modelId: Long = id,
     val dateAdded: Long = Clock.System.now().toEpochMilliseconds(),
+)
+
+fun CustomListItem.toImageHash() = if (coverImage != null)
+    ImageHash(coverImage, hash)
+else
+    null
+
+fun CustomListInfo.toImageHash() = if (imageUrl != null)
+    ImageHash(imageUrl, hash)
+else
+    null
+
+fun CustomList.toImageHash(): ImageHash? {
+    return if (item.coverImage != null && item.coverImage.endsWith("mp4")) {
+        list.firstOrNull()?.toImageHash()
+    } else if (item.coverImage != null && item.hash != null) {
+        item.toImageHash()
+    } else {
+        list.firstOrNull()?.toImageHash()
+    }
+}
+
+data class ImageHash(
+    val url: String? = null,
+    val hash: String? = null,
 )

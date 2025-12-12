@@ -15,7 +15,6 @@ import androidx.room.RoomDatabase
 import ca.gosyer.appdirs.AppDirs
 import com.programmersbox.common.db.AppDatabase
 import com.programmersbox.common.db.BlacklistedItemRoom
-import com.programmersbox.common.db.CivitDb
 import com.programmersbox.common.db.FavoritesDao
 import kotlinx.coroutines.launch
 import org.koin.compose.koinInject
@@ -29,30 +28,10 @@ public actual fun getPlatformName(): String {
 public fun UIShow(
     onShareClick: (String) -> Unit,
     producePath: () -> String,
-    onExport: (CivitDb) -> Unit = {},
-    onImport: () -> String,
-    export: @Composable () -> Unit = {},
-    import: (@Composable () -> Unit)? = null,
 ) {
-    /*KoinApplication(
-        application = {
-            modules(
-                module {
-                    single { producePath() }
-                    single { getDatabaseBuilder() }
-                },
-                cmpModules()
-            )
-        }
-    ) {*/
     App(
         onShareClick = onShareClick,
-        onExport = onExport,
-        onImport = onImport,
-        export = export,
-        import = import
     )
-    //}
 }
 
 internal actual fun getPagingPlaceholderKey(index: Int): Any = index

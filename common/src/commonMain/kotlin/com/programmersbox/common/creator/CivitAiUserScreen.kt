@@ -41,6 +41,8 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.dokar.sonner.ToastType
+import com.dokar.sonner.ToasterState
 import com.programmersbox.common.BackButton
 import com.programmersbox.common.DataStore
 import com.programmersbox.common.adaptiveGridCell
@@ -109,6 +111,7 @@ fun CivitAiUserScreen(
                 containerColor = MaterialTheme.colorScheme.surface,
                 sheetState = listState
             ) {
+                val toaster = koinInject<ToasterState>()
                 ListChoiceScreen(
                     username = username,
                     onClick = { item ->
@@ -124,6 +127,7 @@ fun CivitAiUserScreen(
                                 favoriteType = FavoriteType.Creator,
                                 hash = null
                             )
+                            toaster.show("Added to List", type = ToastType.Success)
                             listState.hide()
                         }.invokeOnCompletion { showLists = false }
                     },

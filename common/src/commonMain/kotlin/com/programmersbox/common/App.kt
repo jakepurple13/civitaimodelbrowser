@@ -19,8 +19,8 @@ import androidx.navigation3.runtime.NavKey
 import androidx.navigation3.runtime.rememberSaveableStateHolderNavEntryDecorator
 import androidx.navigation3.scene.DialogSceneStrategy
 import androidx.navigation3.ui.NavDisplay
+import com.dokar.sonner.ToasterState
 import com.programmersbox.common.db.AppDatabase
-import com.programmersbox.common.db.CivitDb
 import com.programmersbox.common.db.FavoritesDao
 import com.programmersbox.common.db.getRoomDatabase
 import com.programmersbox.common.di.navigationModule
@@ -28,6 +28,8 @@ import com.programmersbox.common.di.repositoryModule
 import com.programmersbox.common.di.viewModelModule
 import dev.chrisbanes.haze.LocalHazeStyle
 import dev.chrisbanes.haze.materials.HazeMaterials
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.serialization.Serializable
 import org.koin.compose.koinInject
 import org.koin.compose.navigation3.koinEntryProvider
@@ -38,10 +40,6 @@ import org.koin.dsl.module
 @Composable
 internal fun App(
     onShareClick: (String) -> Unit,
-    onExport: (CivitDb) -> Unit = {},
-    onImport: () -> String = { "" },
-    export: @Composable () -> Unit = {},
-    import: (@Composable () -> Unit)? = null,
 ) {
     //val backStack = remember { mutableStateListOf<NavKey>(Screen.List) }
     CompositionLocalProvider(
@@ -50,10 +48,6 @@ internal fun App(
         LocalActions provides remember {
             Actions(
                 shareUrl = onShareClick,
-                onExport = onExport,
-                onImport = onImport,
-                export = export,
-                import = import,
             )
         }
     ) {
@@ -97,6 +91,7 @@ fun cmpModules() = module {
     single { getRoomDatabase(get()) }
     single { get<AppDatabase>().getDao() }
     single { get<AppDatabase>().getListDao() }
+    single { ToasterState(CoroutineScope(Dispatchers.Main)) }
 
     includes(
         viewModelModule(),
@@ -113,10 +108,6 @@ val LocalActions = staticCompositionLocalOf<Actions> { error("Nothing") }
 
 data class Actions(
     val shareUrl: (String) -> Unit,
-    val onImport: () -> String,
-    val onExport: (CivitDb) -> Unit,
-    val export: @Composable () -> Unit,
-    val import: (@Composable () -> Unit)? = null,
 )
 
 val LocalDatabaseDao = staticCompositionLocalOf<FavoritesDao> { error("Nothing") }

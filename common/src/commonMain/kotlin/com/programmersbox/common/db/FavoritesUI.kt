@@ -71,6 +71,8 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.dokar.sonner.ToastType
+import com.dokar.sonner.ToasterState
 import com.programmersbox.common.BackButton
 import com.programmersbox.common.ComposableUtils
 import com.programmersbox.common.CustomScrollBar
@@ -606,6 +608,7 @@ fun FavoritesCreatorOptionsSheet(
                 val listState = rememberModalBottomSheetState(true)
                 var showLists by remember { mutableStateOf(false) }
                 if (showLists) {
+                    val toaster = koinInject<ToasterState>()
                     ModalBottomSheet(
                         onDismissRequest = { showLists = false },
                         containerColor = MaterialTheme.colorScheme.surface,
@@ -626,6 +629,7 @@ fun FavoritesCreatorOptionsSheet(
                                         favoriteType = FavoriteType.Model,
                                         hash = null
                                     )
+                                    toaster.show("Added to List", type = ToastType.Success)
                                     listState.hide()
                                 }.invokeOnCompletion { showLists = false }
                             },

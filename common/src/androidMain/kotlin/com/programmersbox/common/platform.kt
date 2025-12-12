@@ -23,7 +23,6 @@ import com.gigamole.composescrollbars.scrolltype.ScrollbarsScrollType
 import com.gigamole.composescrollbars.scrolltype.knobtype.ScrollbarsDynamicKnobType
 import com.programmersbox.common.db.AppDatabase
 import com.programmersbox.common.db.BlacklistedItemRoom
-import com.programmersbox.common.db.CivitDb
 
 public actual fun getPlatformName(): String {
     return "Android ${android.os.Build.VERSION.SDK_INT}"
@@ -32,17 +31,9 @@ public actual fun getPlatformName(): String {
 @Composable
 public fun UIShow(
     onShareClick: (String) -> Unit,
-    onExport: (CivitDb) -> Unit = {},
-    onImport: () -> String = { "" },
-    export: @Composable () -> Unit = {},
-    import: (@Composable () -> Unit)? = null,
 ) {
     App(
         onShareClick = onShareClick,
-        onExport = onExport,
-        onImport = onImport,
-        export = export,
-        import = import
     )
 }
 

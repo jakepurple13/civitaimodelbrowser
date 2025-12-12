@@ -43,8 +43,6 @@ import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.programmersbox.common.components.icons.Github
-import com.programmersbox.common.db.CivitDb
-import com.programmersbox.common.db.FavoritesDao
 import com.programmersbox.resources.Res
 import com.programmersbox.resources.civitai_logo
 import kotlinx.coroutines.launch
@@ -55,10 +53,6 @@ import kotlin.math.roundToInt
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SettingsScreen(
-    onExport: (CivitDb) -> Unit = {},
-    onImport: () -> String = { "" },
-    export: @Composable () -> Unit = {},
-    import: (@Composable () -> Unit)? = null,
     onNavigateToQrCode: () -> Unit,
     onNavigateToBackup: () -> Unit,
     onNavigateToRestore: () -> Unit,
@@ -71,7 +65,6 @@ fun SettingsScreen(
     val hideNsfwStrength = remember { dataStore.hideNsfwStrength }
     val includeNsfw = remember { dataStore.includeNsfw }
     var useToolbar by dataStore.rememberUseToolbar()
-    val dao = koinInject<FavoritesDao>()
     var showBlur by dataStore.rememberShowBlur()
 
     Scaffold(
@@ -220,26 +213,6 @@ fun SettingsScreen(
             ) {
                 ListItem(
                     headlineContent = { Text("Restore") },
-                )
-            }
-
-            export()
-
-            Card(
-                onClick = {
-                    scope.launch { onExport(dao.export()) }
-                }
-            ) {
-                ListItem(
-                    headlineContent = { Text("Export Favorites") }
-                )
-            }
-
-            import?.invoke() ?: Card(
-                onClick = { onImport() }
-            ) {
-                ListItem(
-                    headlineContent = { Text("Import Favorites") }
                 )
             }
 

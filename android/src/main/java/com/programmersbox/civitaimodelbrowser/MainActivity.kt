@@ -3,20 +3,14 @@ package com.programmersbox.civitaimodelbrowser
 import android.app.Activity
 import android.content.Context
 import android.content.Intent
-import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import androidx.activity.ComponentActivity
-import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.browser.customtabs.CustomTabsIntent
 import androidx.compose.foundation.isSystemInDarkTheme
-import androidx.compose.material3.Card
-import androidx.compose.material3.ListItem
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
 import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.dynamicDarkColorScheme
 import androidx.compose.material3.dynamicLightColorScheme
@@ -24,10 +18,7 @@ import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.SideEffect
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalContext
@@ -36,14 +27,9 @@ import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.platform.UriHandler
 import androidx.core.net.toUri
 import androidx.core.view.WindowCompat
-import androidx.lifecycle.lifecycleScope
-import com.dokar.sonner.Toast
-import com.dokar.sonner.ToastType
 import com.dokar.sonner.Toaster
-import com.dokar.sonner.rememberToasterState
+import com.dokar.sonner.ToasterState
 import com.programmersbox.common.UIShow
-import com.programmersbox.common.db.CivitDb
-import com.programmersbox.common.db.FavoritesDao
 import io.kamel.core.config.KamelConfig
 import io.kamel.core.config.takeFrom
 import io.kamel.image.config.Default
@@ -51,15 +37,7 @@ import io.kamel.image.config.LocalKamelConfig
 import io.kamel.image.config.animatedImageDecoder
 import io.kamel.image.config.imageBitmapResizingDecoder
 import io.kamel.image.config.resourcesFetcher
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
-import kotlinx.serialization.json.Json
 import org.koin.compose.koinInject
-import java.io.BufferedReader
-import java.io.FileNotFoundException
-import java.io.FileOutputStream
-import java.io.IOException
-import java.io.InputStreamReader
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -68,31 +46,13 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             CustomMaterialTheme {
-                val toaster = rememberToasterState()
+                val toaster = koinInject<ToasterState>()
                 val defaultUriHandler = LocalUriHandler.current
                 val customUriHandler = remember { customTabsUriHandler { defaultUriHandler.openUri(it) } }
                 CompositionLocalProvider(
                     LocalUriHandler provides customUriHandler,
                     LocalKamelConfig provides customKamelConfig()
                 ) {
-                    var listToExport by remember { mutableStateOf(CivitDb(emptyList(), emptyList())) }
-                    val exportLauncher = rememberLauncherForActivityResult(
-                        ActivityResultContracts.CreateDocument("application/json")
-                    ) { document ->
-                        document?.let {
-                            lifecycleScope.launch {
-                                writeToFile(it, listToExport)
-                                listToExport = CivitDb(emptyList(), emptyList())
-                                toaster.show(
-                                    Toast(
-                                        message = "Export Completed",
-                                        type = ToastType.Success
-                                    )
-                                )
-                            }
-                        }
-                    }
-
                     UIShow(
                         onShareClick = {
                             startActivity(
@@ -105,42 +65,6 @@ class MainActivity : ComponentActivity() {
                                     null
                                 )
                             )
-                        },
-                        onExport = {
-                            listToExport = it
-                            exportLauncher.launch("civitmodelbrowser.json")
-                        },
-                        onImport = { "" },
-                        import = {
-                            val dao = koinInject<FavoritesDao>()
-                            val importLauncher2 = rememberLauncherForActivityResult(
-                                ActivityResultContracts.OpenDocument()
-                            ) { document ->
-                                document?.let { uri ->
-                                    contentResolver.openInputStream(uri)
-                                        ?.use { inputStream -> BufferedReader(InputStreamReader(inputStream)).readText() }
-                                        ?.let {
-                                            lifecycleScope.launch {
-                                                dao.importFavorites(it)
-                                                toaster.show(
-                                                    Toast(
-                                                        message = "Import Completed",
-                                                        type = ToastType.Success
-                                                    )
-                                                )
-                                            }
-                                        }
-                                }
-                            }
-                            Card(
-                                onClick = {
-                                    importLauncher2.launch(arrayOf("application/json"))
-                                }
-                            ) {
-                                ListItem(
-                                    headlineContent = { Text("Import Favorites") }
-                                )
-                            }
                         }
                     )
                 }
@@ -151,33 +75,6 @@ class MainActivity : ComponentActivity() {
             }
         }
     }
-}
-
-private suspend fun Context.writeToFile(document: Uri, list: CivitDb) {
-    val json = Json {
-        isLenient = true
-        prettyPrint = true
-        ignoreUnknownKeys = true
-        coerceInputValues = true
-    }
-
-    runCatching {
-        runBlocking {
-            try {
-                contentResolver.openFileDescriptor(document, "w")?.use {
-                    FileOutputStream(it.fileDescriptor).use { f ->
-                        f.write(json.encodeToString(list).toByteArray())
-                    }
-                }
-            } catch (e: FileNotFoundException) {
-                e.printStackTrace()
-            } catch (e: IOException) {
-                e.printStackTrace()
-            }
-        }
-    }
-        .onSuccess { println("Written!") }
-        .onFailure { it.printStackTrace() }
 }
 
 fun Context.customTabsUriHandler(

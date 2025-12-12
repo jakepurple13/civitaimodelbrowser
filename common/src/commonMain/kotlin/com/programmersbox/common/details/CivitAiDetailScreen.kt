@@ -85,6 +85,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import chaintech.videoplayer.ui.preview.VideoPreviewComposable
+import com.dokar.sonner.ToastType
+import com.dokar.sonner.ToasterState
 import com.programmersbox.common.BackButton
 import com.programmersbox.common.ComposableUtils
 import com.programmersbox.common.ContextMenu
@@ -571,6 +573,7 @@ private fun HorizontalToolbarContent(
             containerColor = MaterialTheme.colorScheme.surface,
             sheetState = listState
         ) {
+            val toaster = koinInject<ToasterState>()
             ListChoiceScreen(
                 id = models.id,
                 onClick = { item ->
@@ -586,6 +589,7 @@ private fun HorizontalToolbarContent(
                             favoriteType = FavoriteType.Model,
                             hash = models.modelVersions.firstOrNull()?.images?.firstOrNull()?.hash
                         )
+                        toaster.show("Added to List", type = ToastType.Success)
                         listState.hide()
                     }.invokeOnCompletion { showLists = false }
                 },

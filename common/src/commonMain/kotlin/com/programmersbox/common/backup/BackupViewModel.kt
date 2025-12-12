@@ -6,6 +6,8 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.dokar.sonner.ToastType
+import com.dokar.sonner.ToasterState
 import com.programmersbox.common.NavigationHandler
 import com.programmersbox.common.db.FavoritesDao
 import com.programmersbox.common.db.ListDao
@@ -19,7 +21,8 @@ class BackupViewModel(
     private val backupRepository: BackupRepository,
     favoriteDao: FavoritesDao,
     listDao: ListDao,
-    private val navigationHandler: NavigationHandler
+    private val navigationHandler: NavigationHandler,
+    private val toasterState: ToasterState,
 ) : ViewModel() {
     val favoritesCount = favoriteDao.getFavoritesCount()
     val blacklistedCount = favoriteDao.getBlacklistCount()
@@ -64,6 +67,10 @@ class BackupViewModel(
                 listItemsByUuid = listsToInclude
             )
             isBackingUp = false
+            toasterState.show(
+                "Backup Complete",
+                type = ToastType.Success
+            )
             delay(1000)
             navigationHandler.backStack.removeLastOrNull()
         }

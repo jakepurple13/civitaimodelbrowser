@@ -1,6 +1,7 @@
 package com.programmersbox.common.di
 
 import com.programmersbox.common.backup.BackupViewModel
+import com.programmersbox.common.backup.RestoreViewModel
 import com.programmersbox.common.creator.CivitAiUserViewModel
 import com.programmersbox.common.db.FavoritesViewModel
 import com.programmersbox.common.details.CivitAiDetailViewModel
@@ -47,4 +48,5 @@ fun viewModelModule() = module {
     }
 
     viewModelOf(::BackupViewModel)
+    viewModelOf(::RestoreViewModel)
 }

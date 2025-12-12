@@ -3,11 +3,11 @@ package com.programmersbox.common.di
 import androidx.compose.material3.adaptive.ExperimentalMaterial3AdaptiveApi
 import androidx.compose.material3.adaptive.navigation3.ListDetailSceneStrategy
 import androidx.navigation3.scene.DialogSceneStrategy
-import com.programmersbox.common.LocalActions
 import com.programmersbox.common.NavigationHandler
 import com.programmersbox.common.Screen
 import com.programmersbox.common.SettingsScreen
 import com.programmersbox.common.backup.BackupScreen
+import com.programmersbox.common.backup.RestoreScreen
 import com.programmersbox.common.blacklisted.BlacklistedScreen
 import com.programmersbox.common.creator.CivitAiUserScreen
 import com.programmersbox.common.db.FavoritesUI
@@ -100,12 +100,7 @@ fun navigationModule() = module {
     }
     navigation<Screen.Settings> {
         val backStack = koinInject<NavigationHandler>().backStack
-        val actions = LocalActions.current
         SettingsScreen(
-            onExport = actions.onExport,
-            onImport = actions.onImport,
-            export = actions.export,
-            import = actions.import,
             onNavigateToQrCode = { backStack.add(Screen.QrCode) },
             onNavigateToBackup = { backStack.add(Screen.Backup) },
             onNavigateToRestore = { backStack.add(Screen.Restore) }
@@ -114,12 +109,7 @@ fun navigationModule() = module {
     navigation<Screen.Settings.Blacklisted> { BlacklistedScreen() }
     navigation<Screen.Settings.Screen> {
         val backStack = koinInject<NavigationHandler>().backStack
-        val actions = LocalActions.current
         SettingsScreen(
-            onExport = actions.onExport,
-            onImport = actions.onImport,
-            export = actions.export,
-            import = actions.import,
             onNavigateToQrCode = { backStack.add(Screen.QrCode) },
             onNavigateToBackup = { backStack.add(Screen.Backup) },
             onNavigateToRestore = { backStack.add(Screen.Restore) }
@@ -164,4 +154,5 @@ fun navigationModule() = module {
     }
 
     navigation<Screen.Backup> { BackupScreen() }
+    navigation<Screen.Restore> { RestoreScreen() }
 }

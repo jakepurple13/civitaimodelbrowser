@@ -8,7 +8,9 @@ import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.datastore.preferences.core.longPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
 import com.programmersbox.common.DataStore
+import com.programmersbox.common.db.BlacklistedItemRoom
 import com.programmersbox.common.db.CustomList
+import com.programmersbox.common.db.FavoriteModel
 import com.programmersbox.common.db.FavoritesDao
 import com.programmersbox.common.db.ListDao
 import io.github.vinceglb.filekit.PlatformFile
@@ -40,7 +42,7 @@ class BackupRepository(
     ) {
         val itemsToZip = buildMap<String, String> {
             if (includeFavorites) {
-                put("favorites.json", json.encodeToString(favoritesDao.export()))
+                put("favorites.json", json.encodeToString(favoritesDao.exportFavorites(json)))
             }
 
             if (includeBlacklisted) {
@@ -97,7 +99,7 @@ class BackupRepository(
             platformFile,
             onInfo = { fileName, jsonString ->
                 when (fileName) {
-                    "favorites.json" -> favoritesDao.importFavorites(jsonString, json)
+                    "favorites.json" -> favoritesDao.importOnlyFavorites(jsonString, json)
                     "blacklisted.json" -> favoritesDao.importBlacklisted(jsonString, json)
                     "lists.json" -> {
                         val lists = json.decodeFromString<List<CustomList>>(jsonString)
@@ -136,7 +138,81 @@ class BackupRepository(
             }
         )
     }
+
+    suspend fun restoreItems(
+        backupItems: BackupItems,
+        includeSettings: Boolean,
+        includeFavorites: Boolean,
+        includeBlacklisted: Boolean,
+    ) {
+        if (includeFavorites) {
+            backupItems.favorites?.let {
+                favoritesDao.importOnlyFavorites(json.encodeToString(it), json)
+            }
+        }
+        if (includeBlacklisted) {
+            backupItems.blacklisted?.let {
+                favoritesDao.importBlacklisted(json.encodeToString(it), json)
+            }
+        }
+        backupItems.lists?.let { lists ->
+            lists.forEach { listDao.createList(it.item) }
+            lists.forEach { it.list.forEach { item -> listDao.addItem(item) } }
+        }
+        if (includeSettings) {
+            backupItems.settings?.let { backupSettings ->
+                with(backupSettings) {
+                    dataStore.dataStore.edit { p ->
+                        stringSettings.forEach {
+                            p[stringPreferencesKey(it.key)] = it.value
+                        }
+                        intSettings.forEach {
+                            p[intPreferencesKey(it.key)] = it.value
+                        }
+                        longSettings.forEach {
+                            p[longPreferencesKey(it.key)] = it.value
+                        }
+                        booleanSettings.forEach {
+                            p[booleanPreferencesKey(it.key)] = it.value
+                        }
+                        doubleSettings.forEach {
+                            p[doublePreferencesKey(it.key)] = it.value
+                        }
+                        byteArraySettings.forEach {
+                            p[byteArrayPreferencesKey(it.key)] = it.value
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    suspend fun readItems(platformFile: PlatformFile): BackupItems {
+        var favorites: List<FavoriteModel>? = null
+        var blacklisted: List<BlacklistedItemRoom>? = null
+        var lists: List<CustomList>? = null
+        var settings: BackupSettings? = null
+        zipper.unzip(
+            platformFile,
+            onInfo = { fileName, jsonString ->
+                when (fileName) {
+                    "favorites.json" -> favorites = json.decodeFromString(jsonString)
+                    "blacklisted.json" -> blacklisted = json.decodeFromString(jsonString)
+                    "lists.json" -> lists = json.decodeFromString<List<CustomList>>(jsonString)
+                    "settings.json" -> settings = json.decodeFromString<BackupSettings>(jsonString)
+                }
+            }
+        )
+        return BackupItems(favorites, blacklisted, lists, settings)
+    }
 }
+
+data class BackupItems(
+    val favorites: List<FavoriteModel>?,
+    val blacklisted: List<BlacklistedItemRoom>?,
+    val lists: List<CustomList>?,
+    val settings: BackupSettings?,
+)
 
 expect class Zipper {
     suspend fun zip(

@@ -57,7 +57,7 @@ actual class Zipper(
                                         entry.name,
                                         zipIs.bufferedReader().readText()
                                     )
-                                }
+                                }.onFailure { it.printStackTrace() }
                             }
                             println("Unzipped ${entry.name} in $duration")
                         }

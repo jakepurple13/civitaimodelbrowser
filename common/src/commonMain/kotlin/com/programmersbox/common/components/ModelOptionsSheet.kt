@@ -41,6 +41,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.dokar.sonner.ToastType
+import com.dokar.sonner.ToasterState
 import com.programmersbox.common.CloseButton
 import com.programmersbox.common.Models
 import com.programmersbox.common.db.BlacklistedItemRoom
@@ -254,6 +256,7 @@ fun ModelOptionsSheet(
                         containerColor = MaterialTheme.colorScheme.surface,
                         sheetState = listState
                     ) {
+                        val toaster = koinInject<ToasterState>()
                         ListChoiceScreen(
                             id = models.id,
                             onClick = { item ->
@@ -269,6 +272,7 @@ fun ModelOptionsSheet(
                                         favoriteType = FavoriteType.Model,
                                         hash = modelImage?.hash
                                     )
+                                    toaster.show("Added to List", type = ToastType.Success)
                                     listState.hide()
                                 }.invokeOnCompletion { showLists = false }
                             },
@@ -439,6 +443,7 @@ fun ListChoiceScreen(
                     )
                 }
                 if (showAdd) {
+                    val toaster = koinInject<ToasterState>()
                     var name by remember { mutableStateOf("") }
                     AlertDialog(
                         onDismissRequest = { showAdd = false },
@@ -457,6 +462,7 @@ fun ListChoiceScreen(
                                 onClick = {
                                     scope.launch {
                                         dao.create(name)
+                                        toaster.show("List Created", type = ToastType.Success)
                                         showAdd = false
                                     }
                                 },

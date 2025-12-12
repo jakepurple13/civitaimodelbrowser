@@ -21,7 +21,6 @@ import androidx.navigation3.scene.DialogSceneStrategy
 import androidx.navigation3.ui.NavDisplay
 import com.dokar.sonner.ToasterState
 import com.programmersbox.common.db.AppDatabase
-import com.programmersbox.common.db.FavoritesDao
 import com.programmersbox.common.db.getRoomDatabase
 import com.programmersbox.common.di.navigationModule
 import com.programmersbox.common.di.repositoryModule
@@ -41,10 +40,8 @@ import org.koin.dsl.module
 internal fun App(
     onShareClick: (String) -> Unit,
 ) {
-    //val backStack = remember { mutableStateListOf<NavKey>(Screen.List) }
     CompositionLocalProvider(
         LocalHazeStyle provides HazeMaterials.regular(),
-        LocalDatabaseDao provides koinInject(),
         LocalActions provides remember {
             Actions(
                 shareUrl = onShareClick,
@@ -109,8 +106,6 @@ val LocalActions = staticCompositionLocalOf<Actions> { error("Nothing") }
 data class Actions(
     val shareUrl: (String) -> Unit,
 )
-
-val LocalDatabaseDao = staticCompositionLocalOf<FavoritesDao> { error("Nothing") }
 
 sealed class Screen {
     @Serializable

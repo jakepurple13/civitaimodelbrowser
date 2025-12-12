@@ -20,12 +20,13 @@ import com.programmersbox.common.lists.ListScreen
 import com.programmersbox.common.qrcode.ScanQrCode
 import org.koin.compose.koinInject
 import org.koin.compose.viewmodel.koinViewModel
+import org.koin.core.annotation.KoinExperimentalAPI
 import org.koin.core.module.dsl.singleOf
 import org.koin.core.parameter.parametersOf
 import org.koin.dsl.module
 import org.koin.dsl.navigation3.navigation
 
-@OptIn(ExperimentalMaterial3AdaptiveApi::class)
+@OptIn(ExperimentalMaterial3AdaptiveApi::class, KoinExperimentalAPI::class)
 fun navigationModule() = module {
     singleOf(::NavigationHandler)
 
@@ -46,12 +47,14 @@ fun navigationModule() = module {
                     )
                 )
             },
-            onNavigateToBlacklisted = { backStack.add(Screen.Settings.Blacklisted) },
+            onNavigateToBlacklisted = {
+                backStack.add(Screen.Settings)
+                backStack.add(Screen.Settings.Blacklisted)
+            },
             onNavigateToCustomList = { backStack.add(Screen.CustomList) },
         )
     }
 
-    //TODO: Maybe add an image searcher?
     navigation<Screen.Detail>(
         metadata = ListDetailSceneStrategy.listPane()
     ) {

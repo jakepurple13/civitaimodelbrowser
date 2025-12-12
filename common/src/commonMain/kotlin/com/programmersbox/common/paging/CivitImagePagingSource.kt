@@ -5,6 +5,8 @@ import androidx.paging.PagingState
 import com.programmersbox.common.CivitAiCustomImages
 import com.programmersbox.common.CustomModelImage
 import com.programmersbox.common.Network
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 
 class CivitImagePagingSource(
     private val network: Network,
@@ -19,10 +21,12 @@ class CivitImagePagingSource(
     }
 
     override suspend fun load(params: LoadParams<String>): LoadResult<String, Pair<Long, List<CustomModelImage>>> {
-        val request = if (params.key == null) {
-            network.fetchAllImages(includeNsfw = includeNsfw)
-        } else {
-            network.fetchRequest<CivitAiCustomImages>(params.key.orEmpty())
+        val request = withContext(Dispatchers.IO) {
+            if (params.key == null) {
+                network.fetchAllImages(includeNsfw = includeNsfw)
+            } else {
+                network.fetchRequest<CivitAiCustomImages>(params.key.orEmpty())
+            }
         }
         return request
             .fold(

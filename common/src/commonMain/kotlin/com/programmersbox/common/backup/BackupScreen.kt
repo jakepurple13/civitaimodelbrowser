@@ -12,7 +12,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowDropDown
-import androidx.compose.material.icons.filled.ImportExport
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Card
@@ -82,14 +81,14 @@ fun BackupScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Backup") },
+                title = { Text("Create Backup") },
                 navigationIcon = { BackButton() }
             )
         },
         floatingActionButton = {
             FloatingActionButton(
                 onClick = { backupFile.launch("civitai_backup", "zip") }
-            ) { Icon(Icons.Default.ImportExport, null) }
+            ) { Text("Backup") }
         }
     ) { padding ->
         LazyColumn(

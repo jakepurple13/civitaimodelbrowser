@@ -12,10 +12,12 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Backup
 import androidx.compose.material.icons.filled.BlurOff
 import androidx.compose.material.icons.filled.BlurOn
 import androidx.compose.material.icons.filled.BorderBottom
 import androidx.compose.material.icons.filled.NoAdultContent
+import androidx.compose.material.icons.filled.Restore
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material3.Card
@@ -205,6 +207,7 @@ fun SettingsScreen(
             ) {
                 ListItem(
                     headlineContent = { Text("Backup") },
+                    leadingContent = { Icon(Icons.Default.Backup, null) }
                 )
             }
 
@@ -213,6 +216,7 @@ fun SettingsScreen(
             ) {
                 ListItem(
                     headlineContent = { Text("Restore") },
+                    leadingContent = { Icon(Icons.Default.Restore, null) }
                 )
             }
 
@@ -232,7 +236,7 @@ fun SettingsScreen(
                             Icons.Github,
                             contentDescription = null,
                             modifier = Modifier
-                                .size(48.dp)
+                                .size(24.dp)
                                 .clip(CircleShape)
                         )
                     }
@@ -249,7 +253,7 @@ fun SettingsScreen(
                             painter = painterResource(Res.drawable.civitai_logo),
                             contentDescription = null,
                             modifier = Modifier
-                                .size(48.dp)
+                                .size(24.dp)
                                 .clip(CircleShape)
                         )
                     }
@@ -266,7 +270,7 @@ fun SettingsScreen(
                             Icons.Github,
                             contentDescription = null,
                             modifier = Modifier
-                                .size(48.dp)
+                                .size(24.dp)
                                 .clip(CircleShape)
                         )
                     }

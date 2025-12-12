@@ -11,6 +11,7 @@ import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.floatPreferencesKey
+import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.distinctUntilChanged
@@ -79,6 +80,35 @@ class DataStore private constructor(
         true
     )
 
+    @Composable
+    fun rememberThemeMode(): MutableState<ThemeMode> {
+        val coroutineScope = rememberCoroutineScope()
+        val key = stringPreferencesKey("theme_mode")
+        val state by remember {
+            dataStore
+                .data
+                .map {
+                    runCatching { ThemeMode.valueOf(it[key]!!) }
+                        .getOrElse { ThemeMode.System }
+                }
+        }.collectAsStateWithLifecycle(initialValue = ThemeMode.System)
+
+        return remember(state) {
+            object : MutableState<ThemeMode> {
+                override var value: ThemeMode
+                    get() = state
+                    set(value) {
+                        coroutineScope.launch {
+                            dataStore.edit { it[key] = value.name }
+                        }
+                    }
+
+                override fun component1() = value
+                override fun component2(): (ThemeMode) -> Unit = { value = it }
+            }
+        }
+    }
+
     open class DataStoreType<T>(
         val key: Preferences.Key<T>,
         protected val dataStore: DataStore<Preferences>,
@@ -133,3 +163,8 @@ class DataStore private constructor(
     }
 }
 
+enum class ThemeMode {
+    System,
+    Light,
+    Dark
+}

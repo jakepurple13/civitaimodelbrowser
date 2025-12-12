@@ -10,14 +10,18 @@ import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.browser.customtabs.CustomTabsIntent
 import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
+import androidx.compose.material3.MaterialExpressiveTheme
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.MotionScheme
 import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.dynamicDarkColorScheme
 import androidx.compose.material3.dynamicLightColorScheme
-import androidx.compose.material3.lightColorScheme
+import androidx.compose.material3.expressiveLightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.SideEffect
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
@@ -29,6 +33,9 @@ import androidx.core.net.toUri
 import androidx.core.view.WindowCompat
 import com.dokar.sonner.Toaster
 import com.dokar.sonner.ToasterState
+import com.materialkolor.ktx.animateColorScheme
+import com.programmersbox.common.DataStore
+import com.programmersbox.common.ThemeMode
 import com.programmersbox.common.UIShow
 import io.kamel.core.config.KamelConfig
 import io.kamel.core.config.takeFrom
@@ -45,10 +52,14 @@ class MainActivity : ComponentActivity() {
         WindowCompat.setDecorFitsSystemWindows(window, false)
         enableEdgeToEdge()
         setContent {
-            CustomMaterialTheme {
+            val isDarkMode by koinInject<DataStore>().rememberThemeMode()
+            CustomMaterialTheme(
+                darkTheme = isDarkMode
+            ) {
                 val toaster = koinInject<ToasterState>()
                 val defaultUriHandler = LocalUriHandler.current
-                val customUriHandler = remember { customTabsUriHandler { defaultUriHandler.openUri(it) } }
+                val customUriHandler =
+                    remember { customTabsUriHandler { defaultUriHandler.openUri(it) } }
                 CompositionLocalProvider(
                     LocalUriHandler provides customUriHandler,
                     LocalKamelConfig provides customKamelConfig()
@@ -106,33 +117,51 @@ private fun customKamelConfig(): KamelConfig {
     }
 }
 
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun CustomMaterialTheme(
-    darkTheme: Boolean = isSystemInDarkTheme(),
+    darkTheme: ThemeMode,
     dynamicColor: Boolean = true,
     content: @Composable () -> Unit,
 ) {
-    val colorScheme = when {
-        dynamicColor && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S -> {
-            val context = LocalContext.current
-            if (darkTheme) dynamicDarkColorScheme(context) else dynamicLightColorScheme(context)
-        }
+    val systemDarkTheme = isSystemInDarkTheme()
+    val colorScheme = if (dynamicColor && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+        val context = LocalContext.current
+        when (darkTheme) {
+            ThemeMode.System -> if (systemDarkTheme)
+                dynamicDarkColorScheme(context)
+            else
+                dynamicLightColorScheme(context)
 
-        darkTheme -> darkColorScheme()
-        else -> lightColorScheme()
+            ThemeMode.Light -> dynamicLightColorScheme(context)
+            ThemeMode.Dark -> dynamicDarkColorScheme(context)
+        }
+    } else {
+        when (darkTheme) {
+            ThemeMode.System -> if (systemDarkTheme) darkColorScheme() else expressiveLightColorScheme()
+            ThemeMode.Dark -> darkColorScheme()
+            ThemeMode.Light -> expressiveLightColorScheme()
+        }
     }
+
     val view = LocalView.current
     if (!view.isInEditMode) {
         SideEffect {
             val activity = view.context as Activity
             activity.window.statusBarColor = Color.Transparent.toArgb()
-            WindowCompat.getInsetsController(activity.window, view).isAppearanceLightStatusBars = !darkTheme
+            WindowCompat.getInsetsController(activity.window, view).isAppearanceLightStatusBars =
+                !when (darkTheme) {
+                    ThemeMode.System -> systemDarkTheme
+                    ThemeMode.Light -> false
+                    ThemeMode.Dark -> true
+                }
         }
     }
 
-    MaterialTheme(
-        colorScheme = colorScheme,
+    MaterialExpressiveTheme(
+        colorScheme = animateColorScheme(colorScheme),
         typography = MaterialTheme.typography,
+        motionScheme = MotionScheme.expressive(),
         content = content
     )
 }

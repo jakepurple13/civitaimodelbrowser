@@ -24,6 +24,10 @@ interface ListDao {
     @Query("SELECT * FROM CustomListItem WHERE name LIKE '%' || :search || '%' ORDER BY time DESC")
     fun getAllLists(search: String): Flow<List<CustomList>>
 
+    @Transaction
+    @Query("SELECT * FROM CustomListItem WHERE uuid in (:uuid)")
+    suspend fun getAllListItems(vararg uuid: String): List<CustomList>
+
     @Query("SELECT COUNT(uuid) FROM CustomListItem")
     fun getAllListsCount(): Flow<Int>
 

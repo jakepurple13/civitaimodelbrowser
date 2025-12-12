@@ -106,6 +106,12 @@ interface FavoritesDao {
     @Query("SELECT * FROM favorite_table ORDER BY dateAdded DESC")
     fun getFavorites(): Flow<List<FavoriteRoom>>
 
+    @Query("SELECT COUNT(id) FROM favorite_table")
+    fun getFavoritesCount(): Flow<Int>
+
+    @Query("SELECT COUNT(id) FROM blacklisted_table")
+    fun getBlacklistCount(): Flow<Int>
+
     @Query("SELECT * FROM favorite_table ORDER BY dateAdded DESC")
     suspend fun getFavoritesSync(): List<FavoriteRoom>
 
@@ -197,6 +203,19 @@ interface FavoritesDao {
     )
 
     @Ignore
+    suspend fun exportFavorites(
+        json: Json = Json {
+            isLenient = true
+            prettyPrint = true
+            ignoreUnknownKeys = true
+            coerceInputValues = true
+        },
+    ) = getFavoritesSync().map { room -> room.toModel(json) }
+
+    @Ignore
+    suspend fun exportBlacklisted() = getBlacklistedSync()
+
+    @Ignore
     suspend fun importFavorites(
         jsonString: String,
         json: Json = Json {
@@ -242,6 +261,66 @@ interface FavoritesDao {
         }
 
         list.blacklistedItemRoom.forEach { item -> insert(item) }
+    }
+
+    @Ignore
+    suspend fun importOnlyFavorites(
+        jsonString: String,
+        json: Json = Json {
+            isLenient = true
+            prettyPrint = true
+            ignoreUnknownKeys = true
+            coerceInputValues = true
+        },
+    ) {
+        val list = json.decodeFromString<List<FavoriteModel>>(jsonString)
+        list.forEach { model ->
+            insert(
+                when (model) {
+                    is FavoriteModel.Model -> FavoriteRoom(
+                        id = model.id,
+                        name = model.name,
+                        description = model.description,
+                        type = model.type,
+                        nsfw = model.nsfw,
+                        imageUrl = model.imageUrl,
+                        favoriteType = FavoriteType.Model,
+                    )
+
+                    is FavoriteModel.Creator -> FavoriteRoom(
+                        id = model.id,
+                        name = model.name,
+                        type = model.modelType,
+                        imageUrl = model.imageUrl,
+                        favoriteType = FavoriteType.Creator,
+                    )
+
+                    is FavoriteModel.Image -> FavoriteRoom(
+                        id = model.id,
+                        name = model.name,
+                        type = model.modelType,
+                        imageUrl = model.imageUrl,
+                        nsfw = model.nsfw,
+                        favoriteType = FavoriteType.Image,
+                        imageMeta = model.imageMetaDb?.let { json.encodeToString(it) }
+                    )
+                }
+            )
+        }
+    }
+
+    @Ignore
+    suspend fun importBlacklisted(
+        jsonString: String,
+        json: Json = Json {
+            isLenient = true
+            prettyPrint = true
+            ignoreUnknownKeys = true
+            coerceInputValues = true
+        },
+    ) {
+        val list = json.decodeFromString<List<BlacklistedItemRoom>>(jsonString)
+        list.forEach { item -> insert(item) }
     }
 }
 

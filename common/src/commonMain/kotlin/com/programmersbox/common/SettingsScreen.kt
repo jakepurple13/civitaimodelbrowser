@@ -60,6 +60,8 @@ fun SettingsScreen(
     export: @Composable () -> Unit = {},
     import: (@Composable () -> Unit)? = null,
     onNavigateToQrCode: () -> Unit,
+    onNavigateToBackup: () -> Unit,
+    onNavigateToRestore: () -> Unit,
 ) {
     val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
     val scope = rememberCoroutineScope()
@@ -204,6 +206,22 @@ fun SettingsScreen(
             }
 
             HorizontalDivider()
+
+            Card(
+                onClick = onNavigateToBackup
+            ) {
+                ListItem(
+                    headlineContent = { Text("Backup") },
+                )
+            }
+
+            Card(
+                onClick = onNavigateToRestore
+            ) {
+                ListItem(
+                    headlineContent = { Text("Restore") },
+                )
+            }
 
             export()
 

@@ -59,18 +59,29 @@ class BackupViewModel(
     ) {
         viewModelScope.launch {
             isBackingUp = true
-            backupRepository.packageItems(
-                platformFile = platformFile,
-                includeFavorites = includeFavorites,
-                includeBlacklisted = includeBlacklisted,
-                includeSettings = includeSettings,
-                listItemsByUuid = listsToInclude
-            )
+            runCatching {
+                backupRepository.packageItems(
+                    platformFile = platformFile,
+                    includeFavorites = includeFavorites,
+                    includeBlacklisted = includeBlacklisted,
+                    includeSettings = includeSettings,
+                    listItemsByUuid = listsToInclude
+                )
+            }
+                .onSuccess {
+                    toasterState.show(
+                        "Backup Complete",
+                        type = ToastType.Success
+                    )
+                }
+                .onFailure {
+                    it.printStackTrace()
+                    toasterState.show(
+                        "Backup Failed",
+                        type = ToastType.Error
+                    )
+                }
             isBackingUp = false
-            toasterState.show(
-                "Backup Complete",
-                type = ToastType.Success
-            )
             delay(1000)
             navigationHandler.backStack.removeLastOrNull()
         }

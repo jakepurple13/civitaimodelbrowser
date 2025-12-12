@@ -31,7 +31,8 @@ class RestoreViewModel(
     fun read(platformFile: PlatformFile) {
         viewModelScope.launch {
             isReading = true
-            backupItems = backupRepository.readItems(platformFile)
+            runCatching { backupItems = backupRepository.readItems(platformFile) }
+                .onFailure { it.printStackTrace() }
             listsToInclude.clear()
             backupItems?.lists?.forEach { listsToInclude.add(it.item.uuid) }
             isReading = false

@@ -10,6 +10,8 @@ import androidx.compose.material3.adaptive.ExperimentalMaterial3AdaptiveApi
 import androidx.compose.material3.adaptive.navigation3.rememberListDetailSceneStrategy
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.staticCompositionLocalOf
@@ -29,6 +31,7 @@ import dev.chrisbanes.haze.LocalHazeStyle
 import dev.chrisbanes.haze.materials.HazeMaterials
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.collect
 import kotlinx.serialization.Serializable
 import org.koin.compose.koinInject
 import org.koin.compose.navigation3.koinEntryProvider
@@ -40,6 +43,7 @@ import org.koin.dsl.module
 internal fun App(
     onShareClick: (String) -> Unit,
 ) {
+    SetupNetworkListener()
     CompositionLocalProvider(
         LocalHazeStyle provides HazeMaterials.regular(),
         LocalActions provides remember {
@@ -78,6 +82,20 @@ internal fun App(
                 )
             }
         }
+    }
+}
+
+@Composable
+private fun SetupNetworkListener() {
+    val networkConnectionRepository = koinInject<NetworkConnectionRepository>()
+    LaunchedEffect(Unit) {
+        networkConnectionRepository
+            .connectivityFlow()
+            .collect()
+    }
+    DisposableEffect(Unit) {
+        networkConnectionRepository.start()
+        onDispose { networkConnectionRepository.stop() }
     }
 }
 

@@ -82,7 +82,10 @@ kotlin {
             implementation(libs.blurhash)
             implementation(libs.compose.multiplatform.media.player)
 
-            api("com.materialkolor:material-kolor:4.0.0")
+            api("com.materialkolor:material-kolor:4.0.5")
+
+            implementation(libs.connectivity.core)
+            implementation(libs.connectivity.compose)
         }
 
         commonTest.dependencies {
@@ -98,6 +101,8 @@ kotlin {
             api(libs.kamel.image.bitmap.resizing)
             api(libs.barcode.scanning)
             api(libs.coroutinesPlayServices)
+            implementation(libs.connectivity.device)
+            implementation(libs.connectivity.compose.device)
         }
 
         jvmMain.dependencies {
@@ -107,6 +112,8 @@ kotlin {
             api("ca.gosyer:kotlin-multiplatform-appdirs:2.0.0")
             api(libs.zxing.javase)
             api(libs.zxing.core)
+            implementation(libs.connectivity.http)
+            implementation(libs.connectivity.compose.http)
         }
 
         //val desktopTest by getting

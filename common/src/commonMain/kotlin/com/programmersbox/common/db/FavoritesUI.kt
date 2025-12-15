@@ -57,6 +57,7 @@ import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -77,6 +78,7 @@ import com.programmersbox.common.BackButton
 import com.programmersbox.common.ComposableUtils
 import com.programmersbox.common.CustomScrollBar
 import com.programmersbox.common.DataStore
+import com.programmersbox.common.NetworkConnectionRepository
 import com.programmersbox.common.SheetDetails
 import com.programmersbox.common.adaptiveGridCell
 import com.programmersbox.common.components.ImageSheet
@@ -110,6 +112,8 @@ fun FavoritesUI(
     onNavigateToDetail: (Long) -> Unit,
     onNavigateToUser: (String) -> Unit,
 ) {
+    val connectionRepository = koinInject<NetworkConnectionRepository>()
+    val shouldShowMedia by remember { derivedStateOf { connectionRepository.shouldShowMedia } }
     val hazeState = remember { HazeState() }
     val dataStore = koinInject<DataStore>()
     val scope = rememberCoroutineScope()
@@ -367,6 +371,7 @@ fun FavoritesUI(
                             showNsfw = showNsfw,
                             blurStrength = blurStrength.dp,
                             blurHash = model.hash,
+                            shouldShowMedia = shouldShowMedia,
                             modifier = Modifier.animateItem()
                         )
                     }
@@ -388,6 +393,7 @@ fun FavoritesUI(
                             blurStrength = blurStrength.dp,
                             onLongClick = { showSheet = true },
                             blurHash = model.hash,
+                            shouldShowMedia = shouldShowMedia,
                             modifier = Modifier.animateItem()
                         )
                     }
@@ -421,6 +427,7 @@ private fun CreatorItem(
         onClick = onClick,
         onLongClick = onLongClick,
         blurHash = null,
+        shouldShowMedia = false,
         modifier = modifier.size(
             width = ComposableUtils.IMAGE_WIDTH,
             height = ComposableUtils.IMAGE_HEIGHT
@@ -434,8 +441,9 @@ private fun ImageItem(
     showNsfw: Boolean,
     blurStrength: Dp,
     onClick: () -> Unit,
-    blurHash: String? = null,
+    shouldShowMedia: Boolean,
     modifier: Modifier = Modifier,
+    blurHash: String? = null,
 ) {
     CoverCard(
         imageUrl = models.imageUrl.orEmpty(),
@@ -446,6 +454,7 @@ private fun ImageItem(
         blurStrength = blurStrength,
         onClick = onClick,
         blurHash = blurHash,
+        shouldShowMedia = shouldShowMedia,
         modifier = modifier.size(
             width = ComposableUtils.IMAGE_WIDTH,
             height = ComposableUtils.IMAGE_HEIGHT
@@ -461,6 +470,7 @@ private fun ModelItem(
     onClick: () -> Unit,
     onLongClick: () -> Unit,
     blurHash: String?,
+    shouldShowMedia: Boolean,
     modifier: Modifier = Modifier,
 ) {
     CoverCard(
@@ -473,6 +483,7 @@ private fun ModelItem(
         onClick = onClick,
         onLongClick = onLongClick,
         blurHash = blurHash,
+        shouldShowMedia = shouldShowMedia,
         modifier = modifier.size(
             width = ComposableUtils.IMAGE_WIDTH,
             height = ComposableUtils.IMAGE_HEIGHT
@@ -489,6 +500,7 @@ fun CoverCard(
     showNsfw: Boolean,
     blurStrength: Dp,
     blurHash: String?,
+    shouldShowMedia: Boolean,
     modifier: Modifier = Modifier,
     onClick: () -> Unit = {},
 ) {
@@ -505,7 +517,8 @@ fun CoverCard(
             isNsfw = isNsfw,
             showNsfw = showNsfw,
             blurHash = blurHash,
-            blurStrength = blurStrength
+            blurStrength = blurStrength,
+            shouldShowMedia = shouldShowMedia,
         )
     }
 }
@@ -519,6 +532,7 @@ fun CoverCard(
     showNsfw: Boolean,
     blurStrength: Dp,
     blurHash: String?,
+    shouldShowMedia: Boolean,
     modifier: Modifier = Modifier,
     onClick: () -> Unit = {},
     onLongClick: () -> Unit = {},
@@ -541,6 +555,7 @@ fun CoverCard(
             showNsfw = showNsfw,
             blurStrength = blurStrength,
             blurHash = blurHash,
+            shouldShowMedia = shouldShowMedia,
         )
     }
 }

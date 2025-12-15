@@ -30,6 +30,7 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -45,6 +46,7 @@ import com.dokar.sonner.ToastType
 import com.dokar.sonner.ToasterState
 import com.programmersbox.common.BackButton
 import com.programmersbox.common.DataStore
+import com.programmersbox.common.NetworkConnectionRepository
 import com.programmersbox.common.adaptiveGridCell
 import com.programmersbox.common.components.ListChoiceScreen
 import com.programmersbox.common.components.LoadingImage
@@ -72,6 +74,8 @@ fun CivitAiUserScreen(
     viewModel: CivitAiUserViewModel = koinViewModel(),
     onNavigateToDetail: (String) -> Unit,
 ) {
+    val connectionRepository = koinInject<NetworkConnectionRepository>()
+    val shouldShowMedia by remember { derivedStateOf { connectionRepository.shouldShowMedia } }
     val hazeState = remember { HazeState() }
     val dataStore = koinInject<DataStore>()
     val showNsfw by remember { dataStore.showNsfw.flow }.collectAsStateWithLifecycle(false)
@@ -255,6 +259,7 @@ fun CivitAiUserScreen(
                     blurStrength = blurStrength,
                     database = favorites,
                     blacklisted = blacklisted,
+                    shouldShowMedia = shouldShowMedia,
                 )
             }
         }

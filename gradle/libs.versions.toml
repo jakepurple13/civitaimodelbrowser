@@ -1,5 +1,5 @@
 [versions]
-appVersion = "4.0.0"
+appVersion = "4.0.1"
 
 blurhashVersion = "0.0-4-ALPHA"
 browser = "1.9.0"
@@ -8,7 +8,7 @@ composeScrollbars = "1.0.4"
 haze = "1.7.1"
 jsoup = "1.21.2"
 kotlin-version = "2.2.21"
-agp-version = "8.13.1"
+agp-version = "8.13.2"
 compose-version = "1.10.0-rc02"
 ktor-version = "3.3.3"
 kotlinx-datetime = "0.7.1"
@@ -39,6 +39,8 @@ scanner = "0.6.0"
 javase = "3.5.4"
 coreVersion = "3.5.4"
 barcodeScanning = "17.3.0"
+
+connectivity = "2.3.0"
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp-version" }
@@ -106,3 +108,12 @@ zxing-javase = { module = "com.google.zxing:javase", version.ref = "javase" }
 zxing-core = { module = "com.google.zxing:core", version.ref = "coreVersion" }
 
 coroutinesPlayServices = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-play-services", version.ref = "kotlinx-coroutines-core" }
+
+connectivity-core = { module = "dev.jordond.connectivity:connectivity-core", version.ref = "connectivity" }
+connectivity-device = { module = "dev.jordond.connectivity:connectivity-device", version.ref = "connectivity" }
+connectivity-android = { module = "dev.jordond.connectivity:connectivity-android", version.ref = "connectivity" }
+connectivity-apple = { module = "dev.jordond.connectivity:connectivity-apple", version.ref = "connectivity" }
+connectivity-http = { module = "dev.jordond.connectivity:connectivity-http", version.ref = "connectivity" }
+connectivity-compose = { module = "dev.jordond.connectivity:connectivity-compose", version.ref = "connectivity" }
+connectivity-compose-device = { module = "dev.jordond.connectivity:connectivity-compose-device", version.ref = "connectivity" }
+connectivity-compose-http = { module = "dev.jordond.connectivity:connectivity-compose-http", version.ref = "connectivity" }

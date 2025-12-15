@@ -62,6 +62,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.rememberSearchBarState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -87,6 +88,7 @@ import com.programmersbox.common.ContextMenu
 import com.programmersbox.common.DataStore
 import com.programmersbox.common.ModelType
 import com.programmersbox.common.Models
+import com.programmersbox.common.NetworkConnectionRepository
 import com.programmersbox.common.adaptiveGridCell
 import com.programmersbox.common.components.LoadingImage
 import com.programmersbox.common.components.ModelOptionsSheet
@@ -126,6 +128,8 @@ fun CivitAiScreen(
     onNavigateToImages: () -> Unit,
     onNavigateToCustomList: () -> Unit,
 ) {
+    val connectionRepository = koinInject<NetworkConnectionRepository>()
+    val shouldShowMedia by remember { derivedStateOf { connectionRepository.shouldShowMedia } }
     val hazeState = remember { HazeState() }
     val db = koinInject<FavoritesDao>()
     val dataStore = koinInject<DataStore>()
@@ -162,6 +166,7 @@ fun CivitAiScreen(
                 onNavigateToImages = onNavigateToImages,
                 onNavigateToBlacklisted = onNavigateToBlacklisted,
                 onNavigateToCustomList = onNavigateToCustomList,
+                shouldShowMedia = shouldShowMedia,
                 modifier = Modifier.ifTrue(showBlur) {
                     hazeEffect(hazeState) {
                         progressive = HazeProgressive.verticalGradient(
@@ -206,6 +211,7 @@ fun CivitAiScreen(
                     blurStrength = blurStrength,
                     database = database,
                     blacklisted = blacklisted,
+                    shouldShowMedia = shouldShowMedia,
                     onNavigateToUser = onNavigateToUser,
                     onNavigateToDetailImages = onNavigateToDetailImages,
                 )
@@ -234,6 +240,7 @@ fun LazyGridScope.modelItems(
     blurStrength: Float,
     database: List<FavoriteModel>,
     blacklisted: List<BlacklistedItemRoom>,
+    shouldShowMedia: Boolean,
     onNavigateToUser: ((String) -> Unit)? = null,
     onNavigateToDetailImages: ((Long, String) -> Unit)? = null,
 ) {
@@ -272,6 +279,7 @@ fun LazyGridScope.modelItems(
                     onLongClick = { showSheet = true },
                     showNsfw = showNsfw,
                     blurStrength = blurStrength.dp,
+                    shouldShowMedia = shouldShowMedia,
                     isFavorite = database
                         .filterIsInstance<FavoriteModel.Model>()
                         .any { m -> m.id == models.id },
@@ -331,6 +339,7 @@ private fun ModelItem(
     onLongClick: () -> Unit,
     isFavorite: Boolean,
     isBlacklisted: Boolean,
+    shouldShowMedia: Boolean,
     checkIfImageUrlIsBlacklisted: (String) -> Boolean,
     modifier: Modifier = Modifier,
 ) {
@@ -350,6 +359,7 @@ private fun ModelItem(
         isFavorite = isFavorite,
         isBlacklisted = isBlacklisted,
         onLongClick = onLongClick,
+        shouldShowMedia = shouldShowMedia,
         blurHash = imageModel?.hash,
         modifier = modifier.size(
             width = ComposableUtils.IMAGE_WIDTH,
@@ -371,6 +381,7 @@ fun CoverCard(
     isBlacklisted: Boolean,
     modifier: Modifier = Modifier,
     blurHash: String? = null,
+    shouldShowMedia: Boolean,
     onLongClick: () -> Unit = {},
     onClick: () -> Unit = {},
 ) {
@@ -394,6 +405,7 @@ fun CoverCard(
             showNsfw = showNsfw,
             blurStrength = blurStrength,
             blurHash = blurHash,
+            shouldShowMedia = shouldShowMedia,
         )
     }
 }
@@ -409,6 +421,7 @@ fun CardContent(
     blurStrength: Dp,
     isBlacklisted: Boolean = false,
     blurHash: String? = null,
+    shouldShowMedia: Boolean,
 ) {
     Box(
         modifier = Modifier.fillMaxSize(),
@@ -421,7 +434,7 @@ fun CardContent(
                     .matchParentSize()
             )
         } else {
-            if (imageUrl.endsWith("mp4")) {
+            if (imageUrl.endsWith("mp4") && shouldShowMedia) {
                 Box(
                     contentAlignment = Alignment.Center,
                     modifier = Modifier
@@ -541,6 +554,7 @@ private fun AppSearchAppBar(
     onNavigateToBlacklisted: () -> Unit,
     onNavigateToCustomList: () -> Unit,
     showBlur: Boolean,
+    shouldShowMedia: Boolean,
     modifier: Modifier = Modifier,
     viewModel: CivitAiSearchViewModel = koinViewModel(),
 ) {
@@ -692,6 +706,7 @@ private fun AppSearchAppBar(
                 blurStrength = blurStrength,
                 database = database,
                 blacklisted = blacklisted,
+                shouldShowMedia = shouldShowMedia,
                 onNavigateToUser = { username ->
                     scope.launch { searchBarState.animateToCollapsed() }
                         .invokeOnCompletion { onNavigateToUser(username) }

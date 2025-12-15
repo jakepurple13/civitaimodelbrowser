@@ -66,6 +66,7 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -92,6 +93,7 @@ import com.programmersbox.common.ComposableUtils
 import com.programmersbox.common.ContextMenu
 import com.programmersbox.common.DataStore
 import com.programmersbox.common.ModelImage
+import com.programmersbox.common.NetworkConnectionRepository
 import com.programmersbox.common.adaptiveGridCell
 import com.programmersbox.common.components.ImageSheet
 import com.programmersbox.common.components.ListChoiceScreen
@@ -125,6 +127,8 @@ fun CivitAiDetailScreen(
     onNavigateToUser: (String) -> Unit,
     onNavigateToDetailImages: (Long, String) -> Unit,
 ) {
+    val connectionRepository = koinInject<NetworkConnectionRepository>()
+    val shouldShowMedia by remember { derivedStateOf { connectionRepository.shouldShowMedia } }
     val hazeState = remember { HazeState() }
     val dao = koinInject<FavoritesDao>()
     val dataStore = koinInject<DataStore>()
@@ -407,6 +411,7 @@ fun CivitAiDetailScreen(
                                             .filterIsInstance<FavoriteModel.Image>()
                                             .any { f -> f.imageUrl == images.url },
                                         isBlacklisted = blacklisted.any { it.imageUrl == images.url },
+                                        shouldShowMedia = shouldShowMedia,
                                         onClick = { sheetDetails = images },
                                         onLongClick = { showDialog = true }
                                     )
@@ -458,6 +463,7 @@ private fun ImageCard(
     isFavorite: Boolean,
     isBlacklisted: Boolean,
     nsfwBlurStrength: Float,
+    shouldShowMedia: Boolean,
     onClick: () -> Unit,
     onLongClick: () -> Unit,
 ) {
@@ -491,7 +497,7 @@ private fun ImageCard(
                         .matchParentSize()
                 )
             } else {
-                if (images.url.endsWith("mp4")) {
+                if (images.url.endsWith("mp4") && shouldShowMedia) {
                     Box(
                         contentAlignment = Alignment.Center,
                         modifier = Modifier

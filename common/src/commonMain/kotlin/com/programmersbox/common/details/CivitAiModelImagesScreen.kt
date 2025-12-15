@@ -27,6 +27,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -50,6 +51,7 @@ import com.programmersbox.common.ComposableUtils
 import com.programmersbox.common.ContextMenu
 import com.programmersbox.common.CustomModelImage
 import com.programmersbox.common.DataStore
+import com.programmersbox.common.NetworkConnectionRepository
 import com.programmersbox.common.adaptiveGridCell
 import com.programmersbox.common.components.ImageSheet
 import com.programmersbox.common.components.LoadingImage
@@ -71,6 +73,8 @@ fun CivitAiModelImagesScreen(
     modelName: String?,
     viewModel: CivitAiModelImagesViewModel = koinViewModel(),
 ) {
+    val connectionRepository = koinInject<NetworkConnectionRepository>()
+    val shouldShowMedia by remember { derivedStateOf { connectionRepository.shouldShowMedia } }
     val hazeState = remember { HazeState() }
     val database = koinInject<FavoritesDao>()
     val dataStore = koinInject<DataStore>()
@@ -185,6 +189,7 @@ fun CivitAiModelImagesScreen(
                             nsfwBlurStrength = nsfwBlurStrength,
                             isFavorite = favoriteList.any { f -> f.imageUrl == models.url },
                             isBlacklisted = blacklisted.any { it.imageUrl == models.url },
+                            shouldShowMedia = shouldShowMedia,
                             onClick = {
                                 if (models.height < 2000 || models.width < 2000) {
                                     sheetDetails = models
@@ -209,6 +214,7 @@ private fun ImageCard(
     isFavorite: Boolean,
     isBlacklisted: Boolean,
     nsfwBlurStrength: Float,
+    shouldShowMedia: Boolean,
     onClick: () -> Unit,
     onLongClick: () -> Unit,
 ) {
@@ -244,7 +250,7 @@ private fun ImageCard(
                             .matchParentSize()
                     )
                 } else {
-                    if (images.url.endsWith("mp4")) {
+                    if (images.url.endsWith("mp4") && shouldShowMedia) {
                         Box(
                             contentAlignment = Alignment.Center,
                             modifier = Modifier

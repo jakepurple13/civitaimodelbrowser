@@ -65,6 +65,7 @@ import androidx.compose.material3.TextButton
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.material3.rememberSearchBarState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
@@ -86,6 +87,7 @@ import chaintech.videoplayer.ui.preview.VideoPreviewComposable
 import com.programmersbox.common.BackButton
 import com.programmersbox.common.ComposableUtils
 import com.programmersbox.common.DataStore
+import com.programmersbox.common.NetworkConnectionRepository
 import com.programmersbox.common.adaptiveGridCell
 import com.programmersbox.common.components.ImageSheet
 import com.programmersbox.common.components.LoadingImage
@@ -112,6 +114,8 @@ fun ListDetailScreen(
     onNavigateToDetail: (String) -> Unit,
     onNavigateToUser: (String) -> Unit,
 ) {
+    val connectionRepository = koinInject<NetworkConnectionRepository>()
+    val shouldShowMedia by remember { derivedStateOf { connectionRepository.shouldShowMedia } }
     val dataStore = koinInject<DataStore>()
     val showBlur by dataStore.rememberShowBlur()
     val showNsfw by remember { dataStore.showNsfw.flow }
@@ -141,6 +145,7 @@ fun ListDetailScreen(
                     showNsfw = showNsfw,
                     blurStrength = blurStrength.dp,
                     onDismiss = { showRemoveItems = false },
+                    shouldShowMedia = shouldShowMedia,
                 )
             }
         }
@@ -183,6 +188,7 @@ fun ListDetailScreen(
                 setNewCoverImage = { url, hash ->
                     viewModel.setCoverImage(url, hash)
                 },
+                shouldShowMedia = shouldShowMedia,
             )
         }
     }
@@ -316,6 +322,7 @@ fun ListDetailScreen(
                             FavoriteType.Creator -> onNavigateToUser(item.name)
                         }
                     },
+                    shouldShowMedia = shouldShowMedia,
                     onLongClick = {
 
                     },
@@ -344,6 +351,7 @@ private fun InfoSheet(
     onDeleteListAction: () -> Unit,
     onRemoveItemsAction: () -> Unit,
     setNewCoverImage: (String?, String?) -> Unit,
+    shouldShowMedia: Boolean,
 ) {
     val scope = rememberCoroutineScope()
 
@@ -400,6 +408,7 @@ private fun InfoSheet(
                             name = item.name,
                             showNsfw = showNsfw,
                             blurStrength = blurStrength,
+                            shouldShowMedia = shouldShowMedia,
                             modifier = Modifier
                                 .size(
                                     width = ComposableUtils.IMAGE_WIDTH,
@@ -594,6 +603,7 @@ fun ImageLoad(
     name: String,
     showNsfw: Boolean,
     blurStrength: Dp,
+    shouldShowMedia: Boolean,
     modifier: Modifier,
 ) {
     if (url?.endsWith("mp4") == true) {
@@ -641,6 +651,7 @@ private fun RemoveItemsSheet(
     listRepository: ListDao = koinInject(),
     showNsfw: Boolean,
     blurStrength: Dp,
+    shouldShowMedia: Boolean,
     onDismiss: () -> Unit,
 ) {
     val itemsToDelete = remember { mutableStateListOf<CustomListInfo>() }
@@ -748,6 +759,7 @@ private fun RemoveItemsSheet(
                         name = item.name,
                         showNsfw = showNsfw,
                         blurStrength = blurStrength,
+                        shouldShowMedia = shouldShowMedia,
                         modifier = Modifier
                             .size(
                                 width = ComposableUtils.IMAGE_WIDTH,

@@ -27,6 +27,7 @@ import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -46,6 +47,7 @@ import chaintech.videoplayer.ui.preview.VideoPreviewComposable
 import com.programmersbox.common.BackButton
 import com.programmersbox.common.ComposableUtils
 import com.programmersbox.common.DataStore
+import com.programmersbox.common.NetworkConnectionRepository
 import com.programmersbox.common.components.LoadingImage
 import com.programmersbox.common.db.CustomList
 import com.programmersbox.common.db.toImageHash
@@ -75,6 +77,8 @@ fun ListScreen(
     viewModel: ListViewModel = koinViewModel(),
     onNavigateToDetail: (String) -> Unit,
 ) {
+    val connectionRepository = koinInject<NetworkConnectionRepository>()
+    val shouldShowMedia by remember { derivedStateOf { connectionRepository.shouldShowMedia } }
     val dataTimeFormatter = remember { DateTimeFormatItem(true) }
     val dataStore = koinInject<DataStore>()
     val showBlur by dataStore.rememberShowBlur()
@@ -163,7 +167,8 @@ fun ListScreen(
                         list = list,
                         dateTimeFormatter = dataTimeFormatter,
                         showNsfw = showNsfw,
-                        blurStrength = blurStrength.dp
+                        blurStrength = blurStrength.dp,
+                        shouldShowMedia = shouldShowMedia
                     )
                 }
             }
@@ -177,6 +182,7 @@ private fun ListCard(
     dateTimeFormatter: DateTimeFormat<LocalDateTime>,
     showNsfw: Boolean,
     blurStrength: Dp,
+    shouldShowMedia: Boolean,
     modifier: Modifier = Modifier,
 ) {
     val imageHashing = list.toImageHash()
@@ -190,7 +196,7 @@ private fun ListCard(
                 .size(ComposableUtils.IMAGE_WIDTH / 3, ComposableUtils.IMAGE_HEIGHT / 3)
                 .clip(MaterialTheme.shapes.medium)
 
-            if (imageHashing?.url?.endsWith("mp4") == true) {
+            if (imageHashing?.url?.endsWith("mp4") == true && shouldShowMedia) {
                 Box(
                     contentAlignment = Alignment.Center,
                     modifier = Modifier

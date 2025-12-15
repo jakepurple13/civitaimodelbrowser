@@ -82,7 +82,7 @@ kotlin {
             implementation(libs.blurhash)
             implementation(libs.compose.multiplatform.media.player)
 
-            api("com.materialkolor:material-kolor:4.0.0")
+            api("com.materialkolor:material-kolor:4.0.5")
         }
 
         commonTest.dependencies {

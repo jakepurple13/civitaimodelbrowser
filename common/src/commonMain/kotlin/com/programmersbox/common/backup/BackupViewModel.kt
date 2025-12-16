@@ -32,8 +32,8 @@ class BackupViewModel(
     var includeBlacklisted by mutableStateOf(true)
     var includeSettings by mutableStateOf(true)
     val listsToInclude = mutableStateListOf<String>()
-
     var isBackingUp by mutableStateOf(false)
+    var error: Throwable? by mutableStateOf(null)
 
     init {
         lists
@@ -58,6 +58,7 @@ class BackupViewModel(
         platformFile: PlatformFile,
     ) {
         viewModelScope.launch {
+            error = null
             isBackingUp = true
             runCatching {
                 backupRepository.packageItems(
@@ -73,17 +74,18 @@ class BackupViewModel(
                         "Backup Complete",
                         type = ToastType.Success
                     )
+                    delay(1000)
+                    navigationHandler.backStack.removeLastOrNull()
                 }
                 .onFailure {
                     it.printStackTrace()
+                    error = it
                     toasterState.show(
                         "Backup Failed",
                         type = ToastType.Error
                     )
                 }
             isBackingUp = false
-            delay(1000)
-            navigationHandler.backStack.removeLastOrNull()
         }
     }
 }

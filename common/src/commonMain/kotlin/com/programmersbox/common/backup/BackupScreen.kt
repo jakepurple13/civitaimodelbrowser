@@ -1,5 +1,6 @@
 package com.programmersbox.common.backup
 
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.background
@@ -132,6 +133,12 @@ fun BackupScreen(
                     onAddList = viewModel::addList,
                     onRemoveList = viewModel::removeList
                 )
+            }
+
+            item {
+                AnimatedVisibility(viewModel.error != null) {
+                    Text(viewModel.error?.message.orEmpty())
+                }
             }
         }
     }

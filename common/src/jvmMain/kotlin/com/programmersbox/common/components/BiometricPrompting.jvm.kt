@@ -3,6 +3,7 @@ package com.programmersbox.common.components
 import androidx.compose.foundation.background
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -54,16 +55,20 @@ actual class BiometricPrompting(
                     motionScheme = MotionScheme.expressive(),
                 ) {
                     //TODO: Need to set up proper ui
-                    Surface {
-                        Text(promptInfo.title)
-                        Button(
-                            onClick = {
-                                promptInfo.onAuthenticationSucceeded()
-                                window.isVisible = false
-                                window.dispose()
+                    Surface(
+                        modifier = Modifier.fillMaxSize()
+                    ) {
+                        Column {
+                            Text(promptInfo.title)
+                            Button(
+                                onClick = {
+                                    promptInfo.onAuthenticationSucceeded()
+                                    window.isVisible = false
+                                    window.dispose()
+                                }
+                            ) {
+                                Text("Authenticate")
                             }
-                        ) {
-                            Text("Authenticate")
                         }
                     }
                 }
@@ -91,23 +96,25 @@ actual fun rememberBiometricPrompting(): BiometricPrompting {
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 actual fun HideScreen(shouldHide: Boolean) {
-    val window = LocalWindowInfo.current
-    if (!window.isWindowFocused) {
-        Dialog(
-            onDismissRequest = {},
-            properties = DialogProperties(
-                usePlatformDefaultWidth = false,
-                dismissOnBackPress = false,
-                dismissOnClickOutside = false,
-                usePlatformInsets = false,
-                useSoftwareKeyboardInset = false
-            )
-        ) {
-            Box(
-                modifier = Modifier
-                    .background(Color.Black)
-                    .fillMaxSize()
-            )
+    if (shouldHide) {
+        val window = LocalWindowInfo.current
+        if (!window.isWindowFocused) {
+            Dialog(
+                onDismissRequest = {},
+                properties = DialogProperties(
+                    usePlatformDefaultWidth = false,
+                    dismissOnBackPress = false,
+                    dismissOnClickOutside = false,
+                    usePlatformInsets = false,
+                    useSoftwareKeyboardInset = false
+                )
+            ) {
+                Box(
+                    modifier = Modifier
+                        .background(Color.Black)
+                        .fillMaxSize()
+                )
+            }
         }
     }
 }

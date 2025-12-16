@@ -12,6 +12,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ElevatedCard
@@ -204,45 +205,55 @@ private fun ListCard(
         trailingContent = { Text("(${list.list.size})") },
         headlineContent = { Text(list.item.name) },
         leadingContent = {
-            val imageModifier = Modifier
-                .size(ComposableUtils.IMAGE_WIDTH / 3, ComposableUtils.IMAGE_HEIGHT / 3)
-                .clip(MaterialTheme.shapes.medium)
+            Box {
+                val imageModifier = Modifier
+                    .size(ComposableUtils.IMAGE_WIDTH / 3, ComposableUtils.IMAGE_HEIGHT / 3)
+                    .clip(MaterialTheme.shapes.medium)
 
-            if (imageHashing?.url?.endsWith("mp4") == true && shouldShowMedia) {
-                Box(
-                    contentAlignment = Alignment.Center,
-                    modifier = Modifier
-                        .background(Color.Black)
-                        .then(imageModifier)
-                ) {
-                    VideoPreviewComposable(
-                        url = imageHashing.url,
-                        frameCount = 5,
-                        contentScale = ContentScale.Crop,
-                    )
-                    Row(
-                        verticalAlignment = Alignment.Bottom,
-                        horizontalArrangement = Arrangement.SpaceEvenly,
-                        modifier = Modifier.matchParentSize()
+                if (imageHashing?.url?.endsWith("mp4") == true && shouldShowMedia) {
+                    Box(
+                        contentAlignment = Alignment.Center,
+                        modifier = Modifier
+                            .background(Color.Black)
+                            .then(imageModifier)
                     ) {
-                        Text("Click to Play")
-                        Icon(Icons.Default.PlayArrow, null)
-                    }
-                }
-            } else {
-                LoadingImage(
-                    imageUrl = imageHashing?.url.orEmpty(),
-                    isNsfw = list.list.any { it.nsfw },
-                    name = list.item.name,
-                    hash = imageHashing?.hash,
-                    modifier = imageModifier.let {
-                        if (!showNsfw && list.list.any { it.nsfw }) {
-                            it.blur(blurStrength)
-                        } else {
-                            it
+                        VideoPreviewComposable(
+                            url = imageHashing.url,
+                            frameCount = 5,
+                            contentScale = ContentScale.Crop,
+                        )
+                        Row(
+                            verticalAlignment = Alignment.Bottom,
+                            horizontalArrangement = Arrangement.SpaceEvenly,
+                            modifier = Modifier.matchParentSize()
+                        ) {
+                            Text("Click to Play")
+                            Icon(Icons.Default.PlayArrow, null)
                         }
-                    },
-                )
+                    }
+                } else {
+                    LoadingImage(
+                        imageUrl = imageHashing?.url.orEmpty(),
+                        isNsfw = list.list.any { it.nsfw },
+                        name = list.item.name,
+                        hash = imageHashing?.hash,
+                        modifier = imageModifier.let {
+                            if (!showNsfw && list.list.any { it.nsfw }) {
+                                it.blur(blurStrength)
+                            } else {
+                                it
+                            }
+                        },
+                    )
+                }
+                if (list.item.useBiometric) {
+                    Icon(
+                        Icons.Default.Lock,
+                        null,
+                        tint = MaterialTheme.colorScheme.error,
+                        modifier = Modifier.align(Alignment.BottomEnd)
+                    )
+                }
             }
         },
         supportingContent = {

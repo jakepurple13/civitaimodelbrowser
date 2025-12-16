@@ -17,11 +17,11 @@ import kotlin.uuid.Uuid
 @Dao
 interface ListDao {
     @Transaction
-    @Query("SELECT * FROM CustomListItem ORDER BY time DESC")
+    @Query("SELECT * FROM CustomListItem ORDER BY useBiometric ASC, time DESC")
     fun getAllLists(): Flow<List<CustomList>>
 
     @Transaction
-    @Query("SELECT * FROM CustomListItem WHERE name LIKE '%' || :search || '%' ORDER BY time DESC")
+    @Query("SELECT * FROM CustomListItem WHERE name LIKE '%' || :search || '%' ORDER BY useBiometric ASC, time DESC")
     fun getAllLists(search: String): Flow<List<CustomList>>
 
     @Transaction

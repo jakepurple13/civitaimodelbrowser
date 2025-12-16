@@ -46,7 +46,11 @@ compose.desktop {
     application {
         mainClass = "MainKt"
         nativeDistributions {
-            targetFormats(TargetFormat.Dmg, TargetFormat.Msi, TargetFormat.Deb)
+            targetFormats(
+                TargetFormat.Dmg,
+                TargetFormat.Exe, TargetFormat.Msi,
+                TargetFormat.Deb
+            )
             packageName = "CivitAi Model Browser"
             packageVersion = libs.versions.appVersion.get()
             vendor = "jakepurple13"

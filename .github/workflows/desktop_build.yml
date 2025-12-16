@@ -80,6 +80,7 @@ jobs:
           path: |
             desktop/build/compose/binaries/main/dmg/*.dmg
             desktop/build/compose/binaries/main/deb/*.deb
+            desktop/build/compose/binaries/main/exe/*.exe
             desktop/build/compose/binaries/main/msi/*.msi
 
   #      - name: Gradle Build

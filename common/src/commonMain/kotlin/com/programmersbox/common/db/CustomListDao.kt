@@ -85,6 +85,9 @@ interface ListDao {
     @Query("UPDATE CustomListItem SET coverImage = :coverImage, hash = :hash WHERE uuid = :uuid")
     suspend fun updateCoverImage(uuid: String, coverImage: String?, hash: String? = null)
 
+    @Query("UPDATE CustomListItem SET useBiometric = :useBiometric WHERE uuid = :uuid")
+    suspend fun updateBiometric(uuid: String, useBiometric: Boolean)
+
     @OptIn(ExperimentalTime::class)
     @Ignore
     suspend fun updateFullList(item: CustomListItem) {

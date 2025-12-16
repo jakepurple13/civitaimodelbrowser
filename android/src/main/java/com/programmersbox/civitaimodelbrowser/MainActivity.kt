@@ -5,7 +5,6 @@ import android.content.Context
 import android.content.Intent
 import android.os.Build
 import android.os.Bundle
-import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.browser.customtabs.CustomTabsIntent
@@ -31,6 +30,7 @@ import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.platform.UriHandler
 import androidx.core.net.toUri
 import androidx.core.view.WindowCompat
+import androidx.fragment.app.FragmentActivity
 import com.dokar.sonner.Toaster
 import com.dokar.sonner.ToasterState
 import com.materialkolor.ktx.animateColorScheme
@@ -46,7 +46,7 @@ import io.kamel.image.config.imageBitmapResizingDecoder
 import io.kamel.image.config.resourcesFetcher
 import org.koin.compose.koinInject
 
-class MainActivity : ComponentActivity() {
+class MainActivity : FragmentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         WindowCompat.setDecorFitsSystemWindows(window, false)

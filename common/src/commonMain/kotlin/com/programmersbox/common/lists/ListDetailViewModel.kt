@@ -51,6 +51,12 @@ class ListDetailViewModel(
         }
     }
 
+    fun setBiometric(useBiometric: Boolean) {
+        viewModelScope.launch {
+            customList?.item?.uuid?.let { listDao.updateBiometric(it, useBiometric) }
+        }
+    }
+
     fun deleteAll() {
         viewModelScope.launch { customList?.let { item -> listDao.removeList(item) } }
     }

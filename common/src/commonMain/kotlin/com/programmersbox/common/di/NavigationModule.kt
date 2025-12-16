@@ -146,7 +146,7 @@ fun navigationModule() = module {
         )
     }
     navigation<Screen.CustomListDetail>(
-        metadata = ListDetailSceneStrategy.detailPane()
+        //metadata = ListDetailSceneStrategy.detailPane()
     ) {
         val backStack = koinInject<NavigationHandler>().backStack
         ListDetailScreen(

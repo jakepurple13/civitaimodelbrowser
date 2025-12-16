@@ -103,6 +103,7 @@ kotlin {
             api(libs.coroutinesPlayServices)
             implementation(libs.connectivity.device)
             implementation(libs.connectivity.compose.device)
+            implementation(libs.androidx.biometric)
         }
 
         jvmMain.dependencies {
@@ -140,7 +141,7 @@ android {
     sourceSets["main"].resources.srcDirs("src/commonMain/resources")
     defaultConfig {
         minSdk = 28
-        targetSdk = 35
+        targetSdk = 36
     }
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_17

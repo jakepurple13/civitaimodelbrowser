@@ -19,7 +19,7 @@ actual class Zipper(
         platformFile: PlatformFile,
         itemsToZip: Map<String, String>
     ) {
-        val f = platformFile.toAndroidUri("")
+        val f = platformFile.toAndroidUri(context.applicationContext.packageName + ".fileprovider")
         withContext(Dispatchers.IO) {
             val pfd = context
                 .contentResolver
@@ -43,7 +43,13 @@ actual class Zipper(
         withContext(Dispatchers.IO) {
             val pfd = context
                 .contentResolver
-                .openFileDescriptor(platformFile.toAndroidUri(""), "r")!!
+                .openFileDescriptor(
+                    platformFile
+                        .toAndroidUri(
+                            context.applicationContext.packageName + ".fileprovider"
+                        ),
+                    "r"
+                )!!
             pfd.use {
                 FileInputStream(it.fileDescriptor).use { inStream ->
                     ZipInputStream(inStream).use { zipIs ->
@@ -67,47 +73,3 @@ actual class Zipper(
         }
     }
 }
-
-/*
-val f = platformFile.toAndroidUri("")
-        withContext(Dispatchers.IO) {
-            val pfd = context
-                .contentResolver
-                .openFileDescriptor(f, "w")!!
-            ZipOutputStream(FileOutputStream(pfd.fileDescriptor)).use { zip ->
-                handlers.forEach { (name, handler) ->
-                    val duration = measureTime {
-                        zip.putNextEntry(ZipEntry(name))
-                        runCatching { handler.output(zip) }
-                            .logFailureToDatabase()
-                    }
-
-                    logFirebaseMessage("Zipped $name in $duration")
-                }
-            }
-        }
- */
-
-/*
-withContext(Dispatchers.IO) {
-    val pfd = context
-        .contentResolver
-        .openFileDescriptor(platformFile.toAndroidUri(""), "r")!!
-    pfd.use {
-        FileInputStream(it.fileDescriptor).use { inStream ->
-            ZipInputStream(inStream).use { zipIs ->
-                var entry: ZipEntry?
-                while (true) {
-                    entry = zipIs.nextEntry
-                    if (entry == null) break
-                    val duration = measureTime {
-                        runCatching { handlers[entry.name]?.input(zipIs) }
-                            .logFailureToDatabase()
-                    }
-                    logFirebaseMessage("Unzipped ${entry.name} in $duration")
-                }
-            }
-        }
-    }
-}
- */

@@ -17,11 +17,11 @@ import kotlin.uuid.Uuid
 @Dao
 interface ListDao {
     @Transaction
-    @Query("SELECT * FROM CustomListItem ORDER BY time DESC")
+    @Query("SELECT * FROM CustomListItem ORDER BY useBiometric ASC, time DESC")
     fun getAllLists(): Flow<List<CustomList>>
 
     @Transaction
-    @Query("SELECT * FROM CustomListItem WHERE name LIKE '%' || :search || '%' ORDER BY time DESC")
+    @Query("SELECT * FROM CustomListItem WHERE name LIKE '%' || :search || '%' ORDER BY useBiometric ASC, time DESC")
     fun getAllLists(search: String): Flow<List<CustomList>>
 
     @Transaction
@@ -84,6 +84,9 @@ interface ListDao {
 
     @Query("UPDATE CustomListItem SET coverImage = :coverImage, hash = :hash WHERE uuid = :uuid")
     suspend fun updateCoverImage(uuid: String, coverImage: String?, hash: String? = null)
+
+    @Query("UPDATE CustomListItem SET useBiometric = :useBiometric WHERE uuid = :uuid")
+    suspend fun updateBiometric(uuid: String, useBiometric: Boolean)
 
     @OptIn(ExperimentalTime::class)
     @Ignore

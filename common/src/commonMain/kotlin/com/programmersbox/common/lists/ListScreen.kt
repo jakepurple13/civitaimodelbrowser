@@ -49,6 +49,7 @@ import com.programmersbox.common.ComposableUtils
 import com.programmersbox.common.DataStore
 import com.programmersbox.common.NetworkConnectionRepository
 import com.programmersbox.common.components.LoadingImage
+import com.programmersbox.common.components.rememberBiometricOpening
 import com.programmersbox.common.db.CustomList
 import com.programmersbox.common.db.toImageHash
 import com.programmersbox.common.ifTrue
@@ -90,6 +91,8 @@ fun ListScreen(
     val scope = rememberCoroutineScope()
     val hazeState = remember { HazeState() }
     val hazeStyle = LocalHazeStyle.current
+
+    val biometricOpen = rememberBiometricOpening()
 
     Scaffold(
         topBar = {
@@ -160,7 +163,16 @@ fun ListScreen(
         ) {
             items(viewModel.list) { list ->
                 ElevatedCard(
-                    onClick = { onNavigateToDetail(list.item.uuid) },
+                    onClick = {
+                        if (list.item.useBiometric) {
+                            biometricOpen.authenticate(
+                                openAction = { onNavigateToDetail(list.item.uuid) },
+                                customListItem = list.item
+                            )
+                        } else {
+                            onNavigateToDetail(list.item.uuid)
+                        }
+                    },
                     modifier = Modifier.animateItem()
                 ) {
                     ListCard(

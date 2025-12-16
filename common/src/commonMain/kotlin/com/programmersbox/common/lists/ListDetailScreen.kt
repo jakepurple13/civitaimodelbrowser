@@ -60,6 +60,7 @@ import androidx.compose.material3.SearchBarDefaults
 import androidx.compose.material3.SearchBarValue
 import androidx.compose.material3.SheetState
 import androidx.compose.material3.Surface
+import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.rememberModalBottomSheetState
@@ -77,6 +78,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.blur
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalWindowInfo
 import androidx.compose.ui.text.style.TextAlign
@@ -89,6 +91,7 @@ import com.programmersbox.common.ComposableUtils
 import com.programmersbox.common.DataStore
 import com.programmersbox.common.NetworkConnectionRepository
 import com.programmersbox.common.adaptiveGridCell
+import com.programmersbox.common.components.HideScreen
 import com.programmersbox.common.components.ImageSheet
 import com.programmersbox.common.components.LoadingImage
 import com.programmersbox.common.db.CoverCard
@@ -127,6 +130,8 @@ fun ListDetailScreen(
     val hazeStyle = LocalHazeStyle.current
 
     val list = viewModel.customList
+
+    list?.let { HideScreen(it.item.useBiometric) }
 
     var showInfo by remember { mutableStateOf(false) }
     val sheetState = rememberModalBottomSheetState(true)
@@ -182,6 +187,7 @@ fun ListDetailScreen(
                 showNsfw = showNsfw,
                 blurStrength = blurStrength.dp,
                 rename = viewModel::rename,
+                setBiometric = viewModel::setBiometric,
                 onDismiss = { showInfo = false },
                 onDeleteListAction = { showDeleteDialog = true },
                 onRemoveItemsAction = { showRemoveItems = true },
@@ -347,6 +353,7 @@ private fun InfoSheet(
     showNsfw: Boolean,
     blurStrength: Dp,
     rename: (String) -> Unit,
+    setBiometric: (Boolean) -> Unit,
     onDismiss: () -> Unit,
     onDeleteListAction: () -> Unit,
     onRemoveItemsAction: () -> Unit,
@@ -430,7 +437,7 @@ private fun InfoSheet(
         Column(
             verticalArrangement = Arrangement.spacedBy(4.dp),
             modifier = Modifier
-                .padding(16.dp)
+                .padding(vertical = 16.dp)
                 .verticalScroll(rememberScrollState())
         ) {
             OutlinedTextField(
@@ -443,7 +450,9 @@ private fun InfoSheet(
                         enabled = currentName != customItem.item.name
                     ) { Icon(Icons.Default.Check, null) }
                 },
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier
+                    .padding(horizontal = 16.dp)
+                    .fillMaxWidth()
             )
             Surface(
                 shape = MaterialTheme.shapes.large
@@ -529,7 +538,27 @@ private fun InfoSheet(
 
             HorizontalDivider()
 
-            Text("List Count: ${customItem.list.size}")
+            Card(
+                onClick = { setBiometric(!customItem.item.useBiometric) },
+                shape = RectangleShape
+            ) {
+                ListItem(
+                    headlineContent = { Text("Use Biometrics to View?") },
+                    trailingContent = {
+                        Switch(
+                            checked = customItem.item.useBiometric,
+                            onCheckedChange = setBiometric
+                        )
+                    }
+                )
+            }
+
+            HorizontalDivider()
+
+            Text(
+                "List Count: ${customItem.list.size}",
+                modifier = Modifier.padding(horizontal = 16.dp)
+            )
 
             HorizontalDivider()
 

@@ -131,6 +131,8 @@ data class CustomListItem(
     val time: Long = Clock.System.now().toEpochMilliseconds(),
     val coverImage: String?,
     val hash: String? = null,
+    @ColumnInfo(name = "useBiometric", defaultValue = "0")
+    val useBiometric: Boolean = false
 )
 
 @Serializable

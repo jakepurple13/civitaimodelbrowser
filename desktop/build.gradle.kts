@@ -70,6 +70,8 @@ compose.desktop {
                 iconFile.set(iconFile("ico"))
                 dirChooser = true
                 console = true
+                menu = true
+                menuGroup = "CivitAi Model Browser"
             }
             linux {
                 iconFile.set(iconFile("png"))

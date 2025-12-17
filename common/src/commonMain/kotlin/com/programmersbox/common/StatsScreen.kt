@@ -39,6 +39,7 @@ import androidx.compose.material3.OutlinedCard
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Switch
+import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
@@ -209,7 +210,11 @@ private fun NsfwStats(
             trailingContent = {
                 Switch(
                     checked = showNsfwStats,
-                    onCheckedChange = onShowNsfwStatsChange
+                    onCheckedChange = onShowNsfwStatsChange,
+                    colors = SwitchDefaults.colors(
+                        checkedThumbColor = MaterialTheme.colorScheme.error,
+                        checkedTrackColor = MaterialTheme.colorScheme.errorContainer,
+                    )
                 )
             },
         )

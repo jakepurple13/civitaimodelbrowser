@@ -7,7 +7,9 @@ import ca.gosyer.appdirs.AppDirs
 import com.dokar.sonner.Toaster
 import com.dokar.sonner.ToasterState
 import com.programmersbox.common.ApplicationInfo
+import com.programmersbox.common.NavigationHandler
 import com.programmersbox.common.Network
+import com.programmersbox.common.Screen
 import com.programmersbox.common.UIShow
 import com.programmersbox.common.backup.Zipper
 import com.programmersbox.common.cmpModules
@@ -33,7 +35,6 @@ import java.io.File
 fun main() {
     System.setProperty("apple.awt.application.appearance", "system")
     application {
-
         KoinApplication(
             configuration = koinConfiguration(
                 declaration = {
@@ -66,11 +67,40 @@ fun main() {
                 }
             ),
             content = {
+                val navHandler = koinInject<NavigationHandler>()
                 val toaster = koinInject<ToasterState>()
                 Tray(
                     state = koinInject<TrayState>(),
                     icon = painterResource(Res.drawable.civitai_logo),
                     menu = {
+                        Item(
+                            "Home",
+                            onClick = {
+                                navHandler.backStack.clear()
+                                navHandler.backStack.add(Screen.List)
+                            },
+                            enabled = navHandler.backStack.lastOrNull() != Screen.List,
+                        )
+                        Item(
+                            "Favorites",
+                            onClick = { navHandler.backStack.add(Screen.Favorites) },
+                            enabled = navHandler.backStack.lastOrNull() != Screen.Favorites,
+                        )
+                        Item(
+                            "Stats",
+                            onClick = { navHandler.backStack.add(Screen.Stats) },
+                            enabled = navHandler.backStack.lastOrNull() != Screen.Stats,
+                        )
+                        Item(
+                            "Blacklisted",
+                            onClick = { navHandler.backStack.add(Screen.Settings.Blacklisted) },
+                            enabled = navHandler.backStack.lastOrNull() != Screen.Settings.Blacklisted,
+                        )
+                        Item(
+                            "Settings",
+                            onClick = { navHandler.backStack.add(Screen.Settings) },
+                            enabled = navHandler.backStack.lastOrNull() != Screen.Settings,
+                        )
                         Item(
                             "Exit",
                             onClick = { exitApplication() }

@@ -64,9 +64,9 @@ kotlin {
             implementation(libs.androidx.sqlite.bundled)
             //add("ksp", libs.androidx.room.compiler)
 
-            implementation(libs.cmp.navigation3.ui)
-            implementation(libs.cmp.lifecycle.viewmodel.navigation3)
-            implementation(libs.cmp.navigationevent.compose)
+            api(libs.cmp.navigation3.ui)
+            api(libs.cmp.lifecycle.viewmodel.navigation3)
+            api(libs.cmp.navigationevent.compose)
             implementation(libs.cmp.material3.adaptive.nav3)
             api(project.dependencies.platform(libs.koin.bom))
             api(libs.koin.core)

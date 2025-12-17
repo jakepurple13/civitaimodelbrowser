@@ -69,7 +69,6 @@ import com.programmersbox.common.rememberSROState
 import com.programmersbox.common.scaleRotateOffsetReset
 import io.kamel.image.KamelImage
 import io.kamel.image.asyncPainterResource
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import okio.Path.Companion.toPath
 import org.koin.compose.koinInject
@@ -245,12 +244,10 @@ private fun SheetContent(
                     NavigationBarItem(
                         selected = false,
                         onClick = {
-                            scope.launch(Dispatchers.IO) {
-                                downloadHandler.download(
-                                    url = image,
-                                    name = image.toPath().name
-                                )
-                            }
+                            downloadHandler.download(
+                                url = image,
+                                name = image.toPath().name
+                            )
                         },
                         icon = { Icon(Icons.Default.Download, null) },
                         label = { Text("Download") },
@@ -421,12 +418,10 @@ private fun VideoSheetContent(
                     NavigationBarItem(
                         selected = false,
                         onClick = {
-                            scope.launch(Dispatchers.IO) {
-                                downloadHandler.download(
-                                    url = video,
-                                    name = video.toPath().name
-                                )
-                            }
+                            downloadHandler.download(
+                                url = video,
+                                name = video.toPath().name
+                            )
                         },
                         icon = { Icon(Icons.Default.Download, null) },
                         label = { Text("Download") },

@@ -13,6 +13,9 @@ import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import io.ktor.client.call.body
 import io.ktor.client.request.get
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import org.koin.core.module.Module
@@ -25,22 +28,25 @@ actual class DownloadHandler(
     private val dataStoreHandler: DataStoreHandler,
     private val trayState: TrayState
 ) {
-    actual suspend fun download(url: String, name: String) {
-        val parent = File(dataStoreHandler.downloadPath.get())
-        if (!parent.exists()) parent.mkdirs()
+    private val scope = CoroutineScope(Dispatchers.IO + Job())
+    actual fun download(url: String, name: String) {
+        scope.launch {
+            val parent = File(dataStoreHandler.downloadPath.get())
+            if (!parent.exists()) parent.mkdirs()
 
-        val file = File(parent, name)
-        if (!file.exists()) file.createNewFile()
+            val file = File(parent, name)
+            if (!file.exists()) file.createNewFile()
 
-        file.writeBytes(network.client.get(url).body())
+            file.writeBytes(network.client.get(url).body())
 
-        trayState.sendNotification(
-            Notification(
-                title = "Download Complete",
-                message = "Downloaded $name",
-                type = Notification.Type.Info
+            trayState.sendNotification(
+                Notification(
+                    title = "Download Complete",
+                    message = "Downloaded $name",
+                    type = Notification.Type.Info
+                )
             )
-        )
+        }
     }
 }
 

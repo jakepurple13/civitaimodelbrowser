@@ -35,7 +35,7 @@ internal expect fun ContextMenu(
 )
 
 expect class DownloadHandler {
-    suspend fun download(url: String, name: String)
+    fun download(url: String, name: String)
 }
 
 expect fun createPlatformModule(): Module

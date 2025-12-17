@@ -2,9 +2,9 @@ package com.programmersbox.common
 
 import android.app.DownloadManager
 import android.content.Context
-import android.net.Uri
 import android.os.Environment
 import androidx.core.content.getSystemService
+import androidx.core.net.toUri
 import org.koin.core.module.Module
 import org.koin.core.module.dsl.singleOf
 import org.koin.dsl.module
@@ -13,8 +13,8 @@ actual class DownloadHandler(
     context: Context,
 ) {
     private val downloadManager = context.getSystemService<DownloadManager>()
-    actual suspend fun download(url: String, name: String) {
-        val uri = Uri.parse(url)
+    actual fun download(url: String, name: String) {
+        val uri = url.toUri()
         val request = DownloadManager.Request(uri)
             .setTitle(name) // Title shown in the notification
             .setDescription("Downloading $name") // Description in the notification

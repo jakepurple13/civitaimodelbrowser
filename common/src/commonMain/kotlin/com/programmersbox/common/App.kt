@@ -167,4 +167,7 @@ sealed class Screen {
 
     @Serializable
     data object Restore : NavKey
+
+    @Serializable
+    data object Stats : NavKey
 }

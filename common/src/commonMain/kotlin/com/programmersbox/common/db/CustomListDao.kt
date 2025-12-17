@@ -31,6 +31,17 @@ interface ListDao {
     @Query("SELECT COUNT(uuid) FROM CustomListItem")
     fun getAllListsCount(): Flow<Int>
 
+    @Query(
+        """
+        SELECT 
+            SUM(CASE WHEN favoriteType = 'Model' THEN 1 ELSE 0 END) as modelCount,
+            SUM(CASE WHEN favoriteType = 'Image' THEN 1 ELSE 0 END) as imageCount,
+            SUM(CASE WHEN favoriteType = 'Creator' THEN 1 ELSE 0 END) as creatorCount
+        FROM CustomListInfo
+    """
+    )
+    fun getTypeCounts(): Flow<DataCounts>
+
     @Query("SELECT COUNT(uuid) FROM CustomListInfo")
     fun getAllListItemsCount(): Flow<Int>
 

@@ -19,6 +19,7 @@ import androidx.compose.material.icons.filled.BlurOn
 import androidx.compose.material.icons.filled.BorderBottom
 import androidx.compose.material.icons.filled.Brightness4
 import androidx.compose.material.icons.filled.NoAdultContent
+import androidx.compose.material.icons.filled.QueryStats
 import androidx.compose.material.icons.filled.Restore
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
@@ -67,6 +68,7 @@ fun SettingsScreen(
     onNavigateToQrCode: () -> Unit,
     onNavigateToBackup: () -> Unit,
     onNavigateToRestore: () -> Unit,
+    onNavigateToStats: () -> Unit,
 ) {
     val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
 
@@ -112,6 +114,17 @@ fun SettingsScreen(
             )
 
             ExtraSettings()
+
+            HorizontalDivider()
+
+            Card(
+                onClick = onNavigateToStats
+            ) {
+                ListItem(
+                    headlineContent = { Text("Stats") },
+                    leadingContent = { Icon(Icons.Default.QueryStats, null) }
+                )
+            }
 
             HorizontalDivider()
 

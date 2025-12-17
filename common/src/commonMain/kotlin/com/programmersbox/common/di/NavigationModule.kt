@@ -6,6 +6,7 @@ import androidx.navigation3.scene.DialogSceneStrategy
 import com.programmersbox.common.NavigationHandler
 import com.programmersbox.common.Screen
 import com.programmersbox.common.SettingsScreen
+import com.programmersbox.common.StatsScreen
 import com.programmersbox.common.backup.BackupScreen
 import com.programmersbox.common.backup.RestoreScreen
 import com.programmersbox.common.blacklisted.BlacklistedScreen
@@ -101,21 +102,23 @@ fun navigationModule() = module {
             onNavigateToUser = { username -> backStack.add(Screen.User(username)) }
         )
     }
+    navigation<Screen.Settings.Blacklisted> { BlacklistedScreen() }
     navigation<Screen.Settings> {
         val backStack = koinInject<NavigationHandler>().backStack
         SettingsScreen(
             onNavigateToQrCode = { backStack.add(Screen.QrCode) },
             onNavigateToBackup = { backStack.add(Screen.Backup) },
-            onNavigateToRestore = { backStack.add(Screen.Restore) }
+            onNavigateToRestore = { backStack.add(Screen.Restore) },
+            onNavigateToStats = { backStack.add(Screen.Stats) }
         )
     }
-    navigation<Screen.Settings.Blacklisted> { BlacklistedScreen() }
     navigation<Screen.Settings.Screen> {
         val backStack = koinInject<NavigationHandler>().backStack
         SettingsScreen(
             onNavigateToQrCode = { backStack.add(Screen.QrCode) },
             onNavigateToBackup = { backStack.add(Screen.Backup) },
-            onNavigateToRestore = { backStack.add(Screen.Restore) }
+            onNavigateToRestore = { backStack.add(Screen.Restore) },
+            onNavigateToStats = { backStack.add(Screen.Stats) }
         )
     }
     navigation<Screen.QrCode>(
@@ -158,4 +161,5 @@ fun navigationModule() = module {
 
     navigation<Screen.Backup> { BackupScreen() }
     navigation<Screen.Restore> { RestoreScreen() }
+    navigation<Screen.Stats> { StatsScreen() }
 }

@@ -110,6 +110,17 @@ interface FavoritesDao {
     @Query("SELECT COUNT(id) FROM favorite_table")
     fun getFavoritesCount(): Flow<Int>
 
+    @Query(
+        """
+        SELECT 
+            SUM(CASE WHEN favoriteType = 'Model' THEN 1 ELSE 0 END) as modelCount,
+            SUM(CASE WHEN favoriteType = 'Image' THEN 1 ELSE 0 END) as imageCount,
+            SUM(CASE WHEN favoriteType = 'Creator' THEN 1 ELSE 0 END) as creatorCount
+        FROM favorite_table
+    """
+    )
+    fun getTypeCounts(): Flow<DataCounts>
+
     @Query("SELECT COUNT(id) FROM blacklisted_table")
     fun getBlacklistCount(): Flow<Int>
 
@@ -353,4 +364,16 @@ fun ImageMetaDb.toMeta() = ImageMeta(
 data class CivitDb(
     val favorites: List<FavoriteModel>,
     val blacklistedItemRoom: List<BlacklistedItemRoom>,
+)
+
+data class DataCounts(
+    val modelCount: Int,
+    val imageCount: Int,
+    val creatorCount: Int
+)
+
+data class NsfwCounts(
+    val favorites: Int,
+    val blacklisted: Int,
+    val lists: Int
 )

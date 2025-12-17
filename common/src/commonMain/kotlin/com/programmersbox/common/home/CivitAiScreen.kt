@@ -82,6 +82,9 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.paging.CombinedLoadStates
 import androidx.paging.LoadState
+import androidx.paging.compose.LazyPagingItems
+import androidx.paging.compose.collectAsLazyPagingItems
+import androidx.paging.compose.itemContentType
 import chaintech.videoplayer.ui.preview.VideoPreviewComposable
 import com.programmersbox.common.ComposableUtils
 import com.programmersbox.common.ContextMenu
@@ -100,9 +103,6 @@ import com.programmersbox.common.db.FavoriteModel
 import com.programmersbox.common.db.FavoritesDao
 import com.programmersbox.common.ifTrue
 import com.programmersbox.common.isScrollingUp
-import com.programmersbox.common.paging.LazyPagingItems
-import com.programmersbox.common.paging.collectAsLazyPagingItems
-import com.programmersbox.common.paging.itemContentType
 import com.programmersbox.common.paging.itemKeyIndexed
 import com.programmersbox.common.showRefreshButton
 import dev.chrisbanes.haze.HazeProgressive

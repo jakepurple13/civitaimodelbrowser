@@ -93,7 +93,7 @@ fun ListScreen(
     val hazeState = remember { HazeState() }
     val hazeStyle = LocalHazeStyle.current
 
-    val biometricOpen = rememberBiometricOpening()
+    //val biometricOpen = rememberBiometricOpening()
 
     Scaffold(
         topBar = {
@@ -163,13 +163,14 @@ fun ListScreen(
                 .ifTrue(showBlur) { hazeSource(state = hazeState) }
         ) {
             items(viewModel.list) { list ->
+                val biometricOpen = rememberBiometricOpening(
+                    title = "Authenticate to view ${list.item.name}",
+                    onAuthenticationSucceeded = { onNavigateToDetail(list.item.uuid) }
+                )
                 ElevatedCard(
                     onClick = {
                         if (list.item.useBiometric) {
-                            biometricOpen.authenticate(
-                                openAction = { onNavigateToDetail(list.item.uuid) },
-                                customListItem = list.item
-                            )
+                            biometricOpen.authenticate(customListItem = list.item)
                         } else {
                             onNavigateToDetail(list.item.uuid)
                         }

@@ -49,6 +49,7 @@ kotlin {
             api(libs.datastore.core.okio)
             api(libs.datastore.preferences)
             api(libs.paging.runtime)
+            api(libs.paging.compose)
             //api(libs.paging.compose)
             api(libs.kamel.image)
             api(libs.kotlinx.datetime)
@@ -82,10 +83,12 @@ kotlin {
             implementation(libs.blurhash)
             implementation(libs.compose.multiplatform.media.player)
 
-            api("com.materialkolor:material-kolor:4.0.5")
+            api(libs.material.kolor)
 
             implementation(libs.connectivity.core)
             implementation(libs.connectivity.compose)
+
+            implementation(libs.kotlinx.collections.immutable)
         }
 
         commonTest.dependencies {
@@ -104,13 +107,14 @@ kotlin {
             implementation(libs.connectivity.device)
             implementation(libs.connectivity.compose.device)
             implementation(libs.androidx.biometric)
+            implementation(libs.androidx.biometric.compose)
         }
 
         jvmMain.dependencies {
             api(compose.preview)
             api(libs.ktor.jvm)
             api(libs.kotlinx.coroutines.swing)
-            api("ca.gosyer:kotlin-multiplatform-appdirs:2.0.0")
+            api(libs.kotlin.multiplatform.appdirs)
             api(libs.zxing.javase)
             api(libs.zxing.core)
             implementation(libs.connectivity.http)

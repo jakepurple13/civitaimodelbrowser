@@ -2,10 +2,13 @@ package com.programmersbox.common.components
 
 import android.content.Context
 import android.content.ContextWrapper
+import android.os.Build
 import android.view.WindowManager
+import android.widget.Toast
 import androidx.activity.compose.LocalActivity
+import androidx.biometric.AuthenticationRequest
 import androidx.biometric.BiometricManager
-import androidx.biometric.BiometricPrompt
+import androidx.biometric.compose.rememberAuthenticationLauncher
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.remember
@@ -16,6 +19,7 @@ actual class BiometricPrompting(
     private val context: Context,
     private val useStrongSecurity: Boolean,
     private val useDeviceCredentials: Boolean,
+    private val onLaunch: () -> Unit,
 ) {
     val biometricManager by lazy { BiometricManager.from(context) }
 
@@ -36,64 +40,60 @@ actual class BiometricPrompting(
     )
 
     actual fun authenticate(promptInfo: PromptCallback) {
-        var biometricStrength = if (useStrongSecurity)
+        val biometricStrength = if (useStrongSecurity)
             BiometricManager.Authenticators.BIOMETRIC_STRONG
         else
             BiometricManager.Authenticators.BIOMETRIC_WEAK
-
-        if (useDeviceCredentials) biometricStrength =
-            biometricStrength or BiometricManager.Authenticators.DEVICE_CREDENTIAL
 
         if (biometricManager.canAuthenticate(biometricStrength) == BiometricManager.BIOMETRIC_ERROR_NONE_ENROLLED) {
             promptInfo.onAuthenticationSucceeded()
             return
         }
 
-        BiometricPrompt(
-            context.findActivity(),
-            context.mainExecutor,
-            object : BiometricPrompt.AuthenticationCallback() {
-                override fun onAuthenticationError(errorCode: Int, errString: CharSequence) {
-                    super.onAuthenticationError(errorCode, errString)
-                    promptInfo.onAuthenticationFailed()
-                }
-
-                override fun onAuthenticationSucceeded(
-                    result: BiometricPrompt.AuthenticationResult,
-                ) {
-                    super.onAuthenticationSucceeded(result)
-                    promptInfo.onAuthenticationSucceeded()
-                }
-
-                override fun onAuthenticationFailed() {
-                    super.onAuthenticationFailed()
-                    promptInfo.onAuthenticationFailed()
-                }
-            }
-        ).authenticate(
-            BiometricPrompt.PromptInfo.Builder()
-                .setTitle(promptInfo.title)
-                .setSubtitle(promptInfo.subtitle)
-                .also {
-                    if (!useDeviceCredentials) {
-                        it.setNegativeButtonText(promptInfo.negativeButtonText)
-                    }
-                }
-                .setAllowedAuthenticators(biometricStrength)
-                .build()
-        )
+        onLaunch()
     }
 }
 
 @Composable
-actual fun rememberBiometricPrompting(): BiometricPrompting {
+actual fun rememberBiometricPrompting(
+    title: String,
+    onAuthenticationSucceeded: () -> Unit,
+    onAuthenticationFailed: () -> Unit,
+): BiometricPrompting {
     val context = LocalContext.current
+
+    val bio = rememberAuthenticationLauncher {
+        if (it.isSuccess()) {
+            onAuthenticationSucceeded()
+        } else if (it.isError()) {
+            println(it.error()?.errString)
+            if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.S_V2)
+                Toast.makeText(context, it.error()?.errString, Toast.LENGTH_LONG).show()
+
+            onAuthenticationFailed()
+        }
+    }
 
     val biometricPrompt = remember(context) {
         BiometricPrompting(
             context = context,
             useStrongSecurity = false,
             useDeviceCredentials = true,
+            onLaunch = {
+                bio.launch(
+                    AuthenticationRequest.biometricRequest(
+                        title = title,
+                        authFallback = AuthenticationRequest.Biometric.Fallback.DeviceCredential
+                    ) {
+                        setContent(
+                            AuthenticationRequest.BodyContent.PlainText(
+                                description = "Authentication is required to view this content."
+                            )
+                        )
+                        setMinStrength(AuthenticationRequest.Biometric.Strength.Class2)
+                    }
+                )
+            }
         )
     }
 

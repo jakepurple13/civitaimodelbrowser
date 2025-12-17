@@ -45,6 +45,9 @@ import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.paging.compose.collectAsLazyPagingItems
+import androidx.paging.compose.itemContentType
+import androidx.paging.compose.itemKey
 import chaintech.videoplayer.ui.preview.VideoPreviewComposable
 import com.programmersbox.common.BackButton
 import com.programmersbox.common.ComposableUtils
@@ -58,9 +61,6 @@ import com.programmersbox.common.components.LoadingImage
 import com.programmersbox.common.db.FavoritesDao
 import com.programmersbox.common.home.BlacklistHandling
 import com.programmersbox.common.ifTrue
-import com.programmersbox.common.paging.collectAsLazyPagingItems
-import com.programmersbox.common.paging.itemContentType
-import com.programmersbox.common.paging.itemKey
 import dev.chrisbanes.haze.HazeState
 import dev.chrisbanes.haze.hazeEffect
 import dev.chrisbanes.haze.hazeSource

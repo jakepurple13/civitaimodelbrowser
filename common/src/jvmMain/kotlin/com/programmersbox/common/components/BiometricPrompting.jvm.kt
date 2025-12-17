@@ -27,6 +27,8 @@ import javax.swing.JFrame
 actual class BiometricPrompting(
     private val useStrongSecurity: Boolean,
     private val useDeviceCredentials: Boolean,
+    private val onAuthenticationSucceeded: () -> Unit,
+    private val onAuthenticationFailed: () -> Unit,
 ) {
     actual fun authenticate(
         onAuthenticationSucceeded: () -> Unit,
@@ -82,11 +84,17 @@ actual class BiometricPrompting(
 }
 
 @Composable
-actual fun rememberBiometricPrompting(): BiometricPrompting {
+actual fun rememberBiometricPrompting(
+    title: String,
+    onAuthenticationSucceeded: () -> Unit,
+    onAuthenticationFailed: () -> Unit,
+): BiometricPrompting {
     val biometricPrompt = remember {
         BiometricPrompting(
             useStrongSecurity = false,
             useDeviceCredentials = true,
+            onAuthenticationSucceeded = onAuthenticationSucceeded,
+            onAuthenticationFailed = onAuthenticationFailed,
         )
     }
 

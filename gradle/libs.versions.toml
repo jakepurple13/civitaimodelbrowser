@@ -1,7 +1,7 @@
 [versions]
-appVersion = "4.1.0"
+appVersion = "4.1.1"
 
-biometricVersion = "1.4.0-alpha04"
+biometricVersion = "1.4.0-alpha05"
 blurhashVersion = "0.0-4-ALPHA"
 browser = "1.9.0"
 composeMultiplatformMediaPlayerVersion = "1.0.50"
@@ -11,12 +11,15 @@ jsoup = "1.21.2"
 kotlin-version = "2.3.0"
 agp-version = "8.13.2"
 compose-version = "1.11.0-alpha01"
+kotlinMultiplatformAppdirsVersion = "2.0.0"
+kotlinxCollectionsImmutableVersion = "0.4.0"
 ktor-version = "3.3.3"
 kotlinx-datetime = "0.7.1"
 datastore-version = "1.2.0"
 material3Version = "1.11.0-alpha01"
 lifecycleViewmodelCompose = "2.10.0-alpha07"
-paging-version = "3.3.6"
+materialKolorVersion = "4.0.5"
+paging-version = "3.4.0-beta01"
 kamel-image = "1.0.8"
 kotlinx-coroutines-core = "1.10.2"
 sonner = "0.3.8"
@@ -54,9 +57,10 @@ room = { id = "androidx.room", version.ref = "androidx-room" }
 [libraries]
 androidx-appcompat = { module = "androidx.appcompat:appcompat", version = "1.7.1" }
 androidx-biometric = { module = "androidx.biometric:biometric", version.ref = "biometricVersion" }
+androidx-biometric-compose = { module = "androidx.biometric:biometric-compose", version.ref = "biometricVersion" }
 androidx-browser = { module = "androidx.browser:browser", version.ref = "browser" }
 androidx-core = { module = "androidx.core:core-ktx", version = "1.17.0" }
-androidx-activity-compose = "androidx.activity:activity-compose:1.12.1"
+androidx-activity-compose = "androidx.activity:activity-compose:1.12.2"
 compose-multiplatform-media-player = { module = "network.chaintech:compose-multiplatform-media-player", version.ref = "composeMultiplatformMediaPlayerVersion" }
 blurhash = { module = "io.github.brys0:blurhash", version.ref = "blurhashVersion" }
 composeScrollbars = { module = "com.github.GIGAMOLE:ComposeScrollbars", version.ref = "composeScrollbars" }
@@ -66,12 +70,16 @@ datastore-core-okio = { group = "androidx.datastore", name = "datastore-core-oki
 haze = { module = "dev.chrisbanes.haze:haze", version.ref = "haze" }
 haze-materials = { module = "dev.chrisbanes.haze:haze-materials", version.ref = "haze" }
 jsoup = { module = "org.jsoup:jsoup", version.ref = "jsoup" }
+kotlin-multiplatform-appdirs = { module = "ca.gosyer:kotlin-multiplatform-appdirs", version.ref = "kotlinMultiplatformAppdirsVersion" }
+kotlinx-collections-immutable = { module = "org.jetbrains.kotlinx:kotlinx-collections-immutable", version.ref = "kotlinxCollectionsImmutableVersion" }
+material-kolor = { module = "com.materialkolor:material-kolor", version.ref = "materialKolorVersion" }
 material3 = { module = "org.jetbrains.compose.material3:material3", version.ref = "material3Version" }
 lifecycle-viewmodel-compose = { module = "org.jetbrains.androidx.lifecycle:lifecycle-viewmodel-compose", version.ref = "lifecycleViewmodelCompose" }
 lifecycle-runtime-compose = { group = "org.jetbrains.androidx.lifecycle", name = "lifecycle-runtime-compose", version.ref = "lifecycleViewmodelCompose" }
 androidx-room-compiler = { group = "androidx.room", name = "room-compiler", version.ref = "androidx-room" }
 androidx-room-runtime = { group = "androidx.room", name = "room-runtime", version.ref = "androidx-room" }
 paging-runtime = { module = "androidx.paging:paging-common", version.ref = "paging-version" }
+paging-compose = { module = "androidx.paging:paging-compose", version.ref = "paging-version" }
 ktor-core = { module = "io.ktor:ktor-client-core", version.ref = "ktor-version" }
 ktor-jvm = { module = "io.ktor:ktor-client-okhttp", version.ref = "ktor-version" }
 ktor-content-negotiation = { module = "io.ktor:ktor-client-content-negotiation", version.ref = "ktor-version" }

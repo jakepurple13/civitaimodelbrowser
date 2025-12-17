@@ -49,11 +49,23 @@ fun rememberBiometricPrompt(
 }
 
 @Composable
-expect fun rememberBiometricPrompting(): BiometricPrompting
+expect fun rememberBiometricPrompting(
+    title: String,
+    onAuthenticationSucceeded: () -> Unit = {},
+    onAuthenticationFailed: () -> Unit = {},
+): BiometricPrompting
 
 @Composable
-fun rememberBiometricOpening(): BiometricOpen {
-    val biometricPrompting = rememberBiometricPrompting()
+fun rememberBiometricOpening(
+    title: String,
+    onAuthenticationSucceeded: () -> Unit = {},
+    onAuthenticationFailed: () -> Unit = {},
+): BiometricOpen {
+    val biometricPrompting = rememberBiometricPrompting(
+        title = title,
+        onAuthenticationSucceeded = onAuthenticationSucceeded,
+        onAuthenticationFailed = onAuthenticationFailed,
+    )
     return remember(biometricPrompting) {
         BiometricOpen(
             biometricPrompting = biometricPrompting,
@@ -65,11 +77,10 @@ class BiometricOpen(
     private val biometricPrompting: BiometricPrompting,
 ) {
     fun authenticate(
-        openAction: () -> Unit,
         customListItem: CustomListItem
     ) {
         biometricPrompting.authenticate(
-            onAuthenticationSucceeded = openAction,
+            onAuthenticationSucceeded = {},
             title = "Authenticate to view ${customListItem.name}",
             subtitle = "Authenticate to view media",
             negativeButtonText = "Cancel"

@@ -42,6 +42,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.paging.compose.collectAsLazyPagingItems
 import com.dokar.sonner.ToastType
 import com.dokar.sonner.ToasterState
 import com.programmersbox.common.BackButton
@@ -55,7 +56,6 @@ import com.programmersbox.common.db.FavoritesDao
 import com.programmersbox.common.db.ListDao
 import com.programmersbox.common.home.modelItems
 import com.programmersbox.common.ifTrue
-import com.programmersbox.common.paging.collectAsLazyPagingItems
 import com.programmersbox.common.qrcode.QrCodeType
 import com.programmersbox.common.qrcode.ShareViaQrCode
 import dev.chrisbanes.haze.HazeProgressive

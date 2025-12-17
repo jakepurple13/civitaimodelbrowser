@@ -13,7 +13,6 @@ import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.MaterialExpressiveTheme
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.MotionScheme
-import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.dynamicDarkColorScheme
 import androidx.compose.material3.dynamicLightColorScheme
 import androidx.compose.material3.expressiveLightColorScheme
@@ -33,6 +32,9 @@ import androidx.core.view.WindowCompat
 import androidx.fragment.app.FragmentActivity
 import com.dokar.sonner.Toaster
 import com.dokar.sonner.ToasterState
+import com.materialkolor.PaletteStyle
+import com.materialkolor.dynamicColorScheme
+import com.materialkolor.dynamiccolor.ColorSpec
 import com.materialkolor.ktx.animateColorScheme
 import com.programmersbox.common.DataStore
 import com.programmersbox.common.ThemeMode
@@ -138,8 +140,22 @@ fun CustomMaterialTheme(
         }
     } else {
         when (darkTheme) {
-            ThemeMode.System -> if (systemDarkTheme) darkColorScheme() else expressiveLightColorScheme()
-            ThemeMode.Dark -> darkColorScheme()
+            ThemeMode.System -> if (systemDarkTheme)
+                dynamicColorScheme(
+                    primary = Color.Cyan,
+                    isDark = true,
+                    style = PaletteStyle.Expressive,
+                    specVersion = ColorSpec.SpecVersion.SPEC_2025
+                )
+            else
+                expressiveLightColorScheme()
+
+            ThemeMode.Dark -> dynamicColorScheme(
+                primary = Color.Cyan,
+                isDark = true,
+                style = PaletteStyle.Expressive,
+                specVersion = ColorSpec.SpecVersion.SPEC_2025
+            )
             ThemeMode.Light -> expressiveLightColorScheme()
         }
     }

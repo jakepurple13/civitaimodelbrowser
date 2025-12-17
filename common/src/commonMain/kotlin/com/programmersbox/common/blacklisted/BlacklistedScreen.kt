@@ -48,7 +48,11 @@ fun BlacklistedScreen() {
         LazyColumn(
             contentPadding = padding
         ) {
-            items(blacklistedItems) { blacklistedItem ->
+            items(
+                blacklistedItems,
+                contentType = { "blacklisted" },
+                key = { it.id }
+            ) { blacklistedItem ->
                 var showDialog by remember { mutableStateOf(false) }
 
                 if (showDialog) {

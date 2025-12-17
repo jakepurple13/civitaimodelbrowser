@@ -210,6 +210,8 @@ fun CivitAiDetailScreen(
 
             var toolBarExpanded by remember { mutableStateOf(true) }
 
+            var showFullDescription by remember { mutableStateOf(false) }
+
             Scaffold(
                 topBar = {
                     TopAppBar(
@@ -291,25 +293,13 @@ fun CivitAiDetailScreen(
                         .fillMaxSize()
                 ) {
                     item(
-                        span = { GridItemSpan(maxLineSpan) }
+                        span = { GridItemSpan(maxLineSpan) },
+                        contentType = "header"
                     ) {
                         ListItem(
                             overlineContent = model.models.creator?.username?.let { { Text("Made by $it") } },
                             leadingContent = { Text(model.models.type.name) },
                             headlineContent = { Text(model.models.name) },
-                            supportingContent = {
-                                var showFullDescription by remember { mutableStateOf(false) }
-                                Text(
-                                    model.models.parsedDescription(),
-                                    maxLines = if (showFullDescription) Int.MAX_VALUE else 3,
-                                    modifier = Modifier
-                                        .animateContentSize()
-                                        .toggleable(
-                                            value = showFullDescription,
-                                            onValueChange = { showFullDescription = it }
-                                        )
-                                )
-                            },
                             trailingContent = {
                                 if (model.models.nsfw) {
                                     ElevatedAssistChip(
@@ -331,13 +321,31 @@ fun CivitAiDetailScreen(
                         )
                     }
 
+                    item(
+                        span = { GridItemSpan(maxLineSpan) },
+                        contentType = "description"
+                    ) {
+                        Text(
+                            model.models.parsedDescription(),
+                            maxLines = if (showFullDescription) Int.MAX_VALUE else 3,
+                            modifier = Modifier
+                                .padding(horizontal = 16.dp)
+                                .animateContentSize()
+                                .toggleable(
+                                    value = showFullDescription,
+                                    onValueChange = { showFullDescription = it }
+                                )
+                        )
+                    }
+
                     model.models.modelVersions.forEachIndexed { index, version ->
 
                         var showImages by mutableStateOf(index == 0)
                         var showMoreInfo by mutableStateOf(index == 0)
 
                         item(
-                            span = { GridItemSpan(maxLineSpan) }
+                            span = { GridItemSpan(maxLineSpan) },
+                            contentType = "version"
                         ) {
                             Card(
                                 onClick = {
@@ -367,18 +375,22 @@ fun CivitAiDetailScreen(
                                     windowInsets = WindowInsets(0.dp)
                                 )
                                 AnimatedVisibility(showMoreInfo) {
-                                    ListItem(
-                                        headlineContent = {
-                                            //Text("Last Update at: " + simpleDateTimeFormatter.format(version.createdAt.toEpochMilliseconds()))
-                                        },
-                                        supportingContent = version.parsedDescription()
-                                            ?.let { { Text(it) } }
-                                    )
+                                    version
+                                        .parsedDescription()
+                                        ?.let {
+                                            Text(
+                                                it,
+                                                modifier = Modifier.padding(horizontal = 16.dp)
+                                            )
+                                        }
                                 }
                             }
                         }
 
-                        items(version.images) { images ->
+                        items(
+                            version.images,
+                            contentType = { "image" }
+                        ) { images ->
                             AnimatedVisibility(
                                 showImages,
                                 enter = fadeIn() + expandVertically(),

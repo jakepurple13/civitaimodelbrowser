@@ -292,6 +292,13 @@ fun FavoritesUI(
                         is FavoriteModel.Image -> it.id.toString() + it.imageUrl + "Image"
                         is FavoriteModel.Model -> it.id.toString() + "Model"
                     }
+                },
+                contentType = {
+                    when (it) {
+                        is FavoriteModel.Creator -> "creator"
+                        is FavoriteModel.Image -> "image"
+                        is FavoriteModel.Model -> "model"
+                    }
                 }
             ) { model ->
                 when (model) {

@@ -70,6 +70,10 @@ import com.programmersbox.common.db.FavoriteRoom
 import com.programmersbox.common.db.FavoriteType
 import com.programmersbox.common.db.FavoritesDao
 import com.programmersbox.common.db.ListDao
+import kotlinx.collections.immutable.ImmutableList
+import kotlinx.collections.immutable.PersistentList
+import kotlinx.collections.immutable.persistentListOf
+import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.launch
 import org.koin.compose.koinInject
@@ -133,7 +137,7 @@ fun StatsScreen() {
             verticalArrangement = Arrangement.spacedBy(4.dp),
             modifier = Modifier.fillMaxSize()
         ) {
-            item {
+            item(contentType = "global stats") {
                 GlobalStats(
                     favoritesCount = favoritesCount,
                     blacklistedCount = blacklistedCount,
@@ -142,7 +146,7 @@ fun StatsScreen() {
                 )
             }
 
-            item {
+            item(contentType = "favorites deep dive") {
                 DeepDive(
                     dataCounts = favoritesCount,
                     title = "Favorites Deep Dive",
@@ -150,7 +154,7 @@ fun StatsScreen() {
                 )
             }
 
-            item {
+            item(contentType = "list title") {
                 Text(
                     "List Stats",
                     style = MaterialTheme.typography.titleLarge,
@@ -160,7 +164,7 @@ fun StatsScreen() {
                 )
             }
 
-            item {
+            item(contentType = "list deep dive") {
                 DeepDive(
                     dataCounts = itemCount,
                     title = "Lists Deep Dive",
@@ -168,18 +172,22 @@ fun StatsScreen() {
                 )
             }
 
-            items(listItems) {
+            items(
+                items = listItems,
+                contentType = { "list" },
+                key = { it.item.uuid }
+            ) {
                 ListStats(
                     list = it,
                     modifier = Modifier.animateItem()
                 )
             }
 
-            item {
+            item(contentType = "nsfw") {
                 NsfwStats(
-                    lists = listItems,
-                    favorites = favorites,
-                    blacklisted = blacklisted,
+                    lists = listItems.toImmutableList(),
+                    favorites = favorites.toImmutableList(),
+                    blacklisted = blacklisted.toImmutableList(),
                     showNsfwStats = showNsfwStats,
                     onShowNsfwStatsChange = { showNsfwStats = it },
                     modifier = Modifier.animateItem()
@@ -191,9 +199,9 @@ fun StatsScreen() {
 
 @Composable
 private fun NsfwStats(
-    lists: List<CustomList>,
-    favorites: List<FavoriteRoom>,
-    blacklisted: List<BlacklistedItemRoom>,
+    lists: ImmutableList<CustomList>,
+    favorites: ImmutableList<FavoriteRoom>,
+    blacklisted: ImmutableList<BlacklistedItemRoom>,
     showNsfwStats: Boolean,
     onShowNsfwStatsChange: (Boolean) -> Unit,
     modifier: Modifier = Modifier,
@@ -451,7 +459,7 @@ private fun DeepDive(
             // Segmented bar showing the distribution of favorite types
             // Feed raw counts (not animated) to avoid re-triggering animations each frame
             SegmentedBar(
-                segments = listOf(
+                segments = persistentListOf(
                     Segment(
                         value = dataCounts.modelCount.toFloat(),
                         color = MaterialTheme.colorScheme.primaryContainer
@@ -580,7 +588,7 @@ private data class Segment(
 
 @Composable
 private fun SegmentedBar(
-    segments: List<Segment>,
+    segments: PersistentList<Segment>,
     modifier: Modifier = Modifier,
     cornerRadius: Dp = 6.dp,
     animate: Boolean = true,

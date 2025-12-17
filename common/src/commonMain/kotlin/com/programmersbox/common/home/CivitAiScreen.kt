@@ -246,7 +246,7 @@ fun LazyGridScope.modelItems(
 ) {
     items(
         count = lazyPagingItems.itemCount,
-        contentType = lazyPagingItems.itemContentType(),
+        contentType = lazyPagingItems.itemContentType { "model" },
         key = lazyPagingItems.itemKeyIndexed { model, index -> "${model.id}$index" }
     ) {
         lazyPagingItems[it]?.let { models ->

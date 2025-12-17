@@ -227,7 +227,8 @@ fun CivitAiUserScreen(
                 .fillMaxSize()
         ) {
             item(
-                span = { GridItemSpan(maxLineSpan) }
+                span = { GridItemSpan(maxLineSpan) },
+                contentType = "header"
             ) {
                 CenterAlignedTopAppBar(
                     title = { Text("Models made by $username") },
@@ -236,7 +237,8 @@ fun CivitAiUserScreen(
             }
             if (lazyPagingItems.itemCount == 0) {
                 item(
-                    span = { GridItemSpan(maxLineSpan) }
+                    span = { GridItemSpan(maxLineSpan) },
+                    contentType = "no models"
                 ) {
                     Column(
                         verticalArrangement = Arrangement.Center,

@@ -158,7 +158,7 @@ fun CivitAiModelImagesScreen(
         ) {
             items(
                 count = lazyPagingItems.itemCount,
-                contentType = lazyPagingItems.itemContentType(),
+                contentType = lazyPagingItems.itemContentType { "image" },
                 key = lazyPagingItems.itemKey { it.url }
             ) {
                 lazyPagingItems[it]?.let { models ->

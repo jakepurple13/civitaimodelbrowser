@@ -228,6 +228,15 @@ private fun NsfwStats(
             },
         )
         AnimatedVisibility(showNsfwStats) {
+            val primaryErrorContainer = MaterialTheme.colorScheme.primaryContainer
+                .blend(MaterialTheme.colorScheme.errorContainer)
+
+            val secondaryErrorContainer = MaterialTheme.colorScheme.secondaryContainer
+                .blend(MaterialTheme.colorScheme.errorContainer)
+
+            val tertiaryErrorContainer = MaterialTheme.colorScheme.tertiaryContainer
+                .blend(MaterialTheme.colorScheme.errorContainer)
+
             Column(
                 verticalArrangement = Arrangement.spacedBy(16.dp),
                 modifier = Modifier.padding(vertical = 16.dp)
@@ -239,15 +248,13 @@ private fun NsfwStats(
                     GlobalStatItem(
                         title = "Favorites",
                         value = favorites.filter { it.nsfw }.size,
-                        color = MaterialTheme.colorScheme.primaryContainer
-                            .blend(MaterialTheme.colorScheme.errorContainer)
+                        color = primaryErrorContainer
                     )
 
                     GlobalStatItem(
                         title = "Blacklisted",
                         value = blacklisted.filter { it.nsfw }.size,
-                        color = MaterialTheme.colorScheme.secondaryContainer
-                            .blend(MaterialTheme.colorScheme.errorContainer)
+                        color = secondaryErrorContainer
                     )
 
                     GlobalStatItem(
@@ -279,42 +286,21 @@ private fun NsfwStats(
                         title = "Models",
                         value = favorites.filter { it.nsfw && it.favoriteType == FavoriteType.Model }.size,
                         icon = Icons.Default.ModelTraining,
-                        color = MaterialTheme.colorScheme.primaryContainer
-                            .blend(MaterialTheme.colorScheme.errorContainer)
+                        color = primaryErrorContainer
                     )
                     DeepDiveChip(
                         title = "Images",
                         value = favorites.filter { it.nsfw && it.favoriteType == FavoriteType.Image }.size,
                         icon = Icons.Default.Image,
-                        color = MaterialTheme.colorScheme.secondaryContainer
-                            .blend(MaterialTheme.colorScheme.errorContainer)
+                        color = secondaryErrorContainer
                     )
                     DeepDiveChip(
                         title = "Creators",
                         value = favorites.filter { it.nsfw && it.favoriteType == FavoriteType.Creator }.size,
                         icon = Icons.Default.Person,
-                        color = MaterialTheme.colorScheme.tertiaryContainer
-                            .blend(MaterialTheme.colorScheme.errorContainer)
+                        color = tertiaryErrorContainer
                     )
                 }
-
-                HorizontalDivider(
-                    color = MaterialTheme.colorScheme.error
-                )
-
-                Text(
-                    "Blacklisted",
-                    style = MaterialTheme.typography.titleLarge,
-                    modifier = Modifier.padding(horizontal = 16.dp)
-                )
-
-                DeepDiveChip(
-                    title = "Blacklisted",
-                    value = blacklisted.filter { it.nsfw }.size,
-                    icon = Icons.Default.Block,
-                    color = MaterialTheme.colorScheme.errorContainer,
-                    modifier = Modifier.padding(horizontal = 16.dp)
-                )
 
                 HorizontalDivider(
                     color = MaterialTheme.colorScheme.error
@@ -345,24 +331,39 @@ private fun NsfwStats(
                         title = "Models",
                         value = listsNsfw[FavoriteType.Model] ?: 0,
                         icon = Icons.Default.ModelTraining,
-                        color = MaterialTheme.colorScheme.primaryContainer
-                            .blend(MaterialTheme.colorScheme.errorContainer)
+                        color = primaryErrorContainer
                     )
                     DeepDiveChip(
                         title = "Images",
                         value = listsNsfw[FavoriteType.Image] ?: 0,
                         icon = Icons.Default.Image,
-                        color = MaterialTheme.colorScheme.secondaryContainer
-                            .blend(MaterialTheme.colorScheme.errorContainer)
+                        color = secondaryErrorContainer
                     )
                     DeepDiveChip(
                         title = "Creators",
                         value = listsNsfw[FavoriteType.Creator] ?: 0,
                         icon = Icons.Default.Person,
-                        color = MaterialTheme.colorScheme.tertiaryContainer
-                            .blend(MaterialTheme.colorScheme.errorContainer)
+                        color = tertiaryErrorContainer
                     )
                 }
+
+                HorizontalDivider(
+                    color = MaterialTheme.colorScheme.error
+                )
+
+                Text(
+                    "Blacklisted",
+                    style = MaterialTheme.typography.titleLarge,
+                    modifier = Modifier.padding(horizontal = 16.dp)
+                )
+
+                DeepDiveChip(
+                    title = "Blacklisted",
+                    value = blacklisted.filter { it.nsfw }.size,
+                    icon = Icons.Default.Block,
+                    color = MaterialTheme.colorScheme.errorContainer,
+                    modifier = Modifier.padding(horizontal = 16.dp)
+                )
             }
         }
     }

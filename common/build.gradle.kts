@@ -1,3 +1,4 @@
+import com.android.build.api.dsl.androidLibrary
 import com.codingfeline.buildkonfig.compiler.FieldSpec.Type.STRING
 import org.jetbrains.compose.internal.utils.localPropertiesFile
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
@@ -8,12 +9,13 @@ import java.util.Properties
 plugins {
     kotlin("multiplatform")
     id("org.jetbrains.compose")
-    id("com.android.library")
+    id("com.android.kotlin.multiplatform.library")
     id("org.jetbrains.kotlin.plugin.serialization") version libs.versions.kotlin.version.get()
     id("com.codingfeline.buildkonfig")
     alias(libs.plugins.compose.compiler)
     alias(libs.plugins.ksp)
     alias(libs.plugins.room)
+    alias(libs.plugins.aboutLibraries)
 }
 
 group = "com.programmersbox"
@@ -21,9 +23,15 @@ version = "1.0-SNAPSHOT"
 
 @OptIn(org.jetbrains.compose.ExperimentalComposeLibrary::class)
 kotlin {
-    androidTarget {
+    androidLibrary {
+        compileSdk = 36
+        minSdk = 28
+        namespace = "com.programmersbox.common"
         compilerOptions {
             jvmTarget.set(JvmTarget.JVM_17)
+        }
+        androidResources {
+            enable = true
         }
     }
     jvm {
@@ -89,6 +97,10 @@ kotlin {
             implementation(libs.connectivity.compose)
 
             implementation(libs.kotlinx.collections.immutable)
+
+            implementation(libs.aboutlibraries.core)
+            implementation(libs.aboutlibraries.compose.core)
+            implementation(libs.aboutlibraries.compose.m3)
         }
 
         commonTest.dependencies {
@@ -137,22 +149,6 @@ compose.resources {
     generateResClass = always
 }
 
-android {
-    compileSdk = 36
-    namespace = "com.programmersbox.common"
-    sourceSets["main"].manifest.srcFile("src/androidMain/AndroidManifest.xml")
-    sourceSets["main"].res.srcDirs("src/androidMain/res")
-    sourceSets["main"].resources.srcDirs("src/commonMain/resources")
-    defaultConfig {
-        minSdk = 28
-        targetSdk = 36
-    }
-    compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_17
-        targetCompatibility = JavaVersion.VERSION_17
-    }
-}
-
 room {
     schemaDirectory("$projectDir/schemas")
 }
@@ -182,4 +178,15 @@ fun Project.getLocalProperty(key: String): Any? {
     } else if (System.getenv("CI") != null) {
         System.getProperty("API_KEY")
     } else error("File from not found")
+}
+
+aboutLibraries {
+    export {
+        // Define the output path for manual generation
+        // Adjust the path based on your project structure (e.g., composeResources, Android res/raw)
+        outputPath =
+            file("${project.projectDir.path}/src/commonMain/composeResources/files/aboutlibraries.json")
+        // Optionally specify the variant for export
+        // variant = "release"
+    }
 }

@@ -20,4 +20,5 @@ plugins {
     id("org.jetbrains.compose") version libs.versions.compose.version.get() apply false
     alias(libs.plugins.compose.compiler) apply false
     id("com.codingfeline.buildkonfig") version "0.17.1" apply false
+    alias(libs.plugins.aboutLibraries) apply false
 }

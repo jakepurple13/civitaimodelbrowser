@@ -5,8 +5,6 @@ import androidx.compose.material3.adaptive.navigation3.ListDetailSceneStrategy
 import androidx.navigation3.scene.DialogSceneStrategy
 import com.programmersbox.common.NavigationHandler
 import com.programmersbox.common.Screen
-import com.programmersbox.common.SettingsScreen
-import com.programmersbox.common.StatsScreen
 import com.programmersbox.common.backup.BackupScreen
 import com.programmersbox.common.backup.RestoreScreen
 import com.programmersbox.common.blacklisted.BlacklistedScreen
@@ -19,6 +17,9 @@ import com.programmersbox.common.images.CivitAiImagesScreen
 import com.programmersbox.common.lists.ListDetailScreen
 import com.programmersbox.common.lists.ListScreen
 import com.programmersbox.common.qrcode.ScanQrCode
+import com.programmersbox.common.settings.AboutScreen
+import com.programmersbox.common.settings.SettingsScreen
+import com.programmersbox.common.settings.StatsScreen
 import org.koin.compose.koinInject
 import org.koin.compose.viewmodel.koinViewModel
 import org.koin.core.annotation.KoinExperimentalAPI
@@ -109,7 +110,8 @@ fun navigationModule() = module {
             onNavigateToQrCode = { backStack.add(Screen.QrCode) },
             onNavigateToBackup = { backStack.add(Screen.Backup) },
             onNavigateToRestore = { backStack.add(Screen.Restore) },
-            onNavigateToStats = { backStack.add(Screen.Stats) }
+            onNavigateToStats = { backStack.add(Screen.Stats) },
+            onNavigateToAbout = { backStack.add(Screen.About) }
         )
     }
     navigation<Screen.Settings.Screen> {
@@ -118,7 +120,8 @@ fun navigationModule() = module {
             onNavigateToQrCode = { backStack.add(Screen.QrCode) },
             onNavigateToBackup = { backStack.add(Screen.Backup) },
             onNavigateToRestore = { backStack.add(Screen.Restore) },
-            onNavigateToStats = { backStack.add(Screen.Stats) }
+            onNavigateToStats = { backStack.add(Screen.Stats) },
+            onNavigateToAbout = { backStack.add(Screen.About) }
         )
     }
     navigation<Screen.QrCode>(
@@ -162,4 +165,5 @@ fun navigationModule() = module {
     navigation<Screen.Backup> { BackupScreen() }
     navigation<Screen.Restore> { RestoreScreen() }
     navigation<Screen.Stats> { StatsScreen() }
+    navigation<Screen.About> { AboutScreen() }
 }

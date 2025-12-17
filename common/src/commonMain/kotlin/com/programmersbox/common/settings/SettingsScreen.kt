@@ -1,4 +1,4 @@
-package com.programmersbox.common
+package com.programmersbox.common.settings
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.Image
@@ -18,6 +18,7 @@ import androidx.compose.material.icons.filled.BlurOff
 import androidx.compose.material.icons.filled.BlurOn
 import androidx.compose.material.icons.filled.BorderBottom
 import androidx.compose.material.icons.filled.Brightness4
+import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.NoAdultContent
 import androidx.compose.material.icons.filled.QueryStats
 import androidx.compose.material.icons.filled.Restore
@@ -54,7 +55,13 @@ import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.programmersbox.common.ApplicationInfo
+import com.programmersbox.common.BackButton
+import com.programmersbox.common.ComposableUtils
+import com.programmersbox.common.DataStore
+import com.programmersbox.common.ThemeMode
 import com.programmersbox.common.components.icons.Github
+import com.programmersbox.common.getPlatformName
 import com.programmersbox.resources.Res
 import com.programmersbox.resources.civitai_logo
 import kotlinx.coroutines.launch
@@ -69,6 +76,7 @@ fun SettingsScreen(
     onNavigateToBackup: () -> Unit,
     onNavigateToRestore: () -> Unit,
     onNavigateToStats: () -> Unit,
+    onNavigateToAbout: () -> Unit,
 ) {
     val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
 
@@ -128,7 +136,9 @@ fun SettingsScreen(
 
             HorizontalDivider()
 
-            AboutSettings()
+            AboutSettings(
+                onNavigateToAbout = onNavigateToAbout,
+            )
         }
     }
 }
@@ -333,23 +343,17 @@ private fun BackupRestoreSettings(
 }
 
 @Composable
-private fun ColumnScope.AboutSettings() {
+private fun ColumnScope.AboutSettings(
+    onNavigateToAbout: () -> Unit,
+) {
     val uriHandler = LocalUriHandler.current
 
     Card(
-        onClick = { uriHandler.openUri("https://github.com/civitai/civitai/wiki/REST-API-Reference") }
+        onClick = onNavigateToAbout
     ) {
         ListItem(
-            headlineContent = { Text("Open CivitAi REST API") },
-            leadingContent = {
-                Icon(
-                    Icons.Github,
-                    contentDescription = null,
-                    modifier = Modifier
-                        .size(24.dp)
-                        .clip(CircleShape)
-                )
-            }
+            headlineContent = { Text("About") },
+            leadingContent = { Icon(Icons.Default.Info, null) }
         )
     }
 
@@ -361,6 +365,23 @@ private fun ColumnScope.AboutSettings() {
             leadingContent = {
                 Image(
                     painter = painterResource(Res.drawable.civitai_logo),
+                    contentDescription = null,
+                    modifier = Modifier
+                        .size(24.dp)
+                        .clip(CircleShape)
+                )
+            }
+        )
+    }
+
+    Card(
+        onClick = { uriHandler.openUri("https://github.com/civitai/civitai/wiki/REST-API-Reference") }
+    ) {
+        ListItem(
+            headlineContent = { Text("Open CivitAi REST API") },
+            leadingContent = {
+                Icon(
+                    Icons.Github,
                     contentDescription = null,
                     modifier = Modifier
                         .size(24.dp)

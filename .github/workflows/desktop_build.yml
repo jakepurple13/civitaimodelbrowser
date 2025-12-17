@@ -67,6 +67,12 @@ jobs:
       #          restore-keys: |
       #            ${{ runner.os }}-gradle-
 
+      - name: Export Libraries
+        uses: gradle/gradle-build-action@v2
+        with:
+          gradle-version: current
+          arguments: "exportLibraryDefinitions"
+
       - name: Build with Gradle
         uses: gradle/gradle-build-action@v2
         with:

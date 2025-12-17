@@ -1,4 +1,4 @@
-package com.programmersbox.common
+package com.programmersbox.common.settings
 
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.runtime.Composable

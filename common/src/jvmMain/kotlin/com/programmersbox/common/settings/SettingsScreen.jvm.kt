@@ -1,4 +1,4 @@
-package com.programmersbox.common
+package com.programmersbox.common.settings
 
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.material.icons.Icons
@@ -11,6 +11,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
+import com.programmersbox.common.DataStoreHandler
 import io.github.vinceglb.filekit.PlatformFile
 import io.github.vinceglb.filekit.absolutePath
 import io.github.vinceglb.filekit.dialogs.compose.rememberDirectoryPickerLauncher
@@ -23,11 +24,7 @@ actual fun ColumnScope.ExtraSettings() {
     var downloadPath by koinInject<DataStoreHandler>().rememberDownloadPath()
     val directoryPicker = rememberDirectoryPickerLauncher(
         directory = PlatformFile(downloadPath)
-    ) { file ->
-        file?.let {
-            downloadPath = it.absolutePath()
-        }
-    }
+    ) { file -> file?.let { downloadPath = it.absolutePath() } }
 
     Card(
         onClick = { directoryPicker.launch() }

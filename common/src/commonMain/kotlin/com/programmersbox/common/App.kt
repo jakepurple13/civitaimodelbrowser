@@ -170,4 +170,7 @@ sealed class Screen {
 
     @Serializable
     data object Stats : NavKey
+
+    @Serializable
+    data object About : NavKey
 }

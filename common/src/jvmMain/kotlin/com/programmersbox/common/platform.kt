@@ -5,11 +5,12 @@ import androidx.compose.foundation.ContextMenuItem
 import androidx.compose.foundation.VerticalScrollbar
 import androidx.compose.foundation.lazy.grid.LazyGridState
 import androidx.compose.foundation.rememberScrollbarAdapter
-import androidx.compose.material3.Surface
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ModalBottomSheet
+import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.window.Window
 import androidx.room.Room
 import androidx.room.RoomDatabase
 import ca.gosyer.appdirs.AppDirs
@@ -36,17 +37,19 @@ public fun UIShow(
 
 internal actual fun getPagingPlaceholderKey(index: Int): Any = index
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 internal actual fun SheetDetails(
     onDismiss: () -> Unit,
     content: @Composable () -> Unit,
 ) {
-    Window(
-        onCloseRequest = onDismiss
+    ModalBottomSheet(
+        onDismissRequest = onDismiss,
+        sheetState = rememberModalBottomSheetState(
+            skipPartiallyExpanded = true
+        )
     ) {
-        Surface {
-            content()
-        }
+        content()
     }
 }
 

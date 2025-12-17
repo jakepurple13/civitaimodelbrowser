@@ -113,6 +113,8 @@ fun StatsScreen() {
         .getBlacklisted()
         .collectAsStateWithLifecycle(emptyList())
 
+    var showNsfwStats by remember { mutableStateOf(false) }
+
     val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
 
     Scaffold(
@@ -177,6 +179,8 @@ fun StatsScreen() {
                     lists = listItems,
                     favorites = favorites,
                     blacklisted = blacklisted,
+                    showNsfwStats = showNsfwStats,
+                    onShowNsfwStatsChange = { showNsfwStats = it },
                     modifier = Modifier.animateItem()
                 )
             }
@@ -189,9 +193,10 @@ private fun NsfwStats(
     lists: List<CustomList>,
     favorites: List<FavoriteRoom>,
     blacklisted: List<BlacklistedItemRoom>,
+    showNsfwStats: Boolean,
+    onShowNsfwStatsChange: (Boolean) -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    var showNsfwStats by remember { mutableStateOf(false) }
     OutlinedCard(
         border = BorderStroke(1.dp, MaterialTheme.colorScheme.error),
         modifier = modifier
@@ -204,7 +209,7 @@ private fun NsfwStats(
             trailingContent = {
                 Switch(
                     checked = showNsfwStats,
-                    onCheckedChange = { showNsfwStats = it }
+                    onCheckedChange = onShowNsfwStatsChange
                 )
             },
         )

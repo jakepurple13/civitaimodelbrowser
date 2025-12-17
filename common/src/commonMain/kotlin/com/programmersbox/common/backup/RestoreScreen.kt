@@ -1,19 +1,27 @@
 package com.programmersbox.common.backup
 
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInHorizontally
+import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.filled.PlayArrow
+import androidx.compose.material.icons.filled.Restore
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.CircularWavyProgressIndicator
@@ -60,6 +68,7 @@ fun RestoreScreen(
     val restoreFile = rememberFilePickerLauncher(
         type = FileKitType.File("zip"),
     ) {
+        //TODO: If null, go back or have a button to select file
         it?.let { platformFile -> viewModel.read(platformFile) }
     }
 
@@ -111,16 +120,22 @@ fun RestoreScreen(
             )
         },
         floatingActionButton = {
-            FloatingActionButton(
-                onClick = viewModel::restore
-            ) { Text("Restore") }
+            AnimatedVisibility(
+                visible = viewModel.backupItems != null,
+                enter = fadeIn() + slideInHorizontally { it },
+                exit = slideOutHorizontally { it } + fadeOut()
+            ) {
+                FloatingActionButton(
+                    onClick = viewModel::restore
+                ) { Text("Restore") }
+            }
         }
     ) { padding ->
-        LazyColumn(
-            contentPadding = padding,
-            verticalArrangement = Arrangement.spacedBy(4.dp)
-        ) {
-            viewModel.backupItems?.let { backupItems ->
+        viewModel.backupItems?.let { backupItems ->
+            LazyColumn(
+                contentPadding = padding,
+                verticalArrangement = Arrangement.spacedBy(4.dp)
+            ) {
                 item {
                     FavoriteSwitch(
                         checked = viewModel.includeFavorites,
@@ -150,6 +165,26 @@ fun RestoreScreen(
                         onAddList = viewModel::addList,
                         onRemoveList = viewModel::removeList
                     )
+                }
+            }
+        } ?: run {
+            Box(
+                contentAlignment = Alignment.Center,
+                modifier = Modifier.fillMaxSize()
+            ) {
+                Column(
+                    verticalArrangement = Arrangement.Center,
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Icon(
+                        Icons.Default.Restore,
+                        null,
+                        modifier = Modifier.size(96.dp)
+                    )
+                    Button(
+                        onClick = restoreFile::launch
+                    ) { Text("Select File") }
                 }
             }
         }

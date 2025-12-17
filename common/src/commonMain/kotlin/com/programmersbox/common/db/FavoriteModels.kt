@@ -108,6 +108,7 @@ sealed interface FavoriteModel {
     ) : FavoriteModel
 }
 
+@Stable
 @Serializable
 data class CustomList(
     @Embedded

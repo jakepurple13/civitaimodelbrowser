@@ -111,7 +111,6 @@ interface ScaleRotateOffsetResetScope {
 
     fun reset()
 
-
     @OptIn(ExperimentalFoundationApi::class)
     fun Modifier.scaleRotateOffsetReset(
         canScale: Boolean = true,

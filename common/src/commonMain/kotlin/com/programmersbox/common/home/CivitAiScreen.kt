@@ -110,6 +110,8 @@ import dev.chrisbanes.haze.HazeState
 import dev.chrisbanes.haze.LocalHazeStyle
 import dev.chrisbanes.haze.hazeEffect
 import dev.chrisbanes.haze.hazeSource
+import kotlinx.collections.immutable.ImmutableList
+import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.launch
 import org.koin.compose.koinInject
 import org.koin.compose.viewmodel.koinViewModel
@@ -152,10 +154,12 @@ fun CivitAiScreen(
     Scaffold(
         topBar = {
             AppSearchAppBar(
-                database = database.filterIsInstance<FavoriteModel.Model>(),
+                database = database
+                    .filterIsInstance<FavoriteModel.Model>()
+                    .toImmutableList(),
                 showNsfw = showNsfw,
                 blurStrength = blurStrength,
-                blacklisted = blacklisted,
+                blacklisted = blacklisted.toImmutableList(),
                 showBlur = showBlur,
                 onNavigateToFavorites = onNavigateToFavorites,
                 onNavigateToSettings = onNavigateToSettings,
@@ -540,8 +544,8 @@ fun CardContent(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun AppSearchAppBar(
-    database: List<FavoriteModel>,
-    blacklisted: List<BlacklistedItemRoom>,
+    database: ImmutableList<FavoriteModel>,
+    blacklisted: ImmutableList<BlacklistedItemRoom>,
     showNsfw: Boolean,
     blurStrength: Float,
     onNavigateToDetail: (String) -> Unit,

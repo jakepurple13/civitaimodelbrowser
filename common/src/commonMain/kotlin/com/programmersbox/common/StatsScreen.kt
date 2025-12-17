@@ -251,7 +251,7 @@ private fun NsfwStats(
 
                     GlobalStatItem(
                         title = "NSFW in Lists",
-                        value = lists.sumOf { it.list.count { it.nsfw } },
+                        value = lists.sumOf { it.list.count { item -> item.nsfw } },
                         color = MaterialTheme.colorScheme.tertiaryContainer
                             .blend(MaterialTheme.colorScheme.errorContainer)
                     )

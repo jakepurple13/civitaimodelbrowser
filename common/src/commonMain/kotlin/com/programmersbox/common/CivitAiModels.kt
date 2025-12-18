@@ -1,9 +1,9 @@
 package com.programmersbox.common
 
 import androidx.compose.runtime.Stable
+import com.fleeksoft.ksoup.Ksoup
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
-import org.jsoup.Jsoup
 
 @Stable
 @Serializable
@@ -27,7 +27,7 @@ data class Models(
     val modelVersions: List<ModelVersion> = emptyList(),
     val creator: Creator? = null,
 ) {
-    fun parsedDescription() = Jsoup.parse(description.orEmpty()).text()
+    fun parsedDescription() = Ksoup.parse(description.orEmpty()).text()
 }
 
 @Stable
@@ -64,7 +64,7 @@ data class ModelVersion(
     val images: List<ModelImage> = emptyList(),
     val downloadUrl: String? = null,
 ) {
-    fun parsedDescription() = description?.let { Jsoup.parse(it).text() }
+    fun parsedDescription() = description?.let { Ksoup.parse(it).text() }
 }
 
 @Stable

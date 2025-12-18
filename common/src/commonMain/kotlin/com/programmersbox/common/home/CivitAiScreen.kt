@@ -119,16 +119,16 @@ import org.koin.compose.viewmodel.koinViewModel
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CivitAiScreen(
-    viewModel: CivitAiViewModel = koinViewModel(),
     onNavigateToDetail: (String) -> Unit,
     onNavigateToFavorites: () -> Unit,
     onNavigateToSettings: () -> Unit,
     onNavigateToQrCode: () -> Unit,
     onNavigateToUser: (String) -> Unit,
     onNavigateToDetailImages: (Long, String) -> Unit,
-    onNavigateToBlacklisted: () -> Unit,
+    onNavigateToBlacklist: () -> Unit,
     onNavigateToImages: () -> Unit,
     onNavigateToCustomList: () -> Unit,
+    viewModel: CivitAiViewModel = koinViewModel(),
 ) {
     val connectionRepository = koinInject<NetworkConnectionRepository>()
     val shouldShowMedia by remember { derivedStateOf { connectionRepository.shouldShowMedia } }
@@ -168,7 +168,7 @@ fun CivitAiScreen(
                 onNavigateToUser = onNavigateToUser,
                 onNavigateToDetailImages = onNavigateToDetailImages,
                 onNavigateToImages = onNavigateToImages,
-                onNavigateToBlacklisted = onNavigateToBlacklisted,
+                onNavigateToBlacklist = onNavigateToBlacklist,
                 onNavigateToCustomList = onNavigateToCustomList,
                 shouldShowMedia = shouldShowMedia,
                 modifier = Modifier.ifTrue(showBlur) {
@@ -555,7 +555,7 @@ private fun AppSearchAppBar(
     onNavigateToImages: () -> Unit,
     onNavigateToUser: (String) -> Unit,
     onNavigateToDetailImages: (Long, String) -> Unit,
-    onNavigateToBlacklisted: () -> Unit,
+    onNavigateToBlacklist: () -> Unit,
     onNavigateToCustomList: () -> Unit,
     showBlur: Boolean,
     shouldShowMedia: Boolean,
@@ -671,7 +671,7 @@ private fun AppSearchAppBar(
                     label = "Settings"
                 )
                 clickableItem(
-                    onClick = onNavigateToBlacklisted,
+                    onClick = onNavigateToBlacklist,
                     icon = { Icon(Icons.Default.Block, null) },
                     label = "Blacklisted"
                 )
@@ -731,9 +731,9 @@ fun BlacklistHandling(
     modelId: Long,
     name: String,
     nsfw: Boolean,
-    imageUrl: String? = null,
     showDialog: Boolean,
     onDialogDismiss: () -> Unit,
+    imageUrl: String? = null,
 ) {
     val db = koinInject<FavoritesDao>()
     val scope = rememberCoroutineScope()

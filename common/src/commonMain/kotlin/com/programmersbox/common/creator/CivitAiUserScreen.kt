@@ -71,8 +71,8 @@ import org.koin.compose.viewmodel.koinViewModel
 @Composable
 fun CivitAiUserScreen(
     username: String,
-    viewModel: CivitAiUserViewModel = koinViewModel(),
     onNavigateToDetail: (String) -> Unit,
+    viewModel: CivitAiUserViewModel = koinViewModel(),
 ) {
     val connectionRepository = koinInject<NetworkConnectionRepository>()
     val shouldShowMedia by remember { derivedStateOf { connectionRepository.shouldShowMedia } }

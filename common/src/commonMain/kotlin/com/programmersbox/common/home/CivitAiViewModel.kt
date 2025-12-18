@@ -22,9 +22,10 @@ import com.programmersbox.common.paging.CivitBrowserSearchPagingSource
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.IO
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.distinctUntilChanged
-import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.launchIn
@@ -35,13 +36,16 @@ class CivitAiViewModel(
     network: Network,
     dataStore: DataStore,
 ) : ViewModel() {
-    var pager by mutableStateOf<Flow<PagingData<Models>>>(emptyFlow())
+    val pager: Flow<PagingData<Models>>
+        field = MutableStateFlow<PagingData<Models>>(PagingData.empty())
 
     init {
-        dataStore.includeNsfw.flow
+        dataStore
+            .includeNsfw
+            .flow
             .distinctUntilChanged()
-            .onEach {
-                pager = Pager(
+            .flatMapLatest {
+                Pager(
                     PagingConfig(
                         pageSize = PAGE_LIMIT,
                         enablePlaceholders = true
@@ -51,6 +55,7 @@ class CivitAiViewModel(
                     .flowOn(Dispatchers.IO)
                     .cachedIn(viewModelScope)
             }
+            .onEach { pager.value = it }
             .launchIn(viewModelScope)
     }
 }

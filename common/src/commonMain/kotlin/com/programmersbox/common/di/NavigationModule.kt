@@ -52,7 +52,7 @@ fun navigationModule() = module {
                     )
                 )
             },
-            onNavigateToBlacklisted = {
+            onNavigateToBlacklist = {
                 backStack.add(Screen.Settings)
                 backStack.add(Screen.Settings.Blacklisted)
             },

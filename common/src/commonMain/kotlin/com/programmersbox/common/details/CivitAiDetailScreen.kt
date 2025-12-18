@@ -31,6 +31,7 @@ import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.filled.ArrowUpward
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.ContentCopy
+import androidx.compose.material.icons.filled.Error
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material.icons.filled.Image
@@ -335,12 +336,12 @@ fun CivitAiDetailScreen(
                             model.models.parsedDescription(),
                             maxLines = if (showFullDescription) Int.MAX_VALUE else 3,
                             modifier = Modifier
-                                .padding(horizontal = 16.dp)
                                 .animateContentSize()
                                 .toggleable(
                                     value = showFullDescription,
                                     onValueChange = { showFullDescription = it }
                                 )
+                                .padding(horizontal = 16.dp)
                         )
                     }
 
@@ -385,12 +386,7 @@ fun CivitAiDetailScreen(
                                 ) {
                                     version
                                         .parsedDescription()
-                                        ?.let {
-                                            Text(
-                                                it,
-                                                modifier = Modifier.padding(horizontal = 16.dp)
-                                            )
-                                        }
+                                        ?.let { Text(it, modifier = Modifier.padding(16.dp)) }
                                 }
                             }
                         }
@@ -453,6 +449,11 @@ fun CivitAiDetailScreen(
                     Column(
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
+                        Icon(
+                            Icons.Default.Error,
+                            null,
+                            modifier = Modifier.size(96.dp)
+                        )
                         Text("Something went wrong")
                         Button(
                             onClick = viewModel::loadData

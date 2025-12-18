@@ -99,6 +99,7 @@ class CivitAiSearchViewModel @OptIn(ExperimentalMaterial3Api::class) constructor
                     ),
                 ) { CivitBrowserSearchPagingSource(network, query, includeNsfw) }
                     .flow
+                    .flowOn(Dispatchers.IO)
                     .cachedIn(viewModelScope)
             }
         }

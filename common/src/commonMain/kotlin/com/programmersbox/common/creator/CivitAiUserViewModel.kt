@@ -12,7 +12,10 @@ import com.programmersbox.common.PAGE_LIMIT
 import com.programmersbox.common.db.FavoriteType
 import com.programmersbox.common.db.FavoritesDao
 import com.programmersbox.common.paging.CivitBrowserUserPagingSource
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.IO
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import kotlin.random.Random
@@ -36,6 +39,7 @@ class CivitAiUserViewModel(
         )
     }
         .flow
+        .flowOn(Dispatchers.IO)
         .cachedIn(viewModelScope)
 
     fun addToFavorites(

@@ -12,6 +12,8 @@ import com.programmersbox.common.Network
 import com.programmersbox.common.db.FavoriteType
 import com.programmersbox.common.db.FavoritesDao
 import com.programmersbox.common.db.toDb
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.IO
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
@@ -37,7 +39,7 @@ class CivitAiDetailViewModel(
     }
 
     fun loadData() {
-        viewModelScope.launch {
+        viewModelScope.launch(Dispatchers.IO) {
             models = DetailViewState.Loading
             models = id?.let { network.fetchModel(it) }
                 ?.onFailure { it.printStackTrace() }

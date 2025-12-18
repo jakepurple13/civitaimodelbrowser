@@ -12,6 +12,7 @@ import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import io.ktor.client.call.body
+import io.ktor.client.plugins.onDownload
 import io.ktor.client.request.get
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -37,7 +38,16 @@ actual class DownloadHandler(
             val file = File(parent, name)
             if (!file.exists()) file.createNewFile()
 
-            file.writeBytes(network.client.get(url).body())
+            file.writeBytes(
+                network
+                    .client
+                    .get(url) {
+                        onDownload { bytesSentTotal, contentLength ->
+                            println("Downloaded $bytesSentTotal of $contentLength")
+                        }
+                    }
+                    .body()
+            )
 
             trayState.sendNotification(
                 Notification(

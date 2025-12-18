@@ -12,11 +12,15 @@ group = "com.programmersbox"
 version = "1.0-SNAPSHOT"
 
 kotlin {
+    compilerOptions {
+        freeCompilerArgs.add("-Xexplicit-backing-fields")
+    }
     jvm {
         compilations.all {
             kotlin {
                 compilerOptions {
                     jvmToolchain(17)
+                    freeCompilerArgs.add("-Xexplicit-backing-fields")
                 }
             }
         }

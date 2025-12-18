@@ -1,5 +1,3 @@
-import androidx.compose.runtime.Composable
-import androidx.compose.ui.window.AwtWindow
 import androidx.compose.ui.window.Tray
 import androidx.compose.ui.window.TrayState
 import androidx.compose.ui.window.application
@@ -26,8 +24,6 @@ import org.koin.compose.koinInject
 import org.koin.core.module.dsl.singleOf
 import org.koin.dsl.koinConfiguration
 import org.koin.dsl.module
-import java.awt.FileDialog
-import java.awt.Frame
 import java.awt.Toolkit
 import java.awt.datatransfer.StringSelection
 import java.io.File
@@ -88,8 +84,8 @@ fun main() {
                         )
                         Item(
                             "Stats",
-                            onClick = { navHandler.backStack.add(Screen.Stats) },
-                            enabled = navHandler.backStack.lastOrNull() != Screen.Stats,
+                            onClick = { navHandler.backStack.add(Screen.Settings.Stats) },
+                            enabled = navHandler.backStack.lastOrNull() != Screen.Settings.Stats,
                         )
                         Item(
                             "Blacklisted",
@@ -132,29 +128,6 @@ fun main() {
         )
     }
 }
-
-enum class FileDialogMode(internal val id: Int) { Load(FileDialog.LOAD), Save(FileDialog.SAVE) }
-
-@Composable
-private fun FileDialog(
-    mode: FileDialogMode,
-    title: String = "Choose a file",
-    parent: Frame? = null,
-    block: FileDialog.() -> Unit = {},
-    onCloseRequest: (result: String?) -> Unit,
-) = AwtWindow(
-    create = {
-        object : FileDialog(parent, title, mode.id) {
-            override fun setVisible(value: Boolean) {
-                super.setVisible(value)
-                if (value) {
-                    onCloseRequest(directory + File.separator + file)
-                }
-            }
-        }.apply(block)
-    },
-    dispose = FileDialog::dispose
-)
 
 fun main1(): Unit = runBlocking {
     val n = Network()

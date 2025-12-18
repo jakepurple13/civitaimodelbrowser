@@ -84,7 +84,6 @@ import androidx.compose.ui.platform.LocalWindowInfo
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import chaintech.videoplayer.ui.preview.VideoPreviewComposable
 import com.programmersbox.common.BackButton
 import com.programmersbox.common.ComposableUtils
@@ -121,10 +120,8 @@ fun ListDetailScreen(
     val shouldShowMedia by remember { derivedStateOf { connectionRepository.shouldShowMedia } }
     val dataStore = koinInject<DataStore>()
     val showBlur by dataStore.rememberShowBlur()
-    val showNsfw by remember { dataStore.showNsfw.flow }
-        .collectAsStateWithLifecycle(false)
-    val blurStrength by remember { dataStore.hideNsfwStrength.flow }
-        .collectAsStateWithLifecycle(6f)
+    val showNsfw by dataStore.showNsfw()
+    val blurStrength by dataStore.hideNsfwStrength()
 
     val hazeState = remember { HazeState() }
     val hazeStyle = LocalHazeStyle.current

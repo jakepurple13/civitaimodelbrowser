@@ -18,11 +18,14 @@ import com.programmersbox.common.lists.ListDetailScreen
 import com.programmersbox.common.lists.ListScreen
 import com.programmersbox.common.qrcode.ScanQrCode
 import com.programmersbox.common.settings.AboutScreen
+import com.programmersbox.common.settings.BehaviorSettingsScreen
+import com.programmersbox.common.settings.NsfwSettingsScreen
 import com.programmersbox.common.settings.SettingsScreen
 import com.programmersbox.common.settings.StatsScreen
 import org.koin.compose.koinInject
 import org.koin.compose.viewmodel.koinViewModel
 import org.koin.core.annotation.KoinExperimentalAPI
+import org.koin.core.module.Module
 import org.koin.core.module.dsl.singleOf
 import org.koin.core.parameter.parametersOf
 import org.koin.dsl.module
@@ -103,27 +106,6 @@ fun navigationModule() = module {
             onNavigateToUser = { username -> backStack.add(Screen.User(username)) }
         )
     }
-    navigation<Screen.Settings.Blacklisted> { BlacklistedScreen() }
-    navigation<Screen.Settings> {
-        val backStack = koinInject<NavigationHandler>().backStack
-        SettingsScreen(
-            onNavigateToQrCode = { backStack.add(Screen.QrCode) },
-            onNavigateToBackup = { backStack.add(Screen.Backup) },
-            onNavigateToRestore = { backStack.add(Screen.Restore) },
-            onNavigateToStats = { backStack.add(Screen.Stats) },
-            onNavigateToAbout = { backStack.add(Screen.About) }
-        )
-    }
-    navigation<Screen.Settings.Screen> {
-        val backStack = koinInject<NavigationHandler>().backStack
-        SettingsScreen(
-            onNavigateToQrCode = { backStack.add(Screen.QrCode) },
-            onNavigateToBackup = { backStack.add(Screen.Backup) },
-            onNavigateToRestore = { backStack.add(Screen.Restore) },
-            onNavigateToStats = { backStack.add(Screen.Stats) },
-            onNavigateToAbout = { backStack.add(Screen.About) }
-        )
-    }
     navigation<Screen.QrCode>(
         metadata = DialogSceneStrategy.dialog()
     ) {
@@ -161,9 +143,45 @@ fun navigationModule() = module {
             onNavigateToUser = { username -> backStack.add(Screen.User(username)) }
         )
     }
+    settingsNavigation()
+}
 
-    navigation<Screen.Backup> { BackupScreen() }
-    navigation<Screen.Restore> { RestoreScreen() }
-    navigation<Screen.Stats> { StatsScreen() }
-    navigation<Screen.About> { AboutScreen() }
+@OptIn(ExperimentalMaterial3AdaptiveApi::class, KoinExperimentalAPI::class)
+private fun Module.settingsNavigation() {
+    navigation<Screen.Settings>(
+        metadata = ListDetailSceneStrategy.listPane()
+    ) {
+        val backStack = koinInject<NavigationHandler>().backStack
+        SettingsScreen(
+            onNavigateToQrCode = { backStack.add(Screen.QrCode) },
+            onNavigateToBackup = { backStack.add(Screen.Settings.Backup) },
+            onNavigateToRestore = { backStack.add(Screen.Settings.Restore) },
+            onNavigateToStats = { backStack.add(Screen.Settings.Stats) },
+            onNavigateToAbout = { backStack.add(Screen.Settings.About) },
+            onNavigateToNsfw = { backStack.add(Screen.Settings.Nsfw) },
+            onNavigateToBehavior = { backStack.add(Screen.Settings.Behavior) }
+        )
+    }
+
+    navigation<Screen.Settings.Blacklisted>(
+        metadata = ListDetailSceneStrategy.detailPane()
+    ) { BlacklistedScreen() }
+    navigation<Screen.Settings.Backup>(
+        metadata = ListDetailSceneStrategy.detailPane()
+    ) { BackupScreen() }
+    navigation<Screen.Settings.Restore>(
+        metadata = ListDetailSceneStrategy.detailPane()
+    ) { RestoreScreen() }
+    navigation<Screen.Settings.Stats>(
+        metadata = ListDetailSceneStrategy.detailPane()
+    ) { StatsScreen() }
+    navigation<Screen.Settings.About>(
+        metadata = ListDetailSceneStrategy.detailPane()
+    ) { AboutScreen() }
+    navigation<Screen.Settings.Nsfw>(
+        metadata = ListDetailSceneStrategy.detailPane()
+    ) { NsfwSettingsScreen() }
+    navigation<Screen.Settings.Behavior>(
+        metadata = ListDetailSceneStrategy.detailPane()
+    ) { BehaviorSettingsScreen() }
 }

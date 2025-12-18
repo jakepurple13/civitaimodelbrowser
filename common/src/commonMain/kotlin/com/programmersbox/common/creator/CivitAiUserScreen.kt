@@ -78,8 +78,8 @@ fun CivitAiUserScreen(
     val shouldShowMedia by remember { derivedStateOf { connectionRepository.shouldShowMedia } }
     val hazeState = remember { HazeState() }
     val dataStore = koinInject<DataStore>()
-    val showNsfw by remember { dataStore.showNsfw.flow }.collectAsStateWithLifecycle(false)
-    val blurStrength by remember { dataStore.hideNsfwStrength.flow }.collectAsStateWithLifecycle(6f)
+    val showNsfw by dataStore.showNsfw()
+    val blurStrength by dataStore.hideNsfwStrength()
     val database = koinInject<FavoritesDao>()
     val favorites by database.getFavoriteModels().collectAsStateWithLifecycle(emptyList())
     val blacklisted by database.getBlacklisted().collectAsStateWithLifecycle(emptyList())

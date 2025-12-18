@@ -134,11 +134,27 @@ sealed class Screen {
 
     @Serializable
     data object Settings : NavKey {
-        @Serializable
-        data object Screen : NavKey
 
         @Serializable
         data object Blacklisted : NavKey
+
+        @Serializable
+        data object Nsfw : NavKey
+
+        @Serializable
+        data object Behavior : NavKey
+
+        @Serializable
+        data object Backup : NavKey
+
+        @Serializable
+        data object Restore : NavKey
+
+        @Serializable
+        data object Stats : NavKey
+
+        @Serializable
+        data object About : NavKey
     }
 
     @Serializable
@@ -161,16 +177,4 @@ sealed class Screen {
 
     @Serializable
     data class CustomListDetail(val uuid: String) : NavKey
-
-    @Serializable
-    data object Backup : NavKey
-
-    @Serializable
-    data object Restore : NavKey
-
-    @Serializable
-    data object Stats : NavKey
-
-    @Serializable
-    data object About : NavKey
 }

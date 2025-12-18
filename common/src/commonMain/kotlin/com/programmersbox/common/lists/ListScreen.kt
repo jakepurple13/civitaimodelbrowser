@@ -43,7 +43,6 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import chaintech.videoplayer.ui.preview.VideoPreviewComposable
 import com.programmersbox.common.BackButton
 import com.programmersbox.common.ComposableUtils
@@ -84,16 +83,12 @@ fun ListScreen(
     val dataTimeFormatter = remember { DateTimeFormatItem(true) }
     val dataStore = koinInject<DataStore>()
     val showBlur by dataStore.rememberShowBlur()
-    val showNsfw by remember { dataStore.showNsfw.flow }
-        .collectAsStateWithLifecycle(false)
-    val blurStrength by remember { dataStore.hideNsfwStrength.flow }
-        .collectAsStateWithLifecycle(6f)
+    val showNsfw by dataStore.showNsfw()
+    val blurStrength by dataStore.hideNsfwStrength()
 
     val scope = rememberCoroutineScope()
     val hazeState = remember { HazeState() }
     val hazeStyle = LocalHazeStyle.current
-
-    //val biometricOpen = rememberBiometricOpening()
 
     Scaffold(
         topBar = {

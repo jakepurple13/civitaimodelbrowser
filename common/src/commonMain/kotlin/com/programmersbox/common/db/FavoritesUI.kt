@@ -71,7 +71,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.dokar.sonner.ToastType
 import com.dokar.sonner.ToasterState
 import com.programmersbox.common.BackButton
@@ -117,10 +116,8 @@ fun FavoritesUI(
     val hazeState = remember { HazeState() }
     val dataStore = koinInject<DataStore>()
     val scope = rememberCoroutineScope()
-    val showNsfw by remember { dataStore.showNsfw.flow }
-        .collectAsStateWithLifecycle(false)
-    val blurStrength by remember { dataStore.hideNsfwStrength.flow }
-        .collectAsStateWithLifecycle(6f)
+    val showNsfw by dataStore.showNsfw()
+    val blurStrength by dataStore.hideNsfwStrength()
     var reverseFavorites by dataStore.rememberReverseFavorites()
     val showBlur by dataStore.rememberShowBlur()
     val lazyGridState = rememberLazyGridState()

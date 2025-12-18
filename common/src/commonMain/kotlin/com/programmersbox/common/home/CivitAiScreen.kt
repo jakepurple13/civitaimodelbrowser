@@ -138,8 +138,8 @@ fun CivitAiScreen(
     val database by db.getFavoriteModels().collectAsStateWithLifecycle(emptyList())
     val blacklisted by db.getBlacklisted().collectAsStateWithLifecycle(emptyList())
     val showBlur by dataStore.rememberShowBlur()
-    val showNsfw by remember { dataStore.showNsfw.flow }.collectAsStateWithLifecycle(false)
-    val blurStrength by remember { dataStore.hideNsfwStrength.flow }.collectAsStateWithLifecycle(6f)
+    val showNsfw by dataStore.showNsfw()
+    val blurStrength by dataStore.hideNsfwStrength()
     val lazyPagingItems = viewModel.pager.collectAsLazyPagingItems()
 
     val scope = rememberCoroutineScope()

@@ -133,10 +133,8 @@ fun CivitAiDetailScreen(
     val dao = koinInject<FavoritesDao>()
     val dataStore = koinInject<DataStore>()
     val showBlur by dataStore.rememberShowBlur()
-    val showNsfw by remember { dataStore.showNsfw.flow }
-        .collectAsStateWithLifecycle(false)
-    val nsfwBlurStrength by remember { dataStore.hideNsfwStrength.flow }
-        .collectAsStateWithLifecycle(6f)
+    val showNsfw by dataStore.showNsfw()
+    val nsfwBlurStrength by dataStore.hideNsfwStrength()
     val useToolbar by dataStore.rememberUseToolbar()
 
     val favoriteList by dao.getFavoriteModels().collectAsStateWithLifecycle(emptyList())

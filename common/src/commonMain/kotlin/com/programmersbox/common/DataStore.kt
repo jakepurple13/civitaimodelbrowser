@@ -39,14 +39,15 @@ class DataStore private constructor(
             }
     }
 
-    val showNsfw = DataStoreTypeNonNull(
+    @Composable
+    fun showNsfw() = rememberPreference(
         key = booleanPreferencesKey("show_nsfw"),
-        dataStore = dataStore,
         defaultValue = false
     )
-    val hideNsfwStrength = DataStoreTypeNonNull(
+
+    @Composable
+    fun hideNsfwStrength() = rememberPreference(
         key = floatPreferencesKey("hide_nsfw_strength"),
-        dataStore = dataStore,
         defaultValue = 6f
     )
 

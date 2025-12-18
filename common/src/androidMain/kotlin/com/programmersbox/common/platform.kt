@@ -1,8 +1,6 @@
 package com.programmersbox.common
 
 import android.content.Context
-import android.os.Parcel
-import android.os.Parcelable
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.WindowInsetsSides
 import androidx.compose.foundation.layout.only
@@ -35,30 +33,6 @@ public fun UIShow(
     App(
         onShareClick = onShareClick,
     )
-}
-
-internal actual fun getPagingPlaceholderKey(index: Int): Any = PagingPlaceholderKey(index)
-
-private data class PagingPlaceholderKey(private val index: Int) : Parcelable {
-    override fun writeToParcel(parcel: Parcel, flags: Int) {
-        parcel.writeInt(index)
-    }
-
-    override fun describeContents(): Int {
-        return 0
-    }
-
-    companion object {
-        @Suppress("unused")
-        @JvmField
-        val CREATOR: Parcelable.Creator<PagingPlaceholderKey> =
-            object : Parcelable.Creator<PagingPlaceholderKey> {
-                override fun createFromParcel(parcel: Parcel) =
-                    PagingPlaceholderKey(parcel.readInt())
-
-                override fun newArray(size: Int) = arrayOfNulls<PagingPlaceholderKey?>(size)
-            }
-    }
 }
 
 @OptIn(ExperimentalMaterial3Api::class)

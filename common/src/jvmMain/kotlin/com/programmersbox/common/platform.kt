@@ -35,8 +35,6 @@ public fun UIShow(
     )
 }
 
-internal actual fun getPagingPlaceholderKey(index: Int): Any = index
-
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 internal actual fun SheetDetails(
@@ -57,7 +55,10 @@ internal actual val showRefreshButton: Boolean = true
 
 
 @Composable
-internal actual fun CustomScrollBar(lazyGridState: LazyGridState, modifier: Modifier) {
+internal actual fun CustomScrollBar(
+    lazyGridState: LazyGridState,
+    modifier: Modifier
+) {
     VerticalScrollbar(
         adapter = rememberScrollbarAdapter(lazyGridState),
         modifier = modifier

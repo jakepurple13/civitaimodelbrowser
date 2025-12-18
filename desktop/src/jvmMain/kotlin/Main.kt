@@ -10,8 +10,8 @@ import com.programmersbox.common.Network
 import com.programmersbox.common.Screen
 import com.programmersbox.common.UIShow
 import com.programmersbox.common.backup.Zipper
-import com.programmersbox.common.cmpModules
 import com.programmersbox.common.createPlatformModule
+import com.programmersbox.common.di.cmpModules
 import com.programmersbox.common.getDatabaseBuilder
 import com.programmersbox.common.qrcode.QrCodeRepository
 import com.programmersbox.desktop.BuildKonfig

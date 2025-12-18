@@ -21,22 +21,12 @@ import androidx.navigation3.runtime.NavKey
 import androidx.navigation3.runtime.rememberSaveableStateHolderNavEntryDecorator
 import androidx.navigation3.scene.DialogSceneStrategy
 import androidx.navigation3.ui.NavDisplay
-import com.dokar.sonner.ToasterState
-import com.programmersbox.common.db.AppDatabase
-import com.programmersbox.common.db.getRoomDatabase
-import com.programmersbox.common.di.navigationModule
-import com.programmersbox.common.di.repositoryModule
-import com.programmersbox.common.di.viewModelModule
 import dev.chrisbanes.haze.LocalHazeStyle
 import dev.chrisbanes.haze.materials.HazeMaterials
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.collect
 import kotlinx.serialization.Serializable
 import org.koin.compose.koinInject
 import org.koin.compose.navigation3.koinEntryProvider
-import org.koin.core.module.dsl.singleOf
-import org.koin.dsl.module
 
 @OptIn(ExperimentalMaterial3AdaptiveApi::class)
 @Composable
@@ -97,22 +87,6 @@ private fun SetupNetworkListener() {
         networkConnectionRepository.start()
         onDispose { networkConnectionRepository.stop() }
     }
-}
-
-@OptIn(ExperimentalMaterial3AdaptiveApi::class)
-fun cmpModules() = module {
-    singleOf(::Network)
-    single { DataStore.getStore(get()) }
-    single { getRoomDatabase(get()) }
-    single { get<AppDatabase>().getDao() }
-    single { get<AppDatabase>().getListDao() }
-    single { ToasterState(CoroutineScope(Dispatchers.Main)) }
-
-    includes(
-        viewModelModule(),
-        repositoryModule(),
-        navigationModule()
-    )
 }
 
 class NavigationHandler {

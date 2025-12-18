@@ -3,8 +3,8 @@ package com.programmersbox.civitaimodelbrowser
 import android.app.Application
 import com.programmersbox.common.ApplicationInfo
 import com.programmersbox.common.backup.Zipper
-import com.programmersbox.common.cmpModules
 import com.programmersbox.common.createPlatformModule
+import com.programmersbox.common.di.cmpModules
 import com.programmersbox.common.getDatabaseBuilder
 import com.programmersbox.common.qrcode.QrCodeRepository
 import org.koin.android.ext.koin.androidContext

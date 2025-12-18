@@ -43,7 +43,10 @@ actual class DownloadHandler(
                     .client
                     .get(url) {
                         onDownload { bytesSentTotal, contentLength ->
-                            println("Downloaded $bytesSentTotal of $contentLength")
+                            val percentage =
+                                (bytesSentTotal.toDouble() / (contentLength ?: 1L) * 100)
+                                    .toInt()
+                            println("Downloaded $percentage% $bytesSentTotal of $contentLength")
                         }
                     }
                     .body()

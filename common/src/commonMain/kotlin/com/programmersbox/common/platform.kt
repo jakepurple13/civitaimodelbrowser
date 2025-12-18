@@ -9,8 +9,6 @@ import org.koin.core.module.Module
 
 public expect fun getPlatformName(): String
 
-internal expect fun getPagingPlaceholderKey(index: Int): Any
-
 internal expect val showRefreshButton: Boolean
 
 @OptIn(ExperimentalMaterial3Api::class)

@@ -1,8 +1,5 @@
 package com.programmersbox.common.images
 
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.paging.Pager
@@ -19,9 +16,11 @@ import com.programmersbox.common.db.FavoritesDao
 import com.programmersbox.common.db.toDb
 import com.programmersbox.common.paging.CivitImagePagingSource
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.IO
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.distinctUntilChanged
-import kotlinx.coroutines.flow.emptyFlow
+import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.map
@@ -34,8 +33,8 @@ class CivitAiImagesViewModel(
     network: Network,
     private val database: FavoritesDao,
 ) : ViewModel() {
-    var pager by
-    mutableStateOf<Flow<PagingData<Pair<Long, List<CustomModelImage>>>>>(emptyFlow())
+    val pager: Flow<PagingData<Pair<Long, List<CustomModelImage>>>>
+        field = MutableStateFlow(PagingData.empty())
 
     val favoriteList = database
         .getFavoriteModels()
@@ -44,8 +43,8 @@ class CivitAiImagesViewModel(
     init {
         dataStore.includeNsfw.flow
             .distinctUntilChanged()
-            .onEach {
-                pager = Pager(
+            .flatMapLatest {
+                Pager(
                     PagingConfig(
                         pageSize = PAGE_LIMIT,
                         enablePlaceholders = true
@@ -55,6 +54,7 @@ class CivitAiImagesViewModel(
                     .flowOn(Dispatchers.IO)
                     .cachedIn(viewModelScope)
             }
+            .onEach { pager.value = it }
             .launchIn(viewModelScope)
     }
 

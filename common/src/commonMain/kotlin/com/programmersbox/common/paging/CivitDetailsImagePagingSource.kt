@@ -7,6 +7,7 @@ import com.programmersbox.common.CustomModelImage
 import com.programmersbox.common.Network
 import com.programmersbox.common.PAGE_LIMIT
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.IO
 import kotlinx.coroutines.withContext
 
 class CivitDetailsImagePagingSource(

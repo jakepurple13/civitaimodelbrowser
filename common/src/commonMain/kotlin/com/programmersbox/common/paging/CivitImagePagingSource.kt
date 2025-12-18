@@ -6,6 +6,7 @@ import com.programmersbox.common.CivitAiCustomImages
 import com.programmersbox.common.CustomModelImage
 import com.programmersbox.common.Network
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.IO
 import kotlinx.coroutines.withContext
 
 class CivitImagePagingSource(

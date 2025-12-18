@@ -60,6 +60,7 @@ enum class FavoriteType {
     Creator
 }
 
+@Stable
 @Serializable
 sealed interface FavoriteModel {
     val id: Long

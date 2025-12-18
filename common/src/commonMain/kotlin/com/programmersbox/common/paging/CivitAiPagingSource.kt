@@ -6,6 +6,7 @@ import com.programmersbox.common.CivitAi
 import com.programmersbox.common.Models
 import com.programmersbox.common.Network
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.IO
 import kotlinx.coroutines.withContext
 
 abstract class CivitAiPagingSource(

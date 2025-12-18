@@ -1,12 +1,7 @@
 package com.programmersbox.common.details
 
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import androidx.paging.LoadState
-import androidx.paging.LoadStates
 import androidx.paging.Pager
 import androidx.paging.PagingConfig
 import androidx.paging.PagingData
@@ -21,9 +16,11 @@ import com.programmersbox.common.db.FavoritesDao
 import com.programmersbox.common.db.toDb
 import com.programmersbox.common.paging.CivitDetailsImagePagingSource
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 import kotlin.random.Random
 
@@ -34,18 +31,8 @@ class CivitAiModelImagesViewModel(
     network: Network,
     private val database: FavoritesDao,
 ) : ViewModel() {
-
-    var pager by mutableStateOf<Flow<PagingData<CustomModelImage>>>(
-        flowOf(
-            PagingData.empty(
-                LoadStates(
-                    LoadState.NotLoading(true),
-                    LoadState.NotLoading(true),
-                    LoadState.NotLoading(true),
-                )
-            )
-        )
-    )
+    val pager: Flow<PagingData<CustomModelImage>>
+        field = MutableStateFlow(PagingData.empty())
 
     val favoriteList = database
         .getFavoriteModels()
@@ -53,17 +40,19 @@ class CivitAiModelImagesViewModel(
 
 
     init {
-        viewModelScope.launch {
-            val includeNsfw = dataStore.includeNsfw.flow.first()
-            pager = Pager(
-                PagingConfig(
-                    pageSize = PAGE_LIMIT,
-                    enablePlaceholders = true
-                ),
-            ) { CivitDetailsImagePagingSource(network, includeNsfw, modelId) }
-                .flow
-                .cachedIn(viewModelScope)
-        }
+        dataStore.includeNsfw.flow
+            .flatMapLatest {
+                Pager(
+                    PagingConfig(
+                        pageSize = PAGE_LIMIT,
+                        enablePlaceholders = true
+                    ),
+                ) { CivitDetailsImagePagingSource(network, it, modelId) }
+                    .flow
+                    .cachedIn(viewModelScope)
+            }
+            .onEach { pager.value = it }
+            .launchIn(viewModelScope)
     }
 
     fun addImageToFavorites(modelImage: CustomModelImage) {

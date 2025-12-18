@@ -132,7 +132,7 @@ fun navigationModule() = module {
             viewModel = koinViewModel(),
             onBack = { backStack.removeLastOrNull() },
             onNavigate = { navKey ->
-                backStack.removeIf { it == Screen.QrCode }
+                backStack.removeAll { it == Screen.QrCode }
                 backStack.add(navKey)
             }
         )

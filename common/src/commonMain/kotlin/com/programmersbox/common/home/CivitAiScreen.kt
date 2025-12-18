@@ -423,9 +423,9 @@ fun CardContent(
     isNsfw: Boolean,
     showNsfw: Boolean,
     blurStrength: Dp,
+    shouldShowMedia: Boolean,
     isBlacklisted: Boolean = false,
     blurHash: String? = null,
-    shouldShowMedia: Boolean,
 ) {
     Box(
         modifier = Modifier.fillMaxSize(),

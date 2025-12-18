@@ -123,9 +123,9 @@ import org.koin.compose.viewmodel.koinViewModel
 @Composable
 fun CivitAiDetailScreen(
     id: String?,
-    viewModel: CivitAiDetailViewModel = koinViewModel(),
     onNavigateToUser: (String) -> Unit,
     onNavigateToDetailImages: (Long, String) -> Unit,
+    viewModel: CivitAiDetailViewModel = koinViewModel(),
 ) {
     val connectionRepository = koinInject<NetworkConnectionRepository>()
     val shouldShowMedia by remember { derivedStateOf { connectionRepository.shouldShowMedia } }
@@ -236,8 +236,10 @@ fun CivitAiDetailScreen(
                                 }
                             }
                         },
-                        colors = if (showBlur) TopAppBarDefaults.topAppBarColors(containerColor = Color.Transparent)
-                        else TopAppBarDefaults.topAppBarColors(),
+                        colors = if (showBlur)
+                            TopAppBarDefaults.topAppBarColors(containerColor = Color.Transparent)
+                        else
+                            TopAppBarDefaults.topAppBarColors(),
                         modifier = Modifier.ifTrue(showBlur) {
                             hazeEffect(hazeState, hazeStyle) {
                                 progressive = HazeProgressive.verticalGradient(
@@ -252,8 +254,11 @@ fun CivitAiDetailScreen(
                 bottomBar = {
                     if (!useToolbar) {
                         BottomBarContent(
-                            viewModel = viewModel,
                             id = id,
+                            isFavorite = viewModel.isFavorite,
+                            addToFavorites = viewModel::addToFavorites,
+                            removeFromFavorites = viewModel::removeFromFavorites,
+                            modelUrl = viewModel.modelUrl,
                             showBlur = showBlur,
                             hazeState = hazeState,
                             hazeStyle = hazeStyle,
@@ -266,8 +271,11 @@ fun CivitAiDetailScreen(
                 floatingActionButton = {
                     if (useToolbar) {
                         HorizontalToolbarContent(
-                            viewModel = viewModel,
                             id = id,
+                            isFavorite = viewModel.isFavorite,
+                            addToFavorites = viewModel::addToFavorites,
+                            removeFromFavorites = viewModel::removeFromFavorites,
+                            modelUrl = viewModel.modelUrl,
                             onNavigateToDetailImages = onNavigateToDetailImages,
                             onShowQrCode = { showQrCode = true },
                             model = model,
@@ -338,20 +346,13 @@ fun CivitAiDetailScreen(
                         )
                     }
 
-                    model.models.modelVersions.forEachIndexed { index, version ->
-
-                        var showImages by mutableStateOf(index == 0)
-                        var showMoreInfo by mutableStateOf(index == 0)
-
+                    model.models.modelVersions.forEach { version ->
                         item(
                             span = { GridItemSpan(maxLineSpan) },
                             contentType = "version"
                         ) {
                             Card(
-                                onClick = {
-                                    showImages = !showImages
-                                    showMoreInfo = !showMoreInfo
-                                }
+                                onClick = { viewModel.toggleShowMoreInfo(version.id) }
                             ) {
                                 TopAppBar(
                                     title = { Text("Version: ${version.name}") },
@@ -369,12 +370,21 @@ fun CivitAiDetailScreen(
                                         Icon(
                                             Icons.Filled.ArrowDropDown,
                                             null,
-                                            Modifier.rotate(if (showMoreInfo) 180f else 0f)
+                                            Modifier.rotate(
+                                                animateFloatAsState(
+                                                    if (viewModel.showMoreInfo[version.id] == true)
+                                                        180f
+                                                    else
+                                                        0f
+                                                ).value
+                                            )
                                         )
                                     },
                                     windowInsets = WindowInsets(0.dp)
                                 )
-                                AnimatedVisibility(showMoreInfo) {
+                                AnimatedVisibility(
+                                    viewModel.showMoreInfo[version.id] == true
+                                ) {
                                     version
                                         .parsedDescription()
                                         ?.let {
@@ -389,10 +399,11 @@ fun CivitAiDetailScreen(
 
                         items(
                             version.images,
-                            contentType = { "image" }
+                            contentType = { "image" },
+                            key = { it.url + it.id }
                         ) { images ->
                             AnimatedVisibility(
-                                showImages,
+                                viewModel.showMoreInfo[version.id] == true,
                                 enter = fadeIn() + expandVertically(),
                                 exit = fadeOut() + shrinkVertically()
                             ) {
@@ -568,8 +579,11 @@ private fun ImageCard(
 @OptIn(ExperimentalMaterial3ExpressiveApi::class, ExperimentalMaterial3Api::class)
 @Composable
 private fun HorizontalToolbarContent(
-    viewModel: CivitAiDetailViewModel,
     id: String?,
+    modelUrl: String,
+    isFavorite: Boolean,
+    addToFavorites: () -> Unit,
+    removeFromFavorites: () -> Unit,
     onNavigateToDetailImages: (Long, String) -> Unit,
     onShowQrCode: () -> Unit,
     model: DetailViewState.Content,
@@ -650,7 +664,7 @@ private fun HorizontalToolbarContent(
                 label = "Share"
             )
             clickableItem(
-                onClick = { uriHandler.openUri(viewModel.modelUrl) },
+                onClick = { uriHandler.openUri(modelUrl) },
                 icon = { Icon(Icons.Default.OpenInBrowser, null) },
                 label = "Browser"
             )
@@ -664,22 +678,22 @@ private fun HorizontalToolbarContent(
             )
             clickableItem(
                 onClick = {
-                    if (viewModel.isFavorite) {
-                        viewModel.removeFromFavorites()
+                    if (isFavorite) {
+                        removeFromFavorites()
                     } else {
-                        viewModel.addToFavorites()
+                        addToFavorites()
                     }
                 },
                 icon = {
                     Icon(
-                        if (viewModel.isFavorite)
+                        if (isFavorite)
                             Icons.Default.Favorite
                         else
                             Icons.Default.FavoriteBorder,
                         null
                     )
                 },
-                label = if (viewModel.isFavorite) "Unfavorite" else "Favorite"
+                label = if (isFavorite) "Unfavorite" else "Favorite"
             )
         }
     }
@@ -687,8 +701,11 @@ private fun HorizontalToolbarContent(
 
 @Composable
 private fun BottomBarContent(
-    viewModel: CivitAiDetailViewModel,
     id: String?,
+    isFavorite: Boolean,
+    removeFromFavorites: () -> Unit,
+    addToFavorites: () -> Unit,
+    modelUrl: String,
     showBlur: Boolean,
     hazeState: HazeState,
     hazeStyle: HazeStyle,
@@ -700,15 +717,15 @@ private fun BottomBarContent(
         floatingActionButton = {
             FloatingActionButton(
                 onClick = {
-                    if (viewModel.isFavorite) {
-                        viewModel.removeFromFavorites()
+                    if (isFavorite) {
+                        removeFromFavorites()
                     } else {
-                        viewModel.addToFavorites()
+                        addToFavorites()
                     }
                 }
             ) {
                 Icon(
-                    if (viewModel.isFavorite) Icons.Default.Favorite else Icons.Default.FavoriteBorder,
+                    if (isFavorite) Icons.Default.Favorite else Icons.Default.FavoriteBorder,
                     null
                 )
             }
@@ -724,7 +741,7 @@ private fun BottomBarContent(
             val uriHandler = LocalUriHandler.current
             NavigationBarItem(
                 selected = false,
-                onClick = { uriHandler.openUri(viewModel.modelUrl) },
+                onClick = { uriHandler.openUri(modelUrl) },
                 icon = { Icon(Icons.Default.OpenInBrowser, null) },
                 label = { Text("Browser") },
             )

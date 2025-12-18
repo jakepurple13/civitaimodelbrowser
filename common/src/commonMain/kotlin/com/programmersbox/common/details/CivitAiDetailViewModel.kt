@@ -1,6 +1,7 @@
 package com.programmersbox.common.details
 
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
@@ -26,6 +27,8 @@ class CivitAiDetailViewModel(
     var models by mutableStateOf<DetailViewState>(DetailViewState.Loading)
     var isFavorite by mutableStateOf(false)
 
+    val showMoreInfo = mutableStateMapOf<Long, Boolean>()
+
     init {
         loadData()
         database.getFavoriteModels()
@@ -38,11 +41,21 @@ class CivitAiDetailViewModel(
             models = DetailViewState.Loading
             models = id?.let { network.fetchModel(it) }
                 ?.onFailure { it.printStackTrace() }
+                ?.onSuccess {
+                    showMoreInfo.clear()
+                    it.modelVersions.forEachIndexed { index, mv ->
+                        showMoreInfo[mv.id] = index == 0
+                    }
+                }
                 ?.fold(
                     onSuccess = { DetailViewState.Content(it) },
                     onFailure = { DetailViewState.Error(it) }
                 ) ?: DetailViewState.Error(Throwable("No ID"))
         }
+    }
+
+    fun toggleShowMoreInfo(id: Long) {
+        showMoreInfo[id] = showMoreInfo[id]?.not() ?: false
     }
 
     fun addToFavorites() {

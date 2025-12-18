@@ -60,6 +60,9 @@ import androidx.compose.material3.SearchBarValue
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.material3.pulltorefresh.PullToRefreshBox
+import androidx.compose.material3.pulltorefresh.PullToRefreshDefaults
+import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.material3.rememberSearchBarState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.derivedStateOf
@@ -95,9 +98,6 @@ import com.programmersbox.common.NetworkConnectionRepository
 import com.programmersbox.common.adaptiveGridCell
 import com.programmersbox.common.components.LoadingImage
 import com.programmersbox.common.components.ModelOptionsSheet
-import com.programmersbox.common.components.PullRefreshIndicator
-import com.programmersbox.common.components.pullRefresh
-import com.programmersbox.common.components.rememberPullRefreshState
 import com.programmersbox.common.db.BlacklistedItemRoom
 import com.programmersbox.common.db.FavoriteModel
 import com.programmersbox.common.db.FavoritesDao
@@ -116,7 +116,7 @@ import kotlinx.coroutines.launch
 import org.koin.compose.koinInject
 import org.koin.compose.viewmodel.koinViewModel
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun CivitAiScreen(
     onNavigateToDetail: (String) -> Unit,
@@ -144,10 +144,7 @@ fun CivitAiScreen(
 
     val scope = rememberCoroutineScope()
     val lazyGridState = rememberLazyGridState()
-    val pullToRefreshState = rememberPullRefreshState(
-        refreshing = lazyPagingItems.loadState.refresh == LoadState.Loading,
-        onRefresh = { lazyPagingItems.refresh() }
-    )
+    val pullToRefreshState = rememberPullToRefreshState()
 
     val hazeStyle = LocalHazeStyle.current
 
@@ -195,8 +192,22 @@ fun CivitAiScreen(
             }
         },
     ) { padding ->
-        Box(
-            modifier = Modifier.pullRefresh(pullToRefreshState)
+        PullToRefreshBox(
+            isRefreshing = lazyPagingItems.loadState.refresh == LoadState.Loading
+                    || lazyPagingItems.loadState.append == LoadState.Loading,
+            state = pullToRefreshState,
+            onRefresh = lazyPagingItems::refresh,
+            indicator = {
+                PullToRefreshDefaults.LoadingIndicator(
+                    isRefreshing = lazyPagingItems.loadState.refresh == LoadState.Loading
+                            || lazyPagingItems.loadState.append == LoadState.Loading,
+                    state = pullToRefreshState,
+                    modifier = Modifier
+                        .align(Alignment.TopCenter)
+                        .padding(padding)
+                )
+            },
+            modifier = Modifier.fillMaxSize()
         ) {
             LazyVerticalGrid(
                 state = lazyGridState,
@@ -220,15 +231,6 @@ fun CivitAiScreen(
                     onNavigateToDetailImages = onNavigateToDetailImages,
                 )
             }
-
-            PullRefreshIndicator(
-                refreshing = lazyPagingItems.loadState.refresh == LoadState.Loading
-                        || lazyPagingItems.loadState.append == LoadState.Loading,
-                state = pullToRefreshState,
-                modifier = Modifier
-                    .padding(padding)
-                    .align(Alignment.TopCenter)
-            )
         }
     }
 }

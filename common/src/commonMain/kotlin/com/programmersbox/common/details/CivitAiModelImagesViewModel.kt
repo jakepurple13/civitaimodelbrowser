@@ -15,15 +15,17 @@ import com.programmersbox.common.db.FavoriteType
 import com.programmersbox.common.db.FavoritesDao
 import com.programmersbox.common.db.toDb
 import com.programmersbox.common.paging.CivitDetailsImagePagingSource
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.IO
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 import kotlin.random.Random
-
 
 class CivitAiModelImagesViewModel(
     private val modelId: String?,
@@ -49,6 +51,7 @@ class CivitAiModelImagesViewModel(
                     ),
                 ) { CivitDetailsImagePagingSource(network, it, modelId) }
                     .flow
+                    .flowOn(Dispatchers.IO)
                     .cachedIn(viewModelScope)
             }
             .onEach { pager.value = it }

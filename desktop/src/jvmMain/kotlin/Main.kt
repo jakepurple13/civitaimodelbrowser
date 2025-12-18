@@ -97,6 +97,7 @@ fun main() {
                             onClick = { navHandler.backStack.add(Screen.Settings) },
                             enabled = navHandler.backStack.lastOrNull() != Screen.Settings,
                         )
+                        Separator()
                         Item(
                             "Exit",
                             onClick = { exitApplication() }

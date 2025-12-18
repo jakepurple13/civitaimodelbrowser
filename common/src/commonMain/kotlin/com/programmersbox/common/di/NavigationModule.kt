@@ -2,6 +2,7 @@ package com.programmersbox.common.di
 
 import androidx.compose.material3.adaptive.ExperimentalMaterial3AdaptiveApi
 import androidx.compose.material3.adaptive.navigation3.ListDetailSceneStrategy
+import androidx.compose.material3.adaptive.navigation3.SupportingPaneSceneStrategy
 import androidx.navigation3.scene.DialogSceneStrategy
 import com.programmersbox.common.NavigationHandler
 import com.programmersbox.common.Screen
@@ -61,7 +62,7 @@ fun navigationModule() = module {
     }
 
     navigation<Screen.Detail>(
-        metadata = ListDetailSceneStrategy.listPane()
+        metadata = SupportingPaneSceneStrategy.mainPane()
     ) {
         val backStack = koinInject<NavigationHandler>().backStack
         CivitAiDetailScreen(
@@ -80,7 +81,7 @@ fun navigationModule() = module {
     }
 
     navigation<Screen.DetailsImage>(
-        metadata = ListDetailSceneStrategy.detailPane()
+        metadata = SupportingPaneSceneStrategy.supportingPane()
     ) {
         CivitAiModelImagesScreen(
             modelName = it.modelName,
@@ -89,7 +90,7 @@ fun navigationModule() = module {
     }
 
     navigation<Screen.User>(
-        metadata = ListDetailSceneStrategy.extraPane()
+        metadata = SupportingPaneSceneStrategy.extraPane()
     ) {
         val backStack = koinInject<NavigationHandler>().backStack
         CivitAiUserScreen(

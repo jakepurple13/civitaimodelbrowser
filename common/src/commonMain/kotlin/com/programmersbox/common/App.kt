@@ -7,7 +7,9 @@ import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.Surface
 import androidx.compose.material3.adaptive.ExperimentalMaterial3AdaptiveApi
+import androidx.compose.material3.adaptive.navigation.BackNavigationBehavior
 import androidx.compose.material3.adaptive.navigation3.rememberListDetailSceneStrategy
+import androidx.compose.material3.adaptive.navigation3.rememberSupportingPaneSceneStrategy
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.DisposableEffect
@@ -43,6 +45,15 @@ internal fun App(
         }
     ) {
         SharedTransitionLayout {
+
+            val listDetailSceneStrategy = rememberListDetailSceneStrategy<Any>(
+                backNavigationBehavior = BackNavigationBehavior.PopLatest
+            )
+
+            val supportingPaneSceneStrategy = rememberSupportingPaneSceneStrategy<Any>(
+                backNavigationBehavior = BackNavigationBehavior.PopLatest
+            )
+
             Surface {
                 NavDisplay(
                     backStack = koinInject<NavigationHandler>().backStack,
@@ -50,7 +61,8 @@ internal fun App(
                         rememberSaveableStateHolderNavEntryDecorator(),
                         rememberViewModelStoreNavEntryDecorator()
                     ),
-                    sceneStrategy = rememberListDetailSceneStrategy<Any>()
+                    sceneStrategy = listDetailSceneStrategy
+                            then supportingPaneSceneStrategy
                             then DialogSceneStrategy(),
                     entryProvider = koinEntryProvider(),
                     transitionSpec = {

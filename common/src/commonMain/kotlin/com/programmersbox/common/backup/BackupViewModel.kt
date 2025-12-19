@@ -4,7 +4,6 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.dokar.sonner.ToastType
 import com.dokar.sonner.ToasterState
-import com.programmersbox.common.db.CustomList
 import com.programmersbox.common.db.FavoritesDao
 import com.programmersbox.common.db.ListDao
 import com.programmersbox.common.di.NavigationHandler
@@ -49,13 +48,17 @@ class BackupViewModel(
             .onEach { customLists ->
                 backupItems.value = backupItems
                     .value
-                    .copy(listsToInclude = customLists.toPersistentList())
+                    .copy(
+                        listsToInclude = customLists
+                            .map { it.item.uuid }
+                            .toPersistentList()
+                    )
             }
             .launchIn(viewModelScope)
     }
 
-    fun addList(item: CustomList) {
-        if (backupItems.value.listsToInclude.none { it.item.uuid == item.item.uuid }) {
+    fun addList(item: String) {
+        if (item !in backupItems.value.listsToInclude) {
             backupItems.value = backupItems
                 .value
                 .copy(
@@ -70,7 +73,7 @@ class BackupViewModel(
         }
     }
 
-    fun removeList(item: CustomList) {
+    fun removeList(item: String) {
         backupItems.value = backupItems
             .value
             .copy(listsToInclude = (backupItems.value.listsToInclude - item).toPersistentList())
@@ -106,7 +109,7 @@ class BackupViewModel(
                     includeFavorites = backupItems.value.includeFavorites,
                     includeBlacklisted = backupItems.value.includeBlacklisted,
                     includeSettings = backupItems.value.includeSettings,
-                    listItemsByUuid = backupItems.value.listsToInclude.map { it.item.uuid }
+                    listItemsByUuid = backupItems.value.listsToInclude
                 )
             }
                 .onSuccess {
@@ -135,7 +138,7 @@ data class BackupItemsState(
     val includeFavorites: Boolean,
     val includeBlacklisted: Boolean,
     val includeSettings: Boolean,
-    val listsToInclude: ImmutableList<CustomList>,
+    val listsToInclude: ImmutableList<String>,
 )
 
 data class BackupUiState(

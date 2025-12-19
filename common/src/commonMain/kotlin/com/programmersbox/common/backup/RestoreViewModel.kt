@@ -18,9 +18,6 @@ class RestoreViewModel(
     private val toasterState: ToasterState,
     private val navigationHandler: NavigationHandler,
 ) : ViewModel() {
-    var isReading by mutableStateOf(false)
-    var isRestoring by mutableStateOf(false)
-
     var backupItems by mutableStateOf<BackupItems?>(null)
 
     var includeFavorites by mutableStateOf(true)
@@ -28,20 +25,33 @@ class RestoreViewModel(
     var includeSettings by mutableStateOf(true)
     val listsToInclude = mutableStateListOf<String>()
 
+    var uiState by mutableStateOf(
+        RestoreUiState(
+            isReading = false,
+            isRestoring = false,
+            error = null
+        )
+    )
+
+    //TODO: Need to include error state
+
     fun read(platformFile: PlatformFile) {
         viewModelScope.launch {
-            isReading = true
+            uiState = uiState.copy(isReading = true)
             runCatching { backupItems = backupRepository.readItems(platformFile) }
-                .onFailure { it.printStackTrace() }
+                .onFailure {
+                    uiState = uiState.copy(error = it)
+                    it.printStackTrace()
+                }
             listsToInclude.clear()
             backupItems?.lists?.forEach { listsToInclude.add(it.item.uuid) }
-            isReading = false
+            uiState = uiState.copy(isReading = false)
         }
     }
 
     fun restore() {
         viewModelScope.launch {
-            isRestoring = true
+            uiState = uiState.copy(isRestoring = true)
             backupItems
                 ?.copy(lists = backupItems?.lists?.filter { it.item.uuid in listsToInclude })
                 ?.let {
@@ -52,7 +62,7 @@ class RestoreViewModel(
                         includeSettings = includeSettings,
                     )
                 }
-            isRestoring = false
+            uiState = uiState.copy(isRestoring = false)
             toasterState.show(
                 "Backup Complete",
                 type = ToastType.Success
@@ -72,3 +82,9 @@ class RestoreViewModel(
         listsToInclude.remove(uuid)
     }
 }
+
+data class RestoreUiState(
+    val isReading: Boolean,
+    val isRestoring: Boolean,
+    val error: Throwable?,
+)

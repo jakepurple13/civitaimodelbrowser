@@ -16,9 +16,14 @@ import com.programmersbox.common.db.ListDao
 import com.programmersbox.common.db.SearchHistoryDao
 import com.programmersbox.common.db.SearchHistoryItem
 import io.github.vinceglb.filekit.PlatformFile
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.IO
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.firstOrNull
+import kotlinx.coroutines.launch
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
+import kotlin.time.measureTime
 
 class BackupRepository(
     private val favoritesDao: FavoritesDao,
@@ -61,7 +66,11 @@ class BackupRepository(
             if (listItemsByUuid.isNotEmpty()) {
                 put(
                     "lists.json",
-                    json.encodeToString(listDao.getAllListItems(*listItemsByUuid.toTypedArray()))
+                    json.encodeToString(
+                        listDao.getAllListItems(
+                            *listItemsByUuid.toTypedArray()
+                        )
+                    )
                 )
             }
 
@@ -74,7 +83,11 @@ class BackupRepository(
 
             if (includeSettings) {
                 runCatching {
-                    val map = dataStore.dataStore.data.firstOrNull()?.asMap()!!
+                    val map = dataStore
+                        .dataStore
+                        .data
+                        .firstOrNull()
+                        ?.asMap()!!
                     BackupSettings(
                         map
                             .filter { it.value is String }
@@ -110,51 +123,6 @@ class BackupRepository(
         zipper.zip(platformFile, itemsToZip)
     }
 
-    suspend fun restoreItems(platformFile: PlatformFile) {
-        zipper.unzip(
-            platformFile,
-            onInfo = { fileName, jsonString ->
-                when (fileName) {
-                    "favorites.json" -> favoritesDao.importOnlyFavorites(jsonString, json)
-                    "blacklisted.json" -> favoritesDao.importBlacklisted(jsonString, json)
-                    "lists.json" -> {
-                        val lists = json.decodeFromString<List<CustomList>>(jsonString)
-                        lists.forEach { listDao.createList(it.item) }
-                        lists.forEach { it.list.forEach { item -> listDao.addItem(item) } }
-                    }
-
-                    "settings.json" -> {
-                        runCatching {
-                            val backupSettings = json.decodeFromString<BackupSettings>(jsonString)
-                            with(backupSettings) {
-                                dataStore.dataStore.edit { p ->
-                                    stringSettings.forEach {
-                                        p[stringPreferencesKey(it.key)] = it.value
-                                    }
-                                    intSettings.forEach {
-                                        p[intPreferencesKey(it.key)] = it.value
-                                    }
-                                    longSettings.forEach {
-                                        p[longPreferencesKey(it.key)] = it.value
-                                    }
-                                    booleanSettings.forEach {
-                                        p[booleanPreferencesKey(it.key)] = it.value
-                                    }
-                                    doubleSettings.forEach {
-                                        p[doublePreferencesKey(it.key)] = it.value
-                                    }
-                                    byteArraySettings.forEach {
-                                        p[byteArrayPreferencesKey(it.key)] = it.value
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        )
-    }
-
     suspend fun restoreItems(
         backupItems: BackupItems,
         includeSettings: Boolean,
@@ -162,48 +130,84 @@ class BackupRepository(
         includeBlacklisted: Boolean,
         includeSearchHistory: Boolean,
     ) {
-        if (includeFavorites) {
-            backupItems.favorites?.let {
-                favoritesDao.importOnlyFavorites(json.encodeToString(it), json)
-            }
-        }
-        if (includeBlacklisted) {
-            backupItems.blacklisted?.let {
-                favoritesDao.importBlacklisted(json.encodeToString(it), json)
-            }
-        }
-        backupItems.lists?.let { lists ->
-            lists.forEach { listDao.createList(it.item) }
-            lists.forEach { it.list.forEach { item -> listDao.addItem(item) } }
-        }
-        if (includeSearchHistory) {
-            backupItems.searchHistory?.forEach {
-                searchHistoryDao.addSearchHistory(it)
-            }
-        }
-        if (includeSettings) {
-            backupItems.settings?.let { backupSettings ->
-                with(backupSettings) {
-                    dataStore.dataStore.edit { p ->
-                        stringSettings.forEach {
-                            p[stringPreferencesKey(it.key)] = it.value
-                        }
-                        intSettings.forEach {
-                            p[intPreferencesKey(it.key)] = it.value
-                        }
-                        longSettings.forEach {
-                            p[longPreferencesKey(it.key)] = it.value
-                        }
-                        booleanSettings.forEach {
-                            p[booleanPreferencesKey(it.key)] = it.value
-                        }
-                        doubleSettings.forEach {
-                            p[doublePreferencesKey(it.key)] = it.value
-                        }
-                        byteArraySettings.forEach {
-                            p[byteArrayPreferencesKey(it.key)] = it.value
+        coroutineScope {
+            if (includeFavorites) {
+                launch(Dispatchers.IO) {
+                    val duration = measureTime {
+                        backupItems.favorites?.let {
+                            favoritesDao.importOnlyFavorites(
+                                json.encodeToString(it),
+                                json
+                            )
                         }
                     }
+                    println("Restored favorites in $duration")
+                }
+            }
+            if (includeBlacklisted) {
+                launch(Dispatchers.IO) {
+                    val duration = measureTime {
+                        backupItems.blacklisted?.let {
+                            favoritesDao.importBlacklisted(
+                                json.encodeToString(it),
+                                json
+                            )
+                        }
+                    }
+                    println("Restored blacklisted in $duration")
+                }
+            }
+            launch(Dispatchers.IO) {
+                backupItems.lists?.let { lists ->
+                    lists.forEach { listDao.createList(it.item) }
+                    lists.forEach {
+                        it.list.forEach { item ->
+                            listDao.addItem(item)
+                        }
+                    }
+                }
+            }
+            if (includeSearchHistory) {
+                launch(Dispatchers.IO) {
+                    val duration = measureTime {
+                        backupItems.searchHistory?.forEach {
+                            searchHistoryDao.addSearchHistory(it)
+                        }
+                    }
+                    println("Restored search history in $duration")
+                }
+            }
+            if (includeSettings) {
+                launch(Dispatchers.IO) {
+                    val duration = measureTime {
+                        backupItems
+                            .settings
+                            ?.let { backupSettings ->
+                                with(backupSettings) {
+                                    dataStore.dataStore.edit { p ->
+                                        stringSettings.forEach {
+                                            p[stringPreferencesKey(it.key)] = it.value
+                                        }
+                                        intSettings.forEach {
+                                            p[intPreferencesKey(it.key)] = it.value
+                                        }
+                                        longSettings.forEach {
+                                            p[longPreferencesKey(it.key)] = it.value
+                                        }
+                                        booleanSettings.forEach {
+                                            p[booleanPreferencesKey(it.key)] = it.value
+                                        }
+                                        doubleSettings.forEach {
+                                            p[doublePreferencesKey(it.key)] = it.value
+                                        }
+                                        byteArraySettings.forEach {
+                                            p[byteArrayPreferencesKey(it.key)] = it.value
+                                        }
+                                    }
+                                }
+                            }
+                    }
+                    println("Restored settings in $duration")
                 }
             }
         }

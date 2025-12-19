@@ -1,12 +1,10 @@
 package com.programmersbox.common.home
 
-import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideOutHorizontally
-import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
@@ -26,28 +24,22 @@ import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.foundation.lazy.grid.LazyGridScope
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.rememberLazyGridState
-import androidx.compose.foundation.text.input.clearText
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.List
 import androidx.compose.material.icons.filled.ArrowUpward
 import androidx.compose.material.icons.filled.Block
-import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.Image
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.QrCodeScanner
-import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.AppBarRow
-import androidx.compose.material3.AppBarWithSearch
 import androidx.compose.material3.AssistChipDefaults
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularWavyProgressIndicator
 import androidx.compose.material3.ElevatedAssistChip
-import androidx.compose.material3.ExpandedFullScreenSearchBar
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.FloatingActionButton
@@ -55,15 +47,14 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.SearchBarDefaults
-import androidx.compose.material3.SearchBarValue
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.material3.pulltorefresh.PullToRefreshDefaults
 import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
-import androidx.compose.material3.rememberSearchBarState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
@@ -78,7 +69,6 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.platform.LocalWindowInfo
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
@@ -104,14 +94,11 @@ import com.programmersbox.common.db.FavoritesDao
 import com.programmersbox.common.ifTrue
 import com.programmersbox.common.isScrollingUp
 import com.programmersbox.common.paging.itemKeyIndexed
-import com.programmersbox.common.showRefreshButton
 import dev.chrisbanes.haze.HazeProgressive
 import dev.chrisbanes.haze.HazeState
 import dev.chrisbanes.haze.LocalHazeStyle
 import dev.chrisbanes.haze.hazeEffect
 import dev.chrisbanes.haze.hazeSource
-import kotlinx.collections.immutable.ImmutableList
-import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.launch
 import org.koin.compose.koinInject
 import org.koin.compose.viewmodel.koinViewModel
@@ -128,6 +115,7 @@ fun CivitAiScreen(
     onNavigateToBlacklist: () -> Unit,
     onNavigateToImages: () -> Unit,
     onNavigateToCustomList: () -> Unit,
+    onNavigateToSearch: () -> Unit,
     viewModel: CivitAiViewModel = koinViewModel(),
 ) {
     val connectionRepository = koinInject<NetworkConnectionRepository>()
@@ -135,8 +123,13 @@ fun CivitAiScreen(
     val hazeState = remember { HazeState() }
     val db = koinInject<FavoritesDao>()
     val dataStore = koinInject<DataStore>()
-    val database by db.getFavoriteModels().collectAsStateWithLifecycle(emptyList())
-    val blacklisted by db.getBlacklisted().collectAsStateWithLifecycle(emptyList())
+    val database by db
+        .getFavoriteModels()
+        .collectAsStateWithLifecycle(emptyList())
+
+    val blacklisted by db
+        .getBlacklisted()
+        .collectAsStateWithLifecycle(emptyList())
     val showBlur by dataStore.rememberShowBlur()
     val showNsfw by dataStore.showNsfw()
     val blurStrength by dataStore.hideNsfwStrength()
@@ -151,23 +144,14 @@ fun CivitAiScreen(
     Scaffold(
         topBar = {
             AppSearchAppBar(
-                database = database
-                    .filterIsInstance<FavoriteModel.Model>()
-                    .toImmutableList(),
-                showNsfw = showNsfw,
-                blurStrength = blurStrength,
-                blacklisted = blacklisted.toImmutableList(),
                 showBlur = showBlur,
+                onNavigateToSearch = onNavigateToSearch,
                 onNavigateToFavorites = onNavigateToFavorites,
                 onNavigateToSettings = onNavigateToSettings,
-                onNavigateToDetail = onNavigateToDetail,
                 onNavigateToQrCode = onNavigateToQrCode,
-                onNavigateToUser = onNavigateToUser,
-                onNavigateToDetailImages = onNavigateToDetailImages,
                 onNavigateToImages = onNavigateToImages,
                 onNavigateToBlacklist = onNavigateToBlacklist,
                 onNavigateToCustomList = onNavigateToCustomList,
-                shouldShowMedia = shouldShowMedia,
                 modifier = Modifier.ifTrue(showBlur) {
                     hazeEffect(hazeState) {
                         progressive = HazeProgressive.verticalGradient(
@@ -394,7 +378,10 @@ fun CoverCard(
     Surface(
         tonalElevation = 4.dp,
         shape = MaterialTheme.shapes.medium,
-        border = if (isFavorite) BorderStroke(1.dp, MaterialTheme.colorScheme.primary) else null,
+        border = if (isFavorite)
+            BorderStroke(1.dp, MaterialTheme.colorScheme.primary)
+        else
+            null,
         modifier = modifier
             .clip(MaterialTheme.shapes.medium)
             .combinedClickable(
@@ -546,107 +533,29 @@ fun CardContent(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun AppSearchAppBar(
-    database: ImmutableList<FavoriteModel>,
-    blacklisted: ImmutableList<BlacklistedItemRoom>,
-    showNsfw: Boolean,
-    blurStrength: Float,
-    onNavigateToDetail: (String) -> Unit,
+    onNavigateToSearch: () -> Unit,
     onNavigateToFavorites: () -> Unit,
     onNavigateToSettings: () -> Unit,
     onNavigateToQrCode: () -> Unit,
     onNavigateToImages: () -> Unit,
-    onNavigateToUser: (String) -> Unit,
-    onNavigateToDetailImages: (Long, String) -> Unit,
     onNavigateToBlacklist: () -> Unit,
     onNavigateToCustomList: () -> Unit,
     showBlur: Boolean,
-    shouldShowMedia: Boolean,
     modifier: Modifier = Modifier,
-    viewModel: CivitAiSearchViewModel = koinViewModel(),
 ) {
-    val searchBarState = rememberSearchBarState()
-    val lazyGridState = rememberLazyGridState()
-
-    /*LaunchedEffect(searchBarState.currentValue) {
-        if (searchBarState.currentValue != SearchBarValue.Expanded) {
-            viewModel.searchQuery.clearText()
-            viewModel.onSearch("")
-        }
-    }*/
-
-    val lazyPagingItems = viewModel.pager.collectAsLazyPagingItems()
-    val scope = rememberCoroutineScope()
-    val appBarWithSearchColors = SearchBarDefaults.appBarWithSearchColors(
-        searchBarColors = SearchBarDefaults.colors(
-            containerColor = if (showBlur)
-                Color.Transparent
-            else
-                MaterialTheme.colorScheme.surfaceContainerHigh
-        ),
-        appBarContainerColor = if (showBlur)
+    val topAppBarColors = TopAppBarDefaults.topAppBarColors(
+        containerColor = if (showBlur)
             Color.Transparent
         else
             MaterialTheme.colorScheme.surface
     )
 
-    val inputField = @Composable {
-        SearchBarDefaults.InputField(
-            searchBarState = searchBarState,
-            textFieldState = viewModel.searchQuery,
-            enabled = LocalWindowInfo.current.isWindowFocused,
-            onSearch = viewModel::onSearch,
-            placeholder = {
-                if (searchBarState.currentValue == SearchBarValue.Collapsed) {
-                    Text(
-                        modifier = Modifier.fillMaxWidth(),
-                        text = "Search",
-                        textAlign = TextAlign.Center,
-                    )
-                }
-            },
-            leadingIcon = {
-                AnimatedContent(
-                    searchBarState.currentValue == SearchBarValue.Expanded,
-                    transitionSpec = {
-                        slideInHorizontally { -it } + fadeIn() togetherWith slideOutHorizontally { -it } + fadeOut()
-                    },
-                    contentAlignment = Alignment.Center
-                ) { target ->
-                    if (target) {
-                        IconButton(
-                            onClick = { scope.launch { searchBarState.animateToCollapsed() } }
-                        ) { Icon(Icons.AutoMirrored.Filled.ArrowBack, null) }
-                    } else {
-                        Icon(Icons.Default.Search, null)
-                    }
-                }
-            },
-            trailingIcon = {
-                AnimatedVisibility(
-                    viewModel.searchQuery.text.isNotEmpty(),
-                    enter = slideInHorizontally { it } + fadeIn(),
-                    exit = slideOutHorizontally { it } + fadeOut()
-                ) {
-                    IconButton(
-                        onClick = {
-                            viewModel.searchQuery.clearText()
-                            viewModel.onSearch("")
-                        }
-                    ) { Icon(Icons.Default.Clear, null) }
-                }
-            },
-        )
-    }
-
-    AppBarWithSearch(
-        state = searchBarState,
-        inputField = inputField,
+    TopAppBar(
+        title = { Text("CivitAI") },
         navigationIcon = {
-            if (showRefreshButton) {
-                IconButton(
-                    onClick = { lazyPagingItems.refresh() },
-                ) { Icon(Icons.Default.Refresh, null) }
-            }
+            IconButton(
+                onClick = onNavigateToSearch
+            ) { Icon(Icons.Default.Search, null) }
         },
         actions = {
             AppBarRow(
@@ -684,46 +593,9 @@ private fun AppSearchAppBar(
                 )
             }
         },
-        colors = appBarWithSearchColors,
+        colors = topAppBarColors,
         modifier = modifier
     )
-
-    //TODO: this is taking focus, preventing typing for the list name
-    ExpandedFullScreenSearchBar(
-        state = searchBarState,
-        inputField = inputField,
-    ) {
-        LazyVerticalGrid(
-            columns = adaptiveGridCell(),
-            verticalArrangement = Arrangement.spacedBy(4.dp),
-            horizontalArrangement = Arrangement.spacedBy(4.dp),
-            state = lazyGridState,
-            modifier = Modifier
-                .padding(4.dp)
-                .fillMaxSize()
-        ) {
-            modelItems(
-                lazyPagingItems = lazyPagingItems,
-                onNavigateToDetail = { id ->
-                    scope.launch { searchBarState.animateToCollapsed() }
-                        .invokeOnCompletion { onNavigateToDetail(id) }
-                },
-                showNsfw = showNsfw,
-                blurStrength = blurStrength,
-                database = database,
-                blacklisted = blacklisted,
-                shouldShowMedia = shouldShowMedia,
-                onNavigateToUser = { username ->
-                    scope.launch { searchBarState.animateToCollapsed() }
-                        .invokeOnCompletion { onNavigateToUser(username) }
-                },
-                onNavigateToDetailImages = { id, name ->
-                    scope.launch { searchBarState.animateToCollapsed() }
-                        .invokeOnCompletion { onNavigateToDetailImages(id, name) }
-                },
-            )
-        }
-    }
 }
 
 

@@ -159,4 +159,7 @@ sealed class Screen {
 
     @Serializable
     data class CustomListDetail(val uuid: String) : NavKey
+
+    @Serializable
+    data object Search : NavKey
 }

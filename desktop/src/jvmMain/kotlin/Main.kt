@@ -175,6 +175,11 @@ fun main() {
                                     enabled = navHandler.backStack.lastOrNull() != Screen.Favorites,
                                 )
                                 Item(
+                                    "Search",
+                                    onClick = { navHandler.backStack.add(Screen.Search) },
+                                    enabled = navHandler.backStack.lastOrNull() != Screen.Search,
+                                )
+                                Item(
                                     "Stats",
                                     onClick = { navHandler.backStack.add(Screen.Settings.Stats) },
                                     enabled = navHandler.backStack.lastOrNull() != Screen.Settings.Stats,

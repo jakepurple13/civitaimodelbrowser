@@ -16,6 +16,7 @@ import com.programmersbox.common.db.FavoritesUI
 import com.programmersbox.common.details.CivitAiDetailScreen
 import com.programmersbox.common.details.CivitAiModelImagesScreen
 import com.programmersbox.common.home.CivitAiScreen
+import com.programmersbox.common.home.SearchScreen
 import com.programmersbox.common.images.CivitAiImagesScreen
 import com.programmersbox.common.lists.ListDetailScreen
 import com.programmersbox.common.lists.ListScreen
@@ -68,6 +69,23 @@ private fun Module.home() {
                 backStack.add(Screen.Settings.Blacklisted)
             },
             onNavigateToCustomList = { backStack.add(Screen.CustomList) },
+            onNavigateToSearch = { backStack.add(Screen.Search) },
+        )
+    }
+
+    navigation<Screen.Search> {
+        val backStack = koinInject<NavigationHandler>().backStack
+        SearchScreen(
+            onNavigateToDetail = { id -> backStack.add(Screen.Detail(id)) },
+            onNavigateToUser = { username -> backStack.add(Screen.User(username)) },
+            onNavigateToDetailImages = { id, name ->
+                backStack.add(
+                    Screen.DetailsImage(
+                        id.toString(),
+                        name
+                    )
+                )
+            }
         )
     }
 

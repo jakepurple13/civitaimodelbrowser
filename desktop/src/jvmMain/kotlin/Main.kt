@@ -1,19 +1,29 @@
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.mutableStateListOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.window.MenuBar
 import androidx.compose.ui.window.Tray
 import androidx.compose.ui.window.TrayState
 import androidx.compose.ui.window.application
+import androidx.navigation3.runtime.NavKey
 import ca.gosyer.appdirs.AppDirs
 import com.dokar.sonner.Toaster
 import com.dokar.sonner.ToasterState
 import com.programmersbox.common.ApplicationInfo
 import com.programmersbox.common.Screen
 import com.programmersbox.common.UIShow
+import com.programmersbox.common.backup.BackupScreen
+import com.programmersbox.common.backup.RestoreScreen
 import com.programmersbox.common.backup.Zipper
 import com.programmersbox.common.createPlatformModule
 import com.programmersbox.common.di.NavigationHandler
 import com.programmersbox.common.di.cmpModules
 import com.programmersbox.common.getDatabaseBuilder
 import com.programmersbox.common.qrcode.QrCodeRepository
+import com.programmersbox.common.settings.AboutScreen
+import com.programmersbox.common.settings.BehaviorSettingsScreen
+import com.programmersbox.common.settings.NsfwSettingsScreen
+import com.programmersbox.common.settings.StatsScreen
 import com.programmersbox.desktop.BuildKonfig
 import com.programmersbox.resources.Res
 import com.programmersbox.resources.civitai_logo
@@ -104,10 +114,47 @@ fun main() {
                     }
                 )
 
+                val appState = remember { MyApplicationState() }
+
+                appState.windows.forEach { state ->
+                    MyWindow(state)
+                }
+
                 WindowWithBar(
                     onCloseRequest = ::exitApplication,
                     frameWindowScope = {
                         MenuBar {
+                            Menu("File") {
+                                Item(
+                                    "New Stats Window",
+                                    onClick = { appState.openNewWindow(Screen.Settings.Stats) }
+                                )
+                                Item(
+                                    "New Backup Window",
+                                    onClick = { appState.openNewWindow(Screen.Settings.Backup) }
+                                )
+                                Item(
+                                    "New Restore Window",
+                                    onClick = { appState.openNewWindow(Screen.Settings.Restore) }
+                                )
+                                Item(
+                                    "New About Window",
+                                    onClick = { appState.openNewWindow(Screen.Settings.About) }
+                                )
+                                Item(
+                                    "New Nsfw Settings Window",
+                                    onClick = { appState.openNewWindow(Screen.Settings.Nsfw) }
+                                )
+                                Item(
+                                    "New Behavior Settings Window",
+                                    onClick = { appState.openNewWindow(Screen.Settings.Behavior) }
+                                )
+                                Separator()
+                                Item(
+                                    "Exit",
+                                    onClick = ::exitApplication
+                                )
+                            }
                             Menu("View") {
                                 Item(
                                     "Home",
@@ -161,4 +208,44 @@ fun main() {
             }
         )
     }
+}
+
+@Composable
+private fun MyWindow(
+    state: MyWindowState,
+) = WindowWithBar(
+    onCloseRequest = state::close
+) {
+    when (state.destination) {
+        Screen.Settings.Stats -> StatsScreen()
+        Screen.Settings.Backup -> BackupScreen()
+        Screen.Settings.Restore -> RestoreScreen()
+        Screen.Settings.About -> AboutScreen()
+        Screen.Settings.Nsfw -> NsfwSettingsScreen()
+        Screen.Settings.Behavior -> BehaviorSettingsScreen()
+    }
+}
+
+private class MyApplicationState {
+    val windows = mutableStateListOf<MyWindowState>()
+
+    fun openNewWindow(
+        destination: NavKey
+    ) {
+        windows += MyWindowState(destination)
+    }
+
+    private fun MyWindowState(
+        title: NavKey
+    ) = MyWindowState(
+        title,
+        windows::remove
+    )
+}
+
+private class MyWindowState(
+    val destination: NavKey,
+    private val close: (MyWindowState) -> Unit
+) {
+    fun close() = close(this)
 }

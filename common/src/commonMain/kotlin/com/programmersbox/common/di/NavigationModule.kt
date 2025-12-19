@@ -3,6 +3,7 @@ package com.programmersbox.common.di
 import androidx.compose.material3.adaptive.ExperimentalMaterial3AdaptiveApi
 import androidx.compose.material3.adaptive.navigation3.ListDetailSceneStrategy
 import androidx.compose.material3.adaptive.navigation3.SupportingPaneSceneStrategy
+import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateListOf
 import androidx.navigation3.runtime.NavKey
 import androidx.navigation3.scene.DialogSceneStrategy
@@ -30,6 +31,7 @@ import org.koin.core.annotation.KoinExperimentalAPI
 import org.koin.core.module.Module
 import org.koin.core.module.dsl.singleOf
 import org.koin.core.parameter.parametersOf
+import org.koin.core.scope.Scope
 import org.koin.dsl.module
 import org.koin.dsl.navigation3.navigation
 
@@ -63,7 +65,7 @@ fun navigationModule() = module {
     }
 
     navigation<Screen.Detail>(
-        metadata = SupportingPaneSceneStrategy.mainPane()
+        metadata = SupportingPaneSceneStrategy.mainPane(sceneKey = "detail")
     ) {
         val backStack = koinInject<NavigationHandler>().backStack
         CivitAiDetailScreen(
@@ -82,7 +84,7 @@ fun navigationModule() = module {
     }
 
     navigation<Screen.DetailsImage>(
-        metadata = SupportingPaneSceneStrategy.supportingPane()
+        metadata = SupportingPaneSceneStrategy.extraPane(sceneKey = "detail")
     ) {
         CivitAiModelImagesScreen(
             modelName = it.modelName,
@@ -91,7 +93,7 @@ fun navigationModule() = module {
     }
 
     navigation<Screen.User>(
-        metadata = SupportingPaneSceneStrategy.extraPane()
+        metadata = SupportingPaneSceneStrategy.extraPane(sceneKey = "detail")
     ) {
         val backStack = koinInject<NavigationHandler>().backStack
         CivitAiUserScreen(
@@ -151,7 +153,9 @@ fun navigationModule() = module {
 @OptIn(ExperimentalMaterial3AdaptiveApi::class, KoinExperimentalAPI::class)
 private fun Module.settingsNavigation() {
     navigation<Screen.Settings>(
-        metadata = ListDetailSceneStrategy.listPane()
+        metadata = ListDetailSceneStrategy.listPane(
+            sceneKey = "settings"
+        )
     ) {
         val backStack = koinInject<NavigationHandler>().backStack
         SettingsScreen(
@@ -165,27 +169,24 @@ private fun Module.settingsNavigation() {
         )
     }
 
-    navigation<Screen.Settings.Blacklisted>(
-        metadata = ListDetailSceneStrategy.detailPane()
-    ) { BlacklistedScreen() }
-    navigation<Screen.Settings.Backup>(
-        metadata = ListDetailSceneStrategy.detailPane()
-    ) { BackupScreen() }
-    navigation<Screen.Settings.Restore>(
-        metadata = ListDetailSceneStrategy.detailPane()
-    ) { RestoreScreen() }
-    navigation<Screen.Settings.Stats>(
-        metadata = ListDetailSceneStrategy.detailPane()
-    ) { StatsScreen() }
-    navigation<Screen.Settings.About>(
-        metadata = ListDetailSceneStrategy.detailPane()
-    ) { AboutScreen() }
-    navigation<Screen.Settings.Nsfw>(
-        metadata = ListDetailSceneStrategy.detailPane()
-    ) { NsfwSettingsScreen() }
-    navigation<Screen.Settings.Behavior>(
-        metadata = ListDetailSceneStrategy.detailPane()
-    ) { BehaviorSettingsScreen() }
+    settingsNavigation<Screen.Settings.Blacklisted> { BlacklistedScreen() }
+    settingsNavigation<Screen.Settings.Backup> { BackupScreen() }
+    settingsNavigation<Screen.Settings.Restore> { RestoreScreen() }
+    settingsNavigation<Screen.Settings.Stats> { StatsScreen() }
+    settingsNavigation<Screen.Settings.About> { AboutScreen() }
+    settingsNavigation<Screen.Settings.Nsfw> { NsfwSettingsScreen() }
+    settingsNavigation<Screen.Settings.Behavior> { BehaviorSettingsScreen() }
+}
+
+@OptIn(ExperimentalMaterial3AdaptiveApi::class, KoinExperimentalAPI::class)
+private inline fun <reified T : NavKey> Module.settingsNavigation(
+    metadata: Map<String, Any> = emptyMap(),
+    noinline definition: @Composable Scope.(T) -> Unit,
+) {
+    navigation<T>(
+        metadata = ListDetailSceneStrategy.detailPane(sceneKey = "settings") + metadata,
+        definition = definition
+    )
 }
 
 class NavigationHandler {

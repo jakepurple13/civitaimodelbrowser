@@ -38,7 +38,14 @@ import org.koin.dsl.navigation3.navigation
 @OptIn(ExperimentalMaterial3AdaptiveApi::class, KoinExperimentalAPI::class)
 fun navigationModule() = module {
     singleOf(::NavigationHandler)
+    home()
+    details()
+    customList()
+    settingsNavigation()
+}
 
+@OptIn(KoinExperimentalAPI::class)
+private fun Module.home() {
     navigation<Screen.List> {
         val backStack = koinInject<NavigationHandler>().backStack
         CivitAiScreen(
@@ -64,6 +71,59 @@ fun navigationModule() = module {
         )
     }
 
+    navigation<Screen.Favorites> {
+        val backStack = koinInject<NavigationHandler>().backStack
+        FavoritesUI(
+            viewModel = koinViewModel(),
+            onNavigateToDetail = { id -> backStack.add(Screen.Detail(id.toString())) },
+            onNavigateToUser = { username -> backStack.add(Screen.User(username)) }
+        )
+    }
+    navigation<Screen.QrCode>(
+        metadata = DialogSceneStrategy.dialog()
+    ) {
+        val backStack = koinInject<NavigationHandler>().backStack
+        ScanQrCode(
+            viewModel = koinViewModel(),
+            onBack = { backStack.removeLastOrNull() },
+            onNavigate = { navKey ->
+                backStack.removeAll { it == Screen.QrCode }
+                backStack.add(navKey)
+            }
+        )
+    }
+    navigation<Screen.Images> {
+        val backStack = koinInject<NavigationHandler>().backStack
+        CivitAiImagesScreen(
+            onNavigateToUser = { username -> backStack.add(Screen.User(username)) }
+        )
+    }
+}
+
+@OptIn(KoinExperimentalAPI::class, ExperimentalMaterial3AdaptiveApi::class)
+private fun Module.customList() {
+    navigation<Screen.CustomList>(
+        metadata = ListDetailSceneStrategy.listPane()
+    ) {
+        val backStack = koinInject<NavigationHandler>().backStack
+        ListScreen(
+            onNavigateToDetail = { id -> backStack.add(Screen.CustomListDetail(id)) }
+        )
+    }
+    navigation<Screen.CustomListDetail>(
+        metadata = ListDetailSceneStrategy.detailPane()
+    ) {
+        val backStack = koinInject<NavigationHandler>().backStack
+        ListDetailScreen(
+            viewModel = koinViewModel { parametersOf(it.uuid) },
+            onNavigateToDetail = { id -> backStack.add(Screen.Detail(id)) },
+            onNavigateToUser = { username -> backStack.add(Screen.User(username)) }
+        )
+    }
+}
+
+@OptIn(ExperimentalMaterial3AdaptiveApi::class, KoinExperimentalAPI::class)
+private fun Module.details() {
     navigation<Screen.Detail>(
         metadata = SupportingPaneSceneStrategy.mainPane(sceneKey = "detail")
     ) {
@@ -102,52 +162,6 @@ fun navigationModule() = module {
             onNavigateToDetail = { id -> backStack.add(Screen.Detail(id)) }
         )
     }
-    navigation<Screen.Favorites> {
-        val backStack = koinInject<NavigationHandler>().backStack
-        FavoritesUI(
-            viewModel = koinViewModel(),
-            onNavigateToDetail = { id -> backStack.add(Screen.Detail(id.toString())) },
-            onNavigateToUser = { username -> backStack.add(Screen.User(username)) }
-        )
-    }
-    navigation<Screen.QrCode>(
-        metadata = DialogSceneStrategy.dialog()
-    ) {
-        val backStack = koinInject<NavigationHandler>().backStack
-        ScanQrCode(
-            viewModel = koinViewModel(),
-            onBack = { backStack.removeLastOrNull() },
-            onNavigate = { navKey ->
-                backStack.removeAll { it == Screen.QrCode }
-                backStack.add(navKey)
-            }
-        )
-    }
-    navigation<Screen.Images> {
-        val backStack = koinInject<NavigationHandler>().backStack
-        CivitAiImagesScreen(
-            onNavigateToUser = { username -> backStack.add(Screen.User(username)) }
-        )
-    }
-    navigation<Screen.CustomList>(
-        metadata = ListDetailSceneStrategy.listPane()
-    ) {
-        val backStack = koinInject<NavigationHandler>().backStack
-        ListScreen(
-            onNavigateToDetail = { id -> backStack.add(Screen.CustomListDetail(id)) }
-        )
-    }
-    navigation<Screen.CustomListDetail>(
-        metadata = ListDetailSceneStrategy.detailPane()
-    ) {
-        val backStack = koinInject<NavigationHandler>().backStack
-        ListDetailScreen(
-            viewModel = koinViewModel { parametersOf(it.uuid) },
-            onNavigateToDetail = { id -> backStack.add(Screen.Detail(id)) },
-            onNavigateToUser = { username -> backStack.add(Screen.User(username)) }
-        )
-    }
-    settingsNavigation()
 }
 
 @OptIn(ExperimentalMaterial3AdaptiveApi::class, KoinExperimentalAPI::class)

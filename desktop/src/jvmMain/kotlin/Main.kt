@@ -141,14 +141,16 @@ fun main() {
                                     "New About Window",
                                     onClick = { appState.openNewWindow(Screen.Settings.About) }
                                 )
-                                Item(
-                                    "New Nsfw Settings Window",
-                                    onClick = { appState.openNewWindow(Screen.Settings.Nsfw) }
-                                )
-                                Item(
-                                    "New Behavior Settings Window",
-                                    onClick = { appState.openNewWindow(Screen.Settings.Behavior) }
-                                )
+                                Menu("Settings") {
+                                    Item(
+                                        "New Nsfw Settings Window",
+                                        onClick = { appState.openNewWindow(Screen.Settings.Nsfw) }
+                                    )
+                                    Item(
+                                        "New Behavior Settings Window",
+                                        onClick = { appState.openNewWindow(Screen.Settings.Behavior) }
+                                    )
+                                }
                                 Separator()
                                 Item(
                                     "Exit",

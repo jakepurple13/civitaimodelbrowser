@@ -74,6 +74,7 @@ fun BackupScreen(
             includeFavorites = backupItems.includeFavorites,
             includeBlacklisted = backupItems.includeBlacklisted,
             includeSettings = backupItems.includeSettings,
+            includeSearchHistory = backupItems.includeSearchHistory,
             headline = "Include in Backup",
             listDialogTitle = "Select Lists to Backup",
             listsToInclude = backupItems.listsToInclude,
@@ -87,6 +88,11 @@ fun BackupScreen(
             onIncludeFavorites = viewModel::includeFavorites,
             onIncludeBlacklisted = viewModel::includeBlacklisted,
             onIncludeSettings = viewModel::includeSettings,
+            onIncludeSearchHistory = viewModel::includeSearchHistory,
+            searchHistoryCount = viewModel
+                .searchHistoryCount
+                .collectAsStateWithLifecycle(0)
+                .value,
             favoritesCount = viewModel
                 .favoritesCount
                 .collectAsStateWithLifecycle(0)

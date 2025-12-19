@@ -6,12 +6,12 @@ import com.dokar.sonner.ToastType
 import com.dokar.sonner.ToasterState
 import com.programmersbox.common.db.FavoritesDao
 import com.programmersbox.common.db.ListDao
+import com.programmersbox.common.db.SearchHistoryDao
 import com.programmersbox.common.di.NavigationHandler
 import io.github.vinceglb.filekit.PlatformFile
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toPersistentList
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.launchIn
@@ -23,12 +23,14 @@ class BackupViewModel(
     private val backupRepository: BackupRepository,
     favoriteDao: FavoritesDao,
     listDao: ListDao,
+    searchHistoryDao: SearchHistoryDao,
     private val navigationHandler: NavigationHandler,
     private val toasterState: ToasterState,
 ) : ViewModel() {
     val favoritesCount = favoriteDao.getFavoritesCount()
     val blacklistedCount = favoriteDao.getBlacklistCount()
     val lists = listDao.getAllLists()
+    val searchHistoryCount = searchHistoryDao.getSearchCount()
 
     val backupItems: StateFlow<BackupItemsState>
         field = MutableStateFlow(
@@ -36,6 +38,7 @@ class BackupViewModel(
                 includeFavorites = true,
                 includeBlacklisted = true,
                 includeSettings = true,
+                includeSearchHistory = true,
                 listsToInclude = persistentListOf()
             )
         )
@@ -91,6 +94,10 @@ class BackupViewModel(
         backupItems.value = backupItems.value.copy(includeSettings = includeSettings)
     }
 
+    fun includeSearchHistory(includeSearchHistory: Boolean) {
+        backupItems.value = backupItems.value.copy(includeSearchHistory = includeSearchHistory)
+    }
+
     fun backup(
         platformFile: PlatformFile,
     ) {
@@ -109,6 +116,7 @@ class BackupViewModel(
                     includeFavorites = backupItems.value.includeFavorites,
                     includeBlacklisted = backupItems.value.includeBlacklisted,
                     includeSettings = backupItems.value.includeSettings,
+                    includeSearchHistory = backupItems.value.includeSearchHistory,
                     listItemsByUuid = backupItems.value.listsToInclude
                 )
             }
@@ -118,7 +126,6 @@ class BackupViewModel(
                         "Backup Complete",
                         type = ToastType.Success
                     )
-                    delay(1000)
                     navigationHandler.backStack.removeLastOrNull()
                 }
                 .onFailure {
@@ -138,6 +145,7 @@ data class BackupItemsState(
     val includeFavorites: Boolean,
     val includeBlacklisted: Boolean,
     val includeSettings: Boolean,
+    val includeSearchHistory: Boolean,
     val listsToInclude: ImmutableList<String>,
 )
 

@@ -10,7 +10,6 @@ import com.dokar.sonner.ToastType
 import com.dokar.sonner.ToasterState
 import com.programmersbox.common.di.NavigationHandler
 import io.github.vinceglb.filekit.PlatformFile
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 class RestoreViewModel(
@@ -23,6 +22,7 @@ class RestoreViewModel(
     var includeFavorites by mutableStateOf(true)
     var includeBlacklisted by mutableStateOf(true)
     var includeSettings by mutableStateOf(true)
+    var includeSearchHistory by mutableStateOf(true)
     val listsToInclude = mutableStateListOf<String>()
 
     var uiState by mutableStateOf(
@@ -32,8 +32,6 @@ class RestoreViewModel(
             error = null
         )
     )
-
-    //TODO: Need to include error state
 
     fun read(platformFile: PlatformFile) {
         viewModelScope.launch {
@@ -60,6 +58,7 @@ class RestoreViewModel(
                         includeFavorites = includeFavorites,
                         includeBlacklisted = includeBlacklisted,
                         includeSettings = includeSettings,
+                        includeSearchHistory = includeSearchHistory,
                     )
                 }
             uiState = uiState.copy(isRestoring = false)
@@ -67,7 +66,6 @@ class RestoreViewModel(
                 "Backup Complete",
                 type = ToastType.Success
             )
-            delay(1000)
             navigationHandler.backStack.removeLastOrNull()
         }
     }

@@ -15,6 +15,9 @@ interface SearchHistoryDao {
     @Query("SELECT * FROM search_history_item WHERE searchQuery LIKE '%' || :query || '%' ORDER BY timestamp DESC LIMIT 5")
     fun getSearchHistory(query: String): Flow<List<SearchHistoryItem>>
 
+    @Query("SELECT * FROM search_history_item ORDER BY timestamp DESC")
+    fun getAllSearchHistoryFlow(): Flow<List<SearchHistoryItem>>
+
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun addSearchHistory(query: SearchHistoryItem)
 
@@ -23,6 +26,9 @@ interface SearchHistoryDao {
 
     @Query("SELECT COUNT(searchQuery) FROM search_history_item")
     fun getSearchCount(): Flow<Int>
+
+    @Query("SELECT * FROM search_history_item ORDER BY timestamp DESC")
+    suspend fun getAllSearchHistory(): List<SearchHistoryItem>
 }
 
 @Serializable

@@ -19,6 +19,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -71,6 +72,7 @@ import com.programmersbox.common.db.FavoriteRoom
 import com.programmersbox.common.db.FavoriteType
 import com.programmersbox.common.db.FavoritesDao
 import com.programmersbox.common.db.ListDao
+import com.programmersbox.common.db.SearchHistoryDao
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.PersistentList
 import kotlinx.collections.immutable.persistentListOf
@@ -84,6 +86,7 @@ import org.koin.compose.koinInject
 fun StatsScreen() {
     val favoritesDao = koinInject<FavoritesDao>()
     val listDao = koinInject<ListDao>()
+    val searchHistoryDao = koinInject<SearchHistoryDao>()
 
     val favoritesCount by favoritesDao
         .getTypeCounts()
@@ -102,6 +105,10 @@ fun StatsScreen() {
             .collectAsStateWithLifecycle(0)
             .value
     )
+
+    val searchCount by searchHistoryDao
+        .getSearchCount()
+        .collectAsStateWithLifecycle(0)
 
     val itemCount by listDao
         .getTypeCounts()
@@ -143,6 +150,7 @@ fun StatsScreen() {
                     favoritesCount = favoritesCount,
                     blacklistedCount = blacklistedCount,
                     listCount = listCount,
+                    searchCount = searchCount,
                     modifier = Modifier.animateItem()
                 )
             }
@@ -520,6 +528,7 @@ private fun GlobalStats(
     favoritesCount: DataCounts,
     blacklistedCount: Int,
     listCount: Int,
+    searchCount: Int,
     modifier: Modifier = Modifier,
 ) {
     Column(
@@ -530,29 +539,51 @@ private fun GlobalStats(
             style = MaterialTheme.typography.titleLarge,
             modifier = Modifier.padding(16.dp)
         )
-        Row(
+        LazyRow(
             horizontalArrangement = Arrangement.SpaceEvenly,
             modifier = Modifier.fillMaxWidth()
         ) {
-            GlobalStatItem(
-                title = "Favorites",
-                value = favoritesCount.imageCount
-                        + favoritesCount.modelCount
-                        + favoritesCount.creatorCount,
-                color = MaterialTheme.colorScheme.primaryContainer
-            )
+            item(
+                contentType = "favorites"
+            ) {
+                GlobalStatItem(
+                    title = "Favorites",
+                    value = favoritesCount.imageCount
+                            + favoritesCount.modelCount
+                            + favoritesCount.creatorCount,
+                    color = MaterialTheme.colorScheme.primaryContainer
+                )
+            }
 
-            GlobalStatItem(
-                title = "Blacklisted",
-                value = blacklistedCount,
-                color = MaterialTheme.colorScheme.secondaryContainer
-            )
+            item(
+                contentType = "blacklisted"
+            ) {
+                GlobalStatItem(
+                    title = "Blacklisted",
+                    value = blacklistedCount,
+                    color = MaterialTheme.colorScheme.secondaryContainer
+                )
+            }
 
-            GlobalStatItem(
-                title = "Total Lists",
-                value = listCount,
-                color = MaterialTheme.colorScheme.tertiaryContainer
-            )
+            item(
+                contentType = "lists"
+            ) {
+                GlobalStatItem(
+                    title = "Total Lists",
+                    value = listCount,
+                    color = MaterialTheme.colorScheme.tertiaryContainer
+                )
+            }
+
+            item(
+                contentType = "searches"
+            ) {
+                GlobalStatItem(
+                    title = "Searches",
+                    value = searchCount,
+                    color = MaterialTheme.colorScheme.surfaceContainerHighest
+                )
+            }
         }
     }
 }

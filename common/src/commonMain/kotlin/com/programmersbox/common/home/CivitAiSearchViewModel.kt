@@ -50,7 +50,13 @@ class CivitAiSearchViewModel @OptIn(ExperimentalMaterial3Api::class) constructor
     )
 
     val searchFlow = snapshotFlow { searchQuery.text }
-        .flatMapLatest { searchHistoryDao.getSearchHistory(it.toString()) }
+        .flatMapLatest {
+            if (it.isEmpty()) {
+                searchHistoryDao.getAllSearchHistoryFlow()
+            } else {
+                searchHistoryDao.getSearchHistory(it.toString())
+            }
+        }
 
     fun onSearch(query: String) {
         viewModelScope.launch {

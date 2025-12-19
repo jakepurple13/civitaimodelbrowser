@@ -13,6 +13,8 @@ import com.programmersbox.common.db.CustomList
 import com.programmersbox.common.db.FavoriteModel
 import com.programmersbox.common.db.FavoritesDao
 import com.programmersbox.common.db.ListDao
+import com.programmersbox.common.db.SearchHistoryDao
+import com.programmersbox.common.db.SearchHistoryItem
 import io.github.vinceglb.filekit.PlatformFile
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.serialization.Serializable
@@ -21,13 +23,13 @@ import kotlinx.serialization.json.Json
 class BackupRepository(
     private val favoritesDao: FavoritesDao,
     private val listDao: ListDao,
+    private val searchHistoryDao: SearchHistoryDao,
     private val dataStore: DataStore,
     private val zipper: Zipper,
 ) {
     private val json by lazy {
         Json {
             isLenient = true
-            prettyPrint = true
             ignoreUnknownKeys = true
             coerceInputValues = true
         }
@@ -38,21 +40,35 @@ class BackupRepository(
         includeFavorites: Boolean,
         includeBlacklisted: Boolean,
         includeSettings: Boolean,
+        includeSearchHistory: Boolean,
         listItemsByUuid: List<String>,
     ) {
         val itemsToZip = buildMap<String, String> {
             if (includeFavorites) {
-                put("favorites.json", json.encodeToString(favoritesDao.exportFavorites(json)))
+                put(
+                    "favorites.json",
+                    json.encodeToString(favoritesDao.exportFavorites(json))
+                )
             }
 
             if (includeBlacklisted) {
-                put("blacklisted.json", json.encodeToString(favoritesDao.exportBlacklisted()))
+                put(
+                    "blacklisted.json",
+                    json.encodeToString(favoritesDao.exportBlacklisted())
+                )
             }
 
             if (listItemsByUuid.isNotEmpty()) {
                 put(
                     "lists.json",
                     json.encodeToString(listDao.getAllListItems(*listItemsByUuid.toTypedArray()))
+                )
+            }
+
+            if (includeSearchHistory) {
+                put(
+                    "search_history.json",
+                    json.encodeToString(searchHistoryDao.getAllSearchHistory())
                 )
             }
 
@@ -144,6 +160,7 @@ class BackupRepository(
         includeSettings: Boolean,
         includeFavorites: Boolean,
         includeBlacklisted: Boolean,
+        includeSearchHistory: Boolean,
     ) {
         if (includeFavorites) {
             backupItems.favorites?.let {
@@ -158,6 +175,11 @@ class BackupRepository(
         backupItems.lists?.let { lists ->
             lists.forEach { listDao.createList(it.item) }
             lists.forEach { it.list.forEach { item -> listDao.addItem(item) } }
+        }
+        if (includeSearchHistory) {
+            backupItems.searchHistory?.forEach {
+                searchHistoryDao.addSearchHistory(it)
+            }
         }
         if (includeSettings) {
             backupItems.settings?.let { backupSettings ->
@@ -192,6 +214,7 @@ class BackupRepository(
         var blacklisted: List<BlacklistedItemRoom>? = null
         var lists: List<CustomList>? = null
         var settings: BackupSettings? = null
+        var searchHistory: List<SearchHistoryItem>? = null
         zipper.unzip(
             platformFile,
             onInfo = { fileName, jsonString ->
@@ -200,10 +223,12 @@ class BackupRepository(
                     "blacklisted.json" -> blacklisted = json.decodeFromString(jsonString)
                     "lists.json" -> lists = json.decodeFromString<List<CustomList>>(jsonString)
                     "settings.json" -> settings = json.decodeFromString<BackupSettings>(jsonString)
+                    "search_history.json" -> searchHistory =
+                        json.decodeFromString<List<SearchHistoryItem>>(jsonString)
                 }
             }
         )
-        return BackupItems(favorites, blacklisted, lists, settings)
+        return BackupItems(favorites, blacklisted, lists, settings, searchHistory)
     }
 }
 
@@ -212,6 +237,7 @@ data class BackupItems(
     val blacklisted: List<BlacklistedItemRoom>?,
     val lists: List<CustomList>?,
     val settings: BackupSettings?,
+    val searchHistory: List<SearchHistoryItem>?,
 )
 
 expect class Zipper {

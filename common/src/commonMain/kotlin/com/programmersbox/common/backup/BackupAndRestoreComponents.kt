@@ -67,6 +67,9 @@ fun BackupAndRestoreList(
     onIncludeFavorites: (Boolean) -> Unit,
     onIncludeBlacklisted: (Boolean) -> Unit,
     onIncludeSettings: (Boolean) -> Unit,
+    includeSearchHistory: Boolean,
+    onIncludeSearchHistory: (Boolean) -> Unit,
+    searchHistoryCount: Int,
     favoritesCount: Int,
     blacklistedCount: Int,
     settingsExtraContent: @Composable ColumnScope.() -> Unit = {},
@@ -101,6 +104,16 @@ fun BackupAndRestoreList(
                 checked = includeBlacklisted,
                 blacklistedCount = blacklistedCount,
                 onCheckedChange = onIncludeBlacklisted,
+                modifier = Modifier.padding(horizontal = 8.dp)
+            )
+        }
+        item(
+            contentType = "search history"
+        ) {
+            SearchHistorySwitch(
+                checked = includeSearchHistory,
+                onCheckedChange = onIncludeSearchHistory,
+                searchHistoryCount = searchHistoryCount,
                 modifier = Modifier.padding(horizontal = 8.dp)
             )
         }
@@ -165,6 +178,33 @@ private fun FavoriteSwitch(
                 )
             },
             supportingContent = { Text("Favorite models, creators, and images") },
+            colors = ListItemDefaults.colors(
+                containerColor = Color.Transparent
+            )
+        )
+    }
+}
+
+@Composable
+private fun SearchHistorySwitch(
+    searchHistoryCount: Int,
+    checked: Boolean,
+    onCheckedChange: (Boolean) -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    Card(
+        onClick = { onCheckedChange(!checked) },
+        modifier = modifier
+    ) {
+        ListItem(
+            headlineContent = { Text("Search History ($searchHistoryCount)") },
+            trailingContent = {
+                Switch(
+                    checked = checked,
+                    onCheckedChange = onCheckedChange
+                )
+            },
+            supportingContent = { Text("All search queries") },
             colors = ListItemDefaults.colors(
                 containerColor = Color.Transparent
             )

@@ -8,7 +8,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.dokar.sonner.ToastType
 import com.dokar.sonner.ToasterState
-import com.programmersbox.common.NavigationHandler
+import com.programmersbox.common.di.NavigationHandler
 import io.github.vinceglb.filekit.PlatformFile
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch

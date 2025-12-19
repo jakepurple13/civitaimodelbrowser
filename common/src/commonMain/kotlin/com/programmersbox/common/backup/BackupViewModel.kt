@@ -1,21 +1,24 @@
 package com.programmersbox.common.backup
 
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateListOf
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.dokar.sonner.ToastType
 import com.dokar.sonner.ToasterState
-import com.programmersbox.common.NavigationHandler
+import com.programmersbox.common.db.CustomList
 import com.programmersbox.common.db.FavoritesDao
 import com.programmersbox.common.db.ListDao
+import com.programmersbox.common.di.NavigationHandler
 import io.github.vinceglb.filekit.PlatformFile
+import kotlinx.collections.immutable.ImmutableList
+import kotlinx.collections.immutable.persistentListOf
+import kotlinx.collections.immutable.toPersistentList
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
+import kotlinx.serialization.Serializable
 
 class BackupViewModel(
     private val backupRepository: BackupRepository,
@@ -28,48 +31,86 @@ class BackupViewModel(
     val blacklistedCount = favoriteDao.getBlacklistCount()
     val lists = listDao.getAllLists()
 
-    var includeFavorites by mutableStateOf(true)
-    var includeBlacklisted by mutableStateOf(true)
-    var includeSettings by mutableStateOf(true)
-    val listsToInclude = mutableStateListOf<String>()
-    var isBackingUp by mutableStateOf(false)
-    var error: Throwable? by mutableStateOf(null)
+    val backupItems: StateFlow<BackupItemsState>
+        field = MutableStateFlow(
+            BackupItemsState(
+                includeFavorites = true,
+                includeBlacklisted = true,
+                includeSettings = true,
+                listsToInclude = persistentListOf()
+            )
+        )
+
+    val uiState: StateFlow<BackupUiState>
+        field = MutableStateFlow(BackupUiState(false, null))
 
     init {
         lists
             .onEach { customLists ->
-                listsToInclude.clear()
-                listsToInclude.addAll(customLists.map { it.item.uuid })
+                backupItems.value = backupItems
+                    .value
+                    .copy(listsToInclude = customLists.toPersistentList())
             }
             .launchIn(viewModelScope)
     }
 
-    fun addList(uuid: String) {
-        if (uuid !in listsToInclude) {
-            listsToInclude.add(uuid)
+    fun addList(item: CustomList) {
+        if (backupItems.value.listsToInclude.none { it.item.uuid == item.item.uuid }) {
+            backupItems.value = backupItems
+                .value
+                .copy(
+                    listsToInclude = persistentListOf(
+                        *backupItems
+                            .value
+                            .listsToInclude
+                            .toTypedArray(),
+                        item
+                    )
+                )
         }
     }
 
-    fun removeList(uuid: String) {
-        listsToInclude.remove(uuid)
+    fun removeList(item: CustomList) {
+        backupItems.value = backupItems
+            .value
+            .copy(listsToInclude = (backupItems.value.listsToInclude - item).toPersistentList())
+    }
+
+    fun includeFavorites(includeFavorites: Boolean) {
+        backupItems.value = backupItems.value.copy(includeFavorites = includeFavorites)
+    }
+
+    fun includeBlacklisted(includeBlacklisted: Boolean) {
+        backupItems.value = backupItems.value.copy(includeBlacklisted = includeBlacklisted)
+    }
+
+    fun includeSettings(includeSettings: Boolean) {
+        backupItems.value = backupItems.value.copy(includeSettings = includeSettings)
     }
 
     fun backup(
         platformFile: PlatformFile,
     ) {
         viewModelScope.launch {
-            error = null
-            isBackingUp = true
+            uiState.value = uiState.value.copy(isBackingUp = true, error = null)
             runCatching {
-                backupRepository.packageItems(
+                /*backupRepository.packageItems(
                     platformFile = platformFile,
                     includeFavorites = includeFavorites,
                     includeBlacklisted = includeBlacklisted,
                     includeSettings = includeSettings,
                     listItemsByUuid = listsToInclude
+                )*/
+                backupRepository.packageItems(
+                    platformFile = platformFile,
+                    includeFavorites = backupItems.value.includeFavorites,
+                    includeBlacklisted = backupItems.value.includeBlacklisted,
+                    includeSettings = backupItems.value.includeSettings,
+                    listItemsByUuid = backupItems.value.listsToInclude.map { it.item.uuid }
                 )
             }
                 .onSuccess {
+                    uiState.value = uiState.value.copy(isBackingUp = false, error = null)
                     toasterState.show(
                         "Backup Complete",
                         type = ToastType.Success
@@ -79,13 +120,25 @@ class BackupViewModel(
                 }
                 .onFailure {
                     it.printStackTrace()
-                    error = it
+                    uiState.value = uiState.value.copy(isBackingUp = false, error = it)
                     toasterState.show(
                         "Backup Failed",
                         type = ToastType.Error
                     )
                 }
-            isBackingUp = false
         }
     }
 }
+
+@Serializable
+data class BackupItemsState(
+    val includeFavorites: Boolean,
+    val includeBlacklisted: Boolean,
+    val includeSettings: Boolean,
+    val listsToInclude: ImmutableList<CustomList>,
+)
+
+data class BackupUiState(
+    val isBackingUp: Boolean,
+    val error: Throwable?,
+)

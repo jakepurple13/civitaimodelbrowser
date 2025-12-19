@@ -14,7 +14,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.Modifier
@@ -23,6 +22,7 @@ import androidx.navigation3.runtime.NavKey
 import androidx.navigation3.runtime.rememberSaveableStateHolderNavEntryDecorator
 import androidx.navigation3.scene.DialogSceneStrategy
 import androidx.navigation3.ui.NavDisplay
+import com.programmersbox.common.di.NavigationHandler
 import dev.chrisbanes.haze.LocalHazeStyle
 import dev.chrisbanes.haze.materials.HazeMaterials
 import kotlinx.coroutines.flow.collect
@@ -99,10 +99,6 @@ private fun SetupNetworkListener() {
         networkConnectionRepository.start()
         onDispose { networkConnectionRepository.stop() }
     }
-}
-
-class NavigationHandler {
-    val backStack = mutableStateListOf<NavKey>(Screen.List)
 }
 
 val LocalActions = staticCompositionLocalOf<Actions> { error("Nothing") }

@@ -5,12 +5,12 @@ import ca.gosyer.appdirs.AppDirs
 import com.dokar.sonner.Toaster
 import com.dokar.sonner.ToasterState
 import com.programmersbox.common.ApplicationInfo
-import com.programmersbox.common.NavigationHandler
 import com.programmersbox.common.Network
 import com.programmersbox.common.Screen
 import com.programmersbox.common.UIShow
 import com.programmersbox.common.backup.Zipper
 import com.programmersbox.common.createPlatformModule
+import com.programmersbox.common.di.NavigationHandler
 import com.programmersbox.common.di.cmpModules
 import com.programmersbox.common.getDatabaseBuilder
 import com.programmersbox.common.qrcode.QrCodeRepository

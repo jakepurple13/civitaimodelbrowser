@@ -2,17 +2,19 @@ package com.programmersbox.common.backup
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateContentSize
-import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowDropDown
+import androidx.compose.material.icons.filled.ChevronRight
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Card
@@ -21,10 +23,13 @@ import androidx.compose.material3.CircularWavyProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.FloatingActionButton
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.ListItem
+import androidx.compose.material3.ListItemDefaults
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
@@ -37,7 +42,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.style.TextOverflow
@@ -61,7 +65,10 @@ fun BackupScreen(
         it?.let { platformFile -> viewModel.backup(platformFile) }
     }
 
-    if (viewModel.isBackingUp) {
+    val backupItems by viewModel.backupItems.collectAsStateWithLifecycle()
+    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+
+    if (uiState.isBackingUp) {
         AlertDialog(
             onDismissRequest = { },
             title = { Text("Backing Up") },
@@ -82,7 +89,7 @@ fun BackupScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Create Backup") },
+                title = { Text("Backup Data") },
                 navigationIcon = { BackButton() }
             )
         },
@@ -97,9 +104,16 @@ fun BackupScreen(
             verticalArrangement = Arrangement.spacedBy(4.dp)
         ) {
             item {
+                Text(
+                    "Include in Backup",
+                    style = MaterialTheme.typography.titleLarge,
+                    modifier = Modifier.padding(8.dp)
+                )
+            }
+            item {
                 FavoriteSwitch(
-                    checked = viewModel.includeFavorites,
-                    onCheckedChange = { viewModel.includeFavorites = it },
+                    checked = backupItems.includeFavorites,
+                    onCheckedChange = viewModel::includeFavorites,
                     favoriteCount = viewModel
                         .favoritesCount
                         .collectAsStateWithLifecycle(0)
@@ -108,36 +122,43 @@ fun BackupScreen(
             }
             item {
                 BlacklistedSwitch(
-                    checked = viewModel.includeBlacklisted,
+                    checked = backupItems.includeBlacklisted,
                     blacklistedCount = viewModel
                         .blacklistedCount
                         .collectAsStateWithLifecycle(0)
                         .value,
-                    onCheckedChange = { viewModel.includeBlacklisted = it }
+                    onCheckedChange = viewModel::includeBlacklisted
                 )
             }
             item {
                 SettingsSwitch(
-                    checked = viewModel.includeSettings,
-                    onCheckedChange = { viewModel.includeSettings = it }
+                    checked = backupItems.includeSettings,
+                    onCheckedChange = viewModel::includeSettings
                 )
             }
-
             item {
                 ListsToInclude(
                     list = viewModel
                         .lists
                         .collectAsStateWithLifecycle(emptyList())
                         .value,
-                    listsToInclude = viewModel.listsToInclude,
+                    listsToInclude = backupItems.listsToInclude,
                     onAddList = viewModel::addList,
                     onRemoveList = viewModel::removeList
                 )
             }
-
             item {
-                AnimatedVisibility(viewModel.error != null) {
-                    Text(viewModel.error?.message.orEmpty())
+                AnimatedVisibility(uiState.error != null) {
+                    Column(
+                        verticalArrangement = Arrangement.spacedBy(4.dp),
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        HorizontalDivider()
+                        Text(
+                            uiState.error?.message.orEmpty(),
+                            modifier = Modifier.padding(16.dp)
+                        )
+                    }
                 }
             }
         }
@@ -154,13 +175,17 @@ private fun FavoriteSwitch(
         onClick = { onCheckedChange(!checked) }
     ) {
         ListItem(
-            headlineContent = { Text("Include Favorites ($favoriteCount)") },
+            headlineContent = { Text("Favorites ($favoriteCount)") },
             trailingContent = {
                 Switch(
                     checked = checked,
                     onCheckedChange = onCheckedChange
                 )
-            }
+            },
+            supportingContent = { Text("Favorite models and images") },
+            colors = ListItemDefaults.colors(
+                containerColor = Color.Transparent
+            )
         )
     }
 }
@@ -175,13 +200,17 @@ private fun BlacklistedSwitch(
         onClick = { onCheckedChange(!checked) }
     ) {
         ListItem(
-            headlineContent = { Text("Include Blacklisted ($blacklistedCount)") },
+            headlineContent = { Text("Blacklisted ($blacklistedCount)") },
             trailingContent = {
                 Switch(
                     checked = checked,
                     onCheckedChange = onCheckedChange
                 )
-            }
+            },
+            supportingContent = { Text("Blocked models and images") },
+            colors = ListItemDefaults.colors(
+                containerColor = Color.Transparent
+            )
         )
     }
 }
@@ -195,57 +224,69 @@ private fun SettingsSwitch(
         onClick = { onCheckedChange(!checked) }
     ) {
         ListItem(
-            headlineContent = { Text("Include Settings") },
+            headlineContent = { Text("App Settings") },
             trailingContent = {
                 Switch(
                     checked = checked,
                     onCheckedChange = onCheckedChange
                 )
-            }
+            },
+            supportingContent = { Text("App settings like theme, etc.") },
+            colors = ListItemDefaults.colors(
+                containerColor = Color.Transparent
+            )
         )
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun ListsToInclude(
     list: List<CustomList>,
-    listsToInclude: List<String>,
-    onAddList: (String) -> Unit,
-    onRemoveList: (String) -> Unit,
+    listsToInclude: List<CustomList>,
+    onAddList: (CustomList) -> Unit,
+    onRemoveList: (CustomList) -> Unit,
 ) {
     var showAdd by remember { mutableStateOf(false) }
+
+    if (showAdd) {
+        ModalBottomSheet(
+            onDismissRequest = { showAdd = false },
+            containerColor = MaterialTheme.colorScheme.surface,
+        ) {
+            LazyColumn {
+                item {
+                    TopAppBar(
+                        title = { Text("Select Lists to Backup") },
+                        actions = {
+                            IconButton(
+                                onClick = { showAdd = false }
+                            ) { Icon(Icons.Default.Close, null) }
+                        }
+                    )
+                }
+                items(list) { customList ->
+                    ListItemToAdd(
+                        customList = customList,
+                        listsToInclude = listsToInclude,
+                        onAddList = onAddList,
+                        onRemoveList = onRemoveList
+                    )
+                }
+            }
+        }
+    }
+
     Card(
+        onClick = { showAdd = !showAdd },
         modifier = Modifier.animateContentSize()
     ) {
         ListItem(
-            headlineContent = { Text("Include Lists (${listsToInclude.size})") },
-            trailingContent = {
-                IconButton(
-                    onClick = { showAdd = !showAdd }
-                ) {
-                    Icon(
-                        Icons.Default.ArrowDropDown,
-                        null,
-                        modifier = Modifier.rotate(
-                            animateFloatAsState(if (showAdd) 180f else 0f).value
-                        )
-                    )
-                }
-            },
-            supportingContent = {
-                if (showAdd) {
-                    Column {
-                        list.forEach { customList ->
-                            ListItemToAdd(
-                                customList = customList,
-                                listsToInclude = listsToInclude,
-                                onAddList = onAddList,
-                                onRemoveList = onRemoveList
-                            )
-                        }
-                    }
-                }
-            }
+            headlineContent = { Text("Select Lists (${listsToInclude.size} selected)") },
+            trailingContent = { Icon(Icons.Default.ChevronRight, null) },
+            colors = ListItemDefaults.colors(
+                containerColor = Color.Transparent
+            )
         )
     }
 }
@@ -253,16 +294,16 @@ private fun ListsToInclude(
 @Composable
 private fun ListItemToAdd(
     customList: CustomList,
-    listsToInclude: List<String>,
-    onAddList: (String) -> Unit,
-    onRemoveList: (String) -> Unit,
+    listsToInclude: List<CustomList>,
+    onAddList: (CustomList) -> Unit,
+    onRemoveList: (CustomList) -> Unit,
 ) {
     Card(
         onClick = {
-            if (customList.item.uuid in listsToInclude) {
-                onRemoveList(customList.item.uuid)
+            if (listsToInclude.any { it.item.uuid == customList.item.uuid }) {
+                onRemoveList(customList)
             } else {
-                onAddList(customList.item.uuid)
+                onAddList(customList)
             }
         }
     ) {
@@ -282,12 +323,12 @@ private fun ListItemToAdd(
             },
             trailingContent = {
                 Checkbox(
-                    checked = customList.item.uuid in listsToInclude,
+                    checked = listsToInclude.any { it.item.uuid == customList.item.uuid },
                     onCheckedChange = {
                         if (it) {
-                            onAddList(customList.item.uuid)
+                            onAddList(customList)
                         } else {
-                            onRemoveList(customList.item.uuid)
+                            onRemoveList(customList)
                         }
                     }
                 )
@@ -296,7 +337,10 @@ private fun ListItemToAdd(
                 val imageHashing = customList.toImageHash()
 
                 val imageModifier = Modifier
-                    .size(ComposableUtils.IMAGE_WIDTH / 3, ComposableUtils.IMAGE_HEIGHT / 3)
+                    .size(
+                        ComposableUtils.IMAGE_WIDTH / 3,
+                        ComposableUtils.IMAGE_HEIGHT / 3
+                    )
                     .clip(MaterialTheme.shapes.medium)
 
                 if (imageHashing?.url?.endsWith("mp4") == true) {

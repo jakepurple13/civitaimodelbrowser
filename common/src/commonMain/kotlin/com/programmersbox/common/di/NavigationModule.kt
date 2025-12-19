@@ -3,8 +3,9 @@ package com.programmersbox.common.di
 import androidx.compose.material3.adaptive.ExperimentalMaterial3AdaptiveApi
 import androidx.compose.material3.adaptive.navigation3.ListDetailSceneStrategy
 import androidx.compose.material3.adaptive.navigation3.SupportingPaneSceneStrategy
+import androidx.compose.runtime.mutableStateListOf
+import androidx.navigation3.runtime.NavKey
 import androidx.navigation3.scene.DialogSceneStrategy
-import com.programmersbox.common.NavigationHandler
 import com.programmersbox.common.Screen
 import com.programmersbox.common.backup.BackupScreen
 import com.programmersbox.common.backup.RestoreScreen
@@ -185,4 +186,8 @@ private fun Module.settingsNavigation() {
     navigation<Screen.Settings.Behavior>(
         metadata = ListDetailSceneStrategy.detailPane()
     ) { BehaviorSettingsScreen() }
+}
+
+class NavigationHandler {
+    val backStack = mutableStateListOf<NavKey>(Screen.List)
 }

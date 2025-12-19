@@ -32,7 +32,6 @@ class RestoreWorker(
         println("Restoring $file")
         val platformFile = PlatformFile(file)
         val readItems = backupRepository.readItems(platformFile)
-        //73, 46
         val duration = measureTime {
             backupRepository.restoreItems(
                 backupItems = readItems.copy(lists = readItems.lists?.filter { it.item.uuid in listsToInclude }),

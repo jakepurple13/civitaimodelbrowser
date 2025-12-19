@@ -1,4 +1,5 @@
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.window.MenuBar
@@ -116,8 +117,10 @@ fun main() {
 
                 val appState = remember { MyApplicationState() }
 
-                appState.windows.forEach { state ->
-                    MyWindow(state)
+                for (window in appState.windows) {
+                    key(window) {
+                        MyWindow(window)
+                    }
                 }
 
                 WindowWithBar(

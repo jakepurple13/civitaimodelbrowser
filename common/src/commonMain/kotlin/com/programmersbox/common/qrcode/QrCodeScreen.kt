@@ -1,6 +1,5 @@
 package com.programmersbox.common.qrcode
 
-import androidx.compose.animation.Crossfade
 import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -11,6 +10,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.sizeIn
 import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.layout.windowInsetsPadding
@@ -54,7 +54,9 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.navigation3.runtime.NavKey
+import com.programmersbox.common.ComposableUtils
 import com.programmersbox.common.Screen
+import com.programmersbox.common.components.LoadingImage
 import com.programmersbox.resources.Res
 import com.programmersbox.resources.civitai_logo
 import io.github.alexzhirkevich.qrose.options.QrLogoPadding
@@ -266,6 +268,7 @@ fun ScanQrCode(
                 horizontalAlignment = Alignment.CenterHorizontally,
                 modifier = Modifier
                     .padding(padding)
+                    .animateContentSize()
                     .fillMaxWidth()
             ) {
                 Box(
@@ -323,7 +326,10 @@ fun ScanQrCode(
                             .padding(8.dp)
                     ) {
                         Icon(
-                            if (torchState) Icons.Default.FlashOn else Icons.Default.FlashOff,
+                            if (torchState)
+                                Icons.Default.FlashOn
+                            else
+                                Icons.Default.FlashOff,
                             null
                         )
                     }
@@ -346,11 +352,31 @@ fun ScanQrCode(
                     onClick = { filePicker.launch() },
                     shapes = ButtonDefaults.shapes(),
                     modifier = Modifier.fillMaxWidth(.75f)
-                ) { Text("Upload Image") }
+                ) { Text("Upload Image from Gallery") }
 
-                Crossfade(qrCodeInfo) { target ->
+                if (qrCodeInfo == null) {
+                    Text(
+                        "Waiting for QR code",
+                        modifier = Modifier.align(Alignment.CenterHorizontally)
+                    )
+                } else {
                     ListItem(
-                        headlineContent = { Text(target?.title ?: "Waiting for QR code") },
+                        headlineContent = { Text(qrCodeInfo.title) },
+                        overlineContent = { Text(qrCodeInfo.username ?: qrCodeInfo.url) },
+                        leadingContent = {
+                            LoadingImage(
+                                imageUrl = qrCodeInfo.imageUrl,
+                                name = qrCodeInfo.title,
+                                isNsfw = false,
+                                hash = null,
+                                modifier = Modifier
+                                    .size(
+                                        width = ComposableUtils.IMAGE_WIDTH / 3,
+                                        height = ComposableUtils.IMAGE_HEIGHT / 3
+                                    )
+                                    .clip(MaterialTheme.shapes.medium)
+                            )
+                        }
                     )
                 }
 
@@ -359,12 +385,16 @@ fun ScanQrCode(
                         scope.launch {
                             qrCodeInfo?.let {
                                 when (it.qrCodeType) {
-                                    QrCodeType.Model -> onNavigate(Screen.Detail(it.id.orEmpty()))
-                                    QrCodeType.User -> onNavigate(Screen.User(it.username.orEmpty()))
+                                    QrCodeType.Model ->
+                                        onNavigate(Screen.Detail(it.id.orEmpty()))
+
+                                    QrCodeType.User ->
+                                        onNavigate(Screen.User(it.username.orEmpty()))
+
                                     QrCodeType.Image -> onNavigate(
                                         Screen.DetailsImage(
-                                            it.id.orEmpty(),
-                                            it.title
+                                            modelId = it.id.orEmpty(),
+                                            modelName = it.title
                                         )
                                     )
                                 }

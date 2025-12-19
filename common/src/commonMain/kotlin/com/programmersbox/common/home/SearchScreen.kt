@@ -8,12 +8,16 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.animation.togetherWith
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.text.input.TextFieldState
 import androidx.compose.foundation.text.input.clearText
+import androidx.compose.foundation.text.input.setTextAndPlaceCursorAtEnd
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Clear
@@ -22,6 +26,7 @@ import androidx.compose.material3.ExpandedFullScreenSearchBar
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.ListItem
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SearchBarDefaults
@@ -45,6 +50,7 @@ import com.programmersbox.common.DataStore
 import com.programmersbox.common.NetworkConnectionRepository
 import com.programmersbox.common.adaptiveGridCell
 import com.programmersbox.common.db.FavoritesDao
+import com.programmersbox.common.db.SearchHistoryItem
 import com.programmersbox.common.ifTrue
 import dev.chrisbanes.haze.HazeProgressive
 import dev.chrisbanes.haze.HazeState
@@ -80,6 +86,10 @@ fun SearchScreen(
     val blurStrength by dataStore.hideNsfwStrength()
     val hazeStyle = LocalHazeStyle.current
 
+    val searchList by viewModel
+        .searchFlow
+        .collectAsStateWithLifecycle(emptyList())
+
     Scaffold(
         topBar = {
             SearchAppBar(
@@ -87,6 +97,8 @@ fun SearchScreen(
                 onSearch = viewModel::onSearch,
                 showBlur = showBlur,
                 searchCount = lazyPagingItems.itemCount,
+                searchHistory = searchList,
+                onRemoveSearchHistory = viewModel::removeSearchHistory,
                 modifier = Modifier.ifTrue(showBlur) {
                     hazeEffect(hazeState) {
                         progressive = HazeProgressive.verticalGradient(
@@ -131,6 +143,8 @@ private fun SearchAppBar(
     onSearch: (String) -> Unit,
     searchCount: Int,
     showBlur: Boolean,
+    searchHistory: List<SearchHistoryItem>,
+    onRemoveSearchHistory: (SearchHistoryItem) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val searchBarState = rememberSearchBarState()
@@ -215,6 +229,27 @@ private fun SearchAppBar(
         state = searchBarState,
         inputField = inputField,
     ) {
-        //TODO: This will be previous searches
+        LazyColumn(
+            verticalArrangement = Arrangement.spacedBy(4.dp)
+        ) {
+            items(searchHistory) { item ->
+                ListItem(
+                    headlineContent = { Text(item.searchQuery) },
+                    trailingContent = {
+                        IconButton(
+                            onClick = { onRemoveSearchHistory(item) }
+                        ) { Icon(Icons.Default.Clear, null) }
+                    },
+                    modifier = Modifier
+                        .animateItem()
+                        .clickable {
+                            scope.launch {
+                                searchQuery.setTextAndPlaceCursorAtEnd(item.searchQuery)
+                                searchBarState.animateToCollapsed()
+                            }.invokeOnCompletion { onSearch(item.searchQuery) }
+                        }
+                )
+            }
+        }
     }
 }

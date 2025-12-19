@@ -23,8 +23,14 @@ import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 
 @Database(
-    entities = [FavoriteRoom::class, BlacklistedItemRoom::class, CustomListInfo::class, CustomListItem::class],
-    version = 7,
+    entities = [
+        FavoriteRoom::class,
+        BlacklistedItemRoom::class,
+        CustomListInfo::class,
+        CustomListItem::class,
+        SearchHistoryItem::class,
+    ],
+    version = 8,
     autoMigrations = [
         AutoMigration(from = 1, to = 2),
         AutoMigration(from = 2, to = 3),
@@ -32,6 +38,7 @@ import kotlinx.serialization.json.Json
         AutoMigration(from = 4, to = 5),
         AutoMigration(from = 5, to = 6),
         AutoMigration(from = 6, to = 7),
+        AutoMigration(from = 7, to = 8),
     ]
 )
 
@@ -39,6 +46,7 @@ import kotlinx.serialization.json.Json
 abstract class AppDatabase : RoomDatabase() {
     abstract fun getDao(): FavoritesDao
     abstract fun getListDao(): ListDao
+    abstract fun getSearchHistoryDao(): SearchHistoryDao
 }
 
 @Suppress("NO_ACTUAL_FOR_EXPECT", "KotlinNoActualForExpect")
@@ -371,10 +379,4 @@ data class DataCounts(
     val modelCount: Int,
     val imageCount: Int,
     val creatorCount: Int
-)
-
-data class NsfwCounts(
-    val favorites: Int,
-    val blacklisted: Int,
-    val lists: Int
 )

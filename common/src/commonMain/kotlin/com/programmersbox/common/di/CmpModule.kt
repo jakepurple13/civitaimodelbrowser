@@ -18,6 +18,7 @@ fun cmpModules() = module {
     single { getRoomDatabase(get()) }
     single { get<AppDatabase>().getDao() }
     single { get<AppDatabase>().getListDao() }
+    single { get<AppDatabase>().getSearchHistoryDao() }
     single { ToasterState(CoroutineScope(Dispatchers.Main)) }
 
     includes(

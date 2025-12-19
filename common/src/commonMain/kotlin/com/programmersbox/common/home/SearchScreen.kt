@@ -2,6 +2,7 @@ package com.programmersbox.common.home
 
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.animateIntAsState
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInHorizontally
@@ -16,7 +17,6 @@ import androidx.compose.foundation.text.input.clearText
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Clear
-import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.AppBarWithSearch
 import androidx.compose.material3.ExpandedFullScreenSearchBar
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -86,6 +86,7 @@ fun SearchScreen(
                 searchQuery = viewModel.searchQuery,
                 onSearch = viewModel::onSearch,
                 showBlur = showBlur,
+                searchCount = lazyPagingItems.itemCount,
                 modifier = Modifier.ifTrue(showBlur) {
                     hazeEffect(hazeState) {
                         progressive = HazeProgressive.verticalGradient(
@@ -128,6 +129,7 @@ fun SearchScreen(
 private fun SearchAppBar(
     searchQuery: TextFieldState,
     onSearch: (String) -> Unit,
+    searchCount: Int,
     showBlur: Boolean,
     modifier: Modifier = Modifier,
 ) {
@@ -156,13 +158,11 @@ private fun SearchAppBar(
                     .invokeOnCompletion { onSearch(query) }
             },
             placeholder = {
-                if (searchBarState.currentValue == SearchBarValue.Collapsed) {
-                    Text(
-                        modifier = Modifier.fillMaxWidth(),
-                        text = "Search CivitAi",
-                        textAlign = TextAlign.Center,
-                    )
-                }
+                Text(
+                    modifier = Modifier.fillMaxWidth(),
+                    text = "Search CivitAi",
+                    textAlign = TextAlign.Center,
+                )
             },
             leadingIcon = {
                 AnimatedContent(
@@ -182,8 +182,6 @@ private fun SearchAppBar(
                                 contentDescription = null
                             )
                         }
-                    } else {
-                        Icon(Icons.Default.Search, null)
                     }
                 }
             },
@@ -208,7 +206,7 @@ private fun SearchAppBar(
         state = searchBarState,
         inputField = inputField,
         navigationIcon = { BackButton() },
-        actions = {},
+        actions = { Text("(${animateIntAsState(searchCount).value})") },
         colors = appBarWithSearchColors,
         modifier = modifier
     )

@@ -215,7 +215,12 @@ private fun NsfwStats(
     ) {
         ListItem(
             headlineContent = { Text("Show NSFW Stats") },
-            leadingContent = { Icon(Icons.Default.NoAdultContent, null) },
+            leadingContent = {
+                Icon(
+                    Icons.Default.NoAdultContent, null,
+                    tint = MaterialTheme.colorScheme.error
+                )
+            },
             trailingContent = {
                 Switch(
                     checked = showNsfwStats,

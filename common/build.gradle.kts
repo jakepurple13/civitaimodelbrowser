@@ -124,6 +124,8 @@ kotlin {
             implementation(libs.connectivity.compose.device)
             implementation(libs.androidx.biometric)
             implementation(libs.androidx.biometric.compose)
+            api(libs.androidx.work.runtime.ktx)
+            api(libs.koin.workmanager)
         }
 
         jvmMain.dependencies {

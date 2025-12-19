@@ -10,6 +10,7 @@ import com.dokar.sonner.ToastType
 import com.dokar.sonner.ToasterState
 import com.programmersbox.common.di.NavigationHandler
 import io.github.vinceglb.filekit.PlatformFile
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 class RestoreViewModel(
@@ -24,6 +25,7 @@ class RestoreViewModel(
     var includeSettings by mutableStateOf(true)
     var includeSearchHistory by mutableStateOf(true)
     val listsToInclude = mutableStateListOf<String>()
+    private var platformFile: PlatformFile? = null
 
     var uiState by mutableStateOf(
         RestoreUiState(
@@ -36,6 +38,7 @@ class RestoreViewModel(
     fun read(platformFile: PlatformFile) {
         viewModelScope.launch {
             uiState = uiState.copy(isReading = true)
+            this@RestoreViewModel.platformFile = platformFile
             runCatching { backupItems = backupRepository.readItems(platformFile) }
                 .onFailure {
                     uiState = uiState.copy(error = it)
@@ -50,22 +53,21 @@ class RestoreViewModel(
     fun restore() {
         viewModelScope.launch {
             uiState = uiState.copy(isRestoring = true)
-            backupItems
-                ?.copy(lists = backupItems?.lists?.filter { it.item.uuid in listsToInclude })
-                ?.let {
-                    backupRepository.restoreItems(
-                        backupItems = it,
-                        includeFavorites = includeFavorites,
-                        includeBlacklisted = includeBlacklisted,
-                        includeSettings = includeSettings,
-                        includeSearchHistory = includeSearchHistory,
-                    )
-                }
-            uiState = uiState.copy(isRestoring = false)
-            toasterState.show(
-                "Backup Complete",
-                type = ToastType.Success
+            backupRepository.startRestore(
+                backupItems = backupItems ?: return@launch,
+                platformFile = platformFile ?: return@launch,
+                includeFavorites = includeFavorites,
+                includeBlacklisted = includeBlacklisted,
+                includeSettings = includeSettings,
+                includeSearchHistory = includeSearchHistory,
+                listItemsByUuid = listsToInclude,
             )
+            delay(1000)
+            toasterState.show(
+                "Running Restore in Background",
+                type = ToastType.Info
+            )
+            uiState = uiState.copy(isRestoring = false)
             navigationHandler.backStack.removeLastOrNull()
         }
     }

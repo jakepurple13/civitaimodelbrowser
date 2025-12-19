@@ -1,8 +1,15 @@
 package com.programmersbox.common.backup
 
+import androidx.compose.ui.window.Notification
+import androidx.compose.ui.window.TrayState
+import com.dokar.sonner.ToastType
+import com.dokar.sonner.ToasterState
 import io.github.vinceglb.filekit.PlatformFile
 import io.github.vinceglb.filekit.absolutePath
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.io.FileInputStream
 import java.io.FileOutputStream
@@ -53,6 +60,46 @@ actual class Zipper {
                     }
                 }
             }
+        }
+    }
+}
+
+actual class BackupRestoreHandler(
+    private val toasterState: ToasterState,
+    private val trayState: TrayState
+) {
+    private val scope = CoroutineScope(Dispatchers.IO + Job())
+    actual fun restore(
+        backupRepository: BackupRepository,
+        platformFile: PlatformFile,
+        includeFavorites: Boolean,
+        includeBlacklisted: Boolean,
+        includeSettings: Boolean,
+        includeSearchHistory: Boolean,
+        listItemsByUuid: List<String>
+    ) {
+        scope.launch {
+            val duration = measureTime {
+                backupRepository.restoreItems(
+                    backupItems = backupRepository.readItems(platformFile),
+                    includeSettings = includeSettings,
+                    includeFavorites = includeFavorites,
+                    includeBlacklisted = includeBlacklisted,
+                    includeSearchHistory = includeSearchHistory,
+                )
+            }
+            println("Restored in $duration")
+            toasterState.show(
+                "Restore Complete in $duration",
+                type = ToastType.Success
+            )
+            trayState.sendNotification(
+                Notification(
+                    title = "Restore Complete",
+                    message = "Restore Complete in $duration",
+                    type = Notification.Type.Info
+                )
+            )
         }
     }
 }

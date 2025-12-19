@@ -1,5 +1,5 @@
 [versions]
-appVersion = "4.1.6"
+appVersion = "4.1.7"
 
 biometricVersion = "1.4.0-alpha05"
 blurhashVersion = "0.0-4-ALPHA"
@@ -47,6 +47,7 @@ barcodeScanning = "17.3.0"
 connectivity = "2.3.0"
 
 aboutLibraries = "13.1.0"
+workRuntimeKtx = "2.11.0"
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp-version" }
@@ -64,6 +65,7 @@ androidx-biometric-compose = { module = "androidx.biometric:biometric-compose", 
 androidx-browser = { module = "androidx.browser:browser", version.ref = "browser" }
 androidx-core = { module = "androidx.core:core-ktx", version = "1.17.0" }
 androidx-activity-compose = "androidx.activity:activity-compose:1.12.2"
+androidx-work-runtime-ktx = { module = "androidx.work:work-runtime-ktx", version.ref = "workRuntimeKtx" }
 compose-multiplatform-media-player = { module = "network.chaintech:compose-multiplatform-media-player", version.ref = "composeMultiplatformMediaPlayerVersion" }
 blurhash = { module = "io.github.brys0:blurhash", version.ref = "blurhashVersion" }
 composeScrollbars = { module = "com.github.GIGAMOLE:ComposeScrollbars", version.ref = "composeScrollbars" }
@@ -108,6 +110,8 @@ koin-android = { module = "io.insert-koin:koin-android" }
 koin-compose = { module = "io.insert-koin:koin-compose" }
 koin-viewmodel = { module = "io.insert-koin:koin-compose-viewmodel" }
 koin-nav3 = { module = "io.insert-koin:koin-compose-navigation3" }
+
+koin-workmanager = { module = "io.insert-koin:koin-androidx-workmanager" }
 
 filekit-core = { module = "io.github.vinceglb:filekit-core", version.ref = "filekit" }
 filekit-dialogs = { module = "io.github.vinceglb:filekit-dialogs", version.ref = "filekit" }

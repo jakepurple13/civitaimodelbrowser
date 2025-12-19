@@ -5,6 +5,7 @@ import android.content.Context
 import android.os.Environment
 import androidx.core.content.getSystemService
 import androidx.core.net.toUri
+import com.programmersbox.common.backup.BackupRestoreHandler
 import org.koin.core.module.Module
 import org.koin.core.module.dsl.singleOf
 import org.koin.dsl.module
@@ -32,4 +33,5 @@ actual class DownloadHandler(
 actual fun createPlatformModule(): Module = module {
     singleOf(::DownloadHandler)
     single { getDatabaseBuilder(get()) }
+    singleOf(::BackupRestoreHandler)
 }

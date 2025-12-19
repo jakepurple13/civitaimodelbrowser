@@ -11,6 +11,7 @@ import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.programmersbox.common.backup.BackupRestoreHandler
 import io.ktor.client.call.body
 import io.ktor.client.plugins.onDownload
 import io.ktor.client.request.get
@@ -66,6 +67,7 @@ actual class DownloadHandler(
 actual fun createPlatformModule(): Module = module {
     singleOf(::DownloadHandler)
     singleOf(::DataStoreHandler)
+    singleOf(::BackupRestoreHandler)
 }
 
 class DataStoreHandler(

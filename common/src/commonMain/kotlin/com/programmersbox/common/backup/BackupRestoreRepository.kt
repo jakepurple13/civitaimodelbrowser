@@ -31,6 +31,7 @@ class BackupRepository(
     private val searchHistoryDao: SearchHistoryDao,
     private val dataStore: DataStore,
     private val zipper: Zipper,
+    private val backupRestoreHandler: BackupRestoreHandler,
 ) {
     private val json by lazy {
         Json {
@@ -123,6 +124,26 @@ class BackupRepository(
         zipper.zip(platformFile, itemsToZip)
     }
 
+    fun startRestore(
+        backupItems: BackupItems,
+        platformFile: PlatformFile,
+        includeSettings: Boolean,
+        includeFavorites: Boolean,
+        includeBlacklisted: Boolean,
+        includeSearchHistory: Boolean,
+        listItemsByUuid: List<String>,
+    ) {
+        backupRestoreHandler.restore(
+            backupRepository = this,
+            platformFile = platformFile,
+            includeFavorites = includeFavorites,
+            includeBlacklisted = includeBlacklisted,
+            includeSettings = includeSettings,
+            includeSearchHistory = includeSearchHistory,
+            listItemsByUuid = listItemsByUuid,
+        )
+    }
+
     suspend fun restoreItems(
         backupItems: BackupItems,
         includeSettings: Boolean,
@@ -158,14 +179,17 @@ class BackupRepository(
                 }
             }
             launch(Dispatchers.IO) {
-                backupItems.lists?.let { lists ->
-                    lists.forEach { listDao.createList(it.item) }
-                    lists.forEach {
-                        it.list.forEach { item ->
-                            listDao.addItem(item)
+                val duration = measureTime {
+                    backupItems.lists?.let { lists ->
+                        lists.forEach { listDao.createList(it.item) }
+                        lists.forEach {
+                            it.list.forEach { item ->
+                                listDao.addItem(item)
+                            }
                         }
                     }
                 }
+                println("Restored lists in $duration")
             }
             if (includeSearchHistory) {
                 launch(Dispatchers.IO) {
@@ -253,6 +277,18 @@ expect class Zipper {
     suspend fun unzip(
         platformFile: PlatformFile,
         onInfo: suspend (fileName: String, jsonString: String) -> Unit
+    )
+}
+
+expect class BackupRestoreHandler {
+    fun restore(
+        backupRepository: BackupRepository,
+        platformFile: PlatformFile,
+        includeFavorites: Boolean,
+        includeBlacklisted: Boolean,
+        includeSettings: Boolean,
+        includeSearchHistory: Boolean,
+        listItemsByUuid: List<String>,
     )
 }
 

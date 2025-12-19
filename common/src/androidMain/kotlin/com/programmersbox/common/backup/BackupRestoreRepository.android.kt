@@ -1,6 +1,11 @@
 package com.programmersbox.common.backup
 
 import android.content.Context
+import androidx.work.ExistingWorkPolicy
+import androidx.work.OneTimeWorkRequestBuilder
+import androidx.work.WorkManager
+import androidx.work.workDataOf
+import com.programmersbox.common.RestoreWorker
 import io.github.vinceglb.filekit.PlatformFile
 import io.github.vinceglb.filekit.dialogs.toAndroidUri
 import kotlinx.coroutines.Dispatchers
@@ -71,5 +76,40 @@ actual class Zipper(
                 }
             }
         }
+    }
+}
+
+actual class BackupRestoreHandler(
+    private val context: Context
+) {
+    actual fun restore(
+        backupRepository: BackupRepository,
+        platformFile: PlatformFile,
+        includeFavorites: Boolean,
+        includeBlacklisted: Boolean,
+        includeSettings: Boolean,
+        includeSearchHistory: Boolean,
+        listItemsByUuid: List<String>
+    ) {
+        WorkManager
+            .getInstance(context)
+            .enqueueUniqueWork(
+                "RestoreWorker",
+                ExistingWorkPolicy.REPLACE,
+                OneTimeWorkRequestBuilder<RestoreWorker>()
+                    .setInputData(
+                        workDataOf(
+                            "file" to platformFile
+                                .toAndroidUri(context.applicationContext.packageName + ".fileprovider")
+                                .toString(),
+                            "includeFavorites" to includeFavorites,
+                            "includeBlacklisted" to includeBlacklisted,
+                            "includeSettings" to includeSettings,
+                            "includeSearchHistory" to includeSearchHistory,
+                            "listsToInclude" to listItemsByUuid.toTypedArray()
+                        )
+                    )
+                    .build()
+            )
     }
 }

@@ -21,6 +21,7 @@ import androidx.compose.foundation.text.input.setTextAndPlaceCursorAtEnd
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Clear
+import androidx.compose.material.icons.filled.History
 import androidx.compose.material3.AppBarWithSearch
 import androidx.compose.material3.ExpandedFullScreenSearchBar
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -235,6 +236,7 @@ private fun SearchAppBar(
             items(searchHistory) { item ->
                 ListItem(
                     headlineContent = { Text(item.searchQuery) },
+                    leadingContent = { Icon(Icons.Default.History, null) },
                     trailingContent = {
                         IconButton(
                             onClick = { onRemoveSearchHistory(item) }

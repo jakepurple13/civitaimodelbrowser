@@ -51,8 +51,6 @@ private fun Module.home() {
         val backStack = koinInject<NavigationHandler>().backStack
         CivitAiScreen(
             onNavigateToDetail = { id -> backStack.add(Screen.Detail(id)) },
-            onNavigateToFavorites = { backStack.add(Screen.Favorites) },
-            onNavigateToSettings = { backStack.add(Screen.Settings) },
             onNavigateToQrCode = { backStack.add(Screen.QrCode) },
             onNavigateToUser = { username -> backStack.add(Screen.User(username)) },
             onNavigateToImages = { backStack.add(Screen.Images) },
@@ -68,7 +66,6 @@ private fun Module.home() {
                 backStack.add(Screen.Settings)
                 backStack.add(Screen.Settings.Blacklisted)
             },
-            onNavigateToCustomList = { backStack.add(Screen.CustomList) },
             onNavigateToSearch = { backStack.add(Screen.Search) },
         )
     }
@@ -125,15 +122,7 @@ private fun Module.customList() {
     ) {
         val backStack = koinInject<NavigationHandler>().backStack
         ListScreen(
-            onNavigateToDetail = { id -> backStack.add(Screen.CustomListDetail(id)) },
-            onNavigateToHome = {
-                backStack.clear()
-                backStack.add(Screen.List)
-            },
-            onNavigateToSettings = {
-                backStack.removeAll { it == Screen.CustomList }
-                backStack.add(Screen.Settings)
-            }
+            onNavigateToDetail = { id -> backStack.add(Screen.CustomListDetail(id)) }
         )
     }
     navigation<Screen.CustomListDetail>(
@@ -205,15 +194,7 @@ private fun Module.settingsNavigation() {
             onNavigateToStats = { backStack.add(Screen.Settings.Stats) },
             onNavigateToAbout = { backStack.add(Screen.Settings.About) },
             onNavigateToNsfw = { backStack.add(Screen.Settings.Nsfw) },
-            onNavigateToBehavior = { backStack.add(Screen.Settings.Behavior) },
-            onNavigateToHome = {
-                backStack.clear()
-                backStack.add(Screen.List)
-            },
-            onNavigateToCustomList = {
-                backStack.removeAll { it == Screen.Settings }
-                backStack.add(Screen.CustomList)
-            }
+            onNavigateToBehavior = { backStack.add(Screen.Settings.Behavior) }
         )
     }
 

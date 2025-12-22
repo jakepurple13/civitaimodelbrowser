@@ -27,7 +27,6 @@ import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowUpward
 import androidx.compose.material.icons.filled.Block
-import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.Image
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.QrCodeScanner
@@ -108,14 +107,11 @@ import org.koin.compose.viewmodel.koinViewModel
 @Composable
 fun CivitAiScreen(
     onNavigateToDetail: (String) -> Unit,
-    onNavigateToFavorites: () -> Unit,
-    onNavigateToSettings: () -> Unit,
     onNavigateToQrCode: () -> Unit,
     onNavigateToUser: (String) -> Unit,
     onNavigateToDetailImages: (Long, String) -> Unit,
     onNavigateToBlacklist: () -> Unit,
     onNavigateToImages: () -> Unit,
-    onNavigateToCustomList: () -> Unit,
     onNavigateToSearch: () -> Unit,
     viewModel: CivitAiViewModel = koinViewModel(),
 ) {
@@ -149,7 +145,6 @@ fun CivitAiScreen(
             AppSearchAppBar(
                 showBlur = showBlur,
                 onNavigateToSearch = onNavigateToSearch,
-                onNavigateToFavorites = onNavigateToFavorites,
                 onNavigateToQrCode = onNavigateToQrCode,
                 onNavigateToImages = onNavigateToImages,
                 onNavigateToBlacklist = onNavigateToBlacklist,
@@ -167,12 +162,6 @@ fun CivitAiScreen(
         },
         bottomBar = {
             CivitBottomBar(
-                onNavigateToLists = onNavigateToCustomList,
-                onNavigateToSettings = onNavigateToSettings,
-                onNavigateToHome = {},
-                isHome = true,
-                isSettings = false,
-                isLists = false,
                 showBlur = showBlur,
                 bottomBarScrollBehavior = bottomBarScrollBehavior,
                 modifier = Modifier.ifTrue(showBlur) {
@@ -558,7 +547,6 @@ fun CardContent(
 @Composable
 private fun AppSearchAppBar(
     onNavigateToSearch: () -> Unit,
-    onNavigateToFavorites: () -> Unit,
     onNavigateToQrCode: () -> Unit,
     onNavigateToImages: () -> Unit,
     onNavigateToBlacklist: () -> Unit,
@@ -581,17 +569,12 @@ private fun AppSearchAppBar(
         },
         actions = {
             AppBarRow(
-                maxItemCount = 3
+                maxItemCount = 2
             ) {
                 clickableItem(
                     onClick = onNavigateToQrCode,
                     icon = { Icon(Icons.Default.QrCodeScanner, null) },
                     label = "QR Code Scanner"
-                )
-                clickableItem(
-                    onClick = onNavigateToFavorites,
-                    icon = { Icon(Icons.Default.Favorite, null) },
-                    label = "Favorites"
                 )
                 clickableItem(
                     onClick = onNavigateToImages,

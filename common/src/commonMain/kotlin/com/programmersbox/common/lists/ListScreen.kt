@@ -80,8 +80,6 @@ import kotlin.time.Instant
 fun ListScreen(
     viewModel: ListViewModel = koinViewModel(),
     onNavigateToDetail: (String) -> Unit,
-    onNavigateToHome: () -> Unit,
-    onNavigateToSettings: () -> Unit,
 ) {
     val connectionRepository = koinInject<NetworkConnectionRepository>()
     val shouldShowMedia by remember { derivedStateOf { connectionRepository.shouldShowMedia } }
@@ -158,12 +156,6 @@ fun ListScreen(
         },
         bottomBar = {
             CivitBottomBar(
-                onNavigateToLists = {},
-                onNavigateToSettings = onNavigateToSettings,
-                onNavigateToHome = onNavigateToHome,
-                isHome = false,
-                isSettings = false,
-                isLists = true,
                 showBlur = showBlur,
                 bottomBarScrollBehavior = bottomBarScrollBehavior,
                 modifier = Modifier.ifTrue(showBlur) {

@@ -82,6 +82,35 @@ class DataStore private constructor(
     )
 
     @Composable
+    fun rememberMiddleNavigation(): MutableState<MiddleNavigation> {
+        val coroutineScope = rememberCoroutineScope()
+        val key = stringPreferencesKey("middle_navigation")
+        val state by remember {
+            dataStore
+                .data
+                .map {
+                    runCatching { MiddleNavigation.valueOf(it[key]!!) }
+                        .getOrElse { MiddleNavigation.Lists }
+                }
+        }.collectAsStateWithLifecycle(initialValue = MiddleNavigation.Lists)
+
+        return remember(state) {
+            object : MutableState<MiddleNavigation> {
+                override var value: MiddleNavigation
+                    get() = state
+                    set(value) {
+                        coroutineScope.launch {
+                            dataStore.edit { it[key] = value.name }
+                        }
+                    }
+
+                override fun component1() = value
+                override fun component2(): (MiddleNavigation) -> Unit = { value = it }
+            }
+        }
+    }
+
+    @Composable
     fun rememberThemeMode(): MutableState<ThemeMode> {
         val coroutineScope = rememberCoroutineScope()
         val key = stringPreferencesKey("theme_mode")
@@ -168,4 +197,10 @@ enum class ThemeMode {
     System,
     Light,
     Dark
+}
+
+enum class MiddleNavigation {
+    Lists,
+    Favorites,
+    None
 }

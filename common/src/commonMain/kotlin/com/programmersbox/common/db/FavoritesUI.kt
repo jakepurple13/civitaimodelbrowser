@@ -36,6 +36,7 @@ import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.Image
 import androidx.compose.material.icons.filled.Preview
 import androidx.compose.material.icons.filled.Share
+import androidx.compose.material3.BottomAppBarDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.DockedSearchBar
@@ -69,6 +70,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
@@ -81,6 +83,7 @@ import com.programmersbox.common.DataStore
 import com.programmersbox.common.NetworkConnectionRepository
 import com.programmersbox.common.SheetDetails
 import com.programmersbox.common.adaptiveGridCell
+import com.programmersbox.common.components.CivitBottomBar
 import com.programmersbox.common.components.ImageSheet
 import com.programmersbox.common.components.ListChoiceScreen
 import com.programmersbox.common.components.rememberModelOptionsScope
@@ -162,6 +165,8 @@ fun FavoritesUI(
             }
         )
     }
+
+    val bottomBarScrollBehavior = BottomAppBarDefaults.exitAlwaysScrollBehavior()
 
     Scaffold(
         topBar = {
@@ -273,6 +278,23 @@ fun FavoritesUI(
                 ) { Icon(Icons.Default.ArrowUpward, null) }
             }
         },
+        bottomBar = {
+            CivitBottomBar(
+                showBlur = showBlur,
+                bottomBarScrollBehavior = bottomBarScrollBehavior,
+                modifier = Modifier.ifTrue(showBlur) {
+                    hazeEffect(hazeState) {
+                        progressive = HazeProgressive.verticalGradient(
+                            startIntensity = 0f,
+                            endIntensity = 1f,
+                            preferPerformance = true
+                        )
+                        style = hazeStyle
+                    }
+                }
+            )
+        },
+        modifier = Modifier.nestedScroll(bottomBarScrollBehavior.nestedScrollConnection)
     ) { padding ->
         LazyVerticalGrid(
             state = lazyGridState,

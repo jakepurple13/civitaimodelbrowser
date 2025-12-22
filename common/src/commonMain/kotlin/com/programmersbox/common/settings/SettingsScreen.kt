@@ -54,8 +54,6 @@ fun SettingsScreen(
     onNavigateToAbout: () -> Unit,
     onNavigateToNsfw: () -> Unit,
     onNavigateToBehavior: () -> Unit,
-    onNavigateToCustomList: () -> Unit,
-    onNavigateToHome: () -> Unit,
 ) {
     val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
 
@@ -69,12 +67,6 @@ fun SettingsScreen(
         },
         bottomBar = {
             CivitBottomBar(
-                onNavigateToLists = onNavigateToCustomList,
-                onNavigateToSettings = {},
-                onNavigateToHome = onNavigateToHome,
-                isHome = false,
-                isSettings = true,
-                isLists = false,
                 showBlur = false,
                 bottomBarScrollBehavior = null,
             )

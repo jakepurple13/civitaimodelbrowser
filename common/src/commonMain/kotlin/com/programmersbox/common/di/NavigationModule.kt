@@ -125,7 +125,15 @@ private fun Module.customList() {
     ) {
         val backStack = koinInject<NavigationHandler>().backStack
         ListScreen(
-            onNavigateToDetail = { id -> backStack.add(Screen.CustomListDetail(id)) }
+            onNavigateToDetail = { id -> backStack.add(Screen.CustomListDetail(id)) },
+            onNavigateToHome = {
+                backStack.clear()
+                backStack.add(Screen.List)
+            },
+            onNavigateToSettings = {
+                backStack.removeAll { it == Screen.CustomList }
+                backStack.add(Screen.Settings)
+            }
         )
     }
     navigation<Screen.CustomListDetail>(
@@ -197,7 +205,15 @@ private fun Module.settingsNavigation() {
             onNavigateToStats = { backStack.add(Screen.Settings.Stats) },
             onNavigateToAbout = { backStack.add(Screen.Settings.About) },
             onNavigateToNsfw = { backStack.add(Screen.Settings.Nsfw) },
-            onNavigateToBehavior = { backStack.add(Screen.Settings.Behavior) }
+            onNavigateToBehavior = { backStack.add(Screen.Settings.Behavior) },
+            onNavigateToHome = {
+                backStack.clear()
+                backStack.add(Screen.List)
+            },
+            onNavigateToCustomList = {
+                backStack.removeAll { it == Screen.Settings }
+                backStack.add(Screen.CustomList)
+            }
         )
     }
 

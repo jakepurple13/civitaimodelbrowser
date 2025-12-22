@@ -36,6 +36,7 @@ import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.unit.dp
 import com.programmersbox.common.ApplicationInfo
 import com.programmersbox.common.BackButton
+import com.programmersbox.common.components.CivitBottomBar
 import com.programmersbox.common.components.icons.Github
 import com.programmersbox.common.getPlatformName
 import com.programmersbox.resources.Res
@@ -53,6 +54,8 @@ fun SettingsScreen(
     onNavigateToAbout: () -> Unit,
     onNavigateToNsfw: () -> Unit,
     onNavigateToBehavior: () -> Unit,
+    onNavigateToCustomList: () -> Unit,
+    onNavigateToHome: () -> Unit,
 ) {
     val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
 
@@ -62,6 +65,18 @@ fun SettingsScreen(
                 title = { Text("Settings") },
                 navigationIcon = { BackButton() },
                 scrollBehavior = scrollBehavior
+            )
+        },
+        bottomBar = {
+            CivitBottomBar(
+                onNavigateToLists = onNavigateToCustomList,
+                onNavigateToSettings = {},
+                onNavigateToHome = onNavigateToHome,
+                isHome = false,
+                isSettings = true,
+                isLists = false,
+                showBlur = false,
+                bottomBarScrollBehavior = null,
             )
         },
         modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection)

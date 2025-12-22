@@ -25,7 +25,6 @@ import androidx.compose.foundation.lazy.grid.LazyGridScope
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.List
 import androidx.compose.material.icons.filled.ArrowUpward
 import androidx.compose.material.icons.filled.Block
 import androidx.compose.material.icons.filled.Favorite
@@ -33,10 +32,10 @@ import androidx.compose.material.icons.filled.Image
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.QrCodeScanner
 import androidx.compose.material.icons.filled.Search
-import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.AppBarRow
 import androidx.compose.material3.AssistChipDefaults
+import androidx.compose.material3.BottomAppBarDefaults
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularWavyProgressIndicator
 import androidx.compose.material3.ElevatedAssistChip
@@ -68,6 +67,7 @@ import androidx.compose.ui.draw.blur
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
@@ -86,6 +86,7 @@ import com.programmersbox.common.ModelType
 import com.programmersbox.common.Models
 import com.programmersbox.common.NetworkConnectionRepository
 import com.programmersbox.common.adaptiveGridCell
+import com.programmersbox.common.components.CivitBottomBar
 import com.programmersbox.common.components.LoadingImage
 import com.programmersbox.common.components.ModelOptionsSheet
 import com.programmersbox.common.db.BlacklistedItemRoom
@@ -141,22 +142,44 @@ fun CivitAiScreen(
 
     val hazeStyle = LocalHazeStyle.current
 
+    val bottomBarScrollBehavior = BottomAppBarDefaults.exitAlwaysScrollBehavior()
+
     Scaffold(
         topBar = {
             AppSearchAppBar(
                 showBlur = showBlur,
                 onNavigateToSearch = onNavigateToSearch,
                 onNavigateToFavorites = onNavigateToFavorites,
-                onNavigateToSettings = onNavigateToSettings,
                 onNavigateToQrCode = onNavigateToQrCode,
                 onNavigateToImages = onNavigateToImages,
                 onNavigateToBlacklist = onNavigateToBlacklist,
-                onNavigateToCustomList = onNavigateToCustomList,
                 modifier = Modifier.ifTrue(showBlur) {
                     hazeEffect(hazeState) {
                         progressive = HazeProgressive.verticalGradient(
                             startIntensity = 1f,
                             endIntensity = 0f,
+                            preferPerformance = true
+                        )
+                        style = hazeStyle
+                    }
+                }
+            )
+        },
+        bottomBar = {
+            CivitBottomBar(
+                onNavigateToLists = onNavigateToCustomList,
+                onNavigateToSettings = onNavigateToSettings,
+                onNavigateToHome = {},
+                isHome = true,
+                isSettings = false,
+                isLists = false,
+                showBlur = showBlur,
+                bottomBarScrollBehavior = bottomBarScrollBehavior,
+                modifier = Modifier.ifTrue(showBlur) {
+                    hazeEffect(hazeState) {
+                        progressive = HazeProgressive.verticalGradient(
+                            startIntensity = 0f,
+                            endIntensity = 1f,
                             preferPerformance = true
                         )
                         style = hazeStyle
@@ -175,6 +198,7 @@ fun CivitAiScreen(
                 ) { Icon(Icons.Default.ArrowUpward, null) }
             }
         },
+        modifier = Modifier.nestedScroll(bottomBarScrollBehavior.nestedScrollConnection)
     ) { padding ->
         PullToRefreshBox(
             isRefreshing = lazyPagingItems.loadState.refresh == LoadState.Loading
@@ -535,11 +559,9 @@ fun CardContent(
 private fun AppSearchAppBar(
     onNavigateToSearch: () -> Unit,
     onNavigateToFavorites: () -> Unit,
-    onNavigateToSettings: () -> Unit,
     onNavigateToQrCode: () -> Unit,
     onNavigateToImages: () -> Unit,
     onNavigateToBlacklist: () -> Unit,
-    onNavigateToCustomList: () -> Unit,
     showBlur: Boolean,
     modifier: Modifier = Modifier,
 ) {
@@ -577,19 +599,9 @@ private fun AppSearchAppBar(
                     label = "Images"
                 )
                 clickableItem(
-                    onClick = onNavigateToSettings,
-                    icon = { Icon(Icons.Default.Settings, null) },
-                    label = "Settings"
-                )
-                clickableItem(
                     onClick = onNavigateToBlacklist,
                     icon = { Icon(Icons.Default.Block, null) },
                     label = "Blacklisted"
-                )
-                clickableItem(
-                    onClick = onNavigateToCustomList,
-                    icon = { Icon(Icons.AutoMirrored.Filled.List, null) },
-                    label = "Lists"
                 )
             }
         },

@@ -10,7 +10,6 @@ import androidx.lifecycle.viewModelScope
 import com.programmersbox.common.DataStore
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.launchIn
-import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 
@@ -50,10 +49,12 @@ class FavoritesViewModel(
     }
 
     init {
-        dataStore.reverseFavorites.flow
-            //.map { if (it) Sort.DESCENDING else Sort.ASCENDING }
-            .map { it }
-            .flatMapLatest { dao.getFavoriteModels() }
+        dataStore
+            .includeNsfw
+            .flow
+            .flatMapLatest { includeNsfw ->
+                dao.getFavoriteModels(includeNsfw = includeNsfw)
+            }
             .onEach {
                 favoritesList.clear()
                 favoritesList.addAll(it)

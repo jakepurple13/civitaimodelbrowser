@@ -55,6 +55,7 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.derivedStateOf
@@ -136,14 +137,17 @@ fun FavoritesUI(
                     ) {
                         CenterAlignedTopAppBar(
                             title = { Text("Sort By") },
-                            windowInsets = WindowInsets(0.dp)
+                            windowInsets = WindowInsets(0.dp),
+                            colors = TopAppBarDefaults.topAppBarColors(
+                                containerColor = Color.Transparent
+                            )
                         )
 
                         FlowRow(
                             horizontalArrangement = Arrangement.SpaceBetween,
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .padding(horizontal = 4.dp)
+                                .padding(24.dp)
                         ) {
                             SortedBy.entries.forEach {
                                 FilterChip(

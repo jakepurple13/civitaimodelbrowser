@@ -136,6 +136,9 @@ interface FavoritesDao {
     @Query("SELECT * FROM favorite_table ORDER BY dateAdded DESC")
     suspend fun getFavoritesSync(): List<FavoriteRoom>
 
+    @Query("SELECT * FROM favorite_table WHERE nsfw = :includeNsfw")
+    fun getFavoritesWithNSFW(includeNsfw: Boolean): Flow<List<FavoriteRoom>>
+
     @Ignore
     fun getFavoriteModels(
         json: Json = Json {
@@ -145,6 +148,19 @@ interface FavoritesDao {
             coerceInputValues = true
         },
     ) = getFavorites().map { value ->
+        value.map { favorite -> favorite.toModel(json) }
+    }
+
+    @Ignore
+    fun getFavoriteModels(
+        json: Json = Json {
+            isLenient = true
+            prettyPrint = true
+            ignoreUnknownKeys = true
+            coerceInputValues = true
+        },
+        includeNsfw: Boolean,
+    ) = getFavoritesWithNSFW(includeNsfw).map { value ->
         value.map { favorite -> favorite.toModel(json) }
     }
 

@@ -15,6 +15,7 @@ import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.BottomAppBarDefaults
 import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -39,6 +40,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.blur
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
@@ -48,6 +50,7 @@ import com.programmersbox.common.BackButton
 import com.programmersbox.common.ComposableUtils
 import com.programmersbox.common.DataStore
 import com.programmersbox.common.NetworkConnectionRepository
+import com.programmersbox.common.components.CivitBottomBar
 import com.programmersbox.common.components.LoadingImage
 import com.programmersbox.common.components.rememberBiometricOpening
 import com.programmersbox.common.db.CustomList
@@ -77,6 +80,8 @@ import kotlin.time.Instant
 fun ListScreen(
     viewModel: ListViewModel = koinViewModel(),
     onNavigateToDetail: (String) -> Unit,
+    onNavigateToHome: () -> Unit,
+    onNavigateToSettings: () -> Unit,
 ) {
     val connectionRepository = koinInject<NetworkConnectionRepository>()
     val shouldShowMedia by remember { derivedStateOf { connectionRepository.shouldShowMedia } }
@@ -89,6 +94,8 @@ fun ListScreen(
     val scope = rememberCoroutineScope()
     val hazeState = remember { HazeState() }
     val hazeStyle = LocalHazeStyle.current
+
+    val bottomBarScrollBehavior = BottomAppBarDefaults.exitAlwaysScrollBehavior()
 
     Scaffold(
         topBar = {
@@ -148,7 +155,30 @@ fun ListScreen(
                     }
                 }
             )
-        }
+        },
+        bottomBar = {
+            CivitBottomBar(
+                onNavigateToLists = {},
+                onNavigateToSettings = onNavigateToSettings,
+                onNavigateToHome = onNavigateToHome,
+                isHome = false,
+                isSettings = false,
+                isLists = true,
+                showBlur = showBlur,
+                bottomBarScrollBehavior = bottomBarScrollBehavior,
+                modifier = Modifier.ifTrue(showBlur) {
+                    hazeEffect(hazeState) {
+                        progressive = HazeProgressive.verticalGradient(
+                            startIntensity = 0f,
+                            endIntensity = 1f,
+                            preferPerformance = true
+                        )
+                        style = hazeStyle
+                    }
+                }
+            )
+        },
+        modifier = Modifier.nestedScroll(bottomBarScrollBehavior.nestedScrollConnection)
     ) { padding ->
         LazyColumn(
             contentPadding = padding,

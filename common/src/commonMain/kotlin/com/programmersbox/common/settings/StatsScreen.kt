@@ -163,6 +163,13 @@ fun StatsScreen() {
                 )
             }
 
+            item(contentType = "favorites without nsfw") {
+                FavoritesDeeperStats(
+                    favorites = favorites.toImmutableList(),
+                    modifier = Modifier.animateItem()
+                )
+            }
+
             item(contentType = "list title") {
                 Text(
                     "List Stats",
@@ -203,6 +210,24 @@ fun StatsScreen() {
                 )
             }
         }
+    }
+}
+
+@Composable
+private fun FavoritesDeeperStats(
+    favorites: ImmutableList<FavoriteRoom>,
+    modifier: Modifier = Modifier,
+) {
+    ElevatedCard(
+        modifier = modifier.padding(horizontal = 16.dp)
+    ) {
+        ListItem(
+            headlineContent = { Text("Favorites without NSFW") },
+            trailingContent = { Text(favorites.filterNot { it.nsfw }.size.toString()) },
+            colors = ListItemDefaults.colors(
+                containerColor = Color.Transparent
+            )
+        )
     }
 }
 

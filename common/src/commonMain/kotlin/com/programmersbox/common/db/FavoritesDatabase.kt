@@ -136,7 +136,7 @@ interface FavoritesDao {
     @Query("SELECT * FROM favorite_table ORDER BY dateAdded DESC")
     suspend fun getFavoritesSync(): List<FavoriteRoom>
 
-    @Query("SELECT * FROM favorite_table WHERE nsfw = :includeNsfw")
+    @Query("SELECT * FROM favorite_table WHERE nsfw = :includeNsfw ORDER BY dateAdded DESC")
     fun getFavoritesWithNSFW(includeNsfw: Boolean): Flow<List<FavoriteRoom>>
 
     @Ignore

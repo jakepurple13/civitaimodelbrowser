@@ -1,5 +1,5 @@
 [versions]
-appVersion = "4.1.8"
+appVersion = "4.1.9"
 
 biometricVersion = "1.4.0-alpha05"
 blurhashVersion = "0.0-4-ALPHA"

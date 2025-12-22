@@ -49,6 +49,8 @@ connectivity = "2.3.0"
 aboutLibraries = "13.2.1"
 workRuntimeKtx = "2.11.0"
 
+easylauncher = "6.4.1"
+
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp-version" }
 android-library = { id = "com.android.library", version.ref = "agp-version" }
@@ -57,6 +59,7 @@ compose-compiler = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "
 ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
 room = { id = "androidx.room", version.ref = "androidx-room" }
 aboutLibraries = { id = "com.mikepenz.aboutlibraries.plugin", version.ref = "aboutLibraries" }
+easylauncher = { id = "com.starter.easylauncher", version.ref = "easylauncher" }
 
 [libraries]
 androidx-appcompat = { module = "androidx.appcompat:appcompat", version = "1.7.1" }

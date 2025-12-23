@@ -24,6 +24,8 @@ import androidx.room.Room
 import androidx.room.RoomDatabase
 import ca.gosyer.appdirs.AppDirs
 import com.programmersbox.common.backup.BackupRestoreHandler
+import com.programmersbox.common.bluetooth.BluetoothTransferRepository
+import com.programmersbox.common.bluetooth.JvmBluetoothTransferRepository
 import com.programmersbox.common.db.AppDatabase
 import com.programmersbox.common.db.BlacklistedItemRoom
 import com.programmersbox.common.db.FavoritesDao
@@ -38,6 +40,7 @@ import kotlinx.coroutines.launch
 import org.koin.compose.koinInject
 import org.koin.core.module.Module
 import org.koin.core.module.dsl.singleOf
+import org.koin.dsl.bind
 import org.koin.dsl.module
 import java.io.File
 
@@ -84,6 +87,7 @@ actual fun createPlatformModule(): Module = module {
     singleOf(::DownloadHandler)
     singleOf(::DataStoreHandler)
     singleOf(::BackupRestoreHandler)
+    singleOf(::JvmBluetoothTransferRepository) bind (BluetoothTransferRepository::class)
 }
 
 class DataStoreHandler(

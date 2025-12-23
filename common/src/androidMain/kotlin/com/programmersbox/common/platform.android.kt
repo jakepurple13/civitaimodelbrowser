@@ -24,10 +24,13 @@ import com.gigamole.composescrollbars.rememberScrollbarsState
 import com.gigamole.composescrollbars.scrolltype.ScrollbarsScrollType
 import com.gigamole.composescrollbars.scrolltype.knobtype.ScrollbarsDynamicKnobType
 import com.programmersbox.common.backup.BackupRestoreHandler
+import com.programmersbox.common.bluetooth.AndroidBluetoothTransferRepository
+import com.programmersbox.common.bluetooth.BluetoothTransferRepository
 import com.programmersbox.common.db.AppDatabase
 import com.programmersbox.common.db.BlacklistedItemRoom
 import org.koin.core.module.Module
 import org.koin.core.module.dsl.singleOf
+import org.koin.dsl.bind
 import org.koin.dsl.module
 
 actual class DownloadHandler(
@@ -54,6 +57,7 @@ actual fun createPlatformModule(): Module = module {
     singleOf(::DownloadHandler)
     single { getDatabaseBuilder(get()) }
     singleOf(::BackupRestoreHandler)
+    singleOf(::AndroidBluetoothTransferRepository) bind (BluetoothTransferRepository::class)
 }
 
 public actual fun getPlatformName(): String {

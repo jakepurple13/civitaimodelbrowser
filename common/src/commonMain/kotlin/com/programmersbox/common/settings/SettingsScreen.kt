@@ -12,6 +12,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Api
 import androidx.compose.material.icons.filled.Backup
+import androidx.compose.material.icons.filled.Bluetooth
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.NoAdultContent
 import androidx.compose.material.icons.filled.QrCodeScanner
@@ -50,6 +51,7 @@ fun SettingsScreen(
     onNavigateToQrCode: () -> Unit,
     onNavigateToBackup: () -> Unit,
     onNavigateToRestore: () -> Unit,
+    onNavigateToBluetooth: () -> Unit,
     onNavigateToStats: () -> Unit,
     onNavigateToAbout: () -> Unit,
     onNavigateToNsfw: () -> Unit,
@@ -115,6 +117,7 @@ fun SettingsScreen(
             BackupRestoreSettings(
                 onNavigateToBackup = onNavigateToBackup,
                 onNavigateToRestore = onNavigateToRestore,
+                onNavigateToBluetooth = onNavigateToBluetooth,
             )
 
             ExtraSettings()
@@ -143,6 +146,7 @@ fun SettingsScreen(
 private fun BackupRestoreSettings(
     onNavigateToBackup: () -> Unit,
     onNavigateToRestore: () -> Unit,
+    onNavigateToBluetooth: () -> Unit,
 ) {
     Column {
         Card(
@@ -160,6 +164,17 @@ private fun BackupRestoreSettings(
             ListItem(
                 headlineContent = { Text("Restore") },
                 leadingContent = { Icon(Icons.Default.Restore, null) }
+            )
+        }
+
+        HorizontalDivider()
+
+        Card(
+            onClick = onNavigateToBluetooth
+        ) {
+            ListItem(
+                headlineContent = { Text("Bluetooth Transfer") },
+                leadingContent = { Icon(Icons.Default.Bluetooth, null) }
             )
         }
     }

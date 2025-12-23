@@ -11,6 +11,7 @@ import com.programmersbox.common.Screen
 import com.programmersbox.common.backup.BackupScreen
 import com.programmersbox.common.backup.RestoreScreen
 import com.programmersbox.common.blacklisted.BlacklistedScreen
+import com.programmersbox.common.bluetooth.ui.BluetoothTransferScreen
 import com.programmersbox.common.creator.CivitAiUserScreen
 import com.programmersbox.common.db.FavoritesUI
 import com.programmersbox.common.details.CivitAiDetailScreen
@@ -191,6 +192,7 @@ private fun Module.settingsNavigation() {
             onNavigateToQrCode = { backStack.add(Screen.QrCode) },
             onNavigateToBackup = { backStack.add(Screen.Settings.Backup) },
             onNavigateToRestore = { backStack.add(Screen.Settings.Restore) },
+            onNavigateToBluetooth = { backStack.add(Screen.Settings.BluetoothTransfer) },
             onNavigateToStats = { backStack.add(Screen.Settings.Stats) },
             onNavigateToAbout = { backStack.add(Screen.Settings.About) },
             onNavigateToNsfw = { backStack.add(Screen.Settings.Nsfw) },
@@ -201,6 +203,7 @@ private fun Module.settingsNavigation() {
     settingsNavigation<Screen.Settings.Blacklisted> { BlacklistedScreen() }
     settingsNavigation<Screen.Settings.Backup> { BackupScreen() }
     settingsNavigation<Screen.Settings.Restore> { RestoreScreen() }
+    settingsNavigation<Screen.Settings.BluetoothTransfer> { BluetoothTransferScreen() }
     settingsNavigation<Screen.Settings.Stats> { StatsScreen() }
     settingsNavigation<Screen.Settings.About> { AboutScreen() }
     settingsNavigation<Screen.Settings.Nsfw> { NsfwSettingsScreen() }

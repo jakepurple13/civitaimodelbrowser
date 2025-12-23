@@ -137,6 +137,9 @@ sealed class Screen {
 
         @Serializable
         data object About : NavKey
+
+        @Serializable
+        data object BluetoothTransfer : NavKey
     }
 
     @Serializable

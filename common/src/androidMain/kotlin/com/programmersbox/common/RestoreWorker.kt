@@ -1,6 +1,10 @@
 package com.programmersbox.common
 
+import android.app.NotificationChannel
+import android.app.NotificationManager
 import android.content.Context
+import androidx.core.app.NotificationCompat
+import androidx.core.content.getSystemService
 import androidx.work.CoroutineWorker
 import androidx.work.WorkerParameters
 import com.dokar.sonner.ToastType
@@ -14,6 +18,7 @@ class RestoreWorker(
     params: WorkerParameters,
     private val backupRepository: BackupRepository,
     private val toasterState: ToasterState,
+    private val applicationIcon: ApplicationIcon
 ) : CoroutineWorker(
     appContext,
     params
@@ -42,6 +47,25 @@ class RestoreWorker(
             )
         }
         println("Restored in $duration")
+
+        applicationContext.getSystemService<NotificationManager>()?.let { manager ->
+            manager.createNotificationChannel(
+                NotificationChannel(
+                    "restore_channel",
+                    "Restore Channel",
+                    NotificationManager.IMPORTANCE_DEFAULT
+                )
+            )
+            manager.notify(
+                1,
+                NotificationCompat.Builder(applicationContext, "restore_channel")
+                    .setContentTitle("Restore Complete")
+                    .setContentText("Restore Complete in $duration")
+                    .setSmallIcon(applicationIcon.icon)
+                    .build()
+            )
+        }
+
         toasterState.show(
             "Backup Complete in $duration",
             type = ToastType.Success

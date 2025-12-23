@@ -3,6 +3,7 @@ package com.programmersbox.civitaimodelbrowser
 import android.app.Application
 import android.util.Log
 import androidx.work.Configuration
+import com.programmersbox.common.ApplicationIcon
 import com.programmersbox.common.ApplicationInfo
 import com.programmersbox.common.RestoreWorker
 import com.programmersbox.common.backup.Zipper
@@ -30,6 +31,7 @@ class CivitApplication : Application(), Configuration.Provider {
                     singleOf(::Zipper)
                     singleOf(::QrCodeRepository)
                     workerOf(::RestoreWorker)
+                    factory { ApplicationIcon(R.drawable.civitai_logo) }
                 },
                 cmpModules(),
                 createPlatformModule()

@@ -105,3 +105,4 @@ actual fun createRoomDatabase(): AppDatabase {
         .build()
 }*/
 
+data class ApplicationIcon(val icon: Int)

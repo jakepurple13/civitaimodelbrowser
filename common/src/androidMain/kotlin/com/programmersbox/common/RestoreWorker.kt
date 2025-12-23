@@ -9,6 +9,7 @@ import androidx.work.CoroutineWorker
 import androidx.work.WorkerParameters
 import com.dokar.sonner.ToastType
 import com.dokar.sonner.ToasterState
+import com.programmersbox.common.backup.ApplicationIcon
 import com.programmersbox.common.backup.BackupRepository
 import io.github.vinceglb.filekit.PlatformFile
 import kotlin.time.measureTime

@@ -113,3 +113,5 @@ actual class BackupRestoreHandler(
             )
     }
 }
+
+data class ApplicationIcon(val icon: Int)

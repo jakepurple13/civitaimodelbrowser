@@ -114,7 +114,7 @@ fun RestoreScreen(
                 headline = "Select items to Restore",
                 listDialogTitle = "Select Lists to Restore",
                 listsToInclude = viewModel.listsToInclude,
-                lists = backupItems.lists.orEmpty(),
+                lists = backupItems.lists?.takeIf { it.isNotEmpty() },
                 addList = viewModel::addList,
                 removeList = viewModel::removeList,
                 error = viewModel.uiState.error,
@@ -122,9 +122,9 @@ fun RestoreScreen(
                 onIncludeBlacklisted = { viewModel.includeBlacklisted = it },
                 onIncludeSettings = { viewModel.includeSettings = it },
                 onIncludeSearchHistory = { viewModel.includeSearchHistory = it },
-                favoritesCount = backupItems.favorites?.size ?: 0,
-                blacklistedCount = backupItems.blacklisted?.size ?: 0,
-                searchHistoryCount = backupItems.searchHistory?.size ?: 0,
+                favoritesCount = backupItems.favorites?.size,
+                blacklistedCount = backupItems.blacklisted?.size,
+                searchHistoryCount = backupItems.searchHistory?.size,
                 settingsExtraContent = {
                     backupItems.settings?.let { settings ->
                         HorizontalDivider()

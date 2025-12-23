@@ -60,7 +60,7 @@ fun BackupAndRestoreList(
     headline: String,
     listDialogTitle: String,
     listsToInclude: List<String>,
-    lists: List<CustomList>,
+    lists: List<CustomList>?,
     addList: (String) -> Unit,
     removeList: (String) -> Unit,
     error: Throwable?,
@@ -69,9 +69,9 @@ fun BackupAndRestoreList(
     onIncludeSettings: (Boolean) -> Unit,
     includeSearchHistory: Boolean,
     onIncludeSearchHistory: (Boolean) -> Unit,
-    searchHistoryCount: Int,
-    favoritesCount: Int,
-    blacklistedCount: Int,
+    searchHistoryCount: Int?,
+    favoritesCount: Int?,
+    blacklistedCount: Int?,
     settingsExtraContent: @Composable ColumnScope.() -> Unit = {},
 ) {
     LazyColumn(
@@ -87,35 +87,41 @@ fun BackupAndRestoreList(
                 modifier = Modifier.padding(8.dp)
             )
         }
-        item(
-            contentType = "favorites"
-        ) {
-            FavoriteSwitch(
-                checked = includeFavorites,
-                onCheckedChange = onIncludeFavorites,
-                favoriteCount = favoritesCount,
-                modifier = Modifier.padding(horizontal = 8.dp)
-            )
+        favoritesCount?.let {
+            item(
+                contentType = "favorites"
+            ) {
+                FavoriteSwitch(
+                    checked = includeFavorites,
+                    onCheckedChange = onIncludeFavorites,
+                    favoriteCount = it,
+                    modifier = Modifier.padding(horizontal = 8.dp)
+                )
+            }
         }
-        item(
-            contentType = "blacklisted"
-        ) {
-            BlacklistedSwitch(
-                checked = includeBlacklisted,
-                blacklistedCount = blacklistedCount,
-                onCheckedChange = onIncludeBlacklisted,
-                modifier = Modifier.padding(horizontal = 8.dp)
-            )
+        blacklistedCount?.let {
+            item(
+                contentType = "blacklisted"
+            ) {
+                BlacklistedSwitch(
+                    checked = includeBlacklisted,
+                    blacklistedCount = it,
+                    onCheckedChange = onIncludeBlacklisted,
+                    modifier = Modifier.padding(horizontal = 8.dp)
+                )
+            }
         }
-        item(
-            contentType = "search history"
-        ) {
-            SearchHistorySwitch(
-                checked = includeSearchHistory,
-                onCheckedChange = onIncludeSearchHistory,
-                searchHistoryCount = searchHistoryCount,
-                modifier = Modifier.padding(horizontal = 8.dp)
-            )
+        searchHistoryCount?.let {
+            item(
+                contentType = "search history"
+            ) {
+                SearchHistorySwitch(
+                    checked = includeSearchHistory,
+                    onCheckedChange = onIncludeSearchHistory,
+                    searchHistoryCount = it,
+                    modifier = Modifier.padding(horizontal = 8.dp)
+                )
+            }
         }
         item(
             contentType = "settings"
@@ -127,17 +133,19 @@ fun BackupAndRestoreList(
                 modifier = Modifier.padding(horizontal = 8.dp)
             )
         }
-        item(
-            contentType = "lists"
-        ) {
-            ListsToInclude(
-                title = listDialogTitle,
-                list = lists,
-                listsToInclude = listsToInclude,
-                onAddList = addList,
-                onRemoveList = removeList,
-                modifier = Modifier.padding(horizontal = 8.dp)
-            )
+        lists?.let {
+            item(
+                contentType = "lists"
+            ) {
+                ListsToInclude(
+                    title = listDialogTitle,
+                    list = it,
+                    listsToInclude = listsToInclude,
+                    onAddList = addList,
+                    onRemoveList = removeList,
+                    modifier = Modifier.padding(horizontal = 8.dp)
+                )
+            }
         }
         item(
             contentType = "error"

@@ -24,6 +24,7 @@ import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.foundation.lazy.grid.LazyGridScope
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.rememberLazyGridState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowUpward
 import androidx.compose.material.icons.filled.Block
@@ -364,6 +365,7 @@ private fun ModelItem(
         onLongClick = onLongClick,
         shouldShowMedia = shouldShowMedia,
         blurHash = imageModel?.hash,
+        creatorImage = models.creator?.image,
         modifier = modifier.size(
             width = ComposableUtils.IMAGE_WIDTH,
             height = ComposableUtils.IMAGE_HEIGHT
@@ -382,9 +384,10 @@ fun CoverCard(
     blurStrength: Dp,
     isFavorite: Boolean,
     isBlacklisted: Boolean,
+    shouldShowMedia: Boolean,
     modifier: Modifier = Modifier,
     blurHash: String? = null,
-    shouldShowMedia: Boolean,
+    creatorImage: String? = null,
     onLongClick: () -> Unit = {},
     onClick: () -> Unit = {},
 ) {
@@ -412,6 +415,7 @@ fun CoverCard(
             blurStrength = blurStrength,
             blurHash = blurHash,
             shouldShowMedia = shouldShowMedia,
+            creatorImage = creatorImage,
         )
     }
 }
@@ -420,6 +424,7 @@ fun CoverCard(
 @Composable
 fun CardContent(
     imageUrl: String,
+    creatorImage: String?,
     name: String,
     type: String,
     isNsfw: Boolean,
@@ -509,6 +514,7 @@ fun CardContent(
 
         FlowRow(
             horizontalArrangement = Arrangement.SpaceBetween,
+            itemVerticalAlignment = Alignment.CenterVertically,
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(horizontal = 4.dp)
@@ -537,6 +543,16 @@ fun CardContent(
                         1.dp,
                         MaterialTheme.colorScheme.error,
                     ),
+                )
+            }
+
+            creatorImage?.let { image ->
+                LoadingImage(
+                    image,
+                    contentScale = ContentScale.FillBounds,
+                    modifier = Modifier
+                        .size(32.dp)
+                        .clip(CircleShape)
                 )
             }
         }

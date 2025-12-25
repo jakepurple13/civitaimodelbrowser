@@ -1,7 +1,9 @@
 package com.programmersbox.common.components
 
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.layout.MutableIntervalList
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.CornerSize
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -38,6 +40,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveableStateHolder
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -153,8 +156,23 @@ fun ModelOptionsSheet(
                         shape = it
                     ) {
                         ListItem(
-                            leadingContent = { Icon(Icons.Default.Person, null) },
-                            headlineContent = { Text("Open Creator") }
+                            leadingContent = {
+                                models
+                                    .creator
+                                    ?.image
+                                    ?.let { image ->
+                                        LoadingImage(
+                                            image,
+                                            modifier = Modifier
+                                                .size(24.dp)
+                                                .clip(CircleShape)
+                                        )
+                                    }
+                                    ?: Icon(Icons.Default.Person, null)
+                            },
+                            headlineContent = {
+                                Text("View ${models.creator?.username ?: "Creator"}'s models")
+                            }
                         )
                     }
                 }

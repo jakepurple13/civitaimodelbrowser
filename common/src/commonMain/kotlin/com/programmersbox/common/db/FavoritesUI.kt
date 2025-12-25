@@ -549,6 +549,7 @@ fun CoverCard(
             blurHash = blurHash,
             blurStrength = blurStrength,
             shouldShowMedia = shouldShowMedia,
+            creatorImage = null
         )
     }
 }
@@ -586,6 +587,7 @@ fun CoverCard(
             blurStrength = blurStrength,
             blurHash = blurHash,
             shouldShowMedia = shouldShowMedia,
+            creatorImage = null
         )
     }
 }

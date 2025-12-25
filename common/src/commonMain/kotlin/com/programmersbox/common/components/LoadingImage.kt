@@ -28,6 +28,7 @@ fun LoadingImage(
     isNsfw: Boolean = false,
     hash: String? = null,
     name: String = "",
+    contentScale: ContentScale = ContentScale.Fit,
 ) {
     KamelImage(
         resource = { asyncPainterResource(imageUrl) },
@@ -54,7 +55,7 @@ fun LoadingImage(
                 modifier = Modifier.fillMaxSize()
             )
         },
-        contentScale = ContentScale.Fit,
+        contentScale = contentScale,
         contentDescription = name,
         animationSpec = tween(250),
         modifier = modifier

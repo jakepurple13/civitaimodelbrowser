@@ -419,14 +419,27 @@ private fun ListStats(
             headlineContent = { Text(list.item.name) },
             trailingContent = { Text("(${list.list.size})") },
             supportingContent = {
-                FlowRow(
-                    horizontalArrangement = Arrangement.spacedBy(8.dp),
-                    verticalArrangement = Arrangement.spacedBy(8.dp),
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-                    Text("Models: ${list.list.filter { it.favoriteType == FavoriteType.Model }.size}")
-                    Text("Images: ${list.list.filter { it.favoriteType == FavoriteType.Image }.size}")
-                    Text("Creators: ${list.list.filter { it.favoriteType == FavoriteType.Creator }.size}")
+                Column {
+                    FlowRow(
+                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                        verticalArrangement = Arrangement.spacedBy(8.dp),
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Text("Models: ${list.list.filter { it.favoriteType == FavoriteType.Model }.size}")
+                        Text("Images: ${list.list.filter { it.favoriteType == FavoriteType.Image }.size}")
+                        Text("Creators: ${list.list.filter { it.favoriteType == FavoriteType.Creator }.size}")
+                    }
+
+                    Text("NSFW: ${list.list.filter { it.nsfw }.size}")
+                    FlowRow(
+                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                        verticalArrangement = Arrangement.spacedBy(8.dp),
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Text("Models: ${list.list.filter { it.favoriteType == FavoriteType.Model && it.nsfw }.size}")
+                        Text("Images: ${list.list.filter { it.favoriteType == FavoriteType.Image && it.nsfw }.size}")
+                        Text("Creators: ${list.list.filter { it.favoriteType == FavoriteType.Creator && it.nsfw }.size}")
+                    }
                 }
             },
             leadingContent = if (list.item.useBiometric) {

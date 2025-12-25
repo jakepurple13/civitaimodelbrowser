@@ -654,3 +654,46 @@ fun BlacklistHandling(
         )
     }
 }
+
+/*
+@Composable
+fun BlacklistHandling(
+    isBlacklisted: Boolean,
+    imageUrl: String?,
+    name: String,
+    nsfw: Boolean,
+    showDialog: Boolean,
+    onDialogDismiss: () -> Unit,
+) {
+    val db = koinInject<FavoritesDao>()
+    val scope = rememberCoroutineScope()
+
+    if (showDialog) {
+        AlertDialog(
+            onDismissRequest = onDialogDismiss,
+            title = { Text(if (isBlacklisted) "Remove from Blacklist?" else "Add to Blacklist?") },
+            text = {
+                Text(if (isBlacklisted) "See the model again!" else "Black out the image.")
+            },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        scope.launch {
+                            if (isBlacklisted) {
+                               db.delete()
+                            } else {
+                                db.blacklistItem(modelId, name, nsfw, imageUrl)
+                            }
+                            onDialogDismiss()
+                        }
+                    }
+                ) { Text("Confirm") }
+            },
+            dismissButton = {
+                TextButton(
+                    onClick = onDialogDismiss
+                ) { Text("Dismiss") }
+            }
+        )
+    }
+}*/

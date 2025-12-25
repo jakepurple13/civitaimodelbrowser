@@ -87,6 +87,10 @@ fun CivitAiUserScreen(
 
     val lazyPagingItems = viewModel.pager.collectAsLazyPagingItems()
 
+    val isFavorite by database
+        .getFavoritesByType(FavoriteType.Creator, username)
+        .collectAsStateWithLifecycle(false)
+
     val hazeStyle = LocalHazeStyle.current
 
     var showQrCode by remember { mutableStateOf(false) }
@@ -170,8 +174,15 @@ fun CivitAiUserScreen(
                                         }
                                     },
                                     icon = {
-                                        Icon(
+                                        /*Icon(
                                             if (favorites.any { it.name == viewModel.username })
+                                                Icons.Default.Favorite
+                                            else
+                                                Icons.Default.FavoriteBorder,
+                                            null
+                                        )*/
+                                        Icon(
+                                            if (isFavorite)
                                                 Icons.Default.Favorite
                                             else
                                                 Icons.Default.FavoriteBorder,

@@ -116,6 +116,15 @@ interface FavoritesDao {
     @Query("SELECT * FROM favorite_table ORDER BY dateAdded DESC")
     fun getFavorites(): Flow<List<FavoriteRoom>>
 
+    @Query("SELECT EXISTS(SELECT * FROM favorite_table WHERE favoriteType = :type AND name = :username)")
+    fun getFavoritesByType(type: FavoriteType, username: String?): Flow<Boolean>
+
+    @Query("SELECT EXISTS(SELECT * FROM favorite_table WHERE favoriteType = :type AND id = :id)")
+    fun getFavoritesByType(type: FavoriteType, id: Long): Flow<Boolean>
+
+    @Query("SELECT EXISTS(SELECT * FROM favorite_table WHERE favoriteType = :type AND imageUrl = :imageUrl)")
+    fun getFavoritesImages(type: FavoriteType, imageUrl: String?): Flow<Boolean>
+
     @Query("SELECT COUNT(id) FROM favorite_table")
     fun getFavoritesCount(): Flow<Int>
 
@@ -160,7 +169,11 @@ interface FavoritesDao {
             coerceInputValues = true
         },
         includeNsfw: Boolean,
-    ) = getFavoritesWithNSFW(includeNsfw).map { value ->
+    ) = if (includeNsfw) {
+        getFavorites()
+    } else {
+        getFavoritesWithNSFW(false)
+    }.map { value ->
         value.map { favorite -> favorite.toModel(json) }
     }
 
@@ -205,6 +218,9 @@ interface FavoritesDao {
     @Query("SELECT * FROM blacklisted_table")
     fun getBlacklisted(): Flow<List<BlacklistedItemRoom>>
 
+    @Query("SELECT EXISTS(SELECT * FROM blacklisted_table WHERE imageUrl = :imageUrl)")
+    fun getBlacklistedByImageUrl(imageUrl: String?): Flow<Boolean>
+
     @Query("SELECT * FROM blacklisted_table")
     suspend fun getBlacklistedSync(): List<BlacklistedItemRoom>
 
@@ -217,8 +233,8 @@ interface FavoritesDao {
     @Ignore
     suspend fun removeCreator(creator: Creator) = removeCreator(creator.username)
 
-    @Query("DELETE FROM favorite_table WHERE name = :username AND favoriteType = 'Creator'")
-    suspend fun removeCreator(username: String?)
+    @Query("DELETE FROM favorite_table WHERE name = :username AND favoriteType = :favoriteType")
+    suspend fun removeCreator(username: String?, favoriteType: FavoriteType = FavoriteType.Creator)
 
     @Query("DELETE FROM favorite_table WHERE imageUrl = :imageUrl AND favoriteType = 'Image'")
     suspend fun removeImage(imageUrl: String?)

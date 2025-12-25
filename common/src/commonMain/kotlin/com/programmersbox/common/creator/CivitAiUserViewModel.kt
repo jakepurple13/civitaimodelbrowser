@@ -47,7 +47,7 @@ class CivitAiUserViewModel(
     ) {
         viewModelScope.launch {
             database.addFavorite(
-                id = Random.nextLong(),
+                id = database.getFavoritesSync().maxOf { it.id } + 1,
                 name = creator.username.orEmpty(),
                 imageUrl = creator.image,
                 favoriteType = FavoriteType.Creator,

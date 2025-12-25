@@ -1,11 +1,18 @@
 package com.programmersbox.common.components
 
+import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.layout.MutableIntervalList
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.CornerSize
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.PlaylistAdd
 import androidx.compose.material.icons.filled.Add
@@ -18,9 +25,15 @@ import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Preview
 import androidx.compose.material.icons.filled.Share
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.AssistChipDefaults
 import androidx.compose.material3.Card
+import androidx.compose.material3.ElevatedAssistChip
 import androidx.compose.material3.ElevatedCard
+import androidx.compose.material3.ElevatedFilterChip
+import androidx.compose.material3.ElevatedSuggestionChip
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
+import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -28,6 +41,7 @@ import androidx.compose.material3.ListItem
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.SuggestionChipDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
@@ -39,6 +53,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveableStateHolder
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Shape
@@ -60,7 +75,7 @@ import com.programmersbox.common.qrcode.ShareViaQrCode
 import kotlinx.coroutines.launch
 import org.koin.compose.koinInject
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun ModelOptionsSheet(
     models: Models,
@@ -320,31 +335,92 @@ fun ModelOptionsSheet(
             sheetState = sheetState,
             containerColor = MaterialTheme.colorScheme.surface,
         ) {
-            TopAppBar(
-                title = { Text(models.name) },
-            )
+            Column(
+                modifier = Modifier.verticalScroll(rememberScrollState())
+            ) {
+                TopAppBar(
+                    title = { Text(models.name) },
+                    subtitle = {
+                        models
+                            .creator
+                            ?.username
+                            ?.let { Text("Made by $it") }
+                    }
+                )
 
-            val stateHolder = rememberSaveableStateHolder()
-
-            for (index in 0 until modelOptionsScope.size) {
-                stateHolder.SaveableStateProvider(index) {
-                    modelOptionsScope[index](
-                        when (index) {
-                            0 -> MaterialTheme.shapes.medium.copy(
-                                bottomStart = CornerSize(0.dp),
-                                bottomEnd = CornerSize(0.dp)
-                            )
-
-                            modelOptionsScope.size - 1 -> MaterialTheme.shapes.medium.copy(
-                                topStart = CornerSize(0.dp),
-                                topEnd = CornerSize(0.dp)
-                            )
-
-                            else -> RoundedCornerShape(0.dp)
-                        }
+                FlowRow(
+                    itemVerticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(4.dp),
+                    modifier = Modifier.padding(8.dp)
+                ) {
+                    ElevatedSuggestionChip(
+                        label = { Text(models.type.name) },
+                        onClick = {},
+                        colors = SuggestionChipDefaults.elevatedSuggestionChipColors(
+                            disabledLabelColor = MaterialTheme.colorScheme.onSurface,
+                            disabledContainerColor = MaterialTheme.colorScheme.surfaceContainerLow
+                        ),
+                        border = BorderStroke(
+                            1.dp,
+                            MaterialTheme.colorScheme.onSurface
+                        ),
+                        enabled = false,
                     )
-                    if (index < modelOptionsScope.size - 1) {
-                        HorizontalDivider()
+
+                    if (models.nsfw) {
+                        ElevatedAssistChip(
+                            label = { Text("NSFW") },
+                            onClick = {},
+                            colors = AssistChipDefaults.elevatedAssistChipColors(
+                                disabledLabelColor = MaterialTheme.colorScheme.error,
+                                disabledContainerColor = MaterialTheme.colorScheme.surface
+                            ),
+                            enabled = false,
+                            border = BorderStroke(
+                                1.dp,
+                                MaterialTheme.colorScheme.error,
+                            ),
+                        )
+                    }
+
+                    models.tags.forEach { tag ->
+                        ElevatedFilterChip(
+                            label = { Text(tag) },
+                            onClick = {},
+                            colors = FilterChipDefaults.elevatedFilterChipColors(
+                                disabledLabelColor = MaterialTheme.colorScheme.onSurface,
+                                disabledContainerColor = MaterialTheme.colorScheme.surfaceContainerLow
+                            ),
+                            enabled = false,
+                            selected = true
+                        )
+                    }
+                }
+
+                HorizontalDivider()
+
+                val stateHolder = rememberSaveableStateHolder()
+
+                for (index in 0 until modelOptionsScope.size) {
+                    stateHolder.SaveableStateProvider(index) {
+                        modelOptionsScope[index](
+                            when (index) {
+                                0 -> MaterialTheme.shapes.medium.copy(
+                                    bottomStart = CornerSize(0.dp),
+                                    bottomEnd = CornerSize(0.dp)
+                                )
+
+                                modelOptionsScope.size - 1 -> MaterialTheme.shapes.medium.copy(
+                                    topStart = CornerSize(0.dp),
+                                    topEnd = CornerSize(0.dp)
+                                )
+
+                                else -> RoundedCornerShape(0.dp)
+                            }
+                        )
+                        if (index < modelOptionsScope.size - 1) {
+                            HorizontalDivider()
+                        }
                     }
                 }
             }

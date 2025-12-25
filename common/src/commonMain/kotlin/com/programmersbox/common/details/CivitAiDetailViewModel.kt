@@ -14,8 +14,6 @@ import com.programmersbox.common.db.FavoritesDao
 import com.programmersbox.common.db.toDb
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.IO
-import kotlinx.coroutines.flow.launchIn
-import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 import okio.Path.Companion.toPath
 import kotlin.random.Random
@@ -27,15 +25,10 @@ class CivitAiDetailViewModel(
 ) : ViewModel() {
     val modelUrl = "https://civitai.com/models/$id"
     var models by mutableStateOf<DetailViewState>(DetailViewState.Loading)
-    var isFavorite by mutableStateOf(false)
-
     val showMoreInfo = mutableStateMapOf<Long, Boolean>()
 
     init {
         loadData()
-        database.getFavoriteModels()
-            .onEach { m -> isFavorite = m.any { it.id == id?.toLongOrNull() } }
-            .launchIn(viewModelScope)
     }
 
     fun loadData() {

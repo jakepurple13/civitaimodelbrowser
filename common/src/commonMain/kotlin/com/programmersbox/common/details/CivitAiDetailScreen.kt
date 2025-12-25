@@ -99,7 +99,6 @@ import com.programmersbox.common.adaptiveGridCell
 import com.programmersbox.common.components.ImageSheet
 import com.programmersbox.common.components.ListChoiceScreen
 import com.programmersbox.common.components.LoadingImage
-import com.programmersbox.common.db.FavoriteModel
 import com.programmersbox.common.db.FavoriteType
 import com.programmersbox.common.db.FavoritesDao
 import com.programmersbox.common.db.ListDao
@@ -138,13 +137,16 @@ fun CivitAiDetailScreen(
     val nsfwBlurStrength by dataStore.hideNsfwStrength()
     val useToolbar by dataStore.rememberUseToolbar()
 
-    val favoriteList by dao.getFavoriteModels().collectAsStateWithLifecycle(emptyList())
     val blacklisted by dao.getBlacklisted().collectAsStateWithLifecycle(emptyList())
 
     val hazeStyle = LocalHazeStyle.current
 
     when (val model = viewModel.models) {
         is DetailViewState.Content -> {
+            val isFavorite by dao
+                .getFavoritesByType(FavoriteType.Model, model.models.id)
+                .collectAsStateWithLifecycle(false)
+
             var showQrCode by remember { mutableStateOf(false) }
 
             if (showQrCode) {
@@ -172,9 +174,10 @@ fun CivitAiDetailScreen(
                 ImageSheet(
                     url = sheetModel.url,
                     isNsfw = sheetModel.nsfw.canNotShow(),
-                    isFavorite = favoriteList
-                        .filterIsInstance<FavoriteModel.Image>()
-                        .any { f -> f.imageUrl == sheetModel.url },
+                    isFavorite = dao
+                        .getFavoritesImages(FavoriteType.Image, sheetModel.url)
+                        .collectAsStateWithLifecycle(false)
+                        .value,
                     onFavorite = { viewModel.addImageToFavorites(sheetModel) },
                     onRemoveFromFavorite = { viewModel.removeImageFromFavorites(sheetModel) },
                     onDismiss = { sheetDetails = null },
@@ -220,6 +223,13 @@ fun CivitAiDetailScreen(
                                 modifier = Modifier.basicMarquee()
                             )
                         },
+                        subtitle = {
+                            model
+                                .models
+                                .creator
+                                ?.username
+                                ?.let { Text("Made by $it") }
+                        },
                         navigationIcon = { BackButton() },
                         actions = {
                             model.models.creator?.let { creator ->
@@ -254,7 +264,7 @@ fun CivitAiDetailScreen(
                     if (!useToolbar) {
                         BottomBarContent(
                             id = id,
-                            isFavorite = viewModel.isFavorite,
+                            isFavorite = isFavorite,
                             addToFavorites = viewModel::addToFavorites,
                             removeFromFavorites = viewModel::removeFromFavorites,
                             modelUrl = viewModel.modelUrl,
@@ -271,7 +281,7 @@ fun CivitAiDetailScreen(
                     if (useToolbar) {
                         HorizontalToolbarContent(
                             id = id,
-                            isFavorite = viewModel.isFavorite,
+                            isFavorite = isFavorite,
                             addToFavorites = viewModel::addToFavorites,
                             removeFromFavorites = viewModel::removeFromFavorites,
                             modelUrl = viewModel.modelUrl,
@@ -304,7 +314,6 @@ fun CivitAiDetailScreen(
                         contentType = "header"
                     ) {
                         ListItem(
-                            overlineContent = model.models.creator?.username?.let { { Text("Made by $it") } },
                             leadingContent = { Text(model.models.type.name) },
                             headlineContent = { Text(model.models.name) },
                             trailingContent = {
@@ -412,8 +421,13 @@ fun CivitAiDetailScreen(
                                     showDialog = showDialog,
                                     onDialogDismiss = { showDialog = false }
                                 )
+
+                                val isBlacklisted by dao
+                                    .getBlacklistedByImageUrl(images.url)
+                                    .collectAsStateWithLifecycle(false)
+
                                 ContextMenu(
-                                    isBlacklisted = blacklisted.any { it.imageUrl == images.url },
+                                    isBlacklisted = isBlacklisted,
                                     blacklistItems = blacklisted,
                                     modelId = images.id?.toLongOrNull() ?: 0L,
                                     name = images.url,
@@ -424,10 +438,11 @@ fun CivitAiDetailScreen(
                                         images = images,
                                         showNsfw = showNsfw,
                                         nsfwBlurStrength = nsfwBlurStrength,
-                                        isFavorite = favoriteList
-                                            .filterIsInstance<FavoriteModel.Image>()
-                                            .any { f -> f.imageUrl == images.url },
-                                        isBlacklisted = blacklisted.any { it.imageUrl == images.url },
+                                        isFavorite = dao
+                                            .getFavoritesImages(FavoriteType.Image, images.url)
+                                            .collectAsStateWithLifecycle(false)
+                                            .value,
+                                        isBlacklisted = isBlacklisted,
                                         shouldShowMedia = shouldShowMedia,
                                         onClick = { sheetDetails = images },
                                         onLongClick = { showDialog = true }

@@ -1,5 +1,6 @@
 package com.programmersbox.common.lists
 
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -15,11 +16,19 @@ class ListViewModel(
 ) : ViewModel() {
 
     var list by mutableStateOf<List<CustomList>>(emptyList())
+    var search by mutableStateOf("")
 
     init {
         listDao
             .getAllLists()
             .onEach { list = it }
             .launchIn(viewModelScope)
+    }
+
+    val searchList by derivedStateOf {
+        if (search.isEmpty()) list
+        else list
+            .dfsSearch(search)
+            .distinctBy { it.item.uuid }
     }
 }

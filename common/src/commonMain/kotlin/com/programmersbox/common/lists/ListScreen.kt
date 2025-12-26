@@ -7,11 +7,13 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material3.AlertDialog
@@ -78,8 +80,8 @@ import kotlin.time.Instant
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ListScreen(
-    viewModel: ListViewModel = koinViewModel(),
     onNavigateToDetail: (String) -> Unit,
+    viewModel: ListViewModel = koinViewModel(),
 ) {
     val connectionRepository = koinInject<NetworkConnectionRepository>()
     val shouldShowMedia by remember { derivedStateOf { connectionRepository.shouldShowMedia } }
@@ -177,9 +179,34 @@ fun ListScreen(
             verticalArrangement = Arrangement.spacedBy(4.dp),
             modifier = Modifier
                 .fillMaxSize()
+                .padding(bottom = 16.dp)
                 .ifTrue(showBlur) { hazeSource(state = hazeState) }
         ) {
-            items(viewModel.list) { list ->
+            item(
+                contentType = "search"
+            ) {
+                OutlinedTextField(
+                    value = viewModel.search,
+                    onValueChange = { viewModel.search = it },
+                    label = { Text("Search Lists") },
+                    singleLine = true,
+                    placeholder = { Text("Search Lists") },
+                    trailingIcon = {
+                        IconButton(
+                            onClick = { viewModel.search = "" }
+                        ) { Icon(Icons.Default.Clear, null) }
+                    },
+                    shape = MaterialTheme.shapes.large,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp)
+                )
+            }
+            items(
+                items = viewModel.searchList,
+                contentType = { "list" },
+                key = { it.item.uuid }
+            ) { list ->
                 val biometricOpen = rememberBiometricOpening(
                     title = "Authenticate to view ${list.item.name}",
                     onAuthenticationSucceeded = { onNavigateToDetail(list.item.uuid) }

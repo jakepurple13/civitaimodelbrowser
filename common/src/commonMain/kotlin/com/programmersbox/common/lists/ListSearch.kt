@@ -37,6 +37,7 @@ fun List<CustomList>.bfsSearch(query: String): List<CustomList> {
                                 }
                         )
                     )
+                    return@forEach
                 }
             }
         }
@@ -70,6 +71,7 @@ fun List<CustomList>.dfsSearch(query: String): List<CustomList> {
                                 }
                         )
                     )
+                    return@forEach
                 }
             }
         }

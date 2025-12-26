@@ -74,6 +74,7 @@ import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.dokar.sonner.ToastType
 import com.dokar.sonner.ToasterState
 import com.programmersbox.common.BackButton
@@ -129,6 +130,11 @@ fun FavoritesUI(
     var showSortedByDialog by remember { mutableStateOf(false) }
 
     val hazeStyle = LocalHazeStyle.current
+
+    //val list = viewModel.viewingList
+    val list by viewModel
+        .viewingList
+        .collectAsStateWithLifecycle(emptyList())
 
     if (showSortedByDialog) {
         SheetDetails(
@@ -200,7 +206,7 @@ fun FavoritesUI(
                                     Row(
                                         verticalAlignment = Alignment.CenterVertically
                                     ) {
-                                        Text("(${viewModel.favoritesList.size})")
+                                        Text("(${list.size})")
                                         FilledIconToggleButton(
                                             checked = reverseFavorites,
                                             onCheckedChange = { reverseFavorites = it }
@@ -308,7 +314,7 @@ fun FavoritesUI(
                 .fillMaxSize()
         ) {
             items(
-                viewModel.viewingList,
+                list,
                 key = {
                     when (it) {
                         is FavoriteModel.Creator -> it.name + "Creator"

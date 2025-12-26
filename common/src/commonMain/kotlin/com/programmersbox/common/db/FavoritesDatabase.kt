@@ -148,6 +148,34 @@ interface FavoritesDao {
     @Query("SELECT * FROM favorite_table WHERE nsfw = :includeNsfw ORDER BY dateAdded DESC")
     fun getFavoritesWithNSFW(includeNsfw: Boolean): Flow<List<FavoriteRoom>>
 
+    @Query("SELECT * FROM favorite_table WHERE name LIKE '%' || :query || '%' OR description LIKE '%' || :query || '%' ORDER BY dateAdded DESC")
+    fun searchFavorites(query: String): Flow<List<FavoriteRoom>>
+
+    @Query("SELECT * FROM favorite_table WHERE nsfw = :includeNsfw AND name LIKE '%' || :query || '%' OR description LIKE '%' || :query || '%' ORDER BY dateAdded DESC")
+    fun searchFavorites(
+        query: String,
+        includeNsfw: Boolean
+    ): Flow<List<FavoriteRoom>>
+
+    @Ignore
+    fun searchForFavorites(
+        query: String,
+        json: Json = Json {
+            isLenient = true
+            prettyPrint = true
+            ignoreUnknownKeys = true
+            coerceInputValues = true
+        },
+        includeNsfw: Boolean,
+        type: List<String> = emptyList(),
+    ) = if (includeNsfw) {
+        searchFavorites(query)
+    } else {
+        searchFavorites(query, false)
+    }.map { value ->
+        value.map { favorite -> favorite.toModel(json) }
+    }
+
     @Ignore
     fun getFavoriteModels(
         json: Json = Json {

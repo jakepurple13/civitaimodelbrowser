@@ -10,6 +10,7 @@ import androidx.lifecycle.viewModelScope
 import com.programmersbox.common.DataStore
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 
@@ -30,28 +31,33 @@ class FavoritesViewModel(
             .distinct()
     }
 
-    val viewingList by derivedStateOf {
-        favoritesList
-            .filter {
-                val name = it.name.contains(search, true)
-                val description = (it as? FavoriteModel.Model)
-                    ?.description
-                    ?.contains(search, true) == true
-                val filter = filterList.isEmpty() || when (it) {
-                    is FavoriteModel.Creator -> CREATOR_FILTER
-                    is FavoriteModel.Image -> IMAGE_FILTER
-                    is FavoriteModel.Model -> it.type
-                } in filterList
+    private var includeNsfw by mutableStateOf(false)
 
-                (name || description) && filter
+    val viewingList by derivedStateOf {
+        dao
+            .searchForFavorites(
+                query = search,
+                type = filterList.takeIf { it.isNotEmpty() } ?: typeList,
+                includeNsfw = includeNsfw
+            )
+            .map { list ->
+                list
+                    .filter {
+                        filterList.isEmpty() || when (it) {
+                            is FavoriteModel.Creator -> CREATOR_FILTER
+                            is FavoriteModel.Image -> IMAGE_FILTER
+                            is FavoriteModel.Model -> it.type
+                        } in filterList
+                    }
+                    .let { sortedBy.sorting(it) }
             }
-            .let { sortedBy.sorting(it) }
     }
 
     init {
         dataStore
             .includeNsfw
             .flow
+            .onEach { includeNsfw = it }
             .flatMapLatest { includeNsfw ->
                 dao.getFavoriteModels(includeNsfw = includeNsfw)
             }

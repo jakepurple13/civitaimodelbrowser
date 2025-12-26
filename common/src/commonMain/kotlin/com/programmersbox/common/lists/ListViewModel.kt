@@ -17,6 +17,7 @@ class ListViewModel(
 
     var list by mutableStateOf<List<CustomList>>(emptyList())
     var search by mutableStateOf("")
+    var searchType by mutableStateOf(SearchType.DFS)
 
     init {
         listDao
@@ -27,8 +28,11 @@ class ListViewModel(
 
     val searchList by derivedStateOf {
         if (search.isEmpty()) list
-        else list
-            .dfsSearch(search)
-            .distinctBy { it.item.uuid }
+        else {
+            when (searchType) {
+                SearchType.DFS -> list.dfsSearch(search)
+                SearchType.BFS -> list.bfsSearch(search)
+            }.distinctBy { it.item.uuid }
+        }
     }
 }

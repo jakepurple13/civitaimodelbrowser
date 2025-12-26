@@ -1,5 +1,6 @@
 package com.programmersbox.common.lists
 
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -12,6 +13,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ManageSearch
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.Lock
@@ -26,6 +28,9 @@ import androidx.compose.material3.ListItem
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SegmentedButton
+import androidx.compose.material3.SegmentedButtonDefaults
+import androidx.compose.material3.SingleChoiceSegmentedButtonRow
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
@@ -185,22 +190,60 @@ fun ListScreen(
             item(
                 contentType = "search"
             ) {
-                OutlinedTextField(
-                    value = viewModel.search,
-                    onValueChange = { viewModel.search = it },
-                    label = { Text("Search Lists") },
-                    singleLine = true,
-                    placeholder = { Text("Search Lists") },
-                    trailingIcon = {
-                        IconButton(
-                            onClick = { viewModel.search = "" }
-                        ) { Icon(Icons.Default.Clear, null) }
-                    },
-                    shape = MaterialTheme.shapes.large,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 16.dp)
-                )
+                Column {
+                    var showSearchType by remember { mutableStateOf(false) }
+                    OutlinedTextField(
+                        value = viewModel.search,
+                        onValueChange = { viewModel.search = it },
+                        label = { Text("Search Lists") },
+                        singleLine = true,
+                        placeholder = { Text("Search Lists") },
+                        trailingIcon = {
+                            IconButton(
+                                onClick = { viewModel.search = "" }
+                            ) { Icon(Icons.Default.Clear, null) }
+                        },
+                        leadingIcon = {
+                            IconButton(
+                                onClick = { showSearchType = !showSearchType }
+                            ) { Icon(Icons.AutoMirrored.Filled.ManageSearch, null) }
+                        },
+                        shape = MaterialTheme.shapes.large,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 16.dp)
+                    )
+
+                    AnimatedVisibility(showSearchType) {
+                        Column {
+                            SingleChoiceSegmentedButtonRow(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(horizontal = 16.dp)
+                            ) {
+                                SearchType.entries.forEachIndexed { index, searchType ->
+                                    SegmentedButton(
+                                        selected = viewModel.searchType == searchType,
+                                        onClick = { viewModel.searchType = searchType },
+                                        shape = SegmentedButtonDefaults.itemShape(
+                                            index = index,
+                                            count = SearchType.entries.size
+                                        ),
+                                        label = { Text(searchType.name) }
+                                    )
+                                }
+                            }
+                            Text(
+                                "DFS: Searches the list name first, then the items",
+                                modifier = Modifier.padding(horizontal = 16.dp)
+                            )
+                            Text(
+                                "BFS: Searches the items first, then the list name",
+                                modifier = Modifier.padding(horizontal = 16.dp)
+                            )
+                        }
+                    }
+                }
             }
             items(
                 items = viewModel.searchList,

@@ -198,6 +198,9 @@ interface FavoritesDao {
         )
     }.map { value -> value.map { favorite -> favorite.toModel(json) } }
 
+    @Query("SELECT DISTINCT type FROM favorite_table WHERE favoriteType = 'Model'")
+    fun getTypes(): Flow<List<String>>
+
     @Ignore
     fun getFavoriteModels(
         json: Json = Json {

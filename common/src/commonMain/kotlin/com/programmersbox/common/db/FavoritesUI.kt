@@ -23,6 +23,7 @@ import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CornerSize
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -113,9 +114,9 @@ internal const val CREATOR_FILTER = "Creator"
 )
 @Composable
 fun FavoritesUI(
-    viewModel: FavoritesViewModel = koinViewModel(),
     onNavigateToDetail: (Long) -> Unit,
     onNavigateToUser: (String) -> Unit,
+    viewModel: FavoritesViewModel = koinViewModel(),
 ) {
     val connectionRepository = koinInject<NetworkConnectionRepository>()
     val shouldShowMedia by remember { derivedStateOf { connectionRepository.shouldShowMedia } }
@@ -132,7 +133,10 @@ fun FavoritesUI(
 
     val hazeStyle = LocalHazeStyle.current
 
-    //val list = viewModel.viewingList
+    val typeList by viewModel
+        .typeList
+        .collectAsStateWithLifecycle(emptyList())
+
     val list by viewModel
         .viewingList
         .collectAsStateWithLifecycle(emptyList())
@@ -236,14 +240,19 @@ fun FavoritesUI(
                             .fillMaxWidth()
                             .windowInsetsPadding(SearchBarDefaults.windowInsets)
                     ) {}
+                    val lazyListState = rememberLazyListState()
+                    LaunchedEffect(typeList) {
+                        lazyListState.scrollToItem(0)
+                    }
                     LazyRow(
+                        state = lazyListState,
                         horizontalArrangement = Arrangement.spacedBy(4.dp),
                         modifier = Modifier
                             .fillMaxWidth()
                             .padding(horizontal = 4.dp)
                     ) {
                         items(
-                            viewModel.typeList,
+                            typeList,
                             contentType = { "type" },
                             key = { it }
                         ) {
@@ -258,20 +267,6 @@ fun FavoritesUI(
                         }
 
                         item(
-                            contentType = "image",
-                            key = IMAGE_FILTER
-                        ) {
-                            FilterChip(
-                                selected = IMAGE_FILTER in viewModel.filterList,
-                                onClick = {
-                                    viewModel.toggleFilter(IMAGE_FILTER)
-                                    scope.launch { lazyGridState.animateScrollToItem(0) }
-                                },
-                                label = { Text(IMAGE_FILTER) }
-                            )
-                        }
-
-                        item(
                             contentType = "creator",
                             key = CREATOR_FILTER
                         ) {
@@ -282,6 +277,20 @@ fun FavoritesUI(
                                     scope.launch { lazyGridState.animateScrollToItem(0) }
                                 },
                                 label = { Text(CREATOR_FILTER) }
+                            )
+                        }
+
+                        item(
+                            contentType = "image",
+                            key = IMAGE_FILTER
+                        ) {
+                            FilterChip(
+                                selected = IMAGE_FILTER in viewModel.filterList,
+                                onClick = {
+                                    viewModel.toggleFilter(IMAGE_FILTER)
+                                    scope.launch { lazyGridState.animateScrollToItem(0) }
+                                },
+                                label = { Text(IMAGE_FILTER) }
                             )
                         }
                     }

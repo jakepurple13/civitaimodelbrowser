@@ -8,7 +8,6 @@ import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.programmersbox.common.DataStore
-import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
@@ -20,19 +19,9 @@ class FavoritesViewModel(
 ) : ViewModel() {
     var search by mutableStateOf("")
     val filterList = mutableStateListOf<String>()
-    val favoritesList = mutableStateListOf<FavoriteModel>()
-
     var sortedBy by mutableStateOf(SortedBy.Default)
-
-    val typeList by derivedStateOf {
-        favoritesList
-            .filterIsInstance<FavoriteModel.Model>()
-            .map { it.type }
-            .distinct()
-    }
-
+    val typeList = dao.getTypes()
     private var includeNsfw by mutableStateOf(false)
-
     val viewingList by derivedStateOf {
         dao
             .searchForFavorites(
@@ -40,7 +29,7 @@ class FavoritesViewModel(
                 type = filterList,
                 includeNsfw = includeNsfw
             )
-            .map { list -> list.let { sortedBy.sorting(it) } }
+            .map { list -> sortedBy.sorting(list) }
     }
 
     init {
@@ -48,13 +37,6 @@ class FavoritesViewModel(
             .includeNsfw
             .flow
             .onEach { includeNsfw = it }
-            .flatMapLatest { includeNsfw ->
-                dao.getFavoriteModels(includeNsfw = includeNsfw)
-            }
-            .onEach {
-                favoritesList.clear()
-                favoritesList.addAll(it)
-            }
             .launchIn(viewModelScope)
     }
 

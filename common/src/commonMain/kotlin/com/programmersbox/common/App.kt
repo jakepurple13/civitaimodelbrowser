@@ -14,6 +14,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.Modifier
@@ -24,7 +25,6 @@ import androidx.navigation3.scene.DialogSceneStrategy
 import androidx.navigation3.ui.NavDisplay
 import com.programmersbox.common.di.NavigationHandler
 import dev.chrisbanes.haze.LocalHazeStyle
-import dev.chrisbanes.haze.materials.HazeMaterials
 import kotlinx.coroutines.flow.collect
 import kotlinx.serialization.Serializable
 import org.koin.compose.koinInject
@@ -36,8 +36,9 @@ internal fun App(
     onShareClick: (String) -> Unit,
 ) {
     SetupNetworkListener()
+    val blurType by koinInject<DataStore>().rememberBlurType()
     CompositionLocalProvider(
-        LocalHazeStyle provides HazeMaterials.regular(),
+        LocalHazeStyle provides blurType.toHazeStyle(),
         LocalActions provides remember {
             Actions(
                 shareUrl = onShareClick,

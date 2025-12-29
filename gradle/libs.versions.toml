@@ -1,10 +1,10 @@
 [versions]
-appVersion = "4.3.0"
+appVersion = "4.3.1"
 
 biometricVersion = "1.4.0-alpha05"
 blurhashVersion = "0.0-4-ALPHA"
 browser = "1.9.0"
-composeMultiplatformMediaPlayerVersion = "1.0.50"
+composeMultiplatformMediaPlayerVersion = "1.0.51"
 composeScrollbars = "1.0.4"
 haze = "1.7.1"
 kotlin-version = "2.3.0"

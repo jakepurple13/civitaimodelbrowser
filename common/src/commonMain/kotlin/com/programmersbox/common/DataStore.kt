@@ -2,6 +2,7 @@ package com.programmersbox.common
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.Stable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -13,12 +14,17 @@ import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.floatPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import dev.chrisbanes.haze.HazeStyle
+import dev.chrisbanes.haze.materials.CupertinoMaterials
+import dev.chrisbanes.haze.materials.HazeMaterials
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.mapNotNull
 import kotlinx.coroutines.launch
+import kotlinx.serialization.Serializable
+import kotlinx.serialization.json.Json
 import okio.Path.Companion.toPath
 
 
@@ -82,62 +88,26 @@ class DataStore private constructor(
     )
 
     @Composable
-    fun rememberMiddleNavigation(): MutableState<MiddleNavigation> {
-        val coroutineScope = rememberCoroutineScope()
-        val key = stringPreferencesKey("middle_navigation")
-        val state by remember {
-            dataStore
-                .data
-                .map {
-                    runCatching { MiddleNavigation.valueOf(it[key]!!) }
-                        .getOrElse { MiddleNavigation.Lists }
-                }
-        }.collectAsStateWithLifecycle(initialValue = MiddleNavigation.Lists)
+    fun rememberThemeMode(): MutableState<ThemeMode> = rememberPreferenceType(
+        key = stringPreferencesKey("theme_mode"),
+        defaultValue = ThemeMode.System,
+        mapToValue = { ThemeMode.valueOf(it) },
+        mapToString = { it.name }
+    )
 
-        return remember(state) {
-            object : MutableState<MiddleNavigation> {
-                override var value: MiddleNavigation
-                    get() = state
-                    set(value) {
-                        coroutineScope.launch {
-                            dataStore.edit { it[key] = value.name }
-                        }
-                    }
-
-                override fun component1() = value
-                override fun component2(): (MiddleNavigation) -> Unit = { value = it }
-            }
-        }
+    private val json = Json {
+        isLenient = true
+        ignoreUnknownKeys = true
+        coerceInputValues = true
     }
 
     @Composable
-    fun rememberThemeMode(): MutableState<ThemeMode> {
-        val coroutineScope = rememberCoroutineScope()
-        val key = stringPreferencesKey("theme_mode")
-        val state by remember {
-            dataStore
-                .data
-                .map {
-                    runCatching { ThemeMode.valueOf(it[key]!!) }
-                        .getOrElse { ThemeMode.System }
-                }
-        }.collectAsStateWithLifecycle(initialValue = ThemeMode.System)
-
-        return remember(state) {
-            object : MutableState<ThemeMode> {
-                override var value: ThemeMode
-                    get() = state
-                    set(value) {
-                        coroutineScope.launch {
-                            dataStore.edit { it[key] = value.name }
-                        }
-                    }
-
-                override fun component1() = value
-                override fun component2(): (ThemeMode) -> Unit = { value = it }
-            }
-        }
-    }
+    fun rememberBlurType(): MutableState<BlurType> = rememberPreferenceType(
+        key = stringPreferencesKey("blur_type"),
+        defaultValue = BlurType(HazeBlur.Material, HazeLevel.Regular),
+        mapToValue = { json.decodeFromString<BlurType>(it) },
+        mapToString = { json.encodeToString(it) }
+    )
 
     open class DataStoreType<T>(
         val key: Preferences.Key<T>,
@@ -191,6 +161,40 @@ class DataStore private constructor(
             }
         }
     }
+
+    @Composable
+    private fun <T> rememberPreferenceType(
+        key: Preferences.Key<String>,
+        defaultValue: T,
+        mapToValue: (String) -> T,
+        mapToString: (T) -> String,
+    ): MutableState<T> {
+        val coroutineScope = rememberCoroutineScope()
+        val state by remember {
+            dataStore
+                .data
+                .map {
+                    it[key]
+                        ?.let { p1 -> runCatching { mapToValue(p1) }.getOrNull() }
+                        ?: defaultValue
+                }
+        }.collectAsStateWithLifecycle(initialValue = defaultValue)
+
+        return remember(state) {
+            object : MutableState<T> {
+                override var value: T
+                    get() = state
+                    set(value) {
+                        coroutineScope.launch {
+                            dataStore.edit { it[key] = mapToString(value) }
+                        }
+                    }
+
+                override fun component1() = value
+                override fun component2(): (T) -> Unit = { value = it }
+            }
+        }
+    }
 }
 
 enum class ThemeMode {
@@ -199,8 +203,65 @@ enum class ThemeMode {
     Dark
 }
 
-enum class MiddleNavigation {
-    Lists,
-    Favorites,
-    None
+@Serializable
+enum class HazeBlur(
+    val levels: Array<HazeLevel>
+) {
+    Material(
+        arrayOf(
+            HazeLevel.UltraThin,
+            HazeLevel.Thin,
+            HazeLevel.Regular,
+            HazeLevel.Thick,
+            HazeLevel.UltraThick
+        )
+    ) {
+        @Composable
+        override fun toHazeStyle(level: HazeLevel) = when (level) {
+            HazeLevel.UltraThin -> HazeMaterials.ultraThin()
+            HazeLevel.Thin -> HazeMaterials.thin()
+            HazeLevel.Regular -> HazeMaterials.regular()
+            HazeLevel.Thick -> HazeMaterials.thick()
+            HazeLevel.UltraThick -> HazeMaterials.ultraThick()
+        }
+    },
+    Cupertino(
+        arrayOf(
+            HazeLevel.UltraThin,
+            HazeLevel.Thin,
+            HazeLevel.Regular,
+            HazeLevel.Thick,
+        )
+    ) {
+        @Composable
+        override fun toHazeStyle(level: HazeLevel) = when (level) {
+            HazeLevel.UltraThin -> CupertinoMaterials.ultraThin()
+            HazeLevel.Thin -> CupertinoMaterials.thin()
+            HazeLevel.Regular -> CupertinoMaterials.regular()
+            HazeLevel.Thick -> CupertinoMaterials.thick()
+            HazeLevel.UltraThick -> CupertinoMaterials.regular()
+        }
+    };
+
+    @Composable
+    abstract fun toHazeStyle(level: HazeLevel): HazeStyle
+}
+
+@Serializable
+enum class HazeLevel {
+    UltraThin,
+    Thin,
+    Regular,
+    Thick,
+    UltraThick
+}
+
+@Serializable
+@Stable
+data class BlurType(
+    val type: HazeBlur,
+    val level: HazeLevel
+) {
+    @Composable
+    fun toHazeStyle() = type.toHazeStyle(level)
 }

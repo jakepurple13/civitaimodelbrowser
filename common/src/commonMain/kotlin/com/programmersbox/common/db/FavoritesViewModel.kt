@@ -37,20 +37,10 @@ class FavoritesViewModel(
         dao
             .searchForFavorites(
                 query = search,
-                type = filterList.takeIf { it.isNotEmpty() } ?: typeList,
+                type = filterList,
                 includeNsfw = includeNsfw
             )
-            .map { list ->
-                list
-                    .filter {
-                        filterList.isEmpty() || when (it) {
-                            is FavoriteModel.Creator -> CREATOR_FILTER
-                            is FavoriteModel.Image -> IMAGE_FILTER
-                            is FavoriteModel.Model -> it.type
-                        } in filterList
-                    }
-                    .let { sortedBy.sorting(it) }
-            }
+            .map { list -> list.let { sortedBy.sorting(it) } }
     }
 
     init {

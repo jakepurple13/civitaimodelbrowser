@@ -148,13 +148,32 @@ interface FavoritesDao {
     @Query("SELECT * FROM favorite_table WHERE nsfw = :includeNsfw ORDER BY dateAdded DESC")
     fun getFavoritesWithNSFW(includeNsfw: Boolean): Flow<List<FavoriteRoom>>
 
-    @Query("SELECT * FROM favorite_table WHERE name LIKE '%' || :query || '%' OR description LIKE '%' || :query || '%' ORDER BY dateAdded DESC")
-    fun searchFavorites(query: String): Flow<List<FavoriteRoom>>
-
-    @Query("SELECT * FROM favorite_table WHERE nsfw = :includeNsfw AND name LIKE '%' || :query || '%' OR description LIKE '%' || :query || '%' ORDER BY dateAdded DESC")
+    @Query(
+        """
+        SELECT * FROM favorite_table
+        WHERE (nsfw = :includeNsfw OR nsfw = 0) 
+        AND (name LIKE '%' || :query || '%' OR description LIKE '%' || :query || '%') 
+        ORDER BY dateAdded DESC
+    """
+    )
     fun searchFavorites(
         query: String,
-        includeNsfw: Boolean
+        includeNsfw: Boolean,
+    ): Flow<List<FavoriteRoom>>
+
+    @Query(
+        """
+        SELECT * FROM favorite_table
+        WHERE (nsfw = :includeNsfw OR nsfw = 0) 
+        AND (name LIKE '%' || :query || '%' OR description LIKE '%' || :query || '%') 
+        AND (favoriteType IN (:types) OR type IN (:types))
+        ORDER BY dateAdded DESC
+    """
+    )
+    fun searchFavorites(
+        query: String,
+        includeNsfw: Boolean,
+        types: List<String>?
     ): Flow<List<FavoriteRoom>>
 
     @Ignore
@@ -167,14 +186,19 @@ interface FavoritesDao {
             coerceInputValues = true
         },
         includeNsfw: Boolean,
-        type: List<String> = emptyList(),
-    ) = if (includeNsfw) {
-        searchFavorites(query)
+        type: List<String>,
+    ) = if (type.isEmpty()) {
+        searchFavorites(
+            query = query,
+            includeNsfw = includeNsfw,
+        )
     } else {
-        searchFavorites(query, false)
-    }.map { value ->
-        value.map { favorite -> favorite.toModel(json) }
-    }
+        searchFavorites(
+            query = query,
+            includeNsfw = includeNsfw,
+            types = type
+        )
+    }.map { value -> value.map { favorite -> favorite.toModel(json) } }
 
     @Ignore
     fun getFavoriteModels(

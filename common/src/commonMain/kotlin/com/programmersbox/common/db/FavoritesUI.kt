@@ -59,6 +59,7 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -135,6 +136,10 @@ fun FavoritesUI(
     val list by viewModel
         .viewingList
         .collectAsStateWithLifecycle(emptyList())
+
+    LaunchedEffect(list) {
+        lazyGridState.scrollToItem(0)
+    }
 
     if (showSortedByDialog) {
         SheetDetails(
@@ -237,7 +242,11 @@ fun FavoritesUI(
                             .fillMaxWidth()
                             .padding(horizontal = 4.dp)
                     ) {
-                        items(viewModel.typeList) {
+                        items(
+                            viewModel.typeList,
+                            contentType = { "type" },
+                            key = { it }
+                        ) {
                             FilterChip(
                                 selected = it in viewModel.filterList,
                                 onClick = {
@@ -248,7 +257,10 @@ fun FavoritesUI(
                             )
                         }
 
-                        item {
+                        item(
+                            contentType = "image",
+                            key = IMAGE_FILTER
+                        ) {
                             FilterChip(
                                 selected = IMAGE_FILTER in viewModel.filterList,
                                 onClick = {
@@ -259,7 +271,10 @@ fun FavoritesUI(
                             )
                         }
 
-                        item {
+                        item(
+                            contentType = "creator",
+                            key = CREATOR_FILTER
+                        ) {
                             FilterChip(
                                 selected = CREATOR_FILTER in viewModel.filterList,
                                 onClick = {

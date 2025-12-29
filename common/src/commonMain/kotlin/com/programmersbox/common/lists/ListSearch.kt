@@ -14,14 +14,17 @@ enum class SearchType {
  */
 fun List<CustomList>.bfsSearch(query: String): List<CustomList> {
     return sequence {
+        val addedList = mutableListOf<CustomList>()
         // First level: Visit all parent CustomLists (their items)
         forEach { customList ->
             if (customList.item.name.contains(query, ignoreCase = true)) {
                 yield(customList)
+                addedList.add(customList)
             }
         }
         // Second level: Visit all children (CustomListInfo items) across all CustomLists
         forEach { customList ->
+            if (customList in addedList) return@forEach
             customList.list.forEach { item ->
                 if (
                     item.name.contains(query, ignoreCase = true) ||
@@ -50,10 +53,11 @@ fun List<CustomList>.bfsSearch(query: String): List<CustomList> {
  */
 fun List<CustomList>.dfsSearch(query: String): List<CustomList> {
     return sequence {
-        forEach { customList ->
+        loop@ for (customList in this@dfsSearch) {
             // Visit the parent CustomList (its item)
             if (customList.item.name.contains(query, ignoreCase = true)) {
                 yield(customList)
+                continue
             }
             // Visit children (CustomListInfo items)
             customList.list.forEach { item ->
@@ -71,7 +75,7 @@ fun List<CustomList>.dfsSearch(query: String): List<CustomList> {
                                 }
                         )
                     )
-                    return@forEach
+                    continue@loop
                 }
             }
         }

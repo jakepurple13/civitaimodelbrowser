@@ -48,8 +48,9 @@ class Network {
         page: Int,
         perPage: Int = PAGE_LIMIT,
         includeNsfw: Boolean = true,
+        sort: CivitSort = CivitSort.Newest,
     ) = runCatching {
-        client.get("models?page=$page&sort=Newest&limit=$perPage&nsfw=$includeNsfw")
+        client.get("models?page=$page&sort=${sort.value}&limit=$perPage&nsfw=$includeNsfw")
             .body<CivitAi>()
     }
 

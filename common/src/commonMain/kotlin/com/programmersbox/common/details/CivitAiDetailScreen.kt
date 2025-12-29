@@ -232,16 +232,24 @@ fun CivitAiDetailScreen(
                         },
                         navigationIcon = { BackButton() },
                         actions = {
-                            model.models.creator?.let { creator ->
-                                IconButton(
-                                    onClick = { onNavigateToUser(creator.username.orEmpty()) },
-                                ) {
-                                    LoadingImage(
-                                        creator.image.orEmpty(),
-                                        modifier = Modifier
-                                            .size(48.dp)
-                                            .clip(CircleShape)
-                                    )
+                            val uriHandler = LocalUriHandler.current
+                            IconButton(
+                                onClick = { uriHandler.openUri(viewModel.modelUrl) }
+                            ) { Icon(Icons.Default.OpenInBrowser, null) }
+
+                            AnimatedVisibility(model.models.creator != null) {
+                                model.models.creator?.let { creator ->
+                                    IconButton(
+                                        onClick = { onNavigateToUser(creator.username.orEmpty()) },
+                                    ) {
+                                        LoadingImage(
+                                            creator.image.orEmpty(),
+                                            contentScale = ContentScale.FillBounds,
+                                            modifier = Modifier
+                                                .size(48.dp)
+                                                .clip(CircleShape)
+                                        )
+                                    }
                                 }
                             }
                         },
@@ -267,7 +275,6 @@ fun CivitAiDetailScreen(
                             isFavorite = isFavorite,
                             addToFavorites = viewModel::addToFavorites,
                             removeFromFavorites = viewModel::removeFromFavorites,
-                            modelUrl = viewModel.modelUrl,
                             showBlur = showBlur,
                             hazeState = hazeState,
                             hazeStyle = hazeStyle,
@@ -284,7 +291,6 @@ fun CivitAiDetailScreen(
                             isFavorite = isFavorite,
                             addToFavorites = viewModel::addToFavorites,
                             removeFromFavorites = viewModel::removeFromFavorites,
-                            modelUrl = viewModel.modelUrl,
                             onNavigateToDetailImages = onNavigateToDetailImages,
                             onShowQrCode = { showQrCode = true },
                             model = model,
@@ -594,7 +600,6 @@ private fun ImageCard(
 @Composable
 private fun HorizontalToolbarContent(
     id: String?,
-    modelUrl: String,
     isFavorite: Boolean,
     addToFavorites: () -> Unit,
     removeFromFavorites: () -> Unit,
@@ -605,7 +610,6 @@ private fun HorizontalToolbarContent(
     onToggleToolbar: (Boolean) -> Unit,
 ) {
     val vibrantColors = FloatingToolbarDefaults.vibrantFloatingToolbarColors()
-    val uriHandler = LocalUriHandler.current
 
     val scope = rememberCoroutineScope()
     var showLists by remember { mutableStateOf(false) }
@@ -678,11 +682,6 @@ private fun HorizontalToolbarContent(
                 label = "Share"
             )
             clickableItem(
-                onClick = { uriHandler.openUri(modelUrl) },
-                icon = { Icon(Icons.Default.OpenInBrowser, null) },
-                label = "Browser"
-            )
-            clickableItem(
                 onClick = {
                     id?.toLongOrNull()
                         ?.let { onNavigateToDetailImages(it, model.models.name) }
@@ -713,13 +712,13 @@ private fun HorizontalToolbarContent(
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun BottomBarContent(
     id: String?,
     isFavorite: Boolean,
     removeFromFavorites: () -> Unit,
     addToFavorites: () -> Unit,
-    modelUrl: String,
     showBlur: Boolean,
     hazeState: HazeState,
     hazeStyle: HazeStyle,
@@ -727,6 +726,47 @@ private fun BottomBarContent(
     onShowQrCode: () -> Unit,
     model: DetailViewState.Content,
 ) {
+    val scope = rememberCoroutineScope()
+    var showLists by remember { mutableStateOf(false) }
+    val listState = rememberModalBottomSheetState(true)
+
+    if (showLists) {
+        val listDao = koinInject<ListDao>()
+        val models = model.models
+        ModalBottomSheet(
+            onDismissRequest = { showLists = false },
+            containerColor = MaterialTheme.colorScheme.surface,
+            sheetState = listState
+        ) {
+            val toaster = koinInject<ToasterState>()
+            ListChoiceScreen(
+                id = models.id,
+                onClick = { item ->
+                    scope.launch {
+                        listDao.addToList(
+                            uuid = item.item.uuid,
+                            id = models.id,
+                            name = models.name,
+                            description = models.description,
+                            type = models.type.name,
+                            nsfw = models.nsfw,
+                            imageUrl = models.modelVersions.firstOrNull()?.images?.firstOrNull()?.url,
+                            favoriteType = FavoriteType.Model,
+                            hash = models.modelVersions.firstOrNull()?.images?.firstOrNull()?.hash
+                        )
+                        toaster.show("Added to List", type = ToastType.Success)
+                        listState.hide()
+                    }.invokeOnCompletion { showLists = false }
+                },
+                navigationIcon = {
+                    IconButton(
+                        onClick = { showLists = false }
+                    ) { Icon(Icons.Default.Close, null) }
+                },
+            )
+        }
+    }
+
     BottomAppBar(
         floatingActionButton = {
             FloatingActionButton(
@@ -752,6 +792,13 @@ private fun BottomBarContent(
                 label = { Text("Share") },
             )
 
+            NavigationBarItem(
+                selected = false,
+                onClick = { showLists = true },
+                icon = { Icon(Icons.AutoMirrored.Filled.PlaylistAdd, null) },
+                label = { Text("List") },
+            )
+
             val uriHandler = LocalUriHandler.current
             NavigationBarItem(
                 selected = false,
@@ -763,7 +810,8 @@ private fun BottomBarContent(
             NavigationBarItem(
                 selected = false,
                 onClick = {
-                    id?.toLongOrNull()
+                    id
+                        ?.toLongOrNull()
                         ?.let { onNavigateToDetailImages(it, model.models.name) }
                 },
                 icon = { Icon(Icons.Default.Image, null) },

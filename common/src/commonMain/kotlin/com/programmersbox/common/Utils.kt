@@ -241,3 +241,9 @@ fun CloseButton() {
         onClick = { navInput.backCompleted() }
     ) { Icon(Icons.Default.Close, null) }
 }
+
+enum class CivitSort(val value: String) {
+    Newest("Newest"),
+    HighestRated("Highest Rated"),
+    MostDownloaded("Most Downloaded")
+}

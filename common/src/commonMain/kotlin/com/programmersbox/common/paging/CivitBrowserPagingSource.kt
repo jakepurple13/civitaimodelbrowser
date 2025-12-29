@@ -1,12 +1,14 @@
 package com.programmersbox.common.paging
 
 import com.programmersbox.common.CivitAi
+import com.programmersbox.common.CivitSort
 import com.programmersbox.common.Network
 import com.programmersbox.common.PAGE_LIMIT
 
 class CivitBrowserPagingSource(
     network: Network,
     includeNsfw: Boolean = true,
+    private val sort: CivitSort
 ) : CivitAiPagingSource(network, includeNsfw) {
     override suspend fun networkLoad(
         params: LoadParams<String>,
@@ -15,7 +17,8 @@ class CivitBrowserPagingSource(
     ): Result<CivitAi> = network.getModels(
         page = page.coerceAtLeast(1),
         perPage = PAGE_LIMIT,
-        includeNsfw = includeNsfw
+        includeNsfw = includeNsfw,
+        sort = sort
     )
 }
 

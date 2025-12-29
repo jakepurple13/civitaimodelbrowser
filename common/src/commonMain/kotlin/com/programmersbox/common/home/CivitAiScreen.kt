@@ -26,6 +26,7 @@ import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.Sort
 import androidx.compose.material.icons.filled.ArrowUpward
 import androidx.compose.material.icons.filled.Block
 import androidx.compose.material.icons.filled.Image
@@ -46,6 +47,9 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SegmentedButton
+import androidx.compose.material3.SegmentedButtonDefaults
+import androidx.compose.material3.SingleChoiceSegmentedButtonRow
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -79,6 +83,7 @@ import androidx.paging.compose.LazyPagingItems
 import androidx.paging.compose.collectAsLazyPagingItems
 import androidx.paging.compose.itemContentType
 import chaintech.videoplayer.ui.preview.VideoPreviewComposable
+import com.programmersbox.common.CivitSort
 import com.programmersbox.common.ComposableUtils
 import com.programmersbox.common.ContextMenu
 import com.programmersbox.common.DataStore
@@ -149,6 +154,8 @@ fun CivitAiScreen(
                 onNavigateToQrCode = onNavigateToQrCode,
                 onNavigateToImages = onNavigateToImages,
                 onNavigateToBlacklist = onNavigateToBlacklist,
+                sort = viewModel.sort,
+                onSortChange = { viewModel.sort = it },
                 modifier = Modifier.ifTrue(showBlur) {
                     hazeEffect(hazeState) {
                         progressive = HazeProgressive.verticalGradient(
@@ -567,6 +574,8 @@ private fun AppSearchAppBar(
     onNavigateToImages: () -> Unit,
     onNavigateToBlacklist: () -> Unit,
     showBlur: Boolean,
+    sort: CivitSort,
+    onSortChange: (CivitSort) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val topAppBarColors = TopAppBarDefaults.topAppBarColors(
@@ -576,37 +585,68 @@ private fun AppSearchAppBar(
             MaterialTheme.colorScheme.surface
     )
 
-    TopAppBar(
-        title = { Text("CivitAI") },
-        navigationIcon = {
-            IconButton(
-                onClick = onNavigateToSearch
-            ) { Icon(Icons.Default.Search, null) }
-        },
-        actions = {
-            AppBarRow(
-                maxItemCount = 2
-            ) {
-                clickableItem(
-                    onClick = onNavigateToQrCode,
-                    icon = { Icon(Icons.Default.QrCodeScanner, null) },
-                    label = "QR Code Scanner"
-                )
-                clickableItem(
-                    onClick = onNavigateToImages,
-                    icon = { Icon(Icons.Default.Image, null) },
-                    label = "Images"
-                )
-                clickableItem(
-                    onClick = onNavigateToBlacklist,
-                    icon = { Icon(Icons.Default.Block, null) },
-                    label = "Blacklisted"
-                )
-            }
-        },
-        colors = topAppBarColors,
+    var showSortBy by remember { mutableStateOf(false) }
+
+    Column(
         modifier = modifier
-    )
+    ) {
+        TopAppBar(
+            title = { Text("CivitAI") },
+            navigationIcon = {
+                IconButton(
+                    onClick = onNavigateToSearch
+                ) { Icon(Icons.Default.Search, null) }
+            },
+            actions = {
+                AppBarRow(
+                    maxItemCount = 3
+                ) {
+                    clickableItem(
+                        onClick = onNavigateToQrCode,
+                        icon = { Icon(Icons.Default.QrCodeScanner, null) },
+                        label = "QR Code Scanner"
+                    )
+                    toggleableItem(
+                        checked = showSortBy,
+                        onCheckedChange = { showSortBy = it },
+                        icon = { Icon(Icons.AutoMirrored.Filled.Sort, null) },
+                        label = "Sort"
+                    )
+                    clickableItem(
+                        onClick = onNavigateToImages,
+                        icon = { Icon(Icons.Default.Image, null) },
+                        label = "Images"
+                    )
+                    clickableItem(
+                        onClick = onNavigateToBlacklist,
+                        icon = { Icon(Icons.Default.Block, null) },
+                        label = "Blacklisted"
+                    )
+                }
+            },
+            colors = topAppBarColors,
+        )
+
+        AnimatedVisibility(showSortBy) {
+            SingleChoiceSegmentedButtonRow(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp)
+            ) {
+                CivitSort.entries.forEachIndexed { index, searchType ->
+                    SegmentedButton(
+                        selected = searchType == sort,
+                        onClick = { onSortChange(searchType) },
+                        shape = SegmentedButtonDefaults.itemShape(
+                            index = index,
+                            count = CivitSort.entries.size
+                        ),
+                        label = { Text(searchType.name) }
+                    )
+                }
+            }
+        }
+    }
 }
 
 

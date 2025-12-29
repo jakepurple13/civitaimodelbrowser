@@ -83,7 +83,6 @@ interface FavoritesDao {
         imageMetaDb: ImageMetaDb? = null,
         json: Json = Json {
             isLenient = true
-            prettyPrint = true
             ignoreUnknownKeys = true
             coerceInputValues = true
         },
@@ -181,7 +180,6 @@ interface FavoritesDao {
         query: String,
         json: Json = Json {
             isLenient = true
-            prettyPrint = true
             ignoreUnknownKeys = true
             coerceInputValues = true
         },
@@ -204,7 +202,6 @@ interface FavoritesDao {
     fun getFavoriteModels(
         json: Json = Json {
             isLenient = true
-            prettyPrint = true
             ignoreUnknownKeys = true
             coerceInputValues = true
         },
@@ -216,7 +213,6 @@ interface FavoritesDao {
     fun getFavoriteModels(
         json: Json = Json {
             isLenient = true
-            prettyPrint = true
             ignoreUnknownKeys = true
             coerceInputValues = true
         },
@@ -298,7 +294,6 @@ interface FavoritesDao {
     suspend fun export(
         json: Json = Json {
             isLenient = true
-            prettyPrint = true
             ignoreUnknownKeys = true
             coerceInputValues = true
         },
@@ -311,7 +306,6 @@ interface FavoritesDao {
     suspend fun exportFavorites(
         json: Json = Json {
             isLenient = true
-            prettyPrint = true
             ignoreUnknownKeys = true
             coerceInputValues = true
         },
@@ -325,7 +319,6 @@ interface FavoritesDao {
         jsonString: String,
         json: Json = Json {
             isLenient = true
-            prettyPrint = true
             ignoreUnknownKeys = true
             coerceInputValues = true
         },
@@ -373,7 +366,6 @@ interface FavoritesDao {
         jsonString: String,
         json: Json = Json {
             isLenient = true
-            prettyPrint = true
             ignoreUnknownKeys = true
             coerceInputValues = true
         },
@@ -419,7 +411,6 @@ interface FavoritesDao {
         jsonString: String,
         json: Json = Json {
             isLenient = true
-            prettyPrint = true
             ignoreUnknownKeys = true
             coerceInputValues = true
         },

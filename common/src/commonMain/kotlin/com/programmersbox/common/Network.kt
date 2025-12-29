@@ -22,7 +22,6 @@ class Network {
 
     private val json: Json = Json {
         isLenient = true
-        prettyPrint = true
         ignoreUnknownKeys = true
         coerceInputValues = true
         explicitNulls = false

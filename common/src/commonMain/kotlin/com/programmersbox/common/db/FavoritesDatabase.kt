@@ -291,18 +291,6 @@ interface FavoritesDao {
     suspend fun removeModel(id: Long)
 
     @Ignore
-    suspend fun export(
-        json: Json = Json {
-            isLenient = true
-            ignoreUnknownKeys = true
-            coerceInputValues = true
-        },
-    ) = CivitDb(
-        favorites = getFavoritesSync().map { room -> room.toModel(json) },
-        blacklistedItemRoom = getBlacklistedSync()
-    )
-
-    @Ignore
     suspend fun exportFavorites(
         json: Json = Json {
             isLenient = true
@@ -313,53 +301,6 @@ interface FavoritesDao {
 
     @Ignore
     suspend fun exportBlacklisted() = getBlacklistedSync()
-
-    @Ignore
-    suspend fun importFavorites(
-        jsonString: String,
-        json: Json = Json {
-            isLenient = true
-            ignoreUnknownKeys = true
-            coerceInputValues = true
-        },
-    ) {
-        val list = json.decodeFromString<CivitDb>(jsonString)
-        list.favorites.forEach { model ->
-            insert(
-                when (model) {
-                    is FavoriteModel.Model -> FavoriteRoom(
-                        id = model.id,
-                        name = model.name,
-                        description = model.description,
-                        type = model.type,
-                        nsfw = model.nsfw,
-                        imageUrl = model.imageUrl,
-                        favoriteType = FavoriteType.Model,
-                    )
-
-                    is FavoriteModel.Creator -> FavoriteRoom(
-                        id = model.id,
-                        name = model.name,
-                        type = model.modelType,
-                        imageUrl = model.imageUrl,
-                        favoriteType = FavoriteType.Creator,
-                    )
-
-                    is FavoriteModel.Image -> FavoriteRoom(
-                        id = model.id,
-                        name = model.name,
-                        type = model.modelType,
-                        imageUrl = model.imageUrl,
-                        nsfw = model.nsfw,
-                        favoriteType = FavoriteType.Image,
-                        imageMeta = model.imageMetaDb?.let { json.encodeToString(it) }
-                    )
-                }
-            )
-        }
-
-        list.blacklistedItemRoom.forEach { item -> insert(item) }
-    }
 
     @Ignore
     suspend fun importOnlyFavorites(

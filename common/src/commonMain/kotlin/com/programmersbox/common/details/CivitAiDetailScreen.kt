@@ -799,14 +799,6 @@ private fun BottomBarContent(
                 label = { Text("List") },
             )
 
-            val uriHandler = LocalUriHandler.current
-            NavigationBarItem(
-                selected = false,
-                onClick = { uriHandler.openUri(modelUrl) },
-                icon = { Icon(Icons.Default.OpenInBrowser, null) },
-                label = { Text("Browser") },
-            )
-
             NavigationBarItem(
                 selected = false,
                 onClick = {

@@ -1,5 +1,6 @@
 package com.programmersbox.common.db
 
+import androidx.compose.foundation.text.input.TextFieldState
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
@@ -17,7 +18,7 @@ class FavoritesViewModel(
     private val dao: FavoritesDao,
     dataStore: DataStore,
 ) : ViewModel() {
-    var search by mutableStateOf("")
+    val search = TextFieldState("")
     val filterList = mutableStateListOf<String>()
     var sortedBy by mutableStateOf(SortedBy.Default)
     val typeList = dao.getTypes()
@@ -25,7 +26,7 @@ class FavoritesViewModel(
     val viewingList by derivedStateOf {
         dao
             .searchForFavorites(
-                query = search,
+                query = search.text.toString(),
                 type = filterList,
                 includeNsfw = includeNsfw
             )

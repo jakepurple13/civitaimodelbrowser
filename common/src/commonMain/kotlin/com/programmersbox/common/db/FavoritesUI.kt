@@ -1,6 +1,7 @@
 package com.programmersbox.common.db
 
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.animateIntAsState
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInHorizontally
@@ -11,13 +12,11 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
@@ -26,6 +25,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CornerSize
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.input.clearText
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowRightAlt
 import androidx.compose.material.icons.automirrored.filled.PlaylistAdd
@@ -37,12 +37,12 @@ import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.Image
 import androidx.compose.material.icons.filled.Preview
 import androidx.compose.material.icons.filled.Share
+import androidx.compose.material3.AppBarRow
+import androidx.compose.material3.AppBarWithSearch
 import androidx.compose.material3.BottomAppBarDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CenterAlignedTopAppBar
-import androidx.compose.material3.DockedSearchBar
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.FilledIconToggleButton
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.HorizontalDivider
@@ -59,6 +59,7 @@ import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberModalBottomSheetState
+import androidx.compose.material3.rememberSearchBarState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
@@ -68,7 +69,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveableStateHolder
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
@@ -199,47 +199,57 @@ fun FavoritesUI(
                         }
                     }
                 ) {
-                    DockedSearchBar(
-                        expanded = false,
-                        onExpandedChange = {},
+                    val appBarWithSearchColors = SearchBarDefaults.appBarWithSearchColors(
+                        searchBarColors = SearchBarDefaults.colors(
+                            containerColor = if (showBlur)
+                                Color.Transparent
+                            else
+                                MaterialTheme.colorScheme.surfaceContainerHigh
+                        ),
+                        appBarContainerColor = if (showBlur)
+                            Color.Transparent
+                        else
+                            MaterialTheme.colorScheme.surface
+                    )
+
+                    val searchBarState = rememberSearchBarState()
+                    AppBarWithSearch(
+                        state = searchBarState,
                         inputField = {
                             SearchBarDefaults.InputField(
-                                query = viewModel.search,
-                                onQueryChange = { viewModel.search = it },
+                                searchBarState = searchBarState,
+                                textFieldState = viewModel.search,
                                 onSearch = {},
-                                expanded = false,
-                                onExpandedChange = {},
-                                leadingIcon = { BackButton() },
                                 placeholder = { Text("Search Favorites") },
                                 trailingIcon = {
-                                    Row(
-                                        verticalAlignment = Alignment.CenterVertically
-                                    ) {
-                                        Text("(${list.size})")
-                                        FilledIconToggleButton(
-                                            checked = reverseFavorites,
-                                            onCheckedChange = { reverseFavorites = it }
-                                        ) { Icon(Icons.Default.Image, null) }
+                                    AnimatedVisibility(viewModel.search.text.isNotEmpty()) {
                                         IconButton(
-                                            onClick = { showSortedByDialog = true }
-                                        ) { Icon(Icons.AutoMirrored.Filled.Sort, null) }
-                                        AnimatedVisibility(viewModel.search.isNotEmpty()) {
-                                            IconButton(
-                                                onClick = { viewModel.search = "" }
-                                            ) { Icon(Icons.Default.Clear, null) }
-                                        }
+                                            onClick = { viewModel.search.clearText() }
+                                        ) { Icon(Icons.Default.Clear, null) }
                                     }
                                 },
                                 modifier = Modifier.fillMaxWidth()
                             )
                         },
-                        colors = if (showBlur) SearchBarDefaults.colors(
-                            containerColor = Color.Transparent
-                        ) else SearchBarDefaults.colors(),
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .windowInsetsPadding(SearchBarDefaults.windowInsets)
-                    ) {}
+                        navigationIcon = { BackButton() },
+                        actions = {
+                            Text("(${animateIntAsState(list.size).value})")
+                            AppBarRow {
+                                clickableItem(
+                                    onClick = { showSortedByDialog = true },
+                                    icon = { Icon(Icons.AutoMirrored.Filled.Sort, null) },
+                                    label = "Sort By"
+                                )
+                                toggleableItem(
+                                    checked = reverseFavorites,
+                                    onCheckedChange = { reverseFavorites = it },
+                                    icon = { Icon(Icons.Default.Image, null) },
+                                    label = "Reverse"
+                                )
+                            }
+                        },
+                        colors = appBarWithSearchColors,
+                    )
                     val lazyListState = rememberLazyListState()
                     LaunchedEffect(typeList) {
                         lazyListState.scrollToItem(0)

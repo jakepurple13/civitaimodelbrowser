@@ -84,7 +84,7 @@ class DataStore private constructor(
     @Composable
     fun rememberUseToolbar() = rememberPreference(
         booleanPreferencesKey("use_toolbar"),
-        true
+        false
     )
 
     @Composable

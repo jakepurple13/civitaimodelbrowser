@@ -118,6 +118,8 @@ interface ListDao {
         favoriteType: FavoriteType = FavoriteType.Model,
         imageMeta: String? = null,
         hash: String? = null,
+        creatorName: String? = null,
+        creatorImage: String? = null,
         modelId: Long = id,
         dateAdded: Long = Clock.System.now().toEpochMilliseconds(),
     ): Boolean {
@@ -134,6 +136,8 @@ interface ListDao {
                 imageUrl = imageUrl,
                 favoriteType = favoriteType,
                 imageMeta = imageMeta,
+                creatorName = creatorName,
+                creatorImage = creatorImage,
                 hash = hash,
                 modelId = modelId,
                 dateAdded = dateAdded,

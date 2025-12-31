@@ -56,16 +56,23 @@ class CivitAiDetailViewModel(
     fun addToFavorites() {
         viewModelScope.launch {
             (models as? DetailViewState.Content)?.models?.let { m ->
+                val firstCapableImage = m
+                    .modelVersions
+                    .firstOrNull { it.images.isNotEmpty() }
+                    ?.images
+                    ?.firstOrNull()
                 database.addFavorite(
                     id = m.id,
                     name = m.name,
                     description = m.description,
                     type = m.type,
                     nsfw = m.nsfw,
-                    imageUrl = m.modelVersions.firstOrNull()?.images?.firstOrNull()?.url,
+                    imageUrl = firstCapableImage?.url,
                     favoriteType = FavoriteType.Model,
                     modelId = m.id,
-                    hash = m.modelVersions.firstOrNull()?.images?.firstOrNull()?.hash
+                    hash = firstCapableImage?.hash,
+                    creatorName = m.creator?.username,
+                    creatorImage = m.creator?.image,
                 )
             }
         }

@@ -63,10 +63,10 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.dokar.sonner.ToastType
 import com.dokar.sonner.ToasterState
 import com.programmersbox.common.CloseButton
+import com.programmersbox.common.ModelType
 import com.programmersbox.common.Models
 import com.programmersbox.common.db.BlacklistedItemRoom
 import com.programmersbox.common.db.CustomList
-import com.programmersbox.common.db.FavoriteModel
 import com.programmersbox.common.db.FavoriteType
 import com.programmersbox.common.db.FavoritesDao
 import com.programmersbox.common.db.ListDao
@@ -80,7 +80,6 @@ import org.koin.compose.koinInject
 @Composable
 fun ModelOptionsSheet(
     models: Models,
-    database: List<FavoriteModel>,
     blacklisted: List<BlacklistedItemRoom>,
     isBlacklisted: Boolean,
     showSheet: Boolean,
@@ -91,6 +90,9 @@ fun ModelOptionsSheet(
 ) {
     if (showSheet) {
         val dao = koinInject<FavoritesDao>()
+        val isFavorite by dao
+            .getFavoritesByType(FavoriteType.Model, models.id)
+            .collectAsStateWithLifecycle(false)
         val listDao = koinInject<ListDao>()
         val scope = rememberCoroutineScope()
         var showDialog by remember { mutableStateOf(false) }
@@ -115,7 +117,7 @@ fun ModelOptionsSheet(
         val modelImage = remember(models) {
             models
                 .modelVersions
-                .firstOrNull()
+                .firstOrNull { it.images.isNotEmpty() }
                 ?.images
                 ?.firstOrNull { it.url.isNotEmpty() }
         }
@@ -239,7 +241,7 @@ fun ModelOptionsSheet(
             }
 
             item {
-                if (database.any { m -> m.id == models.id }) {
+                if (isFavorite) {
                     Card(
                         onClick = {
                             scope.launch {
@@ -264,9 +266,12 @@ fun ModelOptionsSheet(
                                     description = models.description,
                                     type = models.type,
                                     nsfw = models.nsfw,
-                                    imageUrl = models.modelVersions.firstOrNull()?.images?.firstOrNull()?.url,
+                                    imageUrl = modelImage?.url,
                                     favoriteType = FavoriteType.Model,
-                                    modelId = models.id
+                                    modelId = models.id,
+                                    hash = modelImage?.hash,
+                                    creatorName = models.creator?.username,
+                                    creatorImage = models.creator?.image,
                                 )
                                 sheetState.hide()
                             }.invokeOnCompletion { onDialogDismiss() }
@@ -305,7 +310,9 @@ fun ModelOptionsSheet(
                                         nsfw = models.nsfw,
                                         imageUrl = modelImage?.url,
                                         favoriteType = FavoriteType.Model,
-                                        hash = modelImage?.hash
+                                        hash = modelImage?.hash,
+                                        creatorName = models.creator?.username,
+                                        creatorImage = models.creator?.image,
                                     )
                                     toaster.show("Added to List", type = ToastType.Success)
                                     listState.hide()
@@ -395,6 +402,287 @@ fun ModelOptionsSheet(
                             ),
                             enabled = false,
                             selected = true
+                        )
+                    }
+                }
+
+                HorizontalDivider()
+
+                val stateHolder = rememberSaveableStateHolder()
+
+                for (index in 0 until modelOptionsScope.size) {
+                    stateHolder.SaveableStateProvider(index) {
+                        modelOptionsScope[index](
+                            when (index) {
+                                0 -> MaterialTheme.shapes.medium.copy(
+                                    bottomStart = CornerSize(0.dp),
+                                    bottomEnd = CornerSize(0.dp)
+                                )
+
+                                modelOptionsScope.size - 1 -> MaterialTheme.shapes.medium.copy(
+                                    topStart = CornerSize(0.dp),
+                                    topEnd = CornerSize(0.dp)
+                                )
+
+                                else -> RoundedCornerShape(0.dp)
+                            }
+                        )
+                        if (index < modelOptionsScope.size - 1) {
+                            HorizontalDivider()
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
+@Composable
+fun ModelOptionsSheet(
+    id: Long,
+    imageUrl: String?,
+    hash: String?,
+    name: String?,
+    type: String?,
+    description: String?,
+    nsfw: Boolean,
+    creatorName: String?,
+    creatorImage: String?,
+    showSheet: Boolean,
+    onDialogDismiss: () -> Unit,
+    onNavigateToDetail: (String) -> Unit,
+    onNavigateToUser: ((String) -> Unit)? = null,
+) {
+    if (showSheet) {
+        val dao = koinInject<FavoritesDao>()
+        val isFavorite by dao
+            .getFavoritesByType(FavoriteType.Model, id)
+            .collectAsStateWithLifecycle(false)
+        val listDao = koinInject<ListDao>()
+        val scope = rememberCoroutineScope()
+
+        val sheetState = rememberModalBottomSheetState(
+            skipPartiallyExpanded = true
+        )
+
+        val modelOptionsScope = rememberModelOptionsScope {
+            item {
+                Card(
+                    onClick = {
+                        onNavigateToDetail(id.toString())
+                        scope.launch { sheetState.hide() }
+                            .invokeOnCompletion { onDialogDismiss() }
+                    },
+                    shape = it
+                ) {
+                    ListItem(
+                        leadingContent = { Icon(Icons.Default.Preview, null) },
+                        headlineContent = { Text("Open") }
+                    )
+                }
+            }
+
+            onNavigateToUser?.let { onNav ->
+                item {
+                    Card(
+                        onClick = {
+                            creatorName?.let { p1 -> onNav(p1) }
+                            scope.launch { sheetState.hide() }
+                                .invokeOnCompletion { onDialogDismiss() }
+                        },
+                        shape = it
+                    ) {
+                        ListItem(
+                            leadingContent = {
+                                creatorImage?.let { image ->
+                                    LoadingImage(
+                                        image,
+                                        contentScale = ContentScale.FillBounds,
+                                        modifier = Modifier
+                                            .size(24.dp)
+                                            .clip(CircleShape)
+                                    )
+                                }
+                                    ?: Icon(Icons.Default.Person, null)
+                            },
+                            headlineContent = {
+                                Text("View ${creatorName ?: "Creator"}'s models")
+                            }
+                        )
+                    }
+                }
+            }
+
+            item {
+                var showQrCode by remember { mutableStateOf(false) }
+
+                if (showQrCode) {
+                    ShareViaQrCode(
+                        title = name.orEmpty(),
+                        url = "https://civitai.com/models/$id",
+                        qrCodeType = QrCodeType.Model,
+                        id = id.toString(),
+                        username = "",
+                        imageUrl = imageUrl.orEmpty(),
+                        onClose = { showQrCode = false }
+                    )
+                }
+                Card(
+                    onClick = { showQrCode = true },
+                    shape = it
+                ) {
+                    ListItem(
+                        leadingContent = { Icon(Icons.Default.Share, null) },
+                        headlineContent = { Text("Share") }
+                    )
+                }
+            }
+
+            item {
+                if (isFavorite) {
+                    Card(
+                        onClick = {
+                            scope.launch {
+                                dao.removeModel(id)
+                                sheetState.hide()
+                            }.invokeOnCompletion { onDialogDismiss() }
+                        },
+                        shape = it
+                    ) {
+                        ListItem(
+                            leadingContent = { Icon(Icons.Default.Favorite, null) },
+                            headlineContent = { Text("Unfavorite Model") }
+                        )
+                    }
+                } else {
+                    Card(
+                        onClick = {
+                            scope.launch {
+                                dao.addFavorite(
+                                    id = id,
+                                    name = name.orEmpty(),
+                                    description = description,
+                                    type = runCatching { ModelType.valueOf(type!!) }
+                                        .getOrElse { ModelType.Other },
+                                    nsfw = nsfw,
+                                    imageUrl = imageUrl,
+                                    favoriteType = FavoriteType.Model,
+                                    modelId = id,
+                                    hash = hash,
+                                    creatorName = creatorName,
+                                    creatorImage = creatorImage
+                                )
+                                sheetState.hide()
+                            }.invokeOnCompletion { onDialogDismiss() }
+                        },
+                        shape = it
+                    ) {
+                        ListItem(
+                            leadingContent = { Icon(Icons.Default.Favorite, null) },
+                            headlineContent = { Text("Favorite Model") }
+                        )
+                    }
+                }
+            }
+
+            item {
+                var showLists by remember { mutableStateOf(false) }
+                val listState = rememberModalBottomSheetState(true)
+
+                if (showLists) {
+                    ModalBottomSheet(
+                        onDismissRequest = { showLists = false },
+                        containerColor = MaterialTheme.colorScheme.surface,
+                        sheetState = listState
+                    ) {
+                        val toaster = koinInject<ToasterState>()
+                        ListChoiceScreen(
+                            id = id,
+                            onClick = { item ->
+                                scope.launch {
+                                    listDao.addToList(
+                                        uuid = item.item.uuid,
+                                        id = id,
+                                        name = name.orEmpty(),
+                                        description = description,
+                                        type = type.orEmpty(),
+                                        nsfw = nsfw,
+                                        imageUrl = imageUrl,
+                                        favoriteType = FavoriteType.Model,
+                                        hash = hash,
+                                        creatorName = creatorName,
+                                        creatorImage = creatorImage,
+                                    )
+                                    toaster.show("Added to List", type = ToastType.Success)
+                                    listState.hide()
+                                }.invokeOnCompletion { showLists = false }
+                            },
+                            navigationIcon = {
+                                IconButton(
+                                    onClick = { showLists = false }
+                                ) { Icon(Icons.Default.Close, null) }
+                            },
+                        )
+                    }
+                }
+
+                Card(
+                    onClick = { showLists = true },
+                    shape = it
+                ) {
+                    ListItem(
+                        leadingContent = { Icon(Icons.AutoMirrored.Filled.PlaylistAdd, null) },
+                        headlineContent = { Text("Add to List") }
+                    )
+                }
+            }
+        }
+
+        ModalBottomSheet(
+            onDismissRequest = onDialogDismiss,
+            sheetState = sheetState,
+            containerColor = MaterialTheme.colorScheme.surface,
+        ) {
+            Column(
+                modifier = Modifier.verticalScroll(rememberScrollState())
+            ) {
+                TopAppBar(
+                    title = { Text(name.orEmpty()) },
+                )
+
+                FlowRow(
+                    itemVerticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(4.dp),
+                    modifier = Modifier.padding(8.dp)
+                ) {
+                    ElevatedSuggestionChip(
+                        label = { Text(type.orEmpty()) },
+                        onClick = {},
+                        colors = SuggestionChipDefaults.elevatedSuggestionChipColors(
+                            disabledLabelColor = MaterialTheme.colorScheme.onSurface,
+                            disabledContainerColor = MaterialTheme.colorScheme.surfaceContainerLow
+                        ),
+                        border = BorderStroke(
+                            1.dp,
+                            MaterialTheme.colorScheme.onSurface
+                        ),
+                        enabled = false,
+                    )
+
+                    if (nsfw) {
+                        ElevatedAssistChip(
+                            label = { Text("NSFW") },
+                            onClick = {},
+                            colors = AssistChipDefaults.elevatedAssistChipColors(
+                                disabledLabelColor = MaterialTheme.colorScheme.error,
+                                disabledContainerColor = MaterialTheme.colorScheme.surface
+                            ),
+                            enabled = false,
+                            border = BorderStroke(
+                                1.dp,
+                                MaterialTheme.colorScheme.error,
+                            ),
                         )
                     }
                 }

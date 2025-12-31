@@ -266,7 +266,6 @@ fun LazyGridScope.modelItems(
 
             ModelOptionsSheet(
                 models = models,
-                database = database,
                 blacklisted = blacklisted,
                 isBlacklisted = isBlacklisted,
                 showSheet = showSheet,

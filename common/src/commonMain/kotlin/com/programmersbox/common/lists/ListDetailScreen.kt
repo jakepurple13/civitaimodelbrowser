@@ -92,6 +92,7 @@ import com.programmersbox.common.adaptiveGridCell
 import com.programmersbox.common.components.HideScreen
 import com.programmersbox.common.components.ImageSheet
 import com.programmersbox.common.components.LoadingImage
+import com.programmersbox.common.components.ModelOptionsSheet
 import com.programmersbox.common.db.CoverCard
 import com.programmersbox.common.db.CustomList
 import com.programmersbox.common.db.CustomListInfo
@@ -274,9 +275,27 @@ fun ListDetailScreen(
 
                 var sheetDetails by remember { mutableStateOf(false) }
                 when (item.favoriteType) {
-                    FavoriteType.Model -> {}
-                    FavoriteType.Image -> {
+                    FavoriteType.Model -> {
+                        if (sheetDetails) {
+                            ModelOptionsSheet(
+                                id = item.modelId,
+                                imageUrl = item.imageUrl.orEmpty(),
+                                hash = item.hash,
+                                type = item.type,
+                                name = item.name,
+                                nsfw = item.nsfw,
+                                creatorName = item.creatorName,
+                                creatorImage = item.creatorImage,
+                                description = item.description,
+                                showSheet = sheetDetails,
+                                onDialogDismiss = { sheetDetails = false },
+                                onNavigateToDetail = onNavigateToDetail,
+                                onNavigateToUser = onNavigateToUser,
+                            )
+                        }
+                    }
 
+                    FavoriteType.Image -> {
                         if (sheetDetails) {
                             ImageSheet(
                                 url = item.imageUrl.orEmpty(),
@@ -321,9 +340,7 @@ fun ListDetailScreen(
                         }
                     },
                     shouldShowMedia = shouldShowMedia,
-                    onLongClick = {
-
-                    },
+                    onLongClick = { sheetDetails = true },
                     modifier = Modifier
                         .size(
                             width = ComposableUtils.IMAGE_WIDTH,

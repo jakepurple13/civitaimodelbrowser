@@ -28,6 +28,8 @@ data class FavoriteRoom(
     val imageMeta: String? = null,
     val hash: String? = null,
     val modelId: Long = id,
+    val creatorName: String? = null,
+    val creatorImage: String? = null,
     val dateAdded: Long = Clock.System.now().toEpochMilliseconds(),
 )
 
@@ -80,6 +82,8 @@ sealed interface FavoriteModel {
         val type: String,
         val nsfw: Boolean,
         val hash: String?,
+        val creatorName: String?,
+        val creatorImage: String?,
         override val modelType: String = "Model",
         override val dateAdded: Long = Clock.System.now().toEpochMilliseconds(),
     ) : FavoriteModel
@@ -155,6 +159,8 @@ data class CustomListInfo @OptIn(ExperimentalUuidApi::class) constructor(
     val imageMeta: String? = null,
     val hash: String? = null,
     val modelId: Long = id,
+    val creatorName: String? = null,
+    val creatorImage: String? = null,
     val dateAdded: Long = Clock.System.now().toEpochMilliseconds(),
 )
 

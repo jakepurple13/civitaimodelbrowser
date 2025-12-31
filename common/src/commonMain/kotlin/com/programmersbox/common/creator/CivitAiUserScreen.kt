@@ -133,7 +133,9 @@ fun CivitAiUserScreen(
                                 nsfw = false,
                                 imageUrl = creator.image,
                                 favoriteType = FavoriteType.Creator,
-                                hash = null
+                                hash = null,
+                                creatorName = creator.username,
+                                creatorImage = creator.image,
                             )
                             toaster.show("Added to List", type = ToastType.Success)
                             listState.hide()

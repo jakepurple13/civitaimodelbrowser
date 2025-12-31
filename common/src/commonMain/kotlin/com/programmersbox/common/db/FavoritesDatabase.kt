@@ -19,7 +19,6 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.IO
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
-import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 
 @Database(
@@ -30,7 +29,7 @@ import kotlinx.serialization.json.Json
         CustomListItem::class,
         SearchHistoryItem::class,
     ],
-    version = 8,
+    version = 10,
     autoMigrations = [
         AutoMigration(from = 1, to = 2),
         AutoMigration(from = 2, to = 3),
@@ -39,6 +38,8 @@ import kotlinx.serialization.json.Json
         AutoMigration(from = 5, to = 6),
         AutoMigration(from = 6, to = 7),
         AutoMigration(from = 7, to = 8),
+        AutoMigration(from = 8, to = 9),
+        AutoMigration(from = 9, to = 10),
     ]
 )
 
@@ -81,6 +82,8 @@ interface FavoritesDao {
         hash: String? = null,
         favoriteType: FavoriteType = FavoriteType.Model,
         imageMetaDb: ImageMetaDb? = null,
+        creatorName: String? = null,
+        creatorImage: String? = null,
         json: Json = Json {
             isLenient = true
             ignoreUnknownKeys = true
@@ -97,7 +100,9 @@ interface FavoritesDao {
             hash = hash,
             favoriteType = favoriteType,
             imageMeta = imageMetaDb?.let { json.encodeToString(it) },
-            modelId = modelId
+            modelId = modelId,
+            creatorName = creatorName,
+            creatorImage = creatorImage,
         )
     )
 
@@ -240,6 +245,8 @@ interface FavoritesDao {
                 nsfw = nsfw,
                 modelType = favoriteType.name,
                 hash = hash,
+                creatorName = creatorName,
+                creatorImage = creatorImage,
             )
         }
 
@@ -326,6 +333,9 @@ interface FavoritesDao {
                         nsfw = model.nsfw,
                         imageUrl = model.imageUrl,
                         favoriteType = FavoriteType.Model,
+                        creatorName = model.creatorName,
+                        creatorImage = model.creatorImage,
+                        hash = model.hash
                     )
 
                     is FavoriteModel.Creator -> FavoriteRoom(
@@ -334,6 +344,8 @@ interface FavoritesDao {
                         type = model.modelType,
                         imageUrl = model.imageUrl,
                         favoriteType = FavoriteType.Creator,
+                        creatorName = model.name,
+                        creatorImage = model.imageUrl,
                     )
 
                     is FavoriteModel.Image -> FavoriteRoom(
@@ -386,12 +398,6 @@ fun ImageMetaDb.toMeta() = ImageMeta(
     cfgScale = cfgScale,
     clipSkip = clipSkip,
     negativePrompt = negativePrompt
-)
-
-@Serializable
-data class CivitDb(
-    val favorites: List<FavoriteModel>,
-    val blacklistedItemRoom: List<BlacklistedItemRoom>,
 )
 
 data class DataCounts(

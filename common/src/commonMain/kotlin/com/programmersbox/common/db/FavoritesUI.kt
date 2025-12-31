@@ -23,6 +23,7 @@ import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.CornerSize
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.input.clearText
@@ -35,6 +36,7 @@ import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.Image
+import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Preview
 import androidx.compose.material.icons.filled.Share
 import androidx.compose.material3.AppBarRow
@@ -73,6 +75,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
@@ -89,6 +92,7 @@ import com.programmersbox.common.adaptiveGridCell
 import com.programmersbox.common.components.CivitBottomBar
 import com.programmersbox.common.components.ImageSheet
 import com.programmersbox.common.components.ListChoiceScreen
+import com.programmersbox.common.components.LoadingImage
 import com.programmersbox.common.components.rememberModelOptionsScope
 import com.programmersbox.common.home.CardContent
 import com.programmersbox.common.ifTrue
@@ -456,6 +460,7 @@ fun FavoritesUI(
                             showSheet = showSheet,
                             onDialogDismiss = { showSheet = false },
                             onNavigateToDetail = onNavigateToDetail,
+                            onNavigateToUser = onNavigateToUser,
                         )
 
                         ModelItem(
@@ -716,7 +721,9 @@ fun FavoritesCreatorOptionsSheet(
                                         nsfw = false,
                                         imageUrl = models.imageUrl,
                                         favoriteType = FavoriteType.Model,
-                                        hash = null
+                                        hash = null,
+                                        creatorName = models.name,
+                                        creatorImage = models.imageUrl
                                     )
                                     toaster.show("Added to List", type = ToastType.Success)
                                     listState.hide()
@@ -803,6 +810,7 @@ fun FavoritesModelOptionsSheet(
     showSheet: Boolean,
     onDialogDismiss: () -> Unit,
     onNavigateToDetail: (Long) -> Unit,
+    onNavigateToUser: ((String) -> Unit)? = null,
 ) {
     if (showSheet) {
         val dao = koinInject<FavoritesDao>()
@@ -826,6 +834,39 @@ fun FavoritesModelOptionsSheet(
                         leadingContent = { Icon(Icons.Default.Preview, null) },
                         headlineContent = { Text("Open") }
                     )
+                }
+            }
+
+            onNavigateToUser?.let { onNav ->
+                item {
+                    Card(
+                        onClick = {
+                            models.creatorName?.let { p1 -> onNav(p1) }
+                            scope.launch { sheetState.hide() }
+                                .invokeOnCompletion { onDialogDismiss() }
+                        },
+                        shape = it
+                    ) {
+                        ListItem(
+                            leadingContent = {
+                                models
+                                    .creatorImage
+                                    ?.let { image ->
+                                        LoadingImage(
+                                            image,
+                                            contentScale = ContentScale.FillBounds,
+                                            modifier = Modifier
+                                                .size(24.dp)
+                                                .clip(CircleShape)
+                                        )
+                                    }
+                                    ?: Icon(Icons.Default.Person, null)
+                            },
+                            headlineContent = {
+                                Text("View ${models.creatorName ?: "Creator"}'s models")
+                            }
+                        )
+                    }
                 }
             }
 
@@ -877,7 +918,9 @@ fun FavoritesModelOptionsSheet(
                                         nsfw = models.nsfw,
                                         imageUrl = models.imageUrl,
                                         favoriteType = FavoriteType.Model,
-                                        hash = models.hash
+                                        hash = models.hash,
+                                        creatorName = models.creatorName,
+                                        creatorImage = models.creatorImage,
                                     )
                                     listState.hide()
                                 }.invokeOnCompletion { showLists = false }

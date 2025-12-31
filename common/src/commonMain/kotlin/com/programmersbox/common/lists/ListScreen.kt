@@ -338,7 +338,7 @@ private fun ListCard(
                     Icon(
                         Icons.Default.Lock,
                         null,
-                        tint = MaterialTheme.colorScheme.error,
+                        tint = MaterialTheme.colorScheme.errorContainer,
                         modifier = Modifier.align(Alignment.BottomEnd)
                     )
                 }

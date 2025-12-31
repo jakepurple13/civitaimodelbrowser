@@ -447,7 +447,7 @@ private fun ListStats(
                     Icon(
                         Icons.Default.Lock,
                         null,
-                        tint = MaterialTheme.colorScheme.error,
+                        tint = MaterialTheme.colorScheme.errorContainer,
                     )
                 }
             } else null,

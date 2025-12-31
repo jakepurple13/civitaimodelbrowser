@@ -637,7 +637,9 @@ private fun HorizontalToolbarContent(
                             nsfw = models.nsfw,
                             imageUrl = models.modelVersions.firstOrNull()?.images?.firstOrNull()?.url,
                             favoriteType = FavoriteType.Model,
-                            hash = models.modelVersions.firstOrNull()?.images?.firstOrNull()?.hash
+                            hash = models.modelVersions.firstOrNull()?.images?.firstOrNull()?.hash,
+                            creatorName = models.creator?.username,
+                            creatorImage = models.creator?.image,
                         )
                         toaster.show("Added to List", type = ToastType.Success)
                         listState.hide()
@@ -752,7 +754,9 @@ private fun BottomBarContent(
                             nsfw = models.nsfw,
                             imageUrl = models.modelVersions.firstOrNull()?.images?.firstOrNull()?.url,
                             favoriteType = FavoriteType.Model,
-                            hash = models.modelVersions.firstOrNull()?.images?.firstOrNull()?.hash
+                            hash = models.modelVersions.firstOrNull()?.images?.firstOrNull()?.hash,
+                            creatorName = models.creator?.username,
+                            creatorImage = models.creator?.image,
                         )
                         toaster.show("Added to List", type = ToastType.Success)
                         listState.hide()

@@ -154,7 +154,7 @@ fun CustomMaterialTheme(
             when (darkTheme) {
                 ThemeMode.System -> if (systemDarkTheme)
                     dynamicColorScheme(
-                        primary = Color.Cyan,
+                        seedColor = Color.Cyan,
                         isDark = true,
                         style = PaletteStyle.Expressive,
                         specVersion = ColorSpec.SpecVersion.SPEC_2025
@@ -163,7 +163,7 @@ fun CustomMaterialTheme(
                     expressiveLightColorScheme()
 
                 ThemeMode.Dark -> dynamicColorScheme(
-                    primary = Color.Cyan,
+                    seedColor = Color.Cyan,
                     isDark = true,
                     style = PaletteStyle.Expressive,
                     specVersion = ColorSpec.SpecVersion.SPEC_2025

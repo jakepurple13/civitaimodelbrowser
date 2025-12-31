@@ -130,6 +130,7 @@ fun FavoritesUI(
     val blurStrength by dataStore.hideNsfwStrength()
     var reverseFavorites by dataStore.rememberReverseFavorites()
     val showBlur by dataStore.rememberShowBlur()
+    val useProgressive by dataStore.rememberUseProgressive()
     val lazyGridState = rememberLazyGridState()
 
     var showSortedByDialog by remember { mutableStateOf(false) }
@@ -193,11 +194,14 @@ fun FavoritesUI(
             ) {
                 Column(
                     modifier = Modifier.hazeEffect(hazeState, hazeStyle) {
-                        progressive = HazeProgressive.verticalGradient(
-                            startIntensity = 1f,
-                            endIntensity = 0f,
-                            preferPerformance = true
-                        )
+                        progressive = if (useProgressive)
+                            HazeProgressive.verticalGradient(
+                                startIntensity = 1f,
+                                endIntensity = 0f,
+                                preferPerformance = true
+                            )
+                        else
+                            null
                         blurEnabled = showBlur
                     }
                 ) {
@@ -326,11 +330,14 @@ fun FavoritesUI(
                 showBlur = showBlur,
                 bottomBarScrollBehavior = bottomBarScrollBehavior,
                 modifier = Modifier.hazeEffect(hazeState) {
-                    progressive = HazeProgressive.verticalGradient(
-                        startIntensity = 0f,
-                        endIntensity = 1f,
-                        preferPerformance = true
-                    )
+                    progressive = if (useProgressive)
+                        HazeProgressive.verticalGradient(
+                            startIntensity = 0f,
+                            endIntensity = 1f,
+                            preferPerformance = true
+                        )
+                    else
+                        null
                     style = hazeStyle
                     blurEnabled = showBlur
                 }

@@ -122,6 +122,7 @@ fun ListDetailScreen(
     val showNsfw by dataStore.showNsfw()
     val blurStrength by dataStore.hideNsfwStrength()
 
+    val useProgressive by dataStore.rememberUseProgressive()
     val hazeState = remember { HazeState() }
     val hazeStyle = LocalHazeStyle.current
 
@@ -249,11 +250,14 @@ fun ListDetailScreen(
                 },
                 colors = appBarWithSearchColors,
                 modifier = Modifier.hazeEffect(hazeState) {
-                    progressive = HazeProgressive.verticalGradient(
-                        startIntensity = 1f,
-                        endIntensity = 0f,
-                        preferPerformance = true
-                    )
+                    progressive = if (useProgressive)
+                        HazeProgressive.verticalGradient(
+                            startIntensity = 1f,
+                            endIntensity = 0f,
+                            preferPerformance = true
+                        )
+                    else
+                        null
                     blurEnabled = showBlur
                     style = hazeStyle
                 }

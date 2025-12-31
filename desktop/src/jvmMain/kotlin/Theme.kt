@@ -7,6 +7,7 @@ import androidx.compose.material3.Shapes
 import androidx.compose.material3.Typography
 import androidx.compose.material3.expressiveLightColorScheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.graphics.Color
 import com.materialkolor.PaletteStyle
 import com.materialkolor.dynamicColorScheme
@@ -21,30 +22,36 @@ fun CustomMaterialTheme(
     shapes: Shapes = MaterialTheme.shapes,
     typography: Typography = MaterialTheme.typography,
     content: @Composable () -> Unit,
-) = MaterialExpressiveTheme(
-    colorScheme = animateColorScheme(
-        when (darkTheme) {
-            ThemeMode.System -> if (isSystemInDarkTheme())
-                dynamicColorScheme(
-                    primary = Color.Cyan,
-                    isDark = true,
-                    style = PaletteStyle.Expressive,
-                    specVersion = ColorSpec.SpecVersion.SPEC_2025
-                )
-            else
-                expressiveLightColorScheme()
+) {
+    val isDarkMode = isSystemInDarkTheme()
+    MaterialExpressiveTheme(
+        colorScheme = animateColorScheme(
+            remember(darkTheme, isDarkMode) {
+                when (darkTheme) {
+                    ThemeMode.System -> if (isDarkMode)
+                        dynamicColorScheme(
+                            primary = Color.Cyan,
+                            isDark = true,
+                            style = PaletteStyle.Expressive,
+                            specVersion = ColorSpec.SpecVersion.SPEC_2025
+                        )
+                    else
+                        expressiveLightColorScheme()
 
-            ThemeMode.Dark -> dynamicColorScheme(
-                primary = Color.Cyan,
-                isDark = true,
-                style = PaletteStyle.Expressive,
-                specVersion = ColorSpec.SpecVersion.SPEC_2025
-            )
-            ThemeMode.Light -> expressiveLightColorScheme()
-        }
-    ),
-    shapes = shapes,
-    typography = typography,
-    motionScheme = MotionScheme.expressive(),
-    content = content
-)
+                    ThemeMode.Dark -> dynamicColorScheme(
+                        primary = Color.Cyan,
+                        isDark = true,
+                        style = PaletteStyle.Expressive,
+                        specVersion = ColorSpec.SpecVersion.SPEC_2025
+                    )
+
+                    ThemeMode.Light -> expressiveLightColorScheme()
+                }
+            }
+        ),
+        shapes = shapes,
+        typography = typography,
+        motionScheme = MotionScheme.expressive(),
+        content = content
+    )
+}

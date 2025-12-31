@@ -86,6 +86,7 @@ fun SearchScreen(
         .getBlacklisted()
         .collectAsStateWithLifecycle(emptyList())
     val showBlur by dataStore.rememberShowBlur()
+    val useProgressive by dataStore.rememberUseProgressive()
     val showNsfw by dataStore.showNsfw()
     val blurStrength by dataStore.hideNsfwStrength()
     val hazeStyle = LocalHazeStyle.current
@@ -104,11 +105,14 @@ fun SearchScreen(
                 searchHistory = searchList,
                 onRemoveSearchHistory = viewModel::removeSearchHistory,
                 modifier = Modifier.hazeEffect(hazeState) {
-                    progressive = HazeProgressive.verticalGradient(
-                        startIntensity = 1f,
-                        endIntensity = 0f,
-                        preferPerformance = true
-                    )
+                    progressive = if (useProgressive)
+                        HazeProgressive.verticalGradient(
+                            startIntensity = 1f,
+                            endIntensity = 0f,
+                            preferPerformance = true
+                        )
+                    else
+                        null
                     blurEnabled = showBlur
                     style = hazeStyle
                 }

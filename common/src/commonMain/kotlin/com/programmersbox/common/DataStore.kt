@@ -82,6 +82,12 @@ class DataStore private constructor(
     )
 
     @Composable
+    fun rememberUseProgressive() = rememberPreference(
+        booleanPreferencesKey("use_progressive"),
+        true
+    )
+
+    @Composable
     fun rememberUseToolbar() = rememberPreference(
         booleanPreferencesKey("use_toolbar"),
         false

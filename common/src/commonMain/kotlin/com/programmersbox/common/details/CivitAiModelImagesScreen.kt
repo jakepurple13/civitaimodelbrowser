@@ -82,6 +82,7 @@ fun CivitAiModelImagesScreen(
     val showNsfw by dataStore.showNsfw()
     val nsfwBlurStrength by dataStore.hideNsfwStrength()
     val showBlur by dataStore.rememberShowBlur()
+    val useProgressive by dataStore.rememberUseProgressive()
     val uriHandler = LocalUriHandler.current
     val lazyPagingItems = viewModel.pager.collectAsLazyPagingItems()
 
@@ -145,11 +146,14 @@ fun CivitAiModelImagesScreen(
                 colors = if (showBlur) TopAppBarDefaults.topAppBarColors(containerColor = Color.Transparent)
                 else TopAppBarDefaults.topAppBarColors(),
                 modifier = Modifier.hazeEffect(hazeState) {
-                    progressive = HazeProgressive.verticalGradient(
-                        startIntensity = 1f,
-                        endIntensity = 0f,
-                        preferPerformance = true
-                    )
+                    progressive = if (useProgressive)
+                        HazeProgressive.verticalGradient(
+                            startIntensity = 1f,
+                            endIntensity = 0f,
+                            preferPerformance = true
+                        )
+                    else
+                        null
                     blurEnabled = showBlur
                     style = hazeStyle
                 }

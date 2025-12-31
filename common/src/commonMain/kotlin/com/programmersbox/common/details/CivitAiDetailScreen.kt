@@ -133,6 +133,7 @@ fun CivitAiDetailScreen(
     val dataStore = koinInject<DataStore>()
     val showBlur by dataStore.rememberShowBlur()
     val showNsfw by dataStore.showNsfw()
+    val useProgressive by dataStore.rememberUseProgressive()
     val nsfwBlurStrength by dataStore.hideNsfwStrength()
     val useToolbar by dataStore.rememberUseToolbar()
 
@@ -257,11 +258,14 @@ fun CivitAiDetailScreen(
                         else
                             TopAppBarDefaults.topAppBarColors(),
                         modifier = Modifier.hazeEffect(hazeState, hazeStyle) {
-                            progressive = HazeProgressive.verticalGradient(
-                                startIntensity = 1f,
-                                endIntensity = 0f,
-                                preferPerformance = true
-                            )
+                            progressive = if (useProgressive)
+                                HazeProgressive.verticalGradient(
+                                    startIntensity = 1f,
+                                    endIntensity = 0f,
+                                    preferPerformance = true
+                                )
+                            else
+                                null
                             blurEnabled = showBlur
                         }
                     )
@@ -279,6 +283,7 @@ fun CivitAiDetailScreen(
                             onNavigateToDetailImages = onNavigateToDetailImages,
                             onShowQrCode = { showQrCode = true },
                             model = model,
+                            useProgressive = useProgressive
                         )
                     }
                 },
@@ -720,6 +725,7 @@ private fun BottomBarContent(
     removeFromFavorites: () -> Unit,
     addToFavorites: () -> Unit,
     showBlur: Boolean,
+    useProgressive: Boolean,
     hazeState: HazeState,
     hazeStyle: HazeStyle,
     onNavigateToDetailImages: (Long, String) -> Unit,
@@ -814,11 +820,14 @@ private fun BottomBarContent(
         },
         containerColor = if (showBlur) Color.Transparent else BottomAppBarDefaults.containerColor,
         modifier = Modifier.hazeEffect(hazeState, hazeStyle) {
-            progressive = HazeProgressive.verticalGradient(
-                startIntensity = 0f,
-                endIntensity = 1f,
-                preferPerformance = true
-            )
+            progressive = if (useProgressive)
+                HazeProgressive.verticalGradient(
+                    startIntensity = 0f,
+                    endIntensity = 1f,
+                    preferPerformance = true
+                )
+            else
+                null
             blurEnabled = showBlur
         }
     )

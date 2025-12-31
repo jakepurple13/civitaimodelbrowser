@@ -92,6 +92,7 @@ fun ListScreen(
     val dataTimeFormatter = remember { DateTimeFormatItem(true) }
     val dataStore = koinInject<DataStore>()
     val showBlur by dataStore.rememberShowBlur()
+    val useProgressive by dataStore.rememberUseProgressive()
     val showNsfw by dataStore.showNsfw()
     val blurStrength by dataStore.hideNsfwStrength()
 
@@ -150,11 +151,14 @@ fun ListScreen(
                 colors = if (showBlur) TopAppBarDefaults.topAppBarColors(containerColor = Color.Transparent)
                 else TopAppBarDefaults.topAppBarColors(),
                 modifier = Modifier.hazeEffect(hazeState, hazeStyle) {
-                    progressive = HazeProgressive.verticalGradient(
-                        startIntensity = 1f,
-                        endIntensity = 0f,
-                        preferPerformance = true
-                    )
+                    progressive = if (useProgressive)
+                        HazeProgressive.verticalGradient(
+                            startIntensity = 1f,
+                            endIntensity = 0f,
+                            preferPerformance = true
+                        )
+                    else
+                        null
                     blurEnabled = showBlur
                 }
             )
@@ -164,11 +168,14 @@ fun ListScreen(
                 showBlur = showBlur,
                 bottomBarScrollBehavior = bottomBarScrollBehavior,
                 modifier = Modifier.hazeEffect(hazeState) {
-                    progressive = HazeProgressive.verticalGradient(
-                        startIntensity = 0f,
-                        endIntensity = 1f,
-                        preferPerformance = true
-                    )
+                    progressive = if (useProgressive)
+                        HazeProgressive.verticalGradient(
+                            startIntensity = 0f,
+                            endIntensity = 1f,
+                            preferPerformance = true
+                        )
+                    else
+                        null
                     blurEnabled = showBlur
                     style = hazeStyle
                 }

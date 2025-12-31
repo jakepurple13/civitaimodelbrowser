@@ -83,6 +83,7 @@ fun CivitAiUserScreen(
     val favorites by database.getFavoriteModels().collectAsStateWithLifecycle(emptyList())
     val blacklisted by database.getBlacklisted().collectAsStateWithLifecycle(emptyList())
     val showBlur by dataStore.rememberShowBlur()
+    val useProgressive by dataStore.rememberUseProgressive()
 
     val lazyPagingItems = viewModel.pager.collectAsLazyPagingItems()
 
@@ -211,11 +212,14 @@ fun CivitAiUserScreen(
                 colors = if (showBlur) TopAppBarDefaults.topAppBarColors(containerColor = Color.Transparent)
                 else TopAppBarDefaults.topAppBarColors(),
                 modifier = Modifier.hazeEffect(hazeState, hazeStyle) {
-                    progressive = HazeProgressive.verticalGradient(
-                        startIntensity = 1f,
-                        endIntensity = 0f,
-                        preferPerformance = true
-                    )
+                    progressive = if (useProgressive)
+                        HazeProgressive.verticalGradient(
+                            startIntensity = 1f,
+                            endIntensity = 0f,
+                            preferPerformance = true
+                        )
+                    else
+                        null
                     blurEnabled = showBlur
                 }
             )

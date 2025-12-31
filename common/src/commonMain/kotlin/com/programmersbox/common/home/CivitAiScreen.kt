@@ -135,6 +135,7 @@ fun CivitAiScreen(
         .getBlacklisted()
         .collectAsStateWithLifecycle(emptyList())
     val showBlur by dataStore.rememberShowBlur()
+    val useProgressive by dataStore.rememberUseProgressive()
     val showNsfw by dataStore.showNsfw()
     val blurStrength by dataStore.hideNsfwStrength()
     val lazyPagingItems = viewModel.pager.collectAsLazyPagingItems()
@@ -159,11 +160,14 @@ fun CivitAiScreen(
                 onSortChange = { viewModel.sort = it },
                 onRefresh = lazyPagingItems::refresh,
                 modifier = Modifier.hazeEffect(hazeState) {
-                    progressive = HazeProgressive.verticalGradient(
-                        startIntensity = 1f,
-                        endIntensity = 0f,
-                        preferPerformance = true
-                    )
+                    progressive = if (useProgressive)
+                        HazeProgressive.verticalGradient(
+                            startIntensity = 1f,
+                            endIntensity = 0f,
+                            preferPerformance = true
+                        )
+                    else
+                        null
                     blurEnabled = showBlur
                     style = hazeStyle
                 }
@@ -174,11 +178,14 @@ fun CivitAiScreen(
                 showBlur = showBlur,
                 bottomBarScrollBehavior = bottomBarScrollBehavior,
                 modifier = Modifier.hazeEffect(hazeState) {
-                    progressive = HazeProgressive.verticalGradient(
-                        startIntensity = 0f,
-                        endIntensity = 1f,
-                        preferPerformance = true
-                    )
+                    progressive = if (useProgressive)
+                        HazeProgressive.verticalGradient(
+                            startIntensity = 0f,
+                            endIntensity = 1f,
+                            preferPerformance = true
+                        )
+                    else
+                        null
                     blurEnabled = showBlur
                     style = hazeStyle
                 }

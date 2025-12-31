@@ -14,6 +14,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.filled.BlurCircular
+import androidx.compose.material.icons.filled.BlurLinear
 import androidx.compose.material.icons.filled.BlurOff
 import androidx.compose.material.icons.filled.BlurOn
 import androidx.compose.material.icons.filled.BorderBottom
@@ -98,6 +99,7 @@ private fun BehaviorSettings(
         var useToolbar by dataStore.rememberUseToolbar()
         var showBlur by dataStore.rememberShowBlur()
         var blurType by dataStore.rememberBlurType()
+        var useProgressive by dataStore.rememberUseProgressive()
         Card(
             onClick = { showBlur = !showBlur }
         ) {
@@ -112,7 +114,7 @@ private fun BehaviorSettings(
                 trailingContent = {
                     Switch(
                         checked = showBlur,
-                        onCheckedChange = { showBlur = it }
+                        onCheckedChange = null
                     )
                 }
             )
@@ -122,6 +124,30 @@ private fun BehaviorSettings(
             var showBlurOptions by remember { mutableStateOf(false) }
 
             Column {
+                Card(
+                    onClick = { useProgressive = !useProgressive }
+                ) {
+                    ListItem(
+                        leadingContent = {
+                            Icon(
+                                if (useProgressive)
+                                    Icons.Default.BlurCircular
+                                else
+                                    Icons.Default.BlurLinear,
+                                null
+                            )
+                        },
+                        headlineContent = { Text("Use Progressive Blur") },
+                        supportingContent = { Text("Have the blur effect transition smoothly. It does use more resources.") },
+                        trailingContent = {
+                            Switch(
+                                checked = useProgressive,
+                                onCheckedChange = null
+                            )
+                        }
+                    )
+                }
+
                 Card(
                     onClick = { showBlurOptions = !showBlurOptions }
                 ) {

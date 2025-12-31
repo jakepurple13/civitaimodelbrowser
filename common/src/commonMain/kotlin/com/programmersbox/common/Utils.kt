@@ -45,15 +45,18 @@ object ComposableUtils {
 @Composable
 fun adaptiveGridCell(
     minSize: Dp = ComposableUtils.IMAGE_WIDTH,
-    minCount: Int = 1,
+    minCount: Int = 2,
+    maxCount: Int = Int.MAX_VALUE,
 ): GridCells = CustomAdaptive(
     minSize = minSize,
-    minCount = minCount
+    minCount = minCount,
+    maxCount = maxCount,
 )
 
 class CustomAdaptive(
     private val minSize: Dp,
     private val minCount: Int = 1,
+    private val maxCount: Int = Int.MAX_VALUE,
 ) : GridCells {
     init {
         require(minSize > 0.dp)
@@ -64,7 +67,11 @@ class CustomAdaptive(
         spacing: Int,
     ): List<Int> {
         val count = maxOf((availableSize + spacing) / (minSize.roundToPx() + spacing), 1) + 1
-        return calculateCellsCrossAxisSizeImpl(availableSize, count.coerceAtLeast(minCount), spacing)
+        return calculateCellsCrossAxisSizeImpl(
+            gridSize = availableSize,
+            slotCount = count.coerceIn(minCount, maxCount),
+            spacing = spacing
+        )
     }
 
     override fun hashCode(): Int {
@@ -186,7 +193,10 @@ fun Modifier.scaleRotateOffsetReset(
     onLongClick: () -> Unit = {},
 ): Modifier = this.composed {
     val animScale = if (canScale) animateFloatAsState(sroState.scale, label = "").value else 1f
-    val (x, y) = if (canOffset) animateOffsetAsState(sroState.offset, label = "").value else Offset.Zero
+    val (x, y) = if (canOffset) animateOffsetAsState(
+        sroState.offset,
+        label = ""
+    ).value else Offset.Zero
     val rotation = if (canRotate) animateFloatAsState(sroState.rotation, label = "").value else 0f
     graphicsLayer(
         scaleX = animScale,
@@ -207,8 +217,9 @@ fun Modifier.scaleRotateOffsetReset(
         )
 }
 
-fun Modifier.ifTrue(isTrue: Boolean, modifierBlock: Modifier.() -> Modifier) = if (isTrue) this.modifierBlock()
-else this
+fun Modifier.ifTrue(isTrue: Boolean, modifierBlock: Modifier.() -> Modifier) =
+    if (isTrue) this.modifierBlock()
+    else this
 
 @Composable
 fun BackButton() {

@@ -338,7 +338,9 @@ fun FavoritesUI(
     ) { padding ->
         LazyVerticalGrid(
             state = lazyGridState,
-            columns = adaptiveGridCell(),
+            columns = adaptiveGridCell(
+                minCount = 3,
+            ),
             verticalArrangement = Arrangement.spacedBy(4.dp),
             horizontalArrangement = Arrangement.spacedBy(4.dp),
             contentPadding = padding,

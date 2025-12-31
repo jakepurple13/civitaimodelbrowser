@@ -260,64 +260,6 @@ private fun BehaviorSettings(
                 }
             )
         }
-
-        /*HorizontalDivider()
-
-        var middleNavigation by dataStore.rememberMiddleNavigation()
-        var showMiddleNavigationDialog by remember { mutableStateOf(false) }
-
-        if (showMiddleNavigationDialog) {
-            AlertDialog(
-                onDismissRequest = { showMiddleNavigationDialog = false },
-                title = { Text("Middle Navigation") },
-                text = {
-                    Column {
-                        MiddleNavigation.entries.forEach {
-                            Card(
-                                onClick = { middleNavigation = it },
-                                colors = CardDefaults.cardColors(
-                                    containerColor = Color.Transparent
-                                )
-                            ) {
-                                ListItem(
-                                    headlineContent = { Text(it.name) },
-                                    trailingContent = {
-                                        RadioButton(
-                                            selected = it == middleNavigation,
-                                            onClick = null
-                                        )
-                                    },
-                                    colors = ListItemDefaults.colors(
-                                        containerColor = Color.Transparent
-                                    )
-                                )
-                            }
-                        }
-                    }
-                },
-                confirmButton = {
-                    TextButton(
-                        onClick = { showMiddleNavigationDialog = false }
-                    ) { Text("Confirm") }
-                }
-            )
-        }
-
-        Card(
-            onClick = { showMiddleNavigationDialog = true }
-        ) {
-            ListItem(
-                leadingContent = { Icon(Icons.Default.Navigation, null) },
-                headlineContent = { Text("Middle Navigation") },
-                supportingContent = { Text(middleNavigation.name) },
-                trailingContent = {
-                    Icon(
-                        Icons.Default.ArrowDropDown,
-                        null
-                    )
-                }
-            )
-        }*/
     }
 }
 

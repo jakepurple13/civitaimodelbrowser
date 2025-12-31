@@ -172,7 +172,9 @@ fun CivitAiImagesScreen(
         },
     ) { padding ->
         LazyVerticalGrid(
-            columns = adaptiveGridCell(),
+            columns = adaptiveGridCell(
+                maxCount = 5
+            ),
             contentPadding = padding,
             verticalArrangement = Arrangement.spacedBy(4.dp),
             horizontalArrangement = Arrangement.spacedBy(4.dp),

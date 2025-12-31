@@ -26,7 +26,10 @@ class ListDetailViewModel(
     val search = TextFieldState("")
 
     val searchedList by derivedStateOf {
-        itemList.filter { it.name.contains(search.text, true) }
+        itemList.filter {
+            it.name.contains(search.text, true) ||
+                    it.description?.contains(search.text, true) == true
+        }
     }
 
     init {

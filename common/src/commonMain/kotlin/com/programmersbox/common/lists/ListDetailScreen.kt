@@ -57,7 +57,6 @@ import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SearchBarDefaults
-import androidx.compose.material3.SearchBarValue
 import androidx.compose.material3.SheetState
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Switch
@@ -213,38 +212,34 @@ fun ListDetailScreen(
                     MaterialTheme.colorScheme.surface
             )
 
-            val inputField = @Composable {
-                SearchBarDefaults.InputField(
-                    searchBarState = searchBarState,
-                    textFieldState = viewModel.search,
-                    enabled = LocalWindowInfo.current.isWindowFocused,
-                    onSearch = {},
-                    placeholder = {
-                        if (searchBarState.currentValue == SearchBarValue.Collapsed) {
+            AppBarWithSearch(
+                state = searchBarState,
+                inputField = {
+                    SearchBarDefaults.InputField(
+                        searchBarState = searchBarState,
+                        textFieldState = viewModel.search,
+                        enabled = LocalWindowInfo.current.isWindowFocused,
+                        onSearch = {},
+                        placeholder = {
                             Text(
                                 modifier = Modifier.fillMaxWidth(),
                                 text = "Search",
                                 textAlign = TextAlign.Center,
                             )
-                        }
-                    },
-                    trailingIcon = {
-                        AnimatedVisibility(
-                            viewModel.search.text.isNotEmpty(),
-                            enter = slideInHorizontally { it } + fadeIn(),
-                            exit = slideOutHorizontally { it } + fadeOut()
-                        ) {
-                            IconButton(
-                                onClick = { viewModel.search.clearText() }
-                            ) { Icon(Icons.Default.Clear, null) }
-                        }
-                    },
-                )
-            }
-
-            AppBarWithSearch(
-                state = searchBarState,
-                inputField = inputField,
+                        },
+                        trailingIcon = {
+                            AnimatedVisibility(
+                                viewModel.search.text.isNotEmpty(),
+                                enter = slideInHorizontally { it } + fadeIn(),
+                                exit = slideOutHorizontally { it } + fadeOut()
+                            ) {
+                                IconButton(
+                                    onClick = { viewModel.search.clearText() }
+                                ) { Icon(Icons.Default.Clear, null) }
+                            }
+                        },
+                    )
+                },
                 navigationIcon = { BackButton() },
                 actions = {
                     Text("(${list?.list?.size ?: 0})")
@@ -270,7 +265,7 @@ fun ListDetailScreen(
             contentPadding = padding,
             verticalArrangement = Arrangement.spacedBy(4.dp),
             horizontalArrangement = Arrangement.spacedBy(4.dp),
-            columns = adaptiveGridCell(),
+            columns = adaptiveGridCell(minCount = 3),
             modifier = Modifier
                 .fillMaxSize()
                 .ifTrue(showBlur) { hazeSource(state = hazeState) }
@@ -392,7 +387,7 @@ private fun InfoSheet(
             containerColor = MaterialTheme.colorScheme.surface,
         ) {
             LazyVerticalGrid(
-                columns = adaptiveGridCell(),
+                columns = adaptiveGridCell(minCount = 3),
                 verticalArrangement = Arrangement.spacedBy(4.dp),
                 horizontalArrangement = Arrangement.spacedBy(4.dp),
                 modifier = Modifier.fillMaxSize()
@@ -748,7 +743,7 @@ private fun RemoveItemsSheet(
         }
     ) { padding ->
         LazyVerticalGrid(
-            columns = adaptiveGridCell(),
+            columns = adaptiveGridCell(minCount = 3),
             verticalArrangement = Arrangement.spacedBy(4.dp),
             horizontalArrangement = Arrangement.spacedBy(4.dp),
             contentPadding = padding,

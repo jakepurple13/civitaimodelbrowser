@@ -103,7 +103,6 @@ import com.programmersbox.common.db.FavoriteType
 import com.programmersbox.common.db.FavoritesDao
 import com.programmersbox.common.db.ListDao
 import com.programmersbox.common.home.BlacklistHandling
-import com.programmersbox.common.ifTrue
 import com.programmersbox.common.qrcode.QrCodeType
 import com.programmersbox.common.qrcode.ShareViaQrCode
 import dev.chrisbanes.haze.HazeProgressive
@@ -257,14 +256,13 @@ fun CivitAiDetailScreen(
                             TopAppBarDefaults.topAppBarColors(containerColor = Color.Transparent)
                         else
                             TopAppBarDefaults.topAppBarColors(),
-                        modifier = Modifier.ifTrue(showBlur) {
-                            hazeEffect(hazeState, hazeStyle) {
-                                progressive = HazeProgressive.verticalGradient(
-                                    startIntensity = 1f,
-                                    endIntensity = 0f,
-                                    preferPerformance = true
-                                )
-                            }
+                        modifier = Modifier.hazeEffect(hazeState, hazeStyle) {
+                            progressive = HazeProgressive.verticalGradient(
+                                startIntensity = 1f,
+                                endIntensity = 0f,
+                                preferPerformance = true
+                            )
+                            blurEnabled = showBlur
                         }
                     )
                 },
@@ -312,7 +310,7 @@ fun CivitAiDetailScreen(
                     verticalArrangement = Arrangement.spacedBy(4.dp),
                     horizontalArrangement = Arrangement.spacedBy(4.dp),
                     modifier = Modifier
-                        .ifTrue(showBlur) { hazeSource(state = hazeState) }
+                        .hazeSource(state = hazeState)
                         .fillMaxSize()
                 ) {
                     item(
@@ -815,14 +813,13 @@ private fun BottomBarContent(
             )
         },
         containerColor = if (showBlur) Color.Transparent else BottomAppBarDefaults.containerColor,
-        modifier = Modifier.ifTrue(showBlur) {
-            hazeEffect(hazeState, hazeStyle) {
-                progressive = HazeProgressive.verticalGradient(
-                    startIntensity = 0f,
-                    endIntensity = 1f,
-                    preferPerformance = true
-                )
-            }
+        modifier = Modifier.hazeEffect(hazeState, hazeStyle) {
+            progressive = HazeProgressive.verticalGradient(
+                startIntensity = 0f,
+                endIntensity = 1f,
+                preferPerformance = true
+            )
+            blurEnabled = showBlur
         }
     )
 }

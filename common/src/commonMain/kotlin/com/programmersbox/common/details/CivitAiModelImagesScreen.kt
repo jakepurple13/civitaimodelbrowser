@@ -60,8 +60,9 @@ import com.programmersbox.common.components.ImageSheet
 import com.programmersbox.common.components.LoadingImage
 import com.programmersbox.common.db.FavoritesDao
 import com.programmersbox.common.home.BlacklistHandling
-import com.programmersbox.common.ifTrue
+import dev.chrisbanes.haze.HazeProgressive
 import dev.chrisbanes.haze.HazeState
+import dev.chrisbanes.haze.LocalHazeStyle
 import dev.chrisbanes.haze.hazeEffect
 import dev.chrisbanes.haze.hazeSource
 import org.koin.compose.koinInject
@@ -83,6 +84,8 @@ fun CivitAiModelImagesScreen(
     val showBlur by dataStore.rememberShowBlur()
     val uriHandler = LocalUriHandler.current
     val lazyPagingItems = viewModel.pager.collectAsLazyPagingItems()
+
+    val hazeStyle = LocalHazeStyle.current
 
     val favoriteList by viewModel
         .favoriteList
@@ -141,7 +144,15 @@ fun CivitAiModelImagesScreen(
                 actions = { Text("(${lazyPagingItems.itemCount})") },
                 colors = if (showBlur) TopAppBarDefaults.topAppBarColors(containerColor = Color.Transparent)
                 else TopAppBarDefaults.topAppBarColors(),
-                modifier = Modifier.ifTrue(showBlur) { hazeEffect(hazeState) }
+                modifier = Modifier.hazeEffect(hazeState) {
+                    progressive = HazeProgressive.verticalGradient(
+                        startIntensity = 1f,
+                        endIntensity = 0f,
+                        preferPerformance = true
+                    )
+                    blurEnabled = showBlur
+                    style = hazeStyle
+                }
             )
         },
     ) { padding ->

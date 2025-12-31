@@ -99,7 +99,7 @@ internal fun WindowWithBar(
                         else -> RoundedCornerShape(8.dp)
                     },
                     modifier = Modifier.animateContentSize(),
-                    border = ButtonDefaults.outlinedButtonBorder,
+                    border = ButtonDefaults.outlinedButtonBorder(),
                 ) {
                     Scaffold(
                         topBar = {

@@ -56,7 +56,6 @@ import com.programmersbox.common.NetworkConnectionRepository
 import com.programmersbox.common.adaptiveGridCell
 import com.programmersbox.common.db.FavoritesDao
 import com.programmersbox.common.db.SearchHistoryItem
-import com.programmersbox.common.ifTrue
 import dev.chrisbanes.haze.HazeProgressive
 import dev.chrisbanes.haze.HazeState
 import dev.chrisbanes.haze.LocalHazeStyle
@@ -104,15 +103,14 @@ fun SearchScreen(
                 searchCount = lazyPagingItems.itemCount,
                 searchHistory = searchList,
                 onRemoveSearchHistory = viewModel::removeSearchHistory,
-                modifier = Modifier.ifTrue(showBlur) {
-                    hazeEffect(hazeState) {
-                        progressive = HazeProgressive.verticalGradient(
-                            startIntensity = 1f,
-                            endIntensity = 0f,
-                            preferPerformance = true
-                        )
-                        style = hazeStyle
-                    }
+                modifier = Modifier.hazeEffect(hazeState) {
+                    progressive = HazeProgressive.verticalGradient(
+                        startIntensity = 1f,
+                        endIntensity = 0f,
+                        preferPerformance = true
+                    )
+                    blurEnabled = showBlur
+                    style = hazeStyle
                 }
             )
         }
@@ -123,7 +121,7 @@ fun SearchScreen(
             horizontalArrangement = Arrangement.spacedBy(4.dp),
             contentPadding = paddingValues,
             modifier = Modifier
-                .ifTrue(showBlur) { hazeSource(state = hazeState) }
+                .hazeSource(state = hazeState)
                 .fillMaxSize()
         ) {
             modelItems(

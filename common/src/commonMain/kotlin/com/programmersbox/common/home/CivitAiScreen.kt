@@ -32,6 +32,7 @@ import androidx.compose.material.icons.filled.Block
 import androidx.compose.material.icons.filled.Image
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.QrCodeScanner
+import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.AppBarRow
@@ -97,9 +98,9 @@ import com.programmersbox.common.components.ModelOptionsSheet
 import com.programmersbox.common.db.BlacklistedItemRoom
 import com.programmersbox.common.db.FavoriteModel
 import com.programmersbox.common.db.FavoritesDao
-import com.programmersbox.common.ifTrue
 import com.programmersbox.common.isScrollingUp
 import com.programmersbox.common.paging.itemKeyIndexed
+import com.programmersbox.common.showRefreshButton
 import dev.chrisbanes.haze.HazeProgressive
 import dev.chrisbanes.haze.HazeState
 import dev.chrisbanes.haze.LocalHazeStyle
@@ -156,15 +157,15 @@ fun CivitAiScreen(
                 onNavigateToBlacklist = onNavigateToBlacklist,
                 sort = viewModel.sort,
                 onSortChange = { viewModel.sort = it },
-                modifier = Modifier.ifTrue(showBlur) {
-                    hazeEffect(hazeState) {
-                        progressive = HazeProgressive.verticalGradient(
-                            startIntensity = 1f,
-                            endIntensity = 0f,
-                            preferPerformance = true
-                        )
-                        style = hazeStyle
-                    }
+                onRefresh = lazyPagingItems::refresh,
+                modifier = Modifier.hazeEffect(hazeState) {
+                    progressive = HazeProgressive.verticalGradient(
+                        startIntensity = 1f,
+                        endIntensity = 0f,
+                        preferPerformance = true
+                    )
+                    blurEnabled = showBlur
+                    style = hazeStyle
                 }
             )
         },
@@ -172,15 +173,14 @@ fun CivitAiScreen(
             CivitBottomBar(
                 showBlur = showBlur,
                 bottomBarScrollBehavior = bottomBarScrollBehavior,
-                modifier = Modifier.ifTrue(showBlur) {
-                    hazeEffect(hazeState) {
-                        progressive = HazeProgressive.verticalGradient(
-                            startIntensity = 0f,
-                            endIntensity = 1f,
-                            preferPerformance = true
-                        )
-                        style = hazeStyle
-                    }
+                modifier = Modifier.hazeEffect(hazeState) {
+                    progressive = HazeProgressive.verticalGradient(
+                        startIntensity = 0f,
+                        endIntensity = 1f,
+                        preferPerformance = true
+                    )
+                    blurEnabled = showBlur
+                    style = hazeStyle
                 }
             )
         },
@@ -221,7 +221,7 @@ fun CivitAiScreen(
                 verticalArrangement = Arrangement.spacedBy(4.dp),
                 horizontalArrangement = Arrangement.spacedBy(4.dp),
                 modifier = Modifier
-                    .ifTrue(showBlur) { hazeSource(state = hazeState) }
+                    .hazeSource(state = hazeState)
                     .fillMaxSize()
             ) {
                 modelItems(
@@ -572,6 +572,7 @@ private fun AppSearchAppBar(
     onNavigateToQrCode: () -> Unit,
     onNavigateToImages: () -> Unit,
     onNavigateToBlacklist: () -> Unit,
+    onRefresh: () -> Unit,
     showBlur: Boolean,
     sort: CivitSort,
     onSortChange: (CivitSort) -> Unit,
@@ -592,9 +593,16 @@ private fun AppSearchAppBar(
         TopAppBar(
             title = { Text("CivitAI") },
             navigationIcon = {
-                IconButton(
-                    onClick = onNavigateToSearch
-                ) { Icon(Icons.Default.Search, null) }
+                Row {
+                    IconButton(
+                        onClick = onNavigateToSearch
+                    ) { Icon(Icons.Default.Search, null) }
+                    if (showRefreshButton) {
+                        IconButton(
+                            onClick = onRefresh
+                        ) { Icon(Icons.Default.Refresh, null) }
+                    }
+                }
             },
             actions = {
                 AppBarRow(

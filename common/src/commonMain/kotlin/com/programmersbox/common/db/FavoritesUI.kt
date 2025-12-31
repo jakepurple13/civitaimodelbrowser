@@ -95,7 +95,6 @@ import com.programmersbox.common.components.ListChoiceScreen
 import com.programmersbox.common.components.LoadingImage
 import com.programmersbox.common.components.rememberModelOptionsScope
 import com.programmersbox.common.home.CardContent
-import com.programmersbox.common.ifTrue
 import com.programmersbox.common.isScrollingUp
 import com.programmersbox.common.qrcode.QrCodeType
 import com.programmersbox.common.qrcode.ShareViaQrCode
@@ -193,14 +192,13 @@ fun FavoritesUI(
                 color = if (showBlur) Color.Transparent else MaterialTheme.colorScheme.surface
             ) {
                 Column(
-                    modifier = Modifier.ifTrue(showBlur) {
-                        hazeEffect(hazeState, hazeStyle) {
-                            progressive = HazeProgressive.verticalGradient(
-                                startIntensity = 1f,
-                                endIntensity = 0f,
-                                preferPerformance = true
-                            )
-                        }
+                    modifier = Modifier.hazeEffect(hazeState, hazeStyle) {
+                        progressive = HazeProgressive.verticalGradient(
+                            startIntensity = 1f,
+                            endIntensity = 0f,
+                            preferPerformance = true
+                        )
+                        blurEnabled = showBlur
                     }
                 ) {
                     val appBarWithSearchColors = SearchBarDefaults.appBarWithSearchColors(
@@ -312,8 +310,9 @@ fun FavoritesUI(
             }
         },
         floatingActionButton = {
+            val firstVisibleItemIndex by remember { derivedStateOf { lazyGridState.firstVisibleItemIndex } }
             AnimatedVisibility(
-                visible = lazyGridState.isScrollingUp() && lazyGridState.firstVisibleItemIndex > 0,
+                visible = lazyGridState.isScrollingUp() && firstVisibleItemIndex > 0,
                 enter = fadeIn() + slideInHorizontally { it },
                 exit = slideOutHorizontally { it } + fadeOut()
             ) {
@@ -326,15 +325,14 @@ fun FavoritesUI(
             CivitBottomBar(
                 showBlur = showBlur,
                 bottomBarScrollBehavior = bottomBarScrollBehavior,
-                modifier = Modifier.ifTrue(showBlur) {
-                    hazeEffect(hazeState) {
-                        progressive = HazeProgressive.verticalGradient(
-                            startIntensity = 0f,
-                            endIntensity = 1f,
-                            preferPerformance = true
-                        )
-                        style = hazeStyle
-                    }
+                modifier = Modifier.hazeEffect(hazeState) {
+                    progressive = HazeProgressive.verticalGradient(
+                        startIntensity = 0f,
+                        endIntensity = 1f,
+                        preferPerformance = true
+                    )
+                    style = hazeStyle
+                    blurEnabled = showBlur
                 }
             )
         },
@@ -350,7 +348,7 @@ fun FavoritesUI(
             contentPadding = padding,
             modifier = Modifier
                 .padding(4.dp)
-                .ifTrue(showBlur) { hazeSource(state = hazeState) }
+                .hazeSource(state = hazeState)
                 .fillMaxSize()
         ) {
             items(

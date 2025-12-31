@@ -99,7 +99,6 @@ import com.programmersbox.common.db.CustomListInfo
 import com.programmersbox.common.db.FavoriteType
 import com.programmersbox.common.db.ListDao
 import com.programmersbox.common.db.toImageHash
-import com.programmersbox.common.ifTrue
 import dev.chrisbanes.haze.HazeProgressive
 import dev.chrisbanes.haze.HazeState
 import dev.chrisbanes.haze.LocalHazeStyle
@@ -249,15 +248,14 @@ fun ListDetailScreen(
                     ) { Icon(Icons.Default.Info, null) }
                 },
                 colors = appBarWithSearchColors,
-                modifier = Modifier.ifTrue(showBlur) {
-                    hazeEffect(hazeState) {
-                        progressive = HazeProgressive.verticalGradient(
-                            startIntensity = 1f,
-                            endIntensity = 0f,
-                            preferPerformance = true
-                        )
-                        style = hazeStyle
-                    }
+                modifier = Modifier.hazeEffect(hazeState) {
+                    progressive = HazeProgressive.verticalGradient(
+                        startIntensity = 1f,
+                        endIntensity = 0f,
+                        preferPerformance = true
+                    )
+                    blurEnabled = showBlur
+                    style = hazeStyle
                 }
             )
         }
@@ -269,7 +267,7 @@ fun ListDetailScreen(
             columns = adaptiveGridCell(minCount = 3),
             modifier = Modifier
                 .fillMaxSize()
-                .ifTrue(showBlur) { hazeSource(state = hazeState) }
+                .hazeSource(state = hazeState)
         ) {
             items(viewModel.searchedList) { item ->
 

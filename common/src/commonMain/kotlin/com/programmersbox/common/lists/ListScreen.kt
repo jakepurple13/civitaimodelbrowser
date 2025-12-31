@@ -62,7 +62,6 @@ import com.programmersbox.common.components.LoadingImage
 import com.programmersbox.common.components.rememberBiometricOpening
 import com.programmersbox.common.db.CustomList
 import com.programmersbox.common.db.toImageHash
-import com.programmersbox.common.ifTrue
 import dev.chrisbanes.haze.HazeProgressive
 import dev.chrisbanes.haze.HazeState
 import dev.chrisbanes.haze.LocalHazeStyle
@@ -150,14 +149,13 @@ fun ListScreen(
                 },
                 colors = if (showBlur) TopAppBarDefaults.topAppBarColors(containerColor = Color.Transparent)
                 else TopAppBarDefaults.topAppBarColors(),
-                modifier = Modifier.ifTrue(showBlur) {
-                    hazeEffect(hazeState, hazeStyle) {
-                        progressive = HazeProgressive.verticalGradient(
-                            startIntensity = 1f,
-                            endIntensity = 0f,
-                            preferPerformance = true
-                        )
-                    }
+                modifier = Modifier.hazeEffect(hazeState, hazeStyle) {
+                    progressive = HazeProgressive.verticalGradient(
+                        startIntensity = 1f,
+                        endIntensity = 0f,
+                        preferPerformance = true
+                    )
+                    blurEnabled = showBlur
                 }
             )
         },
@@ -165,15 +163,14 @@ fun ListScreen(
             CivitBottomBar(
                 showBlur = showBlur,
                 bottomBarScrollBehavior = bottomBarScrollBehavior,
-                modifier = Modifier.ifTrue(showBlur) {
-                    hazeEffect(hazeState) {
-                        progressive = HazeProgressive.verticalGradient(
-                            startIntensity = 0f,
-                            endIntensity = 1f,
-                            preferPerformance = true
-                        )
-                        style = hazeStyle
-                    }
+                modifier = Modifier.hazeEffect(hazeState) {
+                    progressive = HazeProgressive.verticalGradient(
+                        startIntensity = 0f,
+                        endIntensity = 1f,
+                        preferPerformance = true
+                    )
+                    blurEnabled = showBlur
+                    style = hazeStyle
                 }
             )
         },
@@ -185,7 +182,7 @@ fun ListScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(bottom = 16.dp)
-                .ifTrue(showBlur) { hazeSource(state = hazeState) }
+                .hazeSource(state = hazeState)
         ) {
             item(
                 contentType = "search"

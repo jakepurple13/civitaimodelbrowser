@@ -55,7 +55,6 @@ import com.programmersbox.common.db.FavoriteType
 import com.programmersbox.common.db.FavoritesDao
 import com.programmersbox.common.db.ListDao
 import com.programmersbox.common.home.modelItems
-import com.programmersbox.common.ifTrue
 import com.programmersbox.common.qrcode.QrCodeType
 import com.programmersbox.common.qrcode.ShareViaQrCode
 import dev.chrisbanes.haze.HazeProgressive
@@ -176,13 +175,6 @@ fun CivitAiUserScreen(
                                         }
                                     },
                                     icon = {
-                                        /*Icon(
-                                            if (favorites.any { it.name == viewModel.username })
-                                                Icons.Default.Favorite
-                                            else
-                                                Icons.Default.FavoriteBorder,
-                                            null
-                                        )*/
                                         Icon(
                                             if (isFavorite)
                                                 Icons.Default.Favorite
@@ -218,14 +210,13 @@ fun CivitAiUserScreen(
                 },
                 colors = if (showBlur) TopAppBarDefaults.topAppBarColors(containerColor = Color.Transparent)
                 else TopAppBarDefaults.topAppBarColors(),
-                modifier = Modifier.ifTrue(showBlur) {
-                    hazeEffect(hazeState, hazeStyle) {
-                        progressive = HazeProgressive.verticalGradient(
-                            startIntensity = 1f,
-                            endIntensity = 0f,
-                            preferPerformance = true
-                        )
-                    }
+                modifier = Modifier.hazeEffect(hazeState, hazeStyle) {
+                    progressive = HazeProgressive.verticalGradient(
+                        startIntensity = 1f,
+                        endIntensity = 0f,
+                        preferPerformance = true
+                    )
+                    blurEnabled = showBlur
                 }
             )
         },
@@ -236,7 +227,7 @@ fun CivitAiUserScreen(
             horizontalArrangement = Arrangement.spacedBy(4.dp),
             contentPadding = padding,
             modifier = Modifier
-                .ifTrue(showBlur) { hazeSource(state = hazeState) }
+                .hazeSource(state = hazeState)
                 .fillMaxSize()
         ) {
             item(

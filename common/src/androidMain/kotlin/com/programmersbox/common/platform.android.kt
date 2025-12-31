@@ -89,7 +89,10 @@ internal actual fun SheetDetails(
 internal actual val showRefreshButton: Boolean = false
 
 @Composable
-internal actual fun CustomScrollBar(lazyGridState: LazyGridState, modifier: Modifier) {
+internal actual fun CustomScrollBar(
+    lazyGridState: LazyGridState,
+    modifier: Modifier
+) {
     Scrollbars(
         state = rememberScrollbarsState(
             config = ScrollbarsConfig(

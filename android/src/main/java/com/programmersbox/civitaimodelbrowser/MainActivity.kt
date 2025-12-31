@@ -138,36 +138,39 @@ fun CustomMaterialTheme(
     content: @Composable () -> Unit,
 ) {
     val systemDarkTheme = isSystemInDarkTheme()
-    val colorScheme = if (dynamicColor && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-        val context = LocalContext.current
-        when (darkTheme) {
-            ThemeMode.System -> if (systemDarkTheme)
-                dynamicDarkColorScheme(context)
-            else
-                dynamicLightColorScheme(context)
+    val context = LocalContext.current
+    val colorScheme = remember(darkTheme, systemDarkTheme, dynamicColor) {
+        if (dynamicColor && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            when (darkTheme) {
+                ThemeMode.System -> if (systemDarkTheme)
+                    dynamicDarkColorScheme(context)
+                else
+                    dynamicLightColorScheme(context)
 
-            ThemeMode.Light -> dynamicLightColorScheme(context)
-            ThemeMode.Dark -> dynamicDarkColorScheme(context)
-        }
-    } else {
-        when (darkTheme) {
-            ThemeMode.System -> if (systemDarkTheme)
-                dynamicColorScheme(
+                ThemeMode.Light -> dynamicLightColorScheme(context)
+                ThemeMode.Dark -> dynamicDarkColorScheme(context)
+            }
+        } else {
+            when (darkTheme) {
+                ThemeMode.System -> if (systemDarkTheme)
+                    dynamicColorScheme(
+                        primary = Color.Cyan,
+                        isDark = true,
+                        style = PaletteStyle.Expressive,
+                        specVersion = ColorSpec.SpecVersion.SPEC_2025
+                    )
+                else
+                    expressiveLightColorScheme()
+
+                ThemeMode.Dark -> dynamicColorScheme(
                     primary = Color.Cyan,
                     isDark = true,
                     style = PaletteStyle.Expressive,
                     specVersion = ColorSpec.SpecVersion.SPEC_2025
                 )
-            else
-                expressiveLightColorScheme()
 
-            ThemeMode.Dark -> dynamicColorScheme(
-                primary = Color.Cyan,
-                isDark = true,
-                style = PaletteStyle.Expressive,
-                specVersion = ColorSpec.SpecVersion.SPEC_2025
-            )
-            ThemeMode.Light -> expressiveLightColorScheme()
+                ThemeMode.Light -> expressiveLightColorScheme()
+            }
         }
     }
 

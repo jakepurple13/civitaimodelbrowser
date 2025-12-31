@@ -19,7 +19,10 @@ internal expect fun SheetDetails(
 )
 
 @Composable
-internal expect fun CustomScrollBar(lazyGridState: LazyGridState, modifier: Modifier)
+internal expect fun CustomScrollBar(
+    lazyGridState: LazyGridState,
+    modifier: Modifier = Modifier
+)
 
 @Composable
 internal expect fun ContextMenu(

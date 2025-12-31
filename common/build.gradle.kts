@@ -1,4 +1,3 @@
-import com.android.build.api.dsl.androidLibrary
 import com.codingfeline.buildkonfig.compiler.FieldSpec.Type.STRING
 import org.jetbrains.compose.internal.utils.localPropertiesFile
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget

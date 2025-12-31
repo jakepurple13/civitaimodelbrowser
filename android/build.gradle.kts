@@ -2,8 +2,7 @@ import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
 plugins {
     id("org.jetbrains.compose")
-    id("com.android.application")
-    kotlin("android")
+    alias(libs.plugins.android.application)
     alias(libs.plugins.compose.compiler)
     alias(libs.plugins.easylauncher)
 }
@@ -29,12 +28,6 @@ android {
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17
     }
-    kotlin {
-        compilerOptions {
-            jvmTarget.set(JvmTarget.JVM_17)
-            freeCompilerArgs.add("-Xexplicit-backing-fields")
-        }
-    }
     buildFeatures {
         buildConfig = true
     }
@@ -51,6 +44,13 @@ android {
             matchingFallbacks.add("debug")
             isDebuggable = false
         }
+    }
+}
+
+kotlin {
+    compilerOptions {
+        jvmTarget.set(JvmTarget.JVM_17)
+        freeCompilerArgs.add("-Xexplicit-backing-fields")
     }
 }
 

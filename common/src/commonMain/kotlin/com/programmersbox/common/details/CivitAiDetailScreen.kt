@@ -224,11 +224,8 @@ fun CivitAiDetailScreen(
                             )
                         },
                         subtitle = {
-                            model
-                                .models
-                                .creator
-                                ?.username
-                                ?.let { Text("Made by $it") }
+                            val models = model.models
+                            Text("${models.type} by ${model.models.creator?.username}")
                         },
                         navigationIcon = { BackButton() },
                         actions = {
@@ -323,7 +320,7 @@ fun CivitAiDetailScreen(
                         contentType = "header"
                     ) {
                         ListItem(
-                            leadingContent = { Text(model.models.type.name) },
+                            overlineContent = { Text(model.models.type.name) },
                             headlineContent = { Text(model.models.name) },
                             trailingContent = {
                                 if (model.models.nsfw) {

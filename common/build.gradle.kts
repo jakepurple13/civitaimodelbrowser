@@ -42,6 +42,17 @@ kotlin {
             jvmTarget.set(JvmTarget.JVM_17)
         }
     }
+    listOf(
+        iosX64(),
+        iosArm64(),
+        iosSimulatorArm64()
+    ).forEach { iosTarget ->
+        iosTarget.binaries.framework {
+            baseName = "common"
+            isStatic = true
+            linkerOpts.add("-lsqlite3")
+        }
+    }
     applyDefaultHierarchyTemplate()
 
     sourceSets {
@@ -138,6 +149,13 @@ kotlin {
             implementation(libs.connectivity.compose.http)
         }
 
+        iosMain.dependencies {
+            implementation(libs.connectivity.device)
+            implementation(libs.connectivity.compose.device)
+            implementation("io.github.zaval:biometricauth:1.0.0")
+            implementation("io.github.skolson:kmp-io:0.2.3")
+        }
+
         //val desktopTest by getting
 
     }
@@ -146,6 +164,9 @@ kotlin {
 dependencies {
     add("kspAndroid", libs.androidx.room.compiler)
     add("kspJvm", libs.androidx.room.compiler)
+    add("kspIosSimulatorArm64", libs.androidx.room.compiler)
+    add("kspIosX64", libs.androidx.room.compiler)
+    add("kspIosArm64", libs.androidx.room.compiler)
 }
 
 compose.resources {

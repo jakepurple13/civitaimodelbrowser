@@ -8,6 +8,8 @@ import com.google.zxing.client.j2se.BufferedImageLuminanceSource
 import com.google.zxing.common.HybridBinarizer
 import com.google.zxing.qrcode.QRCodeReader
 import io.github.vinceglb.filekit.dialogs.compose.util.encodeToByteArray
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import java.awt.Image
 import java.awt.Toolkit
 import java.awt.datatransfer.DataFlavor
@@ -17,7 +19,6 @@ import java.awt.datatransfer.UnsupportedFlavorException
 import java.awt.image.BufferedImage
 import java.io.File
 import java.io.IOException
-
 
 actual class QrCodeRepository(
     private val appDirs: AppDirs,
@@ -51,7 +52,7 @@ actual class QrCodeRepository(
     actual suspend fun saveImage(bitmap: ImageBitmap, title: String) {
         appDirs.getUserDataDir()
         val file = File(appDirs.getUserDataDir(), "$title-${System.currentTimeMillis()}.png")
-        if (!file.exists()) file.createNewFile()
+        if (!file.exists()) withContext(Dispatchers.IO) { file.createNewFile() }
         file.writeBytes(bitmap.encodeToByteArray())
         println("Saved to ${file.absolutePath}")
     }

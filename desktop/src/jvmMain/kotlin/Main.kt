@@ -48,7 +48,6 @@ fun main() {
                         cmpModules(),
                         createPlatformModule(),
                         module {
-                            //single { producePath() }
                             factory { ApplicationInfo(BuildKonfig.VERSION_NAME) }
                             single {
                                 AppDirs {

@@ -6,6 +6,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import com.programmersbox.common.db.BlacklistedItemRoom
 import org.koin.core.module.Module
+import kotlin.jvm.JvmInline
 
 public expect fun getPlatformName(): String
 

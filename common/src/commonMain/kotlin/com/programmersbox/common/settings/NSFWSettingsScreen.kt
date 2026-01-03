@@ -12,6 +12,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.NoAdultContent
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
+import androidx.compose.material3.Card
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LargeTopAppBar
@@ -80,36 +81,44 @@ private fun NsfwSettings(
     Column(
         modifier = modifier.verticalScroll(rememberScrollState())
     ) {
-        ListItem(
-            headlineContent = { Text("Include NSFW Content?") },
-            trailingContent = {
-                Switch(
-                    checked = includeNsfwEnabled,
-                    onCheckedChange = { scope.launch { includeNsfw.update(it) } }
-                )
-            },
-            leadingContent = { Icon(Icons.Default.NoAdultContent, null) }
-        )
-
-        AnimatedVisibility(includeNsfwEnabled) {
+        Card(
+            onClick = { scope.launch { includeNsfw.update(!includeNsfwEnabled) } }
+        ) {
             ListItem(
-                headlineContent = { Text("Show NSFW Content?") },
+                headlineContent = { Text("Include NSFW Content?") },
                 trailingContent = {
                     Switch(
-                        checked = showNsfw,
-                        onCheckedChange = { showNsfw = it }
+                        checked = includeNsfwEnabled,
+                        onCheckedChange = null
                     )
                 },
-                leadingContent = {
-                    Icon(
-                        if (showNsfw)
-                            Icons.Default.Visibility
-                        else
-                            Icons.Default.VisibilityOff,
-                        null
-                    )
-                }
+                leadingContent = { Icon(Icons.Default.NoAdultContent, null) }
             )
+        }
+
+        AnimatedVisibility(includeNsfwEnabled) {
+            Card(
+                onClick = { showNsfw = !showNsfw }
+            ) {
+                ListItem(
+                    headlineContent = { Text("Show NSFW Content?") },
+                    trailingContent = {
+                        Switch(
+                            checked = showNsfw,
+                            onCheckedChange = null
+                        )
+                    },
+                    leadingContent = {
+                        Icon(
+                            if (showNsfw)
+                                Icons.Default.Visibility
+                            else
+                                Icons.Default.VisibilityOff,
+                            null
+                        )
+                    }
+                )
+            }
         }
 
         AnimatedVisibility(!showNsfw && includeNsfwEnabled) {

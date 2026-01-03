@@ -9,6 +9,7 @@ import androidx.room.PrimaryKey
 import androidx.room.Query
 import kotlinx.coroutines.flow.Flow
 import kotlinx.serialization.Serializable
+import kotlin.time.Clock
 
 @Dao
 interface SearchHistoryDao {
@@ -36,5 +37,5 @@ interface SearchHistoryDao {
 data class SearchHistoryItem(
     @PrimaryKey
     val searchQuery: String,
-    val timestamp: Long = System.currentTimeMillis(),
+    val timestamp: Long = Clock.System.now().toEpochMilliseconds(),
 )

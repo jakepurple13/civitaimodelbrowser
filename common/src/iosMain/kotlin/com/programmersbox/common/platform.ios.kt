@@ -11,10 +11,13 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.room.Room
 import androidx.room.RoomDatabase
+import com.programmersbox.common.backup.BackupRestoreHandler
 import com.programmersbox.common.db.AppDatabase
 import com.programmersbox.common.db.BlacklistedItemRoom
 import kotlinx.cinterop.ExperimentalForeignApi
 import org.koin.core.module.Module
+import org.koin.core.module.dsl.singleOf
+import org.koin.dsl.module
 import platform.Foundation.NSDocumentDirectory
 import platform.Foundation.NSFileManager
 import platform.Foundation.NSUserDomainMask
@@ -37,8 +40,9 @@ internal actual fun SheetDetails(
     }
 }
 
-actual fun createPlatformModule(): Module {
-    TODO("Not yet implemented")
+actual fun createPlatformModule(): Module = module {
+    singleOf(::DownloadHandler)
+    singleOf(::BackupRestoreHandler)
 }
 
 actual class DownloadHandler {

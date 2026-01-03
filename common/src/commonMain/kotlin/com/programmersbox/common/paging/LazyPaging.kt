@@ -1,6 +1,7 @@
 package com.programmersbox.common.paging
 
 import androidx.paging.compose.LazyPagingItems
+import kotlin.jvm.JvmSuppressWildcards
 
 @Suppress("PrimitiveInLambda")
 public fun <T : Any> LazyPagingItems<T>.itemKeyIndexed(

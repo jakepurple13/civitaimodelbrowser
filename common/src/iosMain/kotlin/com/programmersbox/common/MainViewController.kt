@@ -41,20 +41,18 @@ fun MainViewController() = ComposeUIViewController {
                     createPlatformModule(),
                     module {
                         factory { ApplicationInfo("4.3.5") }
-                        single {
+                        single<() -> String> {
                             {
-                                {
-                                    val documentDirectory: NSURL? = NSFileManager
-                                        .defaultManager
-                                        .URLForDirectory(
-                                            directory = NSDocumentDirectory,
-                                            inDomain = NSUserDomainMask,
-                                            appropriateForURL = null,
-                                            create = false,
-                                            error = null,
-                                        )
-                                    requireNotNull(documentDirectory).path + "/androidx.preferences_pb"
-                                }
+                                val documentDirectory: NSURL? = NSFileManager
+                                    .defaultManager
+                                    .URLForDirectory(
+                                        directory = NSDocumentDirectory,
+                                        inDomain = NSUserDomainMask,
+                                        appropriateForURL = null,
+                                        create = false,
+                                        error = null,
+                                    )
+                                requireNotNull(documentDirectory).path + "/androidx.preferences_pb"
                             }
                         }
                         single { getDatabaseBuilder() }

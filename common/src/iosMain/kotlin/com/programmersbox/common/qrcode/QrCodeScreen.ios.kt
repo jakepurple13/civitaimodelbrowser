@@ -7,6 +7,10 @@ import kotlinx.cinterop.ExperimentalForeignApi
 import kotlinx.cinterop.addressOf
 import kotlinx.cinterop.usePinned
 import kotlinx.coroutines.runBlocking
+import platform.CoreImage.CIDetector
+import platform.CoreImage.CIDetectorAccuracyHigh
+import platform.CoreImage.CIDetectorTypeQRCode
+import platform.CoreImage.CIImage
 import platform.Foundation.NSData
 import platform.Foundation.create
 import platform.Photos.PHAssetChangeRequest
@@ -22,7 +26,24 @@ import platform.UIKit.popoverPresentationController
 
 actual class QrCodeRepository {
     actual suspend fun getInfoFromQRCode(bitmap: ImageBitmap): Result<List<String>> {
-        TODO("Not yet implemented")
+        val detect = CIDetector()
+        val items = bitmap
+            .encodeToByteArray()
+            .toNSData()
+            ?.let { CIImage(it) }
+            ?.let {
+                detect.featuresInImage(
+                    it,
+                    options = mapOf(
+                        "CIDetectorTypeQRCode" to CIDetectorTypeQRCode,
+                        "CIDetectorAccuracy" to CIDetectorAccuracyHigh
+                    )
+                )
+            }
+            ?.mapNotNull { it?.toString() }
+            ?: return Result.failure(Exception("No QR Code Found"))
+
+        return Result.success(items)
     }
 
     actual suspend fun shareImage(

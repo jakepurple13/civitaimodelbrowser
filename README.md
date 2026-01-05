@@ -11,10 +11,14 @@ models from [CivitAI](https://civitai.com/).
 - **Model Details**: View detailed information about models, including versions, images, and
   descriptions.
 - **Favorites**: Save your favorite models for quick access.
+- **Lists**: Create and manage lists of models.
+- **Backup & Restore**: Export and import your favorites, blacklist, lists, settings, and search
+  history.
 - **Blacklist**: Hide models or creators you're not interested in.
 - **QR Code Sharing**: Share models easily via QR codes.
 - **NSFW Content Handling**: Option to toggle NSFW content with blur support.
 - **Dynamic Theming**: Beautiful Material 3 UI with dynamic color support (where applicable).
+- **Stats**: View statistics about your favorites, blacklist, lists, and search history.
 
 ## 🛠 Technologies Used
 

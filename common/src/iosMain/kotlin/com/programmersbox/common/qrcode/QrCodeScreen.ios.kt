@@ -26,20 +26,26 @@ import platform.UIKit.popoverPresentationController
 
 actual class QrCodeRepository {
     actual suspend fun getInfoFromQRCode(bitmap: ImageBitmap): Result<List<String>> {
-        val detect = CIDetector()
-        val items = bitmap
-            .encodeToByteArray()
-            .toNSData()
-            ?.let { CIImage(it) }
-            ?.let {
-                detect.featuresInImage(
-                    it,
-                    options = mapOf(
-                        "CIDetectorTypeQRCode" to CIDetectorTypeQRCode,
-                        "CIDetectorAccuracy" to CIDetectorAccuracyHigh
+        val items = runCatching {
+            //TODO: Get working
+            val detect = CIDetector()
+            bitmap
+                .encodeToByteArray()
+                .toNSData()
+                ?.let { CIImage(it) }
+                ?.let {
+                    detect.featuresInImage(
+                        it,
+                        options = mapOf(
+                            "CIDetectorTypeQRCode" to CIDetectorTypeQRCode,
+                            "CIDetectorAccuracy" to CIDetectorAccuracyHigh
+                        )
                     )
-                )
-            }
+                }
+        }
+            .onFailure { it.printStackTrace() }
+            .getOrNull()
+            .also { println(it) }
             ?.mapNotNull { it?.toString() }
             ?: return Result.failure(Exception("No QR Code Found"))
 
@@ -79,6 +85,7 @@ actual class QrCodeRepository {
         bitmap: ImageBitmap,
         title: String
     ) {
+        //TODO: Get working
         PHPhotoLibrary.requestAuthorization { status ->
             if (status == PHAuthorizationStatusAuthorized) {
                 // Convert Kotlin ByteArray to NSData

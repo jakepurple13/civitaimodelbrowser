@@ -152,8 +152,8 @@ kotlin {
         iosMain.dependencies {
             implementation(libs.connectivity.device)
             implementation(libs.connectivity.compose.device)
-            implementation("io.github.zaval:biometricauth:1.0.0")
-            implementation("io.github.skolson:kmp-io:0.2.3")
+            implementation(libs.biometricauth)
+            implementation(libs.kmp.io)
         }
 
         //val desktopTest by getting

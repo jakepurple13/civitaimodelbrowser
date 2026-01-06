@@ -7,9 +7,6 @@ import io.github.vinceglb.filekit.dialogs.compose.util.encodeToByteArray
 import io.github.vinceglb.filekit.dialogs.openFileSaver
 import io.github.vinceglb.filekit.write
 import kotlinx.cinterop.BetaInteropApi
-import kotlinx.cinterop.CFunction
-import kotlinx.cinterop.COpaquePointer
-import kotlinx.cinterop.CPointer
 import kotlinx.cinterop.ExperimentalForeignApi
 import kotlinx.cinterop.addressOf
 import kotlinx.cinterop.usePinned
@@ -18,12 +15,6 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import org.jetbrains.skia.EncodedImageFormat
 import org.jetbrains.skia.Image
-import platform.CoreGraphics.CGBitmapContextCreate
-import platform.CoreGraphics.CGBitmapContextCreateImage
-import platform.CoreGraphics.CGColorSpaceCreateDeviceRGB
-import platform.CoreGraphics.CGImageAlphaInfo
-import platform.CoreGraphics.CGImageRef
-import platform.CoreGraphics.kCGBitmapByteOrder32Big
 import platform.Foundation.NSData
 import platform.Foundation.create
 import platform.Foundation.dataWithBytes
@@ -91,28 +82,6 @@ actual class QrCodeRepository {
                 Result.failure(e)
             }
         }
-
-    @OptIn(ExperimentalForeignApi::class)
-    private fun createCGImageFromPixels(pixels: ByteArray, width: Int, height: Int): CGImageRef? {
-        val releaseDescriptor: CPointer<CFunction<(COpaquePointer?, COpaquePointer?, Long) -> Unit>>? =
-            null
-
-        val colorSpace = CGColorSpaceCreateDeviceRGB()
-        val bitmapInfo = CGImageAlphaInfo.kCGImageAlphaLast.value or kCGBitmapByteOrder32Big
-
-        return pixels.usePinned { pinned ->
-            val context = CGBitmapContextCreate(
-                data = pinned.addressOf(0),
-                width = width.toULong(),
-                height = height.toULong(),
-                bitsPerComponent = 8u,
-                bytesPerRow = (width * 4).toULong(),
-                space = colorSpace,
-                bitmapInfo = bitmapInfo
-            )
-            CGBitmapContextCreateImage(context)
-        }
-    }
 
     actual suspend fun shareImage(
         bitmap: ImageBitmap,

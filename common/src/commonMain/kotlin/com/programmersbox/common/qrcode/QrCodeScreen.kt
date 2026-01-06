@@ -338,8 +338,10 @@ fun ScanQrCode(
                 val filePicker = rememberFilePickerLauncher(
                     type = FileKitType.Image
                 ) { file ->
+                    println("File: $file")
+                    file ?: return@rememberFilePickerLauncher
                     scope.launch {
-                        runCatching { file?.toImageBitmap()!! }
+                        runCatching { file.toImageBitmap() }
                             .onSuccess {
                                 viewModel.scanQrCodeFromImage(it)
                                 scope.launch { sheetState.expand() }
@@ -420,6 +422,7 @@ class QrCodeScannerViewModel(
             qrCodeRepository.getInfoFromQRCode(bitmap)
                 .mapCatching { Json.decodeFromString<QrCodeInfo>(it.first()) }
                 .onSuccess { qrCodeInfo = it }
+                .onFailure { it.printStackTrace() }
         }
     }
 }

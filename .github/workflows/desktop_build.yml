@@ -2,6 +2,7 @@ name: Compose Desktop Build
 
 env:
   GITHUB_DEPLOY: 'false'
+  API_KEY: ${{ secrets.API_KEY }}
 
 on:
   push:

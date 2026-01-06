@@ -9,6 +9,11 @@ on:
     tags-ignore:
       - 'v*'
 
+  pull_request:
+    branches:
+      - main
+      - master
+
   workflow_call:
   workflow_dispatch:
 
@@ -17,6 +22,8 @@ concurrency:
   group: ios-${{ github.head_ref }}
   cancel-in-progress: true
 
+env:
+  API_KEY: ${{ secrets.API_KEY }}
 
 jobs:
   build:

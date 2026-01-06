@@ -13,6 +13,7 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import kotlin.time.measureTime
 
+//TODO: Need to get working
 actual class Zipper {
     actual suspend fun zip(
         platformFile: PlatformFile,

@@ -1,5 +1,10 @@
 package com.programmersbox.common.di
 
+import androidx.compose.animation.ExitTransition
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutVertically
+import androidx.compose.animation.togetherWith
 import androidx.compose.material3.adaptive.ExperimentalMaterial3AdaptiveApi
 import androidx.compose.material3.adaptive.navigation3.ListDetailSceneStrategy
 import androidx.compose.material3.adaptive.navigation3.SupportingPaneSceneStrategy
@@ -7,6 +12,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateListOf
 import androidx.navigation3.runtime.NavKey
 import androidx.navigation3.scene.DialogSceneStrategy
+import androidx.navigation3.ui.NavDisplay
 import com.programmersbox.common.Screen
 import com.programmersbox.common.backup.BackupScreen
 import com.programmersbox.common.backup.RestoreScreen
@@ -70,7 +76,33 @@ private fun Module.home() {
         )
     }
 
-    navigation<Screen.Search> {
+    navigation<Screen.Search>(
+        metadata = NavDisplay.transitionSpec {
+            // Slide new content up, keeping the old content in place underneath
+            slideInVertically(
+                initialOffsetY = { it },
+                animationSpec = tween(1000)
+            ) togetherWith ExitTransition.KeepUntilTransitionsFinished
+        } + NavDisplay.popTransitionSpec {
+            // Slide old content down, revealing the new content in place underneath
+            slideInVertically(
+                initialOffsetY = { 0 },
+                animationSpec = tween(1000)
+            ) togetherWith slideOutVertically(
+                targetOffsetY = { it },
+                animationSpec = tween(1000)
+            )
+        } + NavDisplay.predictivePopTransitionSpec {
+            // Slide old content down, revealing the new content in place underneath
+            slideInVertically(
+                initialOffsetY = { 0 },
+                animationSpec = tween(1000)
+            ) togetherWith slideOutVertically(
+                targetOffsetY = { it },
+                animationSpec = tween(1000)
+            )
+        }
+    ) {
         val backStack = koinInject<NavigationHandler>().backStack
         SearchScreen(
             onNavigateToDetail = { id -> backStack.add(Screen.Detail(id)) },

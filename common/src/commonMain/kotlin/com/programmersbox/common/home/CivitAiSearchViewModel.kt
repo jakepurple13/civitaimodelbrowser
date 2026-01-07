@@ -21,6 +21,7 @@ import com.programmersbox.common.PAGE_LIMIT
 import com.programmersbox.common.db.SearchHistoryDao
 import com.programmersbox.common.db.SearchHistoryItem
 import com.programmersbox.common.paging.CivitBrowserSearchPagingSource
+import kotlinx.collections.immutable.toPersistentList
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.IO
 import kotlinx.coroutines.flow.Flow
@@ -28,6 +29,7 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.flowOn
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 
 class CivitAiSearchViewModel @OptIn(ExperimentalMaterial3Api::class) constructor(
@@ -55,7 +57,7 @@ class CivitAiSearchViewModel @OptIn(ExperimentalMaterial3Api::class) constructor
                 searchHistoryDao.getAllSearchHistoryFlow()
             } else {
                 searchHistoryDao.getSearchHistory(it.toString())
-            }
+            }.map { l -> l.toPersistentList() }
         }
 
     fun onSearch(query: String) {

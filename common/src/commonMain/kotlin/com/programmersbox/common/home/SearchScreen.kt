@@ -62,6 +62,8 @@ import dev.chrisbanes.haze.HazeState
 import dev.chrisbanes.haze.LocalHazeStyle
 import dev.chrisbanes.haze.hazeEffect
 import dev.chrisbanes.haze.hazeSource
+import kotlinx.collections.immutable.PersistentList
+import kotlinx.collections.immutable.persistentListOf
 import kotlinx.coroutines.launch
 import org.koin.compose.koinInject
 import org.koin.compose.viewmodel.koinViewModel
@@ -94,7 +96,7 @@ fun SearchScreen(
 
     val searchList by viewModel
         .searchFlow
-        .collectAsStateWithLifecycle(emptyList())
+        .collectAsStateWithLifecycle(persistentListOf())
 
     Scaffold(
         topBar = {
@@ -152,7 +154,7 @@ private fun SearchAppBar(
     onSearch: (String) -> Unit,
     searchCount: Int,
     showBlur: Boolean,
-    searchHistory: List<SearchHistoryItem>,
+    searchHistory: PersistentList<SearchHistoryItem>,
     onRemoveSearchHistory: (SearchHistoryItem) -> Unit,
     modifier: Modifier = Modifier,
 ) {

@@ -641,7 +641,7 @@ private fun HorizontalToolbarContent(
                             creatorName = models.creator?.username,
                             creatorImage = models.creator?.image,
                         )
-                        toaster.show("Added to List", type = ToastType.Success)
+                        toaster.show("Added to ${item.item.name}", type = ToastType.Success)
                         listState.hide()
                     }.invokeOnCompletion { showLists = false }
                 },
@@ -759,7 +759,7 @@ private fun BottomBarContent(
                             creatorName = models.creator?.username,
                             creatorImage = models.creator?.image,
                         )
-                        toaster.show("Added to List", type = ToastType.Success)
+                        toaster.show("Added to ${item.item.name}", type = ToastType.Success)
                         listState.hide()
                     }.invokeOnCompletion { showLists = false }
                 },

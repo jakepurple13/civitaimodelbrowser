@@ -730,7 +730,10 @@ fun FavoritesCreatorOptionsSheet(
                                         creatorName = models.name,
                                         creatorImage = models.imageUrl
                                     )
-                                    toaster.show("Added to List", type = ToastType.Success)
+                                    toaster.show(
+                                        "Added to ${item.item.name}",
+                                        type = ToastType.Success
+                                    )
                                     listState.hide()
                                 }.invokeOnCompletion { showLists = false }
                             },

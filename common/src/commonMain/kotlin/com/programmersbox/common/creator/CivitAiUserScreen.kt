@@ -137,7 +137,7 @@ fun CivitAiUserScreen(
                                 creatorName = creator.username,
                                 creatorImage = creator.image,
                             )
-                            toaster.show("Added to List", type = ToastType.Success)
+                            toaster.show("Added to ${item.item.name}", type = ToastType.Success)
                             listState.hide()
                         }.invokeOnCompletion { showLists = false }
                     },

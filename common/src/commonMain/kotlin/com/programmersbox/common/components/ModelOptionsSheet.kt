@@ -314,7 +314,10 @@ fun ModelOptionsSheet(
                                         creatorName = models.creator?.username,
                                         creatorImage = models.creator?.image,
                                     )
-                                    toaster.show("Added to List", type = ToastType.Success)
+                                    toaster.show(
+                                        "Added to ${item.item.name}",
+                                        type = ToastType.Success
+                                    )
                                     listState.hide()
                                 }.invokeOnCompletion { showLists = false }
                             },
@@ -614,7 +617,10 @@ fun ModelOptionsSheet(
                                         creatorName = creatorName,
                                         creatorImage = creatorImage,
                                     )
-                                    toaster.show("Added to List", type = ToastType.Success)
+                                    toaster.show(
+                                        "Added to ${item.item.name}",
+                                        type = ToastType.Success
+                                    )
                                     listState.hide()
                                 }.invokeOnCompletion { showLists = false }
                             },

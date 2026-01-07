@@ -64,6 +64,14 @@ internal actual fun ContextMenu(
 }
 
 @Composable
+internal actual fun ContextMenuHandle(
+    scope: ContextMenuScope.() -> Unit,
+    content: @Composable () -> Unit,
+) {
+    content()
+}
+
+@Composable
 internal actual fun CustomScrollBar(
     lazyGridState: LazyGridState,
     modifier: Modifier

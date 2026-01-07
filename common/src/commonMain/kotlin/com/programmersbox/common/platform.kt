@@ -3,6 +3,7 @@ package com.programmersbox.common
 import androidx.compose.foundation.lazy.grid.LazyGridState
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.ui.Modifier
 import com.programmersbox.common.db.BlacklistedItemRoom
 import org.koin.core.module.Module
@@ -35,6 +36,29 @@ internal expect fun ContextMenu(
     imageUrl: String?,
     content: @Composable () -> Unit,
 )
+
+@Composable
+internal expect fun ContextMenuHandle(
+    scope: ContextMenuScope.() -> Unit,
+    content: @Composable () -> Unit,
+)
+
+interface ContextMenuScope {
+    fun item(title: String, onClick: () -> Unit)
+}
+
+data class ContextMenuItems(
+    val title: String,
+    val onClick: () -> Unit,
+)
+
+internal class ContextMenuScopeImpl : ContextMenuScope {
+    val items = mutableStateListOf<ContextMenuItems>()
+
+    override fun item(title: String, onClick: () -> Unit) {
+        items.add(ContextMenuItems(title, onClick))
+    }
+}
 
 expect class DownloadHandler {
     fun download(url: String, name: String)

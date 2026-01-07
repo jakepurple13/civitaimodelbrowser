@@ -10,6 +10,7 @@ import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -203,6 +204,25 @@ internal actual fun ContextMenu(
                 }
             )
         },
+        content = content
+    )
+}
+
+@Composable
+internal actual fun ContextMenuHandle(
+    scope: ContextMenuScope.() -> Unit,
+    content: @Composable () -> Unit,
+) {
+    val contextMenuScope = remember(scope) { ContextMenuScopeImpl().apply(scope) }
+    val items by remember {
+        derivedStateOf {
+            contextMenuScope
+                .items
+                .map { ContextMenuItem(it.title, it.onClick) }
+        }
+    }
+    ContextMenuArea(
+        items = { items },
         content = content
     )
 }

@@ -189,7 +189,7 @@ fun CivitAiModelImagesScreen(
                     )
 
                     ContextMenu(
-                        isBlacklisted = blacklisted.any { it.imageUrl == models.url },
+                        isBlacklisted = blacklisted.any { b -> b.imageUrl == models.url },
                         blacklistItems = blacklisted,
                         modelId = models.postId ?: 0L,
                         name = models.url,
@@ -201,7 +201,7 @@ fun CivitAiModelImagesScreen(
                             showNsfw = showNsfw,
                             nsfwBlurStrength = nsfwBlurStrength,
                             isFavorite = favoriteList.any { f -> f.imageUrl == models.url },
-                            isBlacklisted = blacklisted.any { it.imageUrl == models.url },
+                            isBlacklisted = blacklisted.any { b -> b.imageUrl == models.url },
                             shouldShowMedia = shouldShowMedia,
                             onClick = {
                                 if (models.height < 2000 || models.width < 2000) {
@@ -290,12 +290,10 @@ private fun ImageCard(
                             name = images.url,
                             isNsfw = images.nsfwLevel.canNotShow(),
                             hash = images.hash,
-                            modifier = Modifier.let {
-                                if (!showNsfw && images.nsfwLevel.canNotShow()) {
-                                    it.blur(nsfwBlurStrength.dp)
-                                } else {
-                                    it
-                                }
+                            modifier = if (!showNsfw && images.nsfwLevel.canNotShow()) {
+                                Modifier.blur(nsfwBlurStrength.dp)
+                            } else {
+                                Modifier
                             }
                         )
                     }

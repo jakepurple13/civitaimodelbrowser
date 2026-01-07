@@ -101,9 +101,9 @@ fun ShareViaQrCode(
     url: String,
     imageUrl: String,
     qrCodeType: QrCodeType,
+    onClose: () -> Unit,
     username: String? = null,
     id: String? = null,
-    onClose: () -> Unit,
 ) {
     ShareViaQrCode(
         qrCodeInfo = QrCodeInfo(
@@ -236,9 +236,9 @@ fun ShareViaQrCode(
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun ScanQrCode(
-    viewModel: QrCodeScannerViewModel = koinViewModel(),
     onBack: () -> Unit,
     onNavigate: (NavKey) -> Unit,
+    viewModel: QrCodeScannerViewModel = koinViewModel(),
 ) {
     val scope = rememberCoroutineScope()
     val sheetState = rememberModalBottomSheetState()

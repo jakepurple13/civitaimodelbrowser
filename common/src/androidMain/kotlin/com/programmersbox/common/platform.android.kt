@@ -121,6 +121,14 @@ internal actual fun ContextMenu(
     content()
 }
 
+@Composable
+internal actual fun ContextMenuHandle(
+    scope: ContextMenuScope.() -> Unit,
+    content: @Composable () -> Unit,
+) {
+    content()
+}
+
 fun getDatabaseBuilder(ctx: Context): RoomDatabase.Builder<AppDatabase> {
     val appContext = ctx.applicationContext
     val dbFile = appContext.getDatabasePath("my_room.db")

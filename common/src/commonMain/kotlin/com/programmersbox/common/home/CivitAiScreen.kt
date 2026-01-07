@@ -87,7 +87,6 @@ import androidx.paging.compose.itemContentType
 import chaintech.videoplayer.ui.preview.VideoPreviewComposable
 import com.programmersbox.common.CivitSort
 import com.programmersbox.common.ComposableUtils
-import com.programmersbox.common.ContextMenu
 import com.programmersbox.common.DataStore
 import com.programmersbox.common.ModelType
 import com.programmersbox.common.Models
@@ -283,31 +282,22 @@ fun LazyGridScope.modelItems(
                 onNavigateToDetailImages = onNavigateToDetailImages,
             )
 
-            ContextMenu(
+            ModelItem(
+                models = models,
+                onClick = { onNavigateToDetail(models.id.toString()) },
+                onLongClick = { showSheet = true },
+                showNsfw = showNsfw,
+                blurStrength = blurStrength.dp,
+                shouldShowMedia = shouldShowMedia,
+                isFavorite = database
+                    .filterIsInstance<FavoriteModel.Model>()
+                    .any { m -> m.id == models.id },
                 isBlacklisted = isBlacklisted,
-                blacklistItems = blacklisted,
-                modelId = models.id,
-                name = models.name,
-                nsfw = models.nsfw,
-                imageUrl = null
-            ) {
-                ModelItem(
-                    models = models,
-                    onClick = { onNavigateToDetail(models.id.toString()) },
-                    onLongClick = { showSheet = true },
-                    showNsfw = showNsfw,
-                    blurStrength = blurStrength.dp,
-                    shouldShowMedia = shouldShowMedia,
-                    isFavorite = database
-                        .filterIsInstance<FavoriteModel.Model>()
-                        .any { m -> m.id == models.id },
-                    isBlacklisted = isBlacklisted,
-                    checkIfImageUrlIsBlacklisted = { url ->
-                        blacklisted.none { b -> b.imageUrl == url }
-                    },
-                    modifier = Modifier.animateItem()
-                )
-            }
+                checkIfImageUrlIsBlacklisted = { url ->
+                    blacklisted.none { b -> b.imageUrl == url }
+                },
+                modifier = Modifier.animateItem()
+            )
         }
     }
 
@@ -334,7 +324,7 @@ fun LazyGridScope.modelItems(
                 Button(
                     onClick = lazyPagingItems::retry
                 ) { Text("Try Again") }
-                error.error.message?.let { Text(it) }
+                error.error.message?.let { Text(it, textAlign = TextAlign.Center) }
             }
         }
     }

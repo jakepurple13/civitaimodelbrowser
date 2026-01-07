@@ -15,6 +15,7 @@ plugins {
     alias(libs.plugins.ksp)
     alias(libs.plugins.room)
     alias(libs.plugins.aboutLibraries)
+    kotlin("native.cocoapods")
 }
 
 group = "com.programmersbox"
@@ -136,6 +137,11 @@ kotlin {
             implementation(libs.androidx.biometric.compose)
             api(libs.androidx.work.runtime.ktx)
             api(libs.koin.workmanager)
+
+            implementation(project.dependencies.platform(libs.firebase.bom))
+            implementation(libs.firebase.analytics)
+            implementation(libs.firebase.crashlytics)
+            implementation(libs.firebase.perf)
         }
 
         jvmMain.dependencies {
@@ -154,6 +160,10 @@ kotlin {
             implementation(libs.connectivity.compose.device)
             implementation(libs.biometricauth)
             implementation(libs.kmp.io)
+
+            implementation(libs.gitlive.firebase.analytics)
+            implementation(libs.gitlive.firebase.crashlytics)
+            implementation(libs.gitlive.firebase.perf)
         }
 
         //val desktopTest by getting

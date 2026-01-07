@@ -7,6 +7,12 @@ plugins {
     alias(libs.plugins.easylauncher)
 }
 
+if (file("google-services.json").exists()) {
+    apply(plugin = libs.plugins.google.gms.google.services.get().pluginId)
+    apply(plugin = libs.plugins.google.firebase.crashlytics.get().pluginId)
+    apply(plugin = libs.plugins.google.firebase.performance.get().pluginId)
+}
+
 group = "com.programmersbox"
 version = "1.0-SNAPSHOT"
 

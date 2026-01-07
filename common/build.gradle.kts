@@ -164,6 +164,7 @@ kotlin {
             implementation(libs.gitlive.firebase.analytics)
             implementation(libs.gitlive.firebase.crashlytics)
             implementation(libs.gitlive.firebase.perf)
+            implementation(libs.kotlin.native.zxing)
         }
 
         //val desktopTest by getting

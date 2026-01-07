@@ -8,6 +8,7 @@ allprojects {
         maven("https://maven.pkg.jetbrains.space/public/p/compose/dev")
         maven("https://jitpack.io")
         maven("https://jogamp.org/deployment/maven")
+        maven { url = uri("https://s01.oss.sonatype.org/content/repositories/snapshots") }
     }
 }
 

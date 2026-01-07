@@ -10,78 +10,44 @@ import kotlinx.cinterop.BetaInteropApi
 import kotlinx.cinterop.ExperimentalForeignApi
 import kotlinx.cinterop.addressOf
 import kotlinx.cinterop.usePinned
-import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import org.jetbrains.skia.EncodedImageFormat
-import org.jetbrains.skia.Image
 import platform.Foundation.NSData
 import platform.Foundation.create
-import platform.Foundation.dataWithBytes
 import platform.UIKit.UIActivityViewController
 import platform.UIKit.UIApplication
 import platform.UIKit.UIDevice
 import platform.UIKit.UIUserInterfaceIdiomPad
 import platform.UIKit.popoverPresentationController
-import platform.Vision.VNBarcodeObservation
-import platform.Vision.VNBarcodeSymbologyQR
-import platform.Vision.VNDetectBarcodesRequest
-import platform.Vision.VNImageRequestHandler
+import zxingcpp.BarcodeFormat
+import zxingcpp.BarcodeReader
+import zxingcpp.ImageFormat
+import zxingcpp.ImageView
 
 actual class QrCodeRepository {
     @OptIn(ExperimentalForeignApi::class)
-    actual suspend fun getInfoFromQRCode(bitmap: ImageBitmap): Result<List<String>> =
-        withContext(Dispatchers.Default) {
-            //TODO: Get working. Doesn't work on simulator
-            try {
-                // 1. Encode to PNG. This is slower than raw pixels but MUCH more stable
-                // because it includes the headers Vision uses to set up the inference context.
-                val skiaBitmap = bitmap.asSkiaBitmap()
-                val skiaImage = Image.makeFromBitmap(skiaBitmap)
-                val encodedData = skiaImage.encodeToData(EncodedImageFormat.PNG)
-                    ?: return@withContext Result.failure(Exception("Encoding failed"))
-
-                val byteArray = encodedData.bytes
-                val nsData = byteArray.usePinned { pinned ->
-                    NSData.dataWithBytes(pinned.addressOf(0), byteArray.size.toULong())
-                }
-
-                val deferredResults = CompletableDeferred<List<String>>()
-
-                // 2. Setup Request
-                val barcodeRequest = VNDetectBarcodesRequest { request, error ->
-                    if (error != null) {
-                        println("Error: $error")
-                        println("Error: ${error.localizedFailureReason}")
-                        println("Error: ${error.localizedRecoverySuggestion}")
-                        println("Error: ${error.localizedDescription}")
-                        deferredResults.completeExceptionally(Exception(error.localizedDescription))
-                        return@VNDetectBarcodesRequest
-                    }
-                    val results = request?.results()
-                        ?.filterIsInstance<VNBarcodeObservation>()
-                        ?.mapNotNull { it.payloadStringValue } ?: emptyList()
-                    deferredResults.complete(results)
-                }
-
-                // Explicitly set the symbology to QR
-                barcodeRequest.setSymbologies(listOf(VNBarcodeSymbologyQR))
-
-                // 3. Initialize the handler with Data
-                // IMPORTANT: On M3, if emptyMap() fails, pass null for options
-                val handler = VNImageRequestHandler(data = nsData, options = emptyMap<Any?, Any?>())
-
-                // 4. Perform the request
-                handler.performRequests(listOf(barcodeRequest), null)
-
-                val finalResults = deferredResults.await()
-                Result.success(finalResults)
-
-            } catch (e: Exception) {
-                println("QR Scan Error: ${e.message}")
-                Result.failure(e)
+    actual suspend fun getInfoFromQRCode(
+        bitmap: ImageBitmap
+    ): Result<List<String>> = withContext(Dispatchers.Default) {
+        return@withContext try {
+            val imageView = ImageView(
+                data = bitmap.asSkiaBitmap().readPixels()!!,
+                width = bitmap.width,
+                height = bitmap.height,
+                format = ImageFormat.RGBA
+            )
+            val barcodeReader = BarcodeReader().apply {
+                formats = setOf(BarcodeFormat.QRCode)
+                tryHarder = true
+                maxNumberOfSymbols = 3
             }
+            Result.success(barcodeReader.read(imageView).mapNotNull { it.text })
+        } catch (e: Exception) {
+            println("QR Scan Error: ${e.message}")
+            e.printStackTrace()
+            Result.failure(e)
         }
+    }
 
     actual suspend fun shareImage(
         bitmap: ImageBitmap,

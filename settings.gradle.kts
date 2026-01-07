@@ -10,10 +10,9 @@ pluginManagement {
 buildscript {
     repositories {
         mavenCentral()
-        maven {
-            url = uri("https://storage.googleapis.com/r8-releases/raw")
-        }
+        maven { url = uri("https://storage.googleapis.com/r8-releases/raw") }
         maven("https://jogamp.org/deployment/maven/")
+        maven { url = uri("https://s01.oss.sonatype.org/content/repositories/snapshots") }
     }
 }
 

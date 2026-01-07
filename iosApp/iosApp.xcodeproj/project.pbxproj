@@ -6,6 +6,13 @@
 	objectVersion = 77;
 	objects = {
 
+/* Begin PBXBuildFile section */
+		785397D12F0EA7A100F83826 /* FirebaseAnalytics in Frameworks */ = {isa = PBXBuildFile; productRef = 785397D02F0EA7A100F83826 /* FirebaseAnalytics */; };
+		785397D32F0EA7A100F83826 /* FirebaseCore in Frameworks */ = {isa = PBXBuildFile; productRef = 785397D22F0EA7A100F83826 /* FirebaseCore */; };
+		785397D52F0EA7A100F83826 /* FirebaseCrashlytics in Frameworks */ = {isa = PBXBuildFile; productRef = 785397D42F0EA7A100F83826 /* FirebaseCrashlytics */; };
+		785397D72F0EA7A100F83826 /* FirebasePerformance in Frameworks */ = {isa = PBXBuildFile; productRef = 785397D62F0EA7A100F83826 /* FirebasePerformance */; };
+/* End PBXBuildFile section */
+
 /* Begin PBXFileReference section */
 		4A847FEA83B936616D90FEC3 /* KotlinProject.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = KotlinProject.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
@@ -41,6 +48,10 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				785397D52F0EA7A100F83826 /* FirebaseCrashlytics in Frameworks */,
+				785397D32F0EA7A100F83826 /* FirebaseCore in Frameworks */,
+				785397D72F0EA7A100F83826 /* FirebasePerformance in Frameworks */,
+				785397D12F0EA7A100F83826 /* FirebaseAnalytics in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -75,6 +86,7 @@
 				228A02AF23D9528036FB969D /* Sources */,
 				4FFAA30812CB6448D70D8FD4 /* Frameworks */,
 				788AFCDE14428B2F8CC435CC /* Resources */,
+				785397D82F0EAA4800F83826 /* ShellScript */,
 			);
 			buildRules = (
 			);
@@ -85,6 +97,10 @@
 			);
 			name = iosApp;
 			packageProductDependencies = (
+				785397D02F0EA7A100F83826 /* FirebaseAnalytics */,
+				785397D22F0EA7A100F83826 /* FirebaseCore */,
+				785397D42F0EA7A100F83826 /* FirebaseCrashlytics */,
+				785397D62F0EA7A100F83826 /* FirebasePerformance */,
 			);
 			productName = iosApp;
 			productReference = 4A847FEA83B936616D90FEC3 /* KotlinProject.app */;
@@ -114,6 +130,9 @@
 			);
 			mainGroup = 80DAB9B1C8FA2A67C59AD0F7;
 			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+				785397CF2F0EA7A100F83826 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */,
+			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = C40CDB1621E456A3C1CD0718 /* Products */;
 			projectDirPath = "";
@@ -135,6 +154,29 @@
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXShellScriptBuildPhase section */
+		785397D82F0EAA4800F83826 /* ShellScript */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+				"${DWARF_DSYM_FOLDER_PATH}/${DWARF_DSYM_FILE_NAME}",
+				"${DWARF_DSYM_FOLDER_PATH}/${DWARF_DSYM_FILE_NAME}/Contents/Resources/DWARF/${PRODUCT_NAME}",
+				"${DWARF_DSYM_FOLDER_PATH}/${DWARF_DSYM_FILE_NAME}/Contents/Info.plist",
+				"$(TARGET_BUILD_DIR)/$(UNLOCALIZED_RESOURCES_FOLDER_PATH)/GoogleService-Info.plist",
+				"$(TARGET_BUILD_DIR)/$(EXECUTABLE_PATH)",
+				"${DWARF_DSYM_FOLDER_PATH}/${DWARF_DSYM_FILE_NAME}/Contents/Resources/DWARF/${PRODUCT_NAME}.debug.dylib",
+			);
+			outputFileListPaths = (
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "# Type a script or drag a script file from your workspace to insert its path.\n\"${BUILD_DIR%/Build/*}/SourcePackages/checkouts/firebase-ios-sdk/Crashlytics/run\"\n\n";
+		};
 		ACABCE85A739CFC84C999E3B /* Compile Kotlin Framework */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 2147483647;
@@ -175,8 +217,9 @@
 				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = NO;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				DEVELOPMENT_ASSET_PATHS = "\"iosApp/Preview Content\"";
-				DEVELOPMENT_TEAM = "${TEAM_ID}";
+				DEVELOPMENT_TEAM = "";
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = iosApp/Info.plist;
@@ -190,6 +233,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
+				PROVISIONING_PROFILE_SPECIFIER = "";
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
@@ -206,7 +250,7 @@
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_ASSET_PATHS = "\"iosApp/Preview Content\"";
-				DEVELOPMENT_TEAM = "${TEAM_ID}";
+				DEVELOPMENT_TEAM = "";
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = iosApp/Info.plist;
@@ -220,6 +264,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
+				PROVISIONING_PROFILE_SPECIFIER = "";
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
@@ -371,6 +416,40 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		785397CF2F0EA7A100F83826 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/firebase/firebase-ios-sdk";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 12.7.0;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		785397D02F0EA7A100F83826 /* FirebaseAnalytics */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 785397CF2F0EA7A100F83826 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseAnalytics;
+		};
+		785397D22F0EA7A100F83826 /* FirebaseCore */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 785397CF2F0EA7A100F83826 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseCore;
+		};
+		785397D42F0EA7A100F83826 /* FirebaseCrashlytics */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 785397CF2F0EA7A100F83826 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseCrashlytics;
+		};
+		785397D62F0EA7A100F83826 /* FirebasePerformance */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 785397CF2F0EA7A100F83826 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebasePerformance;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = 7784C1D4824FB37EFAE568A0 /* Project object */;
 }

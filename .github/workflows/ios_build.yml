@@ -35,5 +35,8 @@ jobs:
           distribution: 'zulu'
           java-version: 17
 
+      - run: |
+          echo CIVIT_IOS_SERVICES > iosApp/iosApp/GoogleService-Info.plist
+
       - name: Build iOS app
         run: xcodebuild -workspace iosApp/iosApp.xcodeproj/project.xcworkspace -configuration Debug -scheme iosApp -sdk iphonesimulator

@@ -15,6 +15,7 @@ plugins {
     alias(libs.plugins.ksp)
     alias(libs.plugins.room)
     alias(libs.plugins.aboutLibraries)
+    kotlin("native.cocoapods")
 }
 
 group = "com.programmersbox"
@@ -160,9 +161,9 @@ kotlin {
             implementation(libs.biometricauth)
             implementation(libs.kmp.io)
 
-            implementation("dev.gitlive:firebase-analytics:2.4.0")
-            implementation("dev.gitlive:firebase-crashlytics:2.4.0")
-            implementation("dev.gitlive:firebase-perf:2.4.0")
+            implementation(libs.gitlive.firebase.analytics)
+            implementation(libs.gitlive.firebase.crashlytics)
+            implementation(libs.gitlive.firebase.perf)
         }
 
         //val desktopTest by getting

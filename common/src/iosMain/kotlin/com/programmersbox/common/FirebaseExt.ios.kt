@@ -18,7 +18,7 @@ actual fun analyticsEvent(name: String, params: Map<String, Any>) {
     }
 }
 
-actual inline fun performanceTrace(name: String, crossinline block: () -> Unit) {
+actual suspend inline fun performanceTrace(name: String, crossinline block: suspend () -> Unit) {
     val trace = runCatching { Firebase.performance.newTrace(name) }
         .getOrNull()
     trace?.start()

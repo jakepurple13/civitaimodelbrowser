@@ -15,6 +15,8 @@ import com.programmersbox.common.db.FavoritesDao
 import com.programmersbox.common.db.ListDao
 import com.programmersbox.common.db.SearchHistoryDao
 import com.programmersbox.common.db.SearchHistoryItem
+import com.programmersbox.common.logToFirebase
+import com.programmersbox.common.performanceTrace
 import io.github.vinceglb.filekit.PlatformFile
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.IO
@@ -121,7 +123,9 @@ class BackupRepository(
             }
         }
 
-        zipper.zip(platformFile, itemsToZip)
+        performanceTrace("packageItems") {
+            zipper.zip(platformFile, itemsToZip)
+        }
     }
 
     fun startRestore(
@@ -152,86 +156,90 @@ class BackupRepository(
         includeSearchHistory: Boolean,
     ) {
         coroutineScope {
-            if (includeFavorites) {
+            performanceTrace("restoreItems") {
+                if (includeFavorites) {
+                    launch(Dispatchers.IO) {
+                        val duration = measureTime {
+                            backupItems.favorites?.let {
+                                favoritesDao.importOnlyFavorites(
+                                    json.encodeToString(it),
+                                    json
+                                )
+                            }
+                        }
+                        logToFirebase("Restored ${backupItems.favorites?.size ?: 0} favorites in $duration")
+                    }
+                }
+                if (includeBlacklisted) {
+                    launch(Dispatchers.IO) {
+                        val duration = measureTime {
+                            backupItems.blacklisted?.let {
+                                favoritesDao.importBlacklisted(
+                                    json.encodeToString(it),
+                                    json
+                                )
+                            }
+                        }
+                        logToFirebase("Restored ${backupItems.blacklisted?.size ?: 0} blacklisted in $duration")
+                    }
+                }
                 launch(Dispatchers.IO) {
                     val duration = measureTime {
-                        backupItems.favorites?.let {
-                            favoritesDao.importOnlyFavorites(
-                                json.encodeToString(it),
-                                json
-                            )
-                        }
-                    }
-                    println("Restored favorites in $duration")
-                }
-            }
-            if (includeBlacklisted) {
-                launch(Dispatchers.IO) {
-                    val duration = measureTime {
-                        backupItems.blacklisted?.let {
-                            favoritesDao.importBlacklisted(
-                                json.encodeToString(it),
-                                json
-                            )
-                        }
-                    }
-                    println("Restored blacklisted in $duration")
-                }
-            }
-            launch(Dispatchers.IO) {
-                val duration = measureTime {
-                    backupItems.lists?.let { lists ->
-                        lists.forEach { listDao.createList(it.item) }
-                        lists.forEach {
-                            it.list.forEach { item ->
-                                listDao.addItem(item)
+                        backupItems.lists?.let { lists ->
+                            lists.forEach { listDao.createList(it.item) }
+                            lists.forEach {
+                                it.list.forEach { item ->
+                                    listDao.addItem(item)
+                                }
                             }
                         }
                     }
+                    val listCount = backupItems.lists?.size ?: 0
+                    val itemCount = backupItems.lists?.sumOf { it.list.size } ?: 0
+                    logToFirebase("Restored $listCount lists with $itemCount items in $duration")
                 }
-                println("Restored lists in $duration")
-            }
-            if (includeSearchHistory) {
-                launch(Dispatchers.IO) {
-                    val duration = measureTime {
-                        backupItems.searchHistory?.forEach {
-                            searchHistoryDao.addSearchHistory(it)
+                if (includeSearchHistory) {
+                    launch(Dispatchers.IO) {
+                        val duration = measureTime {
+                            backupItems.searchHistory?.forEach {
+                                searchHistoryDao.addSearchHistory(it)
+                            }
                         }
+                        logToFirebase("Restored ${backupItems.searchHistory?.size ?: 0} search history in $duration")
                     }
-                    println("Restored search history in $duration")
                 }
-            }
-            if (includeSettings) {
-                launch(Dispatchers.IO) {
-                    val duration = measureTime {
-                        backupItems
-                            .settings
-                            ?.let { backupSettings ->
-                                with(backupSettings) {
-                                    dataStore.dataStore.edit { p ->
-                                        stringSettings.forEach {
-                                            p[stringPreferencesKey(it.key)] = it.value
-                                        }
-                                        intSettings.forEach {
-                                            p[intPreferencesKey(it.key)] = it.value
-                                        }
-                                        longSettings.forEach {
-                                            p[longPreferencesKey(it.key)] = it.value
-                                        }
-                                        booleanSettings.forEach {
-                                            p[booleanPreferencesKey(it.key)] = it.value
-                                        }
-                                        doubleSettings.forEach {
-                                            p[doublePreferencesKey(it.key)] = it.value
-                                        }
-                                        byteArraySettings.forEach {
-                                            p[byteArrayPreferencesKey(it.key)] = it.value
+                if (includeSettings) {
+                    launch(Dispatchers.IO) {
+                        val duration = measureTime {
+                            backupItems
+                                .settings
+                                ?.let { backupSettings ->
+                                    with(backupSettings) {
+                                        dataStore.dataStore.edit { p ->
+                                            stringSettings.forEach {
+                                                p[stringPreferencesKey(it.key)] = it.value
+                                            }
+                                            intSettings.forEach {
+                                                p[intPreferencesKey(it.key)] = it.value
+                                            }
+                                            longSettings.forEach {
+                                                p[longPreferencesKey(it.key)] = it.value
+                                            }
+                                            booleanSettings.forEach {
+                                                p[booleanPreferencesKey(it.key)] = it.value
+                                            }
+                                            doubleSettings.forEach {
+                                                p[doublePreferencesKey(it.key)] = it.value
+                                            }
+                                            byteArraySettings.forEach {
+                                                p[byteArrayPreferencesKey(it.key)] = it.value
+                                            }
                                         }
                                     }
                                 }
-                            }
+                        }
+                        logToFirebase("Restored settings in $duration")
                     }
-                    println("Restored settings in $duration")
                 }
             }
         }

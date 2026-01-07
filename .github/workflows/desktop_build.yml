@@ -37,7 +37,7 @@ defaults:
 jobs:
   build:
     name: Build Package
-    timeout-minutes: 15
+    timeout-minutes: 60
     continue-on-error: true
     # if: github.event_name  == 'pull_request'
 

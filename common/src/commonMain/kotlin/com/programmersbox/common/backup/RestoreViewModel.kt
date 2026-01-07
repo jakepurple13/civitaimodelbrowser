@@ -8,6 +8,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.dokar.sonner.ToastType
 import com.dokar.sonner.ToasterState
+import com.programmersbox.common.analyticsEvent
 import com.programmersbox.common.di.NavigationHandler
 import io.github.vinceglb.filekit.PlatformFile
 import kotlinx.coroutines.delay
@@ -51,6 +52,16 @@ class RestoreViewModel(
     }
 
     fun restore() {
+        analyticsEvent(
+            "restore",
+            mapOf(
+                "includeFavorites" to includeFavorites,
+                "includeBlacklisted" to includeBlacklisted,
+                "includeSettings" to includeSettings,
+                "includeSearchHistory" to includeSearchHistory,
+                "listsToInclude" to listsToInclude.size
+            )
+        )
         viewModelScope.launch {
             uiState = uiState.copy(isRestoring = true)
             backupRepository.startRestore(

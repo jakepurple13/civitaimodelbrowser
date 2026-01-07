@@ -8,6 +8,6 @@ actual fun analyticsEvent(name: String, params: Map<String, Any>) {
     println("Event: $name, Params: $params")
 }
 
-actual inline fun performanceTrace(name: String, crossinline block: () -> Unit) {
+actual suspend inline fun performanceTrace(name: String, crossinline block: suspend () -> Unit) {
     block()
 }

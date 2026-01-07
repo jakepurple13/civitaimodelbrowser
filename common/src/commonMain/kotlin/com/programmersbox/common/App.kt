@@ -16,6 +16,7 @@ import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.viewmodel.navigation3.rememberViewModelStoreNavEntryDecorator
@@ -36,6 +37,21 @@ internal fun App(
     onShareClick: (String) -> Unit,
 ) {
     SetupNetworkListener()
+
+    val backStack = koinInject<NavigationHandler>().backStack
+
+    LaunchedEffect(Unit) {
+        snapshotFlow { backStack.toList() }
+            .collect {
+                val screen = it.lastOrNull()
+                logToFirebase("Navigated to: ${screen.toString()}")
+                analyticsEvent(
+                    "screen_view",
+                    mapOf("screen" to screen.toString())
+                )
+            }
+    }
+
     val blurType by koinInject<DataStore>().rememberBlurType()
     CompositionLocalProvider(
         LocalHazeStyle provides blurType.toHazeStyle(),
@@ -57,7 +73,7 @@ internal fun App(
 
             Surface {
                 NavDisplay(
-                    backStack = koinInject<NavigationHandler>().backStack,
+                    backStack = backStack,
                     entryDecorators = listOf(
                         rememberSaveableStateHolderNavEntryDecorator(),
                         rememberViewModelStoreNavEntryDecorator()

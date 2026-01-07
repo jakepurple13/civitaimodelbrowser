@@ -6,6 +6,7 @@ import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.WorkManager
 import androidx.work.workDataOf
 import com.programmersbox.common.RestoreWorker
+import com.programmersbox.common.logToFirebase
 import io.github.vinceglb.filekit.PlatformFile
 import io.github.vinceglb.filekit.dialogs.toAndroidUri
 import kotlinx.coroutines.Dispatchers
@@ -35,7 +36,7 @@ actual class Zipper(
                         zip.putNextEntry(ZipEntry(name))
                         runCatching { zip.write(handler.toByteArray()) }
                     }
-                    println("Zipped $name in $duration")
+                    logToFirebase("Zipped $name in $duration")
                 }
             }
         }
@@ -70,7 +71,7 @@ actual class Zipper(
                                     )
                                 }.onFailure { it.printStackTrace() }
                             }
-                            println("Unzipped ${entry.name} in $duration")
+                            logToFirebase("Unzipped ${entry.name} in $duration")
                         }
                     }
                 }

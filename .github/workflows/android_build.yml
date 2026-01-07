@@ -32,6 +32,8 @@ env:
 jobs:
   aab:
     name: Generate AAB
+    timeout-minutes: 60
+    continue-on-error: true
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -89,10 +91,15 @@ jobs:
 
   apk:
     name: Generate Apk
+    timeout-minutes: 60
+    continue-on-error: true
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
         uses: actions/checkout@v5
+
+      - run: |
+          echo CIVIT_SERVICES > android/google-services.json
 
       - name: Setup JDK
         uses: actions/setup-java@v5

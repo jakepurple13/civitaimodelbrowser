@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.dokar.sonner.ToastType
 import com.dokar.sonner.ToasterState
+import com.programmersbox.common.analyticsEvent
 import com.programmersbox.common.db.FavoritesDao
 import com.programmersbox.common.db.ListDao
 import com.programmersbox.common.db.SearchHistoryDao
@@ -101,6 +102,16 @@ class BackupViewModel(
     fun backup(
         platformFile: PlatformFile,
     ) {
+        analyticsEvent(
+            "backup",
+            mapOf(
+                "includeFavorites" to backupItems.value.includeFavorites,
+                "includeBlacklisted" to backupItems.value.includeBlacklisted,
+                "includeSettings" to backupItems.value.includeSettings,
+                "includeSearchHistory" to backupItems.value.includeSearchHistory,
+                "listsToInclude" to backupItems.value.listsToInclude.size
+            )
+        )
         viewModelScope.launch {
             uiState.value = uiState.value.copy(isBackingUp = true, error = null)
             runCatching {

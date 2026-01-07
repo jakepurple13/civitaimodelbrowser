@@ -8,6 +8,7 @@ import com.google.firebase.perf.performance
 
 actual fun logToFirebase(message: Any) {
     runCatching { Firebase.crashlytics.log(message.toString()) }
+        .onFailure { println(message) }
 }
 
 actual fun analyticsEvent(name: String, params: Map<String, Any>) {
@@ -15,10 +16,10 @@ actual fun analyticsEvent(name: String, params: Map<String, Any>) {
         Firebase.analytics.logEvent(name) {
             params.forEach { (k, v) -> param(k, v.toString()) }
         }
-    }
+    }.onFailure { println("$name, Params: $params") }
 }
 
-actual inline fun performanceTrace(name: String, crossinline block: () -> Unit) {
+actual suspend inline fun performanceTrace(name: String, crossinline block: suspend () -> Unit) {
     val trace = runCatching { Firebase.performance.newTrace(name) }
         .getOrNull()
     trace?.start()

@@ -150,7 +150,7 @@ fun CivitAiScreen(
 
     Scaffold(
         topBar = {
-            AppSearchAppBar(
+            CivitTopBar(
                 showBlur = showBlur,
                 onNavigateToSearch = onNavigateToSearch,
                 onNavigateToQrCode = onNavigateToQrCode,
@@ -565,7 +565,7 @@ fun CardContent(
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun AppSearchAppBar(
+private fun CivitTopBar(
     onNavigateToSearch: () -> Unit,
     onNavigateToQrCode: () -> Unit,
     onNavigateToImages: () -> Unit,
@@ -580,7 +580,11 @@ private fun AppSearchAppBar(
         containerColor = if (showBlur)
             Color.Transparent
         else
-            MaterialTheme.colorScheme.surface
+            MaterialTheme.colorScheme.surface,
+        scrolledContainerColor = if (showBlur)
+            Color.Transparent
+        else
+            MaterialTheme.colorScheme.surface,
     )
 
     var showSortBy by rememberSaveable { mutableStateOf(false) }

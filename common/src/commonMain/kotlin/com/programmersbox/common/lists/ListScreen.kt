@@ -36,6 +36,7 @@ import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.Stable
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -89,7 +90,9 @@ fun ListScreen(
 ) {
     val connectionRepository = koinInject<NetworkConnectionRepository>()
     val shouldShowMedia by remember { derivedStateOf { connectionRepository.shouldShowMedia } }
-    val dataTimeFormatter = remember { DateTimeFormatItem(true) }
+    val dataTimeFormatter = remember {
+        DateTimeFormatHandle(createDateTimeFormatItem(true))
+    }
     val dataStore = koinInject<DataStore>()
     val showBlur by dataStore.rememberShowBlur()
     val useProgressive by dataStore.rememberUseProgressive()
@@ -284,7 +287,7 @@ fun ListScreen(
 @Composable
 private fun ListCard(
     list: CustomList,
-    dateTimeFormatter: DateTimeFormat<LocalDateTime>,
+    dateTimeFormatter: DateTimeFormatHandle,
     showNsfw: Boolean,
     blurStrength: Dp,
     shouldShowMedia: Boolean,
@@ -329,13 +332,13 @@ private fun ListCard(
                         isNsfw = list.list.any { it.nsfw },
                         name = list.item.name,
                         hash = imageHashing?.hash,
-                        modifier = imageModifier.let {
+                        modifier = imageModifier.then(
                             if (!showNsfw && list.list.any { it.nsfw }) {
-                                it.blur(blurStrength)
+                                Modifier.blur(blurStrength)
                             } else {
-                                it
+                                Modifier
                             }
-                        },
+                        ),
                     )
                 }
                 if (list.item.useBiometric) {
@@ -373,6 +376,13 @@ private val Format24 = LocalTime.Format {
     minute()
 }
 
+@Stable
+data class DateTimeFormatHandle(
+    val dateTimeFormatter: DateTimeFormat<LocalDateTime>
+) {
+    fun format(time: LocalDateTime) = dateTimeFormatter.format(time)
+}
+
 private val Format12 = LocalTime.Format {
     amPmHour()
     char(':')
@@ -381,11 +391,12 @@ private val Format12 = LocalTime.Format {
     amPmMarker("AM", "PM")
 }
 
-internal fun DateTimeFormatItem(isUsing24HourTime: Boolean) = LocalDateTime.Format {
-    date(DateFormatItem)
-    chars(", ")
-    time(if (isUsing24HourTime) Format24 else Format12)
-}
+internal fun createDateTimeFormatItem(isUsing24HourTime: Boolean) =
+    LocalDateTime.Format {
+        date(DateFormatItem)
+        chars(", ")
+        time(if (isUsing24HourTime) Format24 else Format12)
+    }
 
 @OptIn(ExperimentalTime::class)
 fun Long.toLocalDateTime() = Instant

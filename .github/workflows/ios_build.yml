@@ -36,7 +36,7 @@ jobs:
           java-version: 17
 
       - run: |
-          echo CIVIT_IOS_SERVICES > iosApp/iosApp/GoogleService-Info.plist
+          echo $CIVIT_IOS_SERVICES > iosApp/iosApp/GoogleService-Info.plist
         env:
           CIVIT_IOS_SERVICES: ${{ secrets.CIVIT_IOS_SERVICES }}
 

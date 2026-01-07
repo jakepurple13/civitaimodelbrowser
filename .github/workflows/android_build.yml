@@ -40,7 +40,7 @@ jobs:
         uses: actions/checkout@v5
 
       - run: |
-          echo CIVIT_SERVICES > android/google-services.json
+          echo $CIVIT_SERVICES > android/google-services.json
         env:
           CIVIT_SERVICES: ${{ secrets.CIVIT_SERVICES }}
 
@@ -101,7 +101,7 @@ jobs:
         uses: actions/checkout@v5
 
       - run: |
-          echo CIVIT_SERVICES > android/google-services.json
+          echo $CIVIT_SERVICES > android/google-services.json
         env:
           CIVIT_SERVICES: ${{ secrets.CIVIT_SERVICES }}
 

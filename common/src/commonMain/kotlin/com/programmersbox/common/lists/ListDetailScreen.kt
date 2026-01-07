@@ -111,9 +111,9 @@ import org.koin.compose.viewmodel.koinViewModel
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ListDetailScreen(
-    viewModel: ListDetailViewModel = koinViewModel(),
     onNavigateToDetail: (String) -> Unit,
     onNavigateToUser: (String) -> Unit,
+    viewModel: ListDetailViewModel = koinViewModel(),
 ) {
     val connectionRepository = koinInject<NetworkConnectionRepository>()
     val shouldShowMedia by remember { derivedStateOf { connectionRepository.shouldShowMedia } }
@@ -470,7 +470,7 @@ private fun InfoSheet(
             ) {
                 ListItem(
                     overlineContent = {
-                        val dataTimeFormatter = remember { DateTimeFormatItem(true) }
+                        val dataTimeFormatter = remember { createDateTimeFormatItem(true) }
                         Text("Last time updated: ${dataTimeFormatter.format(customItem.item.time.toLocalDateTime())}")
                     },
                     headlineContent = {},
@@ -517,13 +517,13 @@ private fun InfoSheet(
                                         isNsfw = customItem.list.any { it.nsfw },
                                         name = customItem.item.name,
                                         hash = imageHashing?.hash,
-                                        modifier = imageModifier.let {
+                                        modifier = imageModifier.then(
                                             if (!showNsfw && customItem.list.any { it.nsfw }) {
-                                                it.blur(blurStrength)
+                                                Modifier.blur(blurStrength)
                                             } else {
-                                                it
+                                                Modifier
                                             }
-                                        },
+                                        ),
                                     )
                                 }
                                 Icon(
@@ -617,8 +617,8 @@ private fun InfoSheet(
 
 @Composable
 private fun ActionItem(
-    modifier: Modifier = Modifier,
     onClick: () -> Unit,
+    modifier: Modifier = Modifier,
     colors: CardColors = CardDefaults.cardColors(),
     content: @Composable ColumnScope.() -> Unit,
 ) {
@@ -673,13 +673,13 @@ fun ImageLoad(
             isNsfw = nsfw,
             name = name,
             hash = hash,
-            modifier = modifier.let {
+            modifier = modifier.then(
                 if (!showNsfw && nsfw) {
-                    it.blur(blurStrength)
+                    Modifier.blur(blurStrength)
                 } else {
-                    it
+                    Modifier
                 }
-            },
+            )
         )
     }
 }
@@ -688,11 +688,11 @@ fun ImageLoad(
 @Composable
 private fun RemoveItemsSheet(
     customList: CustomList,
-    listRepository: ListDao = koinInject(),
     showNsfw: Boolean,
     blurStrength: Dp,
     shouldShowMedia: Boolean,
     onDismiss: () -> Unit,
+    listRepository: ListDao = koinInject(),
 ) {
     val itemsToDelete = remember { mutableStateListOf<CustomListInfo>() }
     var showPopup by remember { mutableStateOf(false) }

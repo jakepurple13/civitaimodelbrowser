@@ -37,6 +37,9 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v5
 
+      - run: |
+          echo CIVIT_SERVICES > android/google-services.json
+
       - name: Setup JDK
         uses: actions/setup-java@v5
         with:

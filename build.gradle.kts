@@ -20,4 +20,7 @@ plugins {
     id("com.codingfeline.buildkonfig") version "0.17.1" apply false
     alias(libs.plugins.aboutLibraries) apply false
     alias(libs.plugins.easylauncher) apply false
+    alias(libs.plugins.google.gms.google.services) apply false
+    alias(libs.plugins.google.firebase.crashlytics) apply false
+    alias(libs.plugins.google.firebase.performance) apply false
 }

@@ -136,6 +136,11 @@ kotlin {
             implementation(libs.androidx.biometric.compose)
             api(libs.androidx.work.runtime.ktx)
             api(libs.koin.workmanager)
+
+            implementation(project.dependencies.platform(libs.firebase.bom))
+            implementation(libs.firebase.analytics)
+            implementation(libs.firebase.crashlytics)
+            implementation(libs.firebase.perf)
         }
 
         jvmMain.dependencies {
@@ -154,6 +159,10 @@ kotlin {
             implementation(libs.connectivity.compose.device)
             implementation(libs.biometricauth)
             implementation(libs.kmp.io)
+
+            implementation("dev.gitlive:firebase-analytics:2.4.0")
+            implementation("dev.gitlive:firebase-crashlytics:2.4.0")
+            implementation("dev.gitlive:firebase-perf:2.4.0")
         }
 
         //val desktopTest by getting

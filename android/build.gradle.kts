@@ -8,6 +8,7 @@ plugins {
 }
 
 if (file("google-services.json").exists()) {
+    println("Applying google services")
     apply(plugin = libs.plugins.google.gms.google.services.get().pluginId)
     apply(plugin = libs.plugins.google.firebase.crashlytics.get().pluginId)
     apply(plugin = libs.plugins.google.firebase.performance.get().pluginId)

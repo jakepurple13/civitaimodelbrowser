@@ -37,6 +37,8 @@ jobs:
 
       - run: |
           echo CIVIT_IOS_SERVICES > iosApp/iosApp/GoogleService-Info.plist
+        env:
+          CIVIT_IOS_SERVICES: ${{ secrets.CIVIT_IOS_SERVICES }}
 
       - name: Build iOS app
         run: xcodebuild -workspace iosApp/iosApp.xcodeproj/project.xcworkspace -configuration Debug -scheme iosApp -sdk iphonesimulator

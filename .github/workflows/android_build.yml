@@ -41,6 +41,8 @@ jobs:
 
       - run: |
           echo CIVIT_SERVICES > android/google-services.json
+        env:
+          CIVIT_SERVICES: ${{ secrets.CIVIT_SERVICES }}
 
       - name: Setup JDK
         uses: actions/setup-java@v5
@@ -100,6 +102,8 @@ jobs:
 
       - run: |
           echo CIVIT_SERVICES > android/google-services.json
+        env:
+          CIVIT_SERVICES: ${{ secrets.CIVIT_SERVICES }}
 
       - name: Setup JDK
         uses: actions/setup-java@v5

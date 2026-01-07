@@ -1,7 +1,6 @@
 package com.programmersbox.common.di
 
 import androidx.compose.animation.ExitTransition
-import androidx.compose.animation.core.tween
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
 import androidx.compose.animation.togetherWith
@@ -68,40 +67,13 @@ private fun Module.home() {
                     )
                 )
             },
-            onNavigateToBlacklist = {
-                backStack.add(Screen.Settings)
-                backStack.add(Screen.Settings.Blacklisted)
-            },
+            onNavigateToBlacklist = { backStack.add(Screen.Settings.Blacklisted) },
             onNavigateToSearch = { backStack.add(Screen.Search) },
         )
     }
 
     navigation<Screen.Search>(
-        metadata = NavDisplay.transitionSpec {
-            // Slide new content up, keeping the old content in place underneath
-            slideInVertically(
-                initialOffsetY = { it },
-                animationSpec = tween(1000)
-            ) togetherWith ExitTransition.KeepUntilTransitionsFinished
-        } + NavDisplay.popTransitionSpec {
-            // Slide old content down, revealing the new content in place underneath
-            slideInVertically(
-                initialOffsetY = { 0 },
-                animationSpec = tween(1000)
-            ) togetherWith slideOutVertically(
-                targetOffsetY = { it },
-                animationSpec = tween(1000)
-            )
-        } + NavDisplay.predictivePopTransitionSpec {
-            // Slide old content down, revealing the new content in place underneath
-            slideInVertically(
-                initialOffsetY = { 0 },
-                animationSpec = tween(1000)
-            ) togetherWith slideOutVertically(
-                targetOffsetY = { it },
-                animationSpec = tween(1000)
-            )
-        }
+        metadata = slideUpAnimation()
     ) {
         val backStack = koinInject<NavigationHandler>().backStack
         SearchScreen(
@@ -230,7 +202,9 @@ private fun Module.settingsNavigation() {
         )
     }
 
-    settingsNavigation<Screen.Settings.Blacklisted> { BlacklistedScreen() }
+    settingsNavigation<Screen.Settings.Blacklisted>(
+        metadata = slideUpAnimation()
+    ) { BlacklistedScreen() }
     settingsNavigation<Screen.Settings.Backup> { BackupScreen() }
     settingsNavigation<Screen.Settings.Restore> { RestoreScreen() }
     settingsNavigation<Screen.Settings.Stats> { StatsScreen() }
@@ -247,6 +221,27 @@ private inline fun <reified T : NavKey> Module.settingsNavigation(
     navigation<T>(
         metadata = ListDetailSceneStrategy.detailPane(sceneKey = "settings") + metadata,
         definition = definition
+    )
+}
+
+private fun slideUpAnimation() = NavDisplay.transitionSpec {
+    // Slide new content up, keeping the old content in place underneath
+    slideInVertically(
+        initialOffsetY = { -it }
+    ) togetherWith ExitTransition.KeepUntilTransitionsFinished
+} + NavDisplay.popTransitionSpec {
+    // Slide old content down, revealing the new content in place underneath
+    slideInVertically(
+        initialOffsetY = { 0 }
+    ) togetherWith slideOutVertically(
+        targetOffsetY = { -it }
+    )
+} + NavDisplay.predictivePopTransitionSpec {
+    // Slide old content down, revealing the new content in place underneath
+    slideInVertically(
+        initialOffsetY = { 0 }
+    ) togetherWith slideOutVertically(
+        targetOffsetY = { -it }
     )
 }
 

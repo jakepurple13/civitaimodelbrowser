@@ -317,6 +317,7 @@ fun ScanQrCode(
                         modifier = Modifier
                             .sizeIn(maxWidth = 250.dp, maxHeight = 250.dp)
                             .clip(MaterialTheme.shapes.medium)
+                            .animateContentSize()
                     )
 
                     FilledTonalIconButton(

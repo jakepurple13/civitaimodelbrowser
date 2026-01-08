@@ -13,6 +13,8 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.window.ComposeUIViewController
+import com.dokar.sonner.Toaster
+import com.dokar.sonner.ToasterState
 import com.materialkolor.PaletteStyle
 import com.materialkolor.dynamicColorScheme
 import com.materialkolor.dynamiccolor.ColorSpec
@@ -69,6 +71,11 @@ fun MainViewController() = ComposeUIViewController {
         ) {
             App(
                 onShareClick = {}
+            )
+
+            Toaster(
+                state = koinInject<ToasterState>(),
+                richColors = true
             )
         }
     }

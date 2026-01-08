@@ -1,5 +1,7 @@
 package com.programmersbox.common.backup
 
+import com.dokar.sonner.ToastType
+import com.dokar.sonner.ToasterState
 import io.github.vinceglb.filekit.PlatformFile
 import io.github.vinceglb.filekit.path
 import kotlinx.cinterop.BetaInteropApi
@@ -19,7 +21,6 @@ import kotlinx.coroutines.withContext
 import okio.FileSystem
 import okio.Path
 import okio.Path.Companion.toPath
-import okio.buffer
 import okio.openZip
 import okio.use
 import platform.Foundation.NSError
@@ -149,48 +150,51 @@ actual class Zipper {
         platformFile: PlatformFile,
         onInfo: suspend (fileName: String, jsonString: String) -> Unit
     ) {
-        withContext(Dispatchers.IO) {
-            val zipPath = platformFile.path.toPath()
+        //TODO: Doesn't work only with the zip from ios
+        withContext(Dispatchers.Default) {
+            // 1. Convert platform path to Okio Path
+            // Assuming 'platformFile.path' returns the absolute string path
+            val zipPath = platformFile.path
+                .removePrefix("file://")
+                .toPath()
 
-            // Safety check: Ensure zip exists
-            if (!FileSystem.SYSTEM.exists(zipPath)) {
-                println("❌ Zip file not found: $zipPath")
-                return@withContext
-            }
-
+            // 2. Open the Zip as a virtual FileSystem
+            // 'use' automatically closes the zip when done
             FileSystem.SYSTEM.openZip(zipPath).use { zipFileSystem ->
 
-                // 1. Get all files
-                val paths = zipFileSystem.listRecursively("/".toPath())
-                    .filter { path ->
-                        val metadata = zipFileSystem.metadata(path)
-                        val name = path.name
+                // 3. List all files inside the zip
+                // listRecursively returns a sequence of paths inside the zip
+                val allPaths = zipFileSystem.listRecursively("/".toPath())
 
-                        // 🛡️ SECURITY & STABILITY FILTER 🛡️
-                        metadata.isRegularFile &&       // Must be a file
-                                !name.startsWith(".") &&        // Ignore .DS_Store, .gitignore
-                                !name.startsWith("__MACOSX") // Ignore Mac metadata folders
-                    }
-                    .toList()
+                for (entryPath in allPaths) {
+                    // 4. Check if it is a file and ends with .json
+                    val metadata = zipFileSystem.metadata(entryPath)
+                    val name = entryPath.name
+                    // 🛡️ GUARD: Ignore macOS ghost files and metadata folders
+                    val isGhostFile = name.startsWith("._")
+                    val isMacOsDir = entryPath.toString().contains("__MACOSX")
+                    val isJson = name.endsWith(".json", ignoreCase = true)
 
-                paths.forEach { zipFilePath ->
-                    zipFileSystem.source(zipFilePath).buffer().use { source ->
-                        runCatching {
-                            // 2. Read safely
-                            val content = source.readUtf8()
+                    if (
+                        metadata.isRegularFile &&
+                        isJson && !isGhostFile && !isMacOsDir
+                    ) {
 
-                            // 3. Pass to callback (ensure this doesn't block if onInfo touches UI)
-                            val duration = measureTime {
-                                onInfo(
-                                    zipFilePath.name.split("/").last(),
-                                    content
-                                )
-                            }
-                            println("Unzipped ${zipFilePath.name} in $duration")
-                        }.onFailure {
-                            println("❌ Failed to process ${zipFilePath.name}: ${it.message}")
-                            it.printStackTrace()
+                        // 5. Read the content directly from the zip stream
+                        val jsonString = zipFileSystem.read(entryPath) {
+                            readUtf8()
                         }
+
+                        // 6. Pass data back (still on background thread)
+                        val duration = measureTime {
+                            onInfo(
+                                entryPath.name
+                                    .split("/")
+                                    .last(),
+                                jsonString
+                            )
+                        }
+                        println("Unzipped ${entryPath.name} in $duration")
                     }
                 }
             }
@@ -198,7 +202,9 @@ actual class Zipper {
     }
 }
 
-actual class BackupRestoreHandler {
+actual class BackupRestoreHandler(
+    private val toasterState: ToasterState,
+) {
     private val scope = CoroutineScope(Dispatchers.IO + Job())
 
     actual fun restore(
@@ -221,6 +227,10 @@ actual class BackupRestoreHandler {
                 )
             }
             println("Restored in $duration")
+            toasterState.show(
+                "Restore Complete in $duration",
+                type = ToastType.Success
+            )
         }
     }
 }

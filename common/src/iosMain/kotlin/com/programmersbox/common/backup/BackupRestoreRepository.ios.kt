@@ -6,19 +6,26 @@ import com.oldguy.common.io.ZipEntry
 import com.oldguy.common.io.ZipFile
 import io.github.vinceglb.filekit.PlatformFile
 import io.github.vinceglb.filekit.absolutePath
+import io.github.vinceglb.filekit.path
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.IO
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import okio.FileSystem
+import okio.Path.Companion.toPath
+import okio.buffer
+import okio.openZip
+import okio.use
 import kotlin.time.measureTime
 
-//TODO: Need to get working
 actual class Zipper {
     actual suspend fun zip(
         platformFile: PlatformFile,
         itemsToZip: Map<String, String>
     ) {
+        //TODO: Need to get working
         ZipFile(
             File(platformFile.absolutePath()),
             FileMode.Write,
@@ -39,22 +46,23 @@ actual class Zipper {
         platformFile: PlatformFile,
         onInfo: suspend (fileName: String, jsonString: String) -> Unit
     ) {
-        ZipFile(
-            File(platformFile.absolutePath()),
-            FileMode.Read,
-            zip64 = true
-        ).use { zipFile ->
-            zipFile.entries.forEach { entry ->
-                zipFile.readEntry(entry) { d, data, _, _ ->
+        withContext(Dispatchers.IO) {
+            val zipFileSystem = FileSystem.SYSTEM.openZip(platformFile.path.toPath())
+            val paths = zipFileSystem.listRecursively("/".toPath())
+                .filter { zipFileSystem.metadata(it).isRegularFile }
+                .toList()
+
+            paths.forEach { zipFilePath ->
+                zipFileSystem.source(zipFilePath).buffer().use { source ->
                     val duration = measureTime {
                         runCatching {
                             onInfo(
-                                d.name,
-                                data.decodeToString()
+                                zipFilePath.toString().removePrefix("/"),
+                                source.readUtf8()
                             )
-                        }
+                        }.onFailure { it.printStackTrace() }
                     }
-                    println("Unzipped ${d.name} in $duration")
+                    println("Unzipped $zipFilePath in $duration")
                 }
             }
         }

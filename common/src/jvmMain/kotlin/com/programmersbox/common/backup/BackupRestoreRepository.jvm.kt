@@ -51,7 +51,8 @@ actual class Zipper {
                         val duration = measureTime {
                             runCatching {
                                 onInfo(
-                                    entry.name,
+                                    //Have to do the split because of how iOS zips files
+                                    entry.name.split("/").last(),
                                     zipIs.bufferedReader().readText()
                                 )
                             }

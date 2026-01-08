@@ -150,22 +150,48 @@ actual class Zipper {
         onInfo: suspend (fileName: String, jsonString: String) -> Unit
     ) {
         withContext(Dispatchers.IO) {
-            val zipFileSystem = FileSystem.SYSTEM.openZip(platformFile.path.toPath())
-            val paths = zipFileSystem.listRecursively("/".toPath())
-                .filter { zipFileSystem.metadata(it).isRegularFile }
-                .toList()
+            val zipPath = platformFile.path.toPath()
 
-            paths.forEach { zipFilePath ->
-                zipFileSystem.source(zipFilePath).buffer().use { source ->
-                    val duration = measureTime {
-                        runCatching {
-                            onInfo(
-                                zipFilePath.name,
-                                source.readUtf8()
-                            )
-                        }.onFailure { it.printStackTrace() }
+            // Safety check: Ensure zip exists
+            if (!FileSystem.SYSTEM.exists(zipPath)) {
+                println("❌ Zip file not found: $zipPath")
+                return@withContext
+            }
+
+            FileSystem.SYSTEM.openZip(zipPath).use { zipFileSystem ->
+
+                // 1. Get all files
+                val paths = zipFileSystem.listRecursively("/".toPath())
+                    .filter { path ->
+                        val metadata = zipFileSystem.metadata(path)
+                        val name = path.name
+
+                        // 🛡️ SECURITY & STABILITY FILTER 🛡️
+                        metadata.isRegularFile &&       // Must be a file
+                                !name.startsWith(".") &&        // Ignore .DS_Store, .gitignore
+                                !name.startsWith("__MACOSX") // Ignore Mac metadata folders
                     }
-                    println("Unzipped $zipFilePath in $duration")
+                    .toList()
+
+                paths.forEach { zipFilePath ->
+                    zipFileSystem.source(zipFilePath).buffer().use { source ->
+                        runCatching {
+                            // 2. Read safely
+                            val content = source.readUtf8()
+
+                            // 3. Pass to callback (ensure this doesn't block if onInfo touches UI)
+                            val duration = measureTime {
+                                onInfo(
+                                    zipFilePath.name.split("/").last(),
+                                    content
+                                )
+                            }
+                            println("Unzipped ${zipFilePath.name} in $duration")
+                        }.onFailure {
+                            println("❌ Failed to process ${zipFilePath.name}: ${it.message}")
+                            it.printStackTrace()
+                        }
+                    }
                 }
             }
         }

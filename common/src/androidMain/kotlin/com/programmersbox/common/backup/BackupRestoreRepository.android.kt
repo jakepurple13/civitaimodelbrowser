@@ -26,17 +26,23 @@ actual class Zipper(
         itemsToZip: Map<String, String>
     ) {
         val f = platformFile.toAndroidUri(context.applicationContext.packageName + ".fileprovider")
+
         withContext(Dispatchers.IO) {
-            val pfd = context
-                .contentResolver
-                .openFileDescriptor(f, "w")!!
-            ZipOutputStream(FileOutputStream(pfd.fileDescriptor)).use { zip ->
-                itemsToZip.forEach { (name, handler) ->
-                    val duration = measureTime {
-                        zip.putNextEntry(ZipEntry(name))
-                        runCatching { zip.write(handler.toByteArray()) }
+            // 1. Open the PFD in a 'use' block so it ALWAYS closes correctly
+            context.contentResolver.openFileDescriptor(f, "wt")?.use { pfd ->
+                // 2. Create the streams
+                ZipOutputStream(FileOutputStream(pfd.fileDescriptor)).use { zip ->
+                    itemsToZip.forEach { (name, handler) ->
+                        val duration = measureTime {
+                            zip.putNextEntry(ZipEntry(name))
+                            // Note: runCatching here might hide errors that should fail the whole zip
+                            zip.write(handler.toByteArray())
+                            zip.closeEntry()
+                        }
+                        logToFirebase("Zipped $name in $duration")
                     }
-                    logToFirebase("Zipped $name in $duration")
+                    // 3. Ensure zip finishes writing its footer/central directory
+                    zip.finish()
                 }
             }
         }

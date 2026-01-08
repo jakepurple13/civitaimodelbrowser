@@ -102,10 +102,10 @@ import com.programmersbox.common.isScrollingUp
 import com.programmersbox.common.paging.itemKeyIndexed
 import com.programmersbox.common.showRefreshButton
 import dev.chrisbanes.haze.HazeProgressive
-import dev.chrisbanes.haze.HazeState
 import dev.chrisbanes.haze.LocalHazeStyle
 import dev.chrisbanes.haze.hazeEffect
 import dev.chrisbanes.haze.hazeSource
+import dev.chrisbanes.haze.rememberHazeState
 import kotlinx.coroutines.launch
 import org.koin.compose.koinInject
 import org.koin.compose.viewmodel.koinViewModel
@@ -124,7 +124,6 @@ fun CivitAiScreen(
 ) {
     val connectionRepository = koinInject<NetworkConnectionRepository>()
     val shouldShowMedia by remember { derivedStateOf { connectionRepository.shouldShowMedia } }
-    val hazeState = remember { HazeState() }
     val db = koinInject<FavoritesDao>()
     val dataStore = koinInject<DataStore>()
     val database by db
@@ -140,6 +139,7 @@ fun CivitAiScreen(
     val blurStrength by dataStore.hideNsfwStrength()
     val lazyPagingItems = viewModel.pager.collectAsLazyPagingItems()
 
+    val hazeState = rememberHazeState(showBlur)
     val scope = rememberCoroutineScope()
     val lazyGridState = rememberLazyGridState()
     val pullToRefreshState = rememberPullToRefreshState()
@@ -159,7 +159,7 @@ fun CivitAiScreen(
                 sort = viewModel.sort,
                 onSortChange = { viewModel.sort = it },
                 onRefresh = lazyPagingItems::refresh,
-                modifier = Modifier.hazeEffect(hazeState) {
+                modifier = Modifier.hazeEffect(hazeState, hazeStyle) {
                     progressive = if (useProgressive)
                         HazeProgressive.verticalGradient(
                             startIntensity = 1f,
@@ -168,8 +168,6 @@ fun CivitAiScreen(
                         )
                     else
                         null
-                    blurEnabled = showBlur
-                    style = hazeStyle
                 }
             )
         },
@@ -177,7 +175,7 @@ fun CivitAiScreen(
             CivitBottomBar(
                 showBlur = showBlur,
                 bottomBarScrollBehavior = bottomBarScrollBehavior,
-                modifier = Modifier.hazeEffect(hazeState) {
+                modifier = Modifier.hazeEffect(hazeState, hazeStyle) {
                     progressive = if (useProgressive)
                         HazeProgressive.verticalGradient(
                             startIntensity = 0f,
@@ -186,8 +184,6 @@ fun CivitAiScreen(
                         )
                     else
                         null
-                    blurEnabled = showBlur
-                    style = hazeStyle
                 }
             )
         },

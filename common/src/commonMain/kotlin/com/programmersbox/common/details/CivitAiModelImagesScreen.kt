@@ -61,10 +61,10 @@ import com.programmersbox.common.components.LoadingImage
 import com.programmersbox.common.db.FavoritesDao
 import com.programmersbox.common.home.BlacklistHandling
 import dev.chrisbanes.haze.HazeProgressive
-import dev.chrisbanes.haze.HazeState
 import dev.chrisbanes.haze.LocalHazeStyle
 import dev.chrisbanes.haze.hazeEffect
 import dev.chrisbanes.haze.hazeSource
+import dev.chrisbanes.haze.rememberHazeState
 import org.koin.compose.koinInject
 import org.koin.compose.viewmodel.koinViewModel
 
@@ -76,7 +76,6 @@ fun CivitAiModelImagesScreen(
 ) {
     val connectionRepository = koinInject<NetworkConnectionRepository>()
     val shouldShowMedia by remember { derivedStateOf { connectionRepository.shouldShowMedia } }
-    val hazeState = remember { HazeState() }
     val database = koinInject<FavoritesDao>()
     val dataStore = koinInject<DataStore>()
     val showNsfw by dataStore.showNsfw()
@@ -86,6 +85,7 @@ fun CivitAiModelImagesScreen(
     val uriHandler = LocalUriHandler.current
     val lazyPagingItems = viewModel.pager.collectAsLazyPagingItems()
 
+    val hazeState = rememberHazeState(showBlur)
     val hazeStyle = LocalHazeStyle.current
 
     val favoriteList by viewModel
@@ -145,7 +145,7 @@ fun CivitAiModelImagesScreen(
                 actions = { Text("(${lazyPagingItems.itemCount})") },
                 colors = if (showBlur) TopAppBarDefaults.topAppBarColors(containerColor = Color.Transparent)
                 else TopAppBarDefaults.topAppBarColors(),
-                modifier = Modifier.hazeEffect(hazeState) {
+                modifier = Modifier.hazeEffect(hazeState, hazeStyle) {
                     progressive = if (useProgressive)
                         HazeProgressive.verticalGradient(
                             startIntensity = 1f,
@@ -154,8 +154,6 @@ fun CivitAiModelImagesScreen(
                         )
                     else
                         null
-                    blurEnabled = showBlur
-                    style = hazeStyle
                 }
             )
         },

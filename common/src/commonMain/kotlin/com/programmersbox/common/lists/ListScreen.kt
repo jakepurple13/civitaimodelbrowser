@@ -64,10 +64,10 @@ import com.programmersbox.common.components.rememberBiometricOpening
 import com.programmersbox.common.db.CustomList
 import com.programmersbox.common.db.toImageHash
 import dev.chrisbanes.haze.HazeProgressive
-import dev.chrisbanes.haze.HazeState
 import dev.chrisbanes.haze.LocalHazeStyle
 import dev.chrisbanes.haze.hazeEffect
 import dev.chrisbanes.haze.hazeSource
+import dev.chrisbanes.haze.rememberHazeState
 import kotlinx.coroutines.launch
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.LocalDateTime
@@ -100,7 +100,7 @@ fun ListScreen(
     val blurStrength by dataStore.hideNsfwStrength()
 
     val scope = rememberCoroutineScope()
-    val hazeState = remember { HazeState() }
+    val hazeState = rememberHazeState(showBlur)
     val hazeStyle = LocalHazeStyle.current
 
     val bottomBarScrollBehavior = BottomAppBarDefaults.exitAlwaysScrollBehavior()
@@ -162,7 +162,6 @@ fun ListScreen(
                         )
                     else
                         null
-                    blurEnabled = showBlur
                 }
             )
         },
@@ -179,7 +178,6 @@ fun ListScreen(
                         )
                     else
                         null
-                    blurEnabled = showBlur
                     style = hazeStyle
                 }
             )

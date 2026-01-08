@@ -99,10 +99,10 @@ import com.programmersbox.common.isScrollingUp
 import com.programmersbox.common.qrcode.QrCodeType
 import com.programmersbox.common.qrcode.ShareViaQrCode
 import dev.chrisbanes.haze.HazeProgressive
-import dev.chrisbanes.haze.HazeState
 import dev.chrisbanes.haze.LocalHazeStyle
 import dev.chrisbanes.haze.hazeEffect
 import dev.chrisbanes.haze.hazeSource
+import dev.chrisbanes.haze.rememberHazeState
 import kotlinx.coroutines.launch
 import org.koin.compose.koinInject
 import org.koin.compose.viewmodel.koinViewModel
@@ -123,7 +123,6 @@ fun FavoritesUI(
 ) {
     val connectionRepository = koinInject<NetworkConnectionRepository>()
     val shouldShowMedia by remember { derivedStateOf { connectionRepository.shouldShowMedia } }
-    val hazeState = remember { HazeState() }
     val dataStore = koinInject<DataStore>()
     val scope = rememberCoroutineScope()
     val showNsfw by dataStore.showNsfw()
@@ -135,6 +134,7 @@ fun FavoritesUI(
 
     var showSortedByDialog by remember { mutableStateOf(false) }
 
+    val hazeState = rememberHazeState(showBlur)
     val hazeStyle = LocalHazeStyle.current
 
     val typeList by viewModel
@@ -202,7 +202,6 @@ fun FavoritesUI(
                             )
                         else
                             null
-                        blurEnabled = showBlur
                     }
                 ) {
                     val appBarWithSearchColors = SearchBarDefaults.appBarWithSearchColors(
@@ -329,7 +328,7 @@ fun FavoritesUI(
             CivitBottomBar(
                 showBlur = showBlur,
                 bottomBarScrollBehavior = bottomBarScrollBehavior,
-                modifier = Modifier.hazeEffect(hazeState) {
+                modifier = Modifier.hazeEffect(hazeState, hazeStyle) {
                     progressive = if (useProgressive)
                         HazeProgressive.verticalGradient(
                             startIntensity = 0f,
@@ -338,8 +337,6 @@ fun FavoritesUI(
                         )
                     else
                         null
-                    style = hazeStyle
-                    blurEnabled = showBlur
                 }
             )
         },

@@ -61,10 +61,10 @@ import com.programmersbox.common.db.FavoritesDao
 import com.programmersbox.common.home.BlacklistHandling
 import com.programmersbox.common.paging.itemKeyIndexed
 import dev.chrisbanes.haze.HazeProgressive
-import dev.chrisbanes.haze.HazeState
 import dev.chrisbanes.haze.LocalHazeStyle
 import dev.chrisbanes.haze.hazeEffect
 import dev.chrisbanes.haze.hazeSource
+import dev.chrisbanes.haze.rememberHazeState
 import org.koin.compose.koinInject
 import org.koin.compose.viewmodel.koinViewModel
 
@@ -76,7 +76,6 @@ fun CivitAiImagesScreen(
 ) {
     val connectionRepository = koinInject<NetworkConnectionRepository>()
     val shouldShowMedia by remember { derivedStateOf { connectionRepository.shouldShowMedia } }
-    val hazeState = remember { HazeState() }
     val database = koinInject<FavoritesDao>()
     val dataStore = koinInject<DataStore>()
     val showNsfw by dataStore.showNsfw()
@@ -84,6 +83,7 @@ fun CivitAiImagesScreen(
     val showBlur by dataStore.rememberShowBlur()
     val useProgressive by dataStore.rememberUseProgressive()
     val uriHandler = LocalUriHandler.current
+    val hazeState = rememberHazeState(showBlur)
     val hazeStyle = LocalHazeStyle.current
     val lazyPagingItems = viewModel
         .pager
@@ -179,7 +179,6 @@ fun CivitAiImagesScreen(
                         )
                     else
                         null
-                    blurEnabled = showBlur
                     style = hazeStyle
                 }
             )

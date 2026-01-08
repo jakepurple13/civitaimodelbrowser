@@ -63,10 +63,10 @@ import com.programmersbox.common.adaptiveGridCell
 import com.programmersbox.common.db.FavoritesDao
 import com.programmersbox.common.db.SearchHistoryItem
 import dev.chrisbanes.haze.HazeProgressive
-import dev.chrisbanes.haze.HazeState
 import dev.chrisbanes.haze.LocalHazeStyle
 import dev.chrisbanes.haze.hazeEffect
 import dev.chrisbanes.haze.hazeSource
+import dev.chrisbanes.haze.rememberHazeState
 import kotlinx.collections.immutable.PersistentList
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.coroutines.launch
@@ -83,7 +83,6 @@ fun SearchScreen(
     val lazyPagingItems = viewModel.pager.collectAsLazyPagingItems()
     val connectionRepository = koinInject<NetworkConnectionRepository>()
     val shouldShowMedia by remember { derivedStateOf { connectionRepository.shouldShowMedia } }
-    val hazeState = remember { HazeState() }
     val db = koinInject<FavoritesDao>()
     val dataStore = koinInject<DataStore>()
     val database by db
@@ -94,6 +93,7 @@ fun SearchScreen(
         .getBlacklisted()
         .collectAsStateWithLifecycle(emptyList())
     val showBlur by dataStore.rememberShowBlur()
+    val hazeState = rememberHazeState(showBlur)
     val useProgressive by dataStore.rememberUseProgressive()
     val showNsfw by dataStore.showNsfw()
     val blurStrength by dataStore.hideNsfwStrength()
@@ -121,7 +121,6 @@ fun SearchScreen(
                         )
                     else
                         null
-                    blurEnabled = showBlur
                     style = hazeStyle
                 }
             )

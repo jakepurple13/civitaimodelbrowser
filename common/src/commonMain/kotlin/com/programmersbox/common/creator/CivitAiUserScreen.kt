@@ -58,10 +58,10 @@ import com.programmersbox.common.home.modelItems
 import com.programmersbox.common.qrcode.QrCodeType
 import com.programmersbox.common.qrcode.ShareViaQrCode
 import dev.chrisbanes.haze.HazeProgressive
-import dev.chrisbanes.haze.HazeState
 import dev.chrisbanes.haze.LocalHazeStyle
 import dev.chrisbanes.haze.hazeEffect
 import dev.chrisbanes.haze.hazeSource
+import dev.chrisbanes.haze.rememberHazeState
 import kotlinx.coroutines.launch
 import org.koin.compose.koinInject
 import org.koin.compose.viewmodel.koinViewModel
@@ -75,7 +75,6 @@ fun CivitAiUserScreen(
 ) {
     val connectionRepository = koinInject<NetworkConnectionRepository>()
     val shouldShowMedia by remember { derivedStateOf { connectionRepository.shouldShowMedia } }
-    val hazeState = remember { HazeState() }
     val dataStore = koinInject<DataStore>()
     val showNsfw by dataStore.showNsfw()
     val blurStrength by dataStore.hideNsfwStrength()
@@ -91,6 +90,7 @@ fun CivitAiUserScreen(
         .getFavoritesByType(FavoriteType.Creator, username)
         .collectAsStateWithLifecycle(false)
 
+    val hazeState = rememberHazeState(showBlur)
     val hazeStyle = LocalHazeStyle.current
 
     var showQrCode by remember { mutableStateOf(false) }
@@ -220,7 +220,6 @@ fun CivitAiUserScreen(
                         )
                     else
                         null
-                    blurEnabled = showBlur
                 }
             )
         },

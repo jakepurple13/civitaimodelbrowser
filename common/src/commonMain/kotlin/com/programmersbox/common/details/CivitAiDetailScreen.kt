@@ -111,6 +111,7 @@ import dev.chrisbanes.haze.HazeStyle
 import dev.chrisbanes.haze.LocalHazeStyle
 import dev.chrisbanes.haze.hazeEffect
 import dev.chrisbanes.haze.hazeSource
+import dev.chrisbanes.haze.rememberHazeState
 import kotlinx.coroutines.launch
 import org.koin.compose.koinInject
 import org.koin.compose.viewmodel.koinViewModel
@@ -128,7 +129,6 @@ fun CivitAiDetailScreen(
 ) {
     val connectionRepository = koinInject<NetworkConnectionRepository>()
     val shouldShowMedia by remember { derivedStateOf { connectionRepository.shouldShowMedia } }
-    val hazeState = remember { HazeState() }
     val dao = koinInject<FavoritesDao>()
     val dataStore = koinInject<DataStore>()
     val showBlur by dataStore.rememberShowBlur()
@@ -139,6 +139,7 @@ fun CivitAiDetailScreen(
 
     val blacklisted by dao.getBlacklisted().collectAsStateWithLifecycle(emptyList())
 
+    val hazeState = rememberHazeState(showBlur)
     val hazeStyle = LocalHazeStyle.current
 
     when (val model = viewModel.models) {
@@ -263,7 +264,6 @@ fun CivitAiDetailScreen(
                                 )
                             else
                                 null
-                            blurEnabled = showBlur
                         }
                     )
                 },
@@ -825,7 +825,6 @@ private fun BottomBarContent(
                 )
             else
                 null
-            blurEnabled = showBlur
         }
     )
 }

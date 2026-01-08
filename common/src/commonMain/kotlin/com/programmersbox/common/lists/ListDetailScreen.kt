@@ -100,10 +100,10 @@ import com.programmersbox.common.db.FavoriteType
 import com.programmersbox.common.db.ListDao
 import com.programmersbox.common.db.toImageHash
 import dev.chrisbanes.haze.HazeProgressive
-import dev.chrisbanes.haze.HazeState
 import dev.chrisbanes.haze.LocalHazeStyle
 import dev.chrisbanes.haze.hazeEffect
 import dev.chrisbanes.haze.hazeSource
+import dev.chrisbanes.haze.rememberHazeState
 import kotlinx.coroutines.launch
 import org.koin.compose.koinInject
 import org.koin.compose.viewmodel.koinViewModel
@@ -123,7 +123,7 @@ fun ListDetailScreen(
     val blurStrength by dataStore.hideNsfwStrength()
 
     val useProgressive by dataStore.rememberUseProgressive()
-    val hazeState = remember { HazeState() }
+    val hazeState = rememberHazeState(showBlur)
     val hazeStyle = LocalHazeStyle.current
 
     val list = viewModel.customList
@@ -258,7 +258,6 @@ fun ListDetailScreen(
                         )
                     else
                         null
-                    blurEnabled = showBlur
                     style = hazeStyle
                 }
             )
@@ -644,9 +643,9 @@ fun ImageLoad(
     showNsfw: Boolean,
     blurStrength: Dp,
     shouldShowMedia: Boolean,
-    modifier: Modifier,
+    modifier: Modifier = Modifier,
 ) {
-    if (url?.endsWith("mp4") == true) {
+    if (url?.endsWith("mp4") == true && shouldShowMedia) {
         Box(
             contentAlignment = Alignment.Center,
             modifier = Modifier

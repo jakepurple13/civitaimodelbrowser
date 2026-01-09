@@ -14,7 +14,20 @@ import androidx.room.RoomDatabase
 import com.programmersbox.common.db.AppDatabase
 import com.programmersbox.common.db.BlacklistedItemRoom
 import com.programmersbox.common.presentation.backup.BackupRestoreHandler
+import com.programmersbox.common.presentation.components.ToastType
+import com.programmersbox.common.presentation.components.ToasterState
+import io.github.vinceglb.filekit.FileKit
+import io.github.vinceglb.filekit.dialogs.openFileSaver
+import io.github.vinceglb.filekit.write
+import io.ktor.client.call.body
+import io.ktor.client.plugins.onDownload
+import io.ktor.client.request.get
 import kotlinx.cinterop.ExperimentalForeignApi
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.IO
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.launch
 import org.koin.core.module.Module
 import org.koin.core.module.dsl.singleOf
 import org.koin.dsl.module
@@ -45,8 +58,47 @@ actual fun createPlatformModule(): Module = module {
     singleOf(::BackupRestoreHandler)
 }
 
-actual class DownloadHandler {
+actual class DownloadHandler(
+    private val network: Network,
+    private val toasterState: ToasterState
+) {
+    private val scope = CoroutineScope(Dispatchers.IO + Job())
+
     actual fun download(url: String, name: String) {
+        scope.launch {
+            runCatching {
+                FileKit.openFileSaver(
+                    suggestedName = name,
+                    extension = name.split(".").last(),
+                )?.write(
+                    network
+                        .client
+                        .get(url) {
+                            onDownload { bytesSentTotal, contentLength ->
+                                val percentage =
+                                    (bytesSentTotal.toDouble() / (contentLength ?: 1L) * 100)
+                                        .toInt()
+                                println("Downloaded $percentage% $bytesSentTotal of $contentLength")
+                            }
+                        }
+                        .body<ByteArray>()
+                )
+            }
+                .onSuccess {
+                    if (it != null)
+                        toasterState.show(
+                            message = "Download Complete",
+                            type = ToastType.Success
+                        )
+                }
+                .onFailure {
+                    toasterState.show(
+                        message = "Download Failed",
+                        type = ToastType.Error
+                    )
+                    it.printStackTrace()
+                }
+        }
     }
 }
 

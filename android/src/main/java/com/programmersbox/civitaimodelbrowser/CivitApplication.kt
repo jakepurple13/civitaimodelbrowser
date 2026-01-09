@@ -5,12 +5,12 @@ import android.util.Log
 import androidx.work.Configuration
 import com.programmersbox.common.ApplicationInfo
 import com.programmersbox.common.RestoreWorker
-import com.programmersbox.common.backup.ApplicationIcon
-import com.programmersbox.common.backup.Zipper
 import com.programmersbox.common.createPlatformModule
 import com.programmersbox.common.di.cmpModules
 import com.programmersbox.common.getDatabaseBuilder
-import com.programmersbox.common.qrcode.QrCodeRepository
+import com.programmersbox.common.presentation.backup.ApplicationIcon
+import com.programmersbox.common.presentation.backup.Zipper
+import com.programmersbox.common.presentation.qrcode.QrCodeRepository
 import org.koin.android.ext.koin.androidContext
 import org.koin.androidx.workmanager.dsl.workerOf
 import org.koin.androidx.workmanager.koin.workManagerFactory

@@ -1,0 +1,908 @@
+package com.programmersbox.common.presentation.components
+
+import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.FlowRow
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.lazy.layout.MutableIntervalList
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.CornerSize
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.PlaylistAdd
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Block
+import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.material.icons.filled.Image
+import androidx.compose.material.icons.filled.Person
+import androidx.compose.material.icons.filled.Preview
+import androidx.compose.material.icons.filled.Share
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.AssistChipDefaults
+import androidx.compose.material3.Card
+import androidx.compose.material3.ElevatedAssistChip
+import androidx.compose.material3.ElevatedCard
+import androidx.compose.material3.ElevatedFilterChip
+import androidx.compose.material3.ElevatedSuggestionChip
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
+import androidx.compose.material3.FilterChipDefaults
+import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.ListItem
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ModalBottomSheet
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.SuggestionChipDefaults
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
+import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.rememberModalBottomSheetState
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.saveable.rememberSaveableStateHolder
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Shape
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.programmersbox.common.CloseButton
+import com.programmersbox.common.ModelType
+import com.programmersbox.common.Models
+import com.programmersbox.common.db.BlacklistedItemRoom
+import com.programmersbox.common.db.CustomList
+import com.programmersbox.common.db.FavoriteType
+import com.programmersbox.common.db.FavoritesDao
+import com.programmersbox.common.db.ListDao
+import com.programmersbox.common.presentation.home.BlacklistHandling
+import com.programmersbox.common.presentation.qrcode.QrCodeType
+import com.programmersbox.common.presentation.qrcode.ShareViaQrCode
+import kotlinx.coroutines.launch
+import org.koin.compose.koinInject
+
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
+@Composable
+fun ModelOptionsSheet(
+    models: Models,
+    blacklisted: List<BlacklistedItemRoom>,
+    isBlacklisted: Boolean,
+    showSheet: Boolean,
+    onDialogDismiss: () -> Unit,
+    onNavigateToDetail: (String) -> Unit,
+    onNavigateToUser: ((String) -> Unit)? = null,
+    onNavigateToDetailImages: ((Long, String) -> Unit)? = null,
+) {
+    if (showSheet) {
+        val dao = koinInject<FavoritesDao>()
+        val isFavorite by dao
+            .getFavoritesByType(FavoriteType.Model, models.id)
+            .collectAsStateWithLifecycle(false)
+        val listDao = koinInject<ListDao>()
+        val scope = rememberCoroutineScope()
+        var showDialog by remember { mutableStateOf(false) }
+
+        val sheetState = rememberModalBottomSheetState(
+            skipPartiallyExpanded = true
+        )
+
+        BlacklistHandling(
+            blacklisted = blacklisted,
+            modelId = models.id,
+            name = models.name,
+            nsfw = models.nsfw,
+            showDialog = showDialog,
+            onDialogDismiss = {
+                showDialog = false
+                scope.launch { sheetState.hide() }
+                    .invokeOnCompletion { onDialogDismiss() }
+            }
+        )
+
+        val modelImage = remember(models) {
+            models
+                .modelVersions
+                .firstOrNull { it.images.isNotEmpty() }
+                ?.images
+                ?.firstOrNull { it.url.isNotEmpty() }
+        }
+
+        val modelOptionsScope = rememberModelOptionsScope {
+            item {
+                if (isBlacklisted) {
+                    Card(
+                        onClick = { showDialog = true },
+                        shape = it
+                    ) {
+                        ListItem(
+                            leadingContent = { Icon(Icons.Default.Block, null) },
+                            headlineContent = { Text("Unblacklist") }
+                        )
+                    }
+                } else {
+                    Card(
+                        onClick = { showDialog = true },
+                        shape = it
+                    ) {
+                        ListItem(
+                            leadingContent = { Icon(Icons.Default.Block, null) },
+                            headlineContent = { Text("Blacklist") }
+                        )
+                    }
+                }
+            }
+
+            item {
+                Card(
+                    onClick = {
+                        onNavigateToDetail(models.id.toString())
+                        scope.launch { sheetState.hide() }
+                            .invokeOnCompletion { onDialogDismiss() }
+                    },
+                    shape = it
+                ) {
+                    ListItem(
+                        leadingContent = { Icon(Icons.Default.Preview, null) },
+                        headlineContent = { Text("Open") }
+                    )
+                }
+            }
+
+            onNavigateToUser?.let { onNav ->
+                item {
+                    Card(
+                        onClick = {
+                            onNav(models.creator?.username.orEmpty())
+                            scope.launch { sheetState.hide() }
+                                .invokeOnCompletion { onDialogDismiss() }
+                        },
+                        shape = it
+                    ) {
+                        ListItem(
+                            leadingContent = {
+                                models
+                                    .creator
+                                    ?.image
+                                    ?.let { image ->
+                                        LoadingImage(
+                                            image,
+                                            contentScale = ContentScale.FillBounds,
+                                            modifier = Modifier
+                                                .size(24.dp)
+                                                .clip(CircleShape)
+                                        )
+                                    }
+                                    ?: Icon(Icons.Default.Person, null)
+                            },
+                            headlineContent = {
+                                Text("View ${models.creator?.username ?: "Creator"}'s models")
+                            }
+                        )
+                    }
+                }
+            }
+
+            onNavigateToDetailImages?.let { onNav ->
+                item {
+                    Card(
+                        onClick = {
+                            onNav(models.id, models.name)
+                            scope.launch { sheetState.hide() }
+                                .invokeOnCompletion { onDialogDismiss() }
+                        },
+                        shape = it
+                    ) {
+                        ListItem(
+                            leadingContent = { Icon(Icons.Default.Image, null) },
+                            headlineContent = { Text("Open Images") }
+                        )
+                    }
+                }
+            }
+
+            item {
+                var showQrCode by remember { mutableStateOf(false) }
+
+                if (showQrCode) {
+                    ShareViaQrCode(
+                        title = models.name,
+                        url = "https://civitai.com/models/${models.id}",
+                        qrCodeType = QrCodeType.Model,
+                        id = models.id.toString(),
+                        username = models.creator?.username,
+                        imageUrl = modelImage?.url.orEmpty(),
+                        onClose = { showQrCode = false }
+                    )
+                }
+                Card(
+                    onClick = { showQrCode = true },
+                    shape = it
+                ) {
+                    ListItem(
+                        leadingContent = { Icon(Icons.Default.Share, null) },
+                        headlineContent = { Text("Share") }
+                    )
+                }
+            }
+
+            item {
+                if (isFavorite) {
+                    Card(
+                        onClick = {
+                            scope.launch {
+                                dao.removeModel(models.id)
+                                sheetState.hide()
+                            }.invokeOnCompletion { onDialogDismiss() }
+                        },
+                        shape = it
+                    ) {
+                        ListItem(
+                            leadingContent = { Icon(Icons.Default.Favorite, null) },
+                            headlineContent = { Text("Unfavorite Model") }
+                        )
+                    }
+                } else {
+                    Card(
+                        onClick = {
+                            scope.launch {
+                                dao.addFavorite(
+                                    id = models.id,
+                                    name = models.name,
+                                    description = models.description,
+                                    type = models.type,
+                                    nsfw = models.nsfw,
+                                    imageUrl = modelImage?.url,
+                                    favoriteType = FavoriteType.Model,
+                                    modelId = models.id,
+                                    hash = modelImage?.hash,
+                                    creatorName = models.creator?.username,
+                                    creatorImage = models.creator?.image,
+                                )
+                                sheetState.hide()
+                            }.invokeOnCompletion { onDialogDismiss() }
+                        },
+                        shape = it
+                    ) {
+                        ListItem(
+                            leadingContent = { Icon(Icons.Default.Favorite, null) },
+                            headlineContent = { Text("Favorite Model") }
+                        )
+                    }
+                }
+            }
+
+            item {
+                var showLists by remember { mutableStateOf(false) }
+                val listState = rememberModalBottomSheetState(true)
+
+                if (showLists) {
+                    ModalBottomSheet(
+                        onDismissRequest = { showLists = false },
+                        containerColor = MaterialTheme.colorScheme.surface,
+                        sheetState = listState
+                    ) {
+                        val toaster = koinInject<ToasterState>()
+                        ListChoiceScreen(
+                            id = models.id,
+                            onClick = { item ->
+                                scope.launch {
+                                    listDao.addToList(
+                                        uuid = item.item.uuid,
+                                        id = models.id,
+                                        name = models.name,
+                                        description = models.description,
+                                        type = models.type.name,
+                                        nsfw = models.nsfw,
+                                        imageUrl = modelImage?.url,
+                                        favoriteType = FavoriteType.Model,
+                                        hash = modelImage?.hash,
+                                        creatorName = models.creator?.username,
+                                        creatorImage = models.creator?.image,
+                                    )
+                                    toaster.show(
+                                        "Added to ${item.item.name}",
+                                        type = ToastType.Success
+                                    )
+                                    listState.hide()
+                                }.invokeOnCompletion { showLists = false }
+                            },
+                            navigationIcon = {
+                                IconButton(
+                                    onClick = { showLists = false }
+                                ) { Icon(Icons.Default.Close, null) }
+                            },
+                        )
+                    }
+                }
+
+                Card(
+                    onClick = { showLists = true },
+                    shape = it
+                ) {
+                    ListItem(
+                        leadingContent = { Icon(Icons.AutoMirrored.Filled.PlaylistAdd, null) },
+                        headlineContent = { Text("Add to List") }
+                    )
+                }
+            }
+        }
+
+        ModalBottomSheet(
+            onDismissRequest = onDialogDismiss,
+            sheetState = sheetState,
+            containerColor = MaterialTheme.colorScheme.surface,
+        ) {
+            Column(
+                modifier = Modifier.verticalScroll(rememberScrollState())
+            ) {
+                TopAppBar(
+                    title = { Text(models.name) },
+                    subtitle = {
+                        models
+                            .creator
+                            ?.username
+                            ?.let { Text("Made by $it") }
+                    }
+                )
+
+                FlowRow(
+                    itemVerticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(4.dp),
+                    modifier = Modifier.padding(8.dp)
+                ) {
+                    ElevatedSuggestionChip(
+                        label = { Text(models.type.name) },
+                        onClick = {},
+                        colors = SuggestionChipDefaults.elevatedSuggestionChipColors(
+                            disabledLabelColor = MaterialTheme.colorScheme.onSurface,
+                            disabledContainerColor = MaterialTheme.colorScheme.surfaceContainerLow
+                        ),
+                        border = BorderStroke(
+                            1.dp,
+                            MaterialTheme.colorScheme.onSurface
+                        ),
+                        enabled = false,
+                    )
+
+                    if (models.nsfw) {
+                        ElevatedAssistChip(
+                            label = { Text("NSFW") },
+                            onClick = {},
+                            colors = AssistChipDefaults.elevatedAssistChipColors(
+                                disabledLabelColor = MaterialTheme.colorScheme.error,
+                                disabledContainerColor = MaterialTheme.colorScheme.surface
+                            ),
+                            enabled = false,
+                            border = BorderStroke(
+                                1.dp,
+                                MaterialTheme.colorScheme.error,
+                            ),
+                        )
+                    }
+
+                    models.tags.forEach { tag ->
+                        ElevatedFilterChip(
+                            label = { Text(tag) },
+                            onClick = {},
+                            colors = FilterChipDefaults.elevatedFilterChipColors(
+                                disabledLabelColor = MaterialTheme.colorScheme.onSurface,
+                                disabledContainerColor = MaterialTheme.colorScheme.surfaceContainerLow
+                            ),
+                            enabled = false,
+                            selected = true
+                        )
+                    }
+                }
+
+                HorizontalDivider()
+
+                val stateHolder = rememberSaveableStateHolder()
+
+                for (index in 0 until modelOptionsScope.size) {
+                    stateHolder.SaveableStateProvider(index) {
+                        modelOptionsScope[index](
+                            when (index) {
+                                0 -> MaterialTheme.shapes.medium.copy(
+                                    bottomStart = CornerSize(0.dp),
+                                    bottomEnd = CornerSize(0.dp)
+                                )
+
+                                modelOptionsScope.size - 1 -> MaterialTheme.shapes.medium.copy(
+                                    topStart = CornerSize(0.dp),
+                                    topEnd = CornerSize(0.dp)
+                                )
+
+                                else -> RoundedCornerShape(0.dp)
+                            }
+                        )
+                        if (index < modelOptionsScope.size - 1) {
+                            HorizontalDivider()
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
+@Composable
+fun ModelOptionsSheet(
+    id: Long,
+    imageUrl: String?,
+    hash: String?,
+    name: String?,
+    type: String?,
+    description: String?,
+    nsfw: Boolean,
+    creatorName: String?,
+    creatorImage: String?,
+    showSheet: Boolean,
+    onDialogDismiss: () -> Unit,
+    onNavigateToDetail: (String) -> Unit,
+    onNavigateToUser: ((String) -> Unit)? = null,
+) {
+    if (showSheet) {
+        val dao = koinInject<FavoritesDao>()
+        val isFavorite by dao
+            .getFavoritesByType(FavoriteType.Model, id)
+            .collectAsStateWithLifecycle(false)
+        val listDao = koinInject<ListDao>()
+        val scope = rememberCoroutineScope()
+
+        val sheetState = rememberModalBottomSheetState(
+            skipPartiallyExpanded = true
+        )
+
+        val modelOptionsScope = rememberModelOptionsScope {
+            item {
+                Card(
+                    onClick = {
+                        onNavigateToDetail(id.toString())
+                        scope.launch { sheetState.hide() }
+                            .invokeOnCompletion { onDialogDismiss() }
+                    },
+                    shape = it
+                ) {
+                    ListItem(
+                        leadingContent = { Icon(Icons.Default.Preview, null) },
+                        headlineContent = { Text("Open") }
+                    )
+                }
+            }
+
+            onNavigateToUser?.let { onNav ->
+                item {
+                    Card(
+                        onClick = {
+                            creatorName?.let { p1 -> onNav(p1) }
+                            scope.launch { sheetState.hide() }
+                                .invokeOnCompletion { onDialogDismiss() }
+                        },
+                        shape = it
+                    ) {
+                        ListItem(
+                            leadingContent = {
+                                creatorImage?.let { image ->
+                                    LoadingImage(
+                                        image,
+                                        contentScale = ContentScale.FillBounds,
+                                        modifier = Modifier
+                                            .size(24.dp)
+                                            .clip(CircleShape)
+                                    )
+                                }
+                                    ?: Icon(Icons.Default.Person, null)
+                            },
+                            headlineContent = {
+                                Text("View ${creatorName ?: "Creator"}'s models")
+                            }
+                        )
+                    }
+                }
+            }
+
+            item {
+                var showQrCode by remember { mutableStateOf(false) }
+
+                if (showQrCode) {
+                    ShareViaQrCode(
+                        title = name.orEmpty(),
+                        url = "https://civitai.com/models/$id",
+                        qrCodeType = QrCodeType.Model,
+                        id = id.toString(),
+                        username = "",
+                        imageUrl = imageUrl.orEmpty(),
+                        onClose = { showQrCode = false }
+                    )
+                }
+                Card(
+                    onClick = { showQrCode = true },
+                    shape = it
+                ) {
+                    ListItem(
+                        leadingContent = { Icon(Icons.Default.Share, null) },
+                        headlineContent = { Text("Share") }
+                    )
+                }
+            }
+
+            item {
+                if (isFavorite) {
+                    Card(
+                        onClick = {
+                            scope.launch {
+                                dao.removeModel(id)
+                                sheetState.hide()
+                            }.invokeOnCompletion { onDialogDismiss() }
+                        },
+                        shape = it
+                    ) {
+                        ListItem(
+                            leadingContent = { Icon(Icons.Default.Favorite, null) },
+                            headlineContent = { Text("Unfavorite Model") }
+                        )
+                    }
+                } else {
+                    Card(
+                        onClick = {
+                            scope.launch {
+                                dao.addFavorite(
+                                    id = id,
+                                    name = name.orEmpty(),
+                                    description = description,
+                                    type = runCatching { ModelType.valueOf(type!!) }
+                                        .getOrElse { ModelType.Other },
+                                    nsfw = nsfw,
+                                    imageUrl = imageUrl,
+                                    favoriteType = FavoriteType.Model,
+                                    modelId = id,
+                                    hash = hash,
+                                    creatorName = creatorName,
+                                    creatorImage = creatorImage
+                                )
+                                sheetState.hide()
+                            }.invokeOnCompletion { onDialogDismiss() }
+                        },
+                        shape = it
+                    ) {
+                        ListItem(
+                            leadingContent = { Icon(Icons.Default.Favorite, null) },
+                            headlineContent = { Text("Favorite Model") }
+                        )
+                    }
+                }
+            }
+
+            item {
+                var showLists by remember { mutableStateOf(false) }
+                val listState = rememberModalBottomSheetState(true)
+
+                if (showLists) {
+                    ModalBottomSheet(
+                        onDismissRequest = { showLists = false },
+                        containerColor = MaterialTheme.colorScheme.surface,
+                        sheetState = listState
+                    ) {
+                        val toaster = koinInject<ToasterState>()
+                        ListChoiceScreen(
+                            id = id,
+                            onClick = { item ->
+                                scope.launch {
+                                    listDao.addToList(
+                                        uuid = item.item.uuid,
+                                        id = id,
+                                        name = name.orEmpty(),
+                                        description = description,
+                                        type = type.orEmpty(),
+                                        nsfw = nsfw,
+                                        imageUrl = imageUrl,
+                                        favoriteType = FavoriteType.Model,
+                                        hash = hash,
+                                        creatorName = creatorName,
+                                        creatorImage = creatorImage,
+                                    )
+                                    toaster.show(
+                                        "Added to ${item.item.name}",
+                                        type = ToastType.Success
+                                    )
+                                    listState.hide()
+                                }.invokeOnCompletion { showLists = false }
+                            },
+                            navigationIcon = {
+                                IconButton(
+                                    onClick = { showLists = false }
+                                ) { Icon(Icons.Default.Close, null) }
+                            },
+                        )
+                    }
+                }
+
+                Card(
+                    onClick = { showLists = true },
+                    shape = it
+                ) {
+                    ListItem(
+                        leadingContent = { Icon(Icons.AutoMirrored.Filled.PlaylistAdd, null) },
+                        headlineContent = { Text("Add to List") }
+                    )
+                }
+            }
+        }
+
+        ModalBottomSheet(
+            onDismissRequest = onDialogDismiss,
+            sheetState = sheetState,
+            containerColor = MaterialTheme.colorScheme.surface,
+        ) {
+            Column(
+                modifier = Modifier.verticalScroll(rememberScrollState())
+            ) {
+                TopAppBar(
+                    title = { Text(name.orEmpty()) },
+                )
+
+                FlowRow(
+                    itemVerticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(4.dp),
+                    modifier = Modifier.padding(8.dp)
+                ) {
+                    ElevatedSuggestionChip(
+                        label = { Text(type.orEmpty()) },
+                        onClick = {},
+                        colors = SuggestionChipDefaults.elevatedSuggestionChipColors(
+                            disabledLabelColor = MaterialTheme.colorScheme.onSurface,
+                            disabledContainerColor = MaterialTheme.colorScheme.surfaceContainerLow
+                        ),
+                        border = BorderStroke(
+                            1.dp,
+                            MaterialTheme.colorScheme.onSurface
+                        ),
+                        enabled = false,
+                    )
+
+                    if (nsfw) {
+                        ElevatedAssistChip(
+                            label = { Text("NSFW") },
+                            onClick = {},
+                            colors = AssistChipDefaults.elevatedAssistChipColors(
+                                disabledLabelColor = MaterialTheme.colorScheme.error,
+                                disabledContainerColor = MaterialTheme.colorScheme.surface
+                            ),
+                            enabled = false,
+                            border = BorderStroke(
+                                1.dp,
+                                MaterialTheme.colorScheme.error,
+                            ),
+                        )
+                    }
+                }
+
+                HorizontalDivider()
+
+                val stateHolder = rememberSaveableStateHolder()
+
+                for (index in 0 until modelOptionsScope.size) {
+                    stateHolder.SaveableStateProvider(index) {
+                        modelOptionsScope[index](
+                            when (index) {
+                                0 -> MaterialTheme.shapes.medium.copy(
+                                    bottomStart = CornerSize(0.dp),
+                                    bottomEnd = CornerSize(0.dp)
+                                )
+
+                                modelOptionsScope.size - 1 -> MaterialTheme.shapes.medium.copy(
+                                    topStart = CornerSize(0.dp),
+                                    topEnd = CornerSize(0.dp)
+                                )
+
+                                else -> RoundedCornerShape(0.dp)
+                            }
+                        )
+                        if (index < modelOptionsScope.size - 1) {
+                            HorizontalDivider()
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun ListChoiceScreen(
+    id: Long,
+    navigationIcon: @Composable () -> Unit = { CloseButton() },
+    onClick: (CustomList) -> Unit,
+) {
+    val dao = koinInject<ListDao>()
+    val scope = rememberCoroutineScope()
+    val list by dao
+        .getAllLists()
+        .collectAsStateWithLifecycle(emptyList())
+    ListBottomScreen(
+        title = "Choose a list",
+        list = list,
+        navigationIcon = navigationIcon,
+        onClick = onClick,
+        lazyListContent = {
+            item {
+                var showAdd by remember { mutableStateOf(false) }
+                ElevatedCard(
+                    onClick = { showAdd = !showAdd }
+                ) {
+                    ListItem(
+                        headlineContent = {
+                            Text(
+                                "Create New List",
+                                style = MaterialTheme.typography.titleLarge
+                            )
+                        },
+                        trailingContent = { Icon(Icons.Default.Add, null) }
+                    )
+                }
+                if (showAdd) {
+                    var name by remember { mutableStateOf("") }
+                    AlertDialog(
+                        onDismissRequest = { showAdd = false },
+                        title = { Text("Create New List") },
+                        text = {
+                            OutlinedTextField(
+                                value = name,
+                                onValueChange = { name = it },
+                                label = { Text("List Name") },
+                                singleLine = true,
+                                modifier = Modifier.fillMaxWidth()
+                            )
+                        },
+                        confirmButton = {
+                            TextButton(
+                                onClick = {
+                                    scope.launch {
+                                        dao.create(name)
+                                        showAdd = false
+                                    }
+                                },
+                                enabled = name.isNotEmpty()
+                            ) { Text("Confirm") }
+                        },
+                        dismissButton = {
+                            TextButton(
+                                onClick = { showAdd = false }
+                            ) { Text("Cancel") }
+                        }
+                    )
+                }
+            }
+        },
+        itemContent = {
+            ListBottomSheetItemModel(
+                primaryText = it.item.name,
+                trailingText = "(${it.list.size})",
+                icon = it.list.find { l -> l.id == id }?.let { Icons.Default.Check }
+            )
+        }
+    )
+}
+
+@Composable
+fun ListChoiceScreen(
+    username: String,
+    navigationIcon: @Composable () -> Unit = { CloseButton() },
+    onClick: (CustomList) -> Unit,
+) {
+    val dao = koinInject<ListDao>()
+    val scope = rememberCoroutineScope()
+    val list by dao
+        .getAllLists()
+        .collectAsStateWithLifecycle(emptyList())
+    ListBottomScreen(
+        title = "Choose a list",
+        list = list,
+        navigationIcon = navigationIcon,
+        onClick = onClick,
+        lazyListContent = {
+            item {
+                var showAdd by remember { mutableStateOf(false) }
+                ElevatedCard(
+                    onClick = { showAdd = !showAdd }
+                ) {
+                    ListItem(
+                        headlineContent = {
+                            Text(
+                                "Create New List",
+                                style = MaterialTheme.typography.titleLarge
+                            )
+                        },
+                        trailingContent = { Icon(Icons.Default.Add, null) }
+                    )
+                }
+                if (showAdd) {
+                    val toaster = koinInject<ToasterState>()
+                    var name by remember { mutableStateOf("") }
+                    AlertDialog(
+                        onDismissRequest = { showAdd = false },
+                        title = { Text("Create New List") },
+                        text = {
+                            OutlinedTextField(
+                                value = name,
+                                onValueChange = { name = it },
+                                label = { Text("List Name") },
+                                singleLine = true,
+                                modifier = Modifier.fillMaxWidth()
+                            )
+                        },
+                        confirmButton = {
+                            TextButton(
+                                onClick = {
+                                    scope.launch {
+                                        dao.create(name)
+                                        toaster.show("List Created", type = ToastType.Success)
+                                        showAdd = false
+                                    }
+                                },
+                                enabled = name.isNotEmpty()
+                            ) { Text("Confirm") }
+                        },
+                        dismissButton = {
+                            TextButton(
+                                onClick = { showAdd = false }
+                            ) { Text("Cancel") }
+                        }
+                    )
+                }
+            }
+        },
+        itemContent = {
+            ListBottomSheetItemModel(
+                primaryText = it.item.name,
+                trailingText = "(${it.list.size})",
+                icon = it.list.find { l -> l.name == username }?.let { Icons.Default.Check }
+            )
+        }
+    )
+}
+
+interface ModelOptionsScope {
+    fun item(content: @Composable (Shape) -> Unit)
+
+    val size: Int
+
+    operator fun get(index: Int): @Composable (Shape) -> Unit
+}
+
+private class ModelOptionsScopeImpl(
+    content: ModelOptionsScope.() -> Unit = {},
+) : ModelOptionsScope {
+    val intervals: MutableIntervalList<@Composable (Shape) -> Unit> = MutableIntervalList()
+
+    override val size: Int get() = intervals.size
+
+    override fun get(index: Int): @Composable ((Shape) -> Unit) = intervals[index].value
+
+    init {
+        apply(content)
+    }
+
+    override fun item(content: @Composable (Shape) -> Unit) {
+        intervals.addInterval(1, content)
+    }
+}
+
+@Composable
+fun rememberModelOptionsScope(
+    content: ModelOptionsScope.() -> Unit = {},
+): ModelOptionsScope = remember { ModelOptionsScopeImpl(content) }

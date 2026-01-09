@@ -1,7 +1,7 @@
 package com.programmersbox.common.di
 
 import com.programmersbox.common.NetworkConnectionRepository
-import com.programmersbox.common.backup.BackupRepository
+import com.programmersbox.common.presentation.backup.BackupRepository
 import org.koin.core.module.dsl.singleOf
 import org.koin.dsl.module
 

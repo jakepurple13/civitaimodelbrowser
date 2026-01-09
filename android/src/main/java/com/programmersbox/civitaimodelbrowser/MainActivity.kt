@@ -39,8 +39,8 @@ import com.materialkolor.ktx.animateColorScheme
 import com.programmersbox.common.DataStore
 import com.programmersbox.common.ThemeMode
 import com.programmersbox.common.UIShow
-import com.programmersbox.common.components.Toaster
-import com.programmersbox.common.components.ToasterState
+import com.programmersbox.common.presentation.components.Toaster
+import com.programmersbox.common.presentation.components.ToasterState
 import io.kamel.core.config.KamelConfig
 import io.kamel.core.config.takeFrom
 import io.kamel.image.config.Default

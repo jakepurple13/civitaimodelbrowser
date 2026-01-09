@@ -17,11 +17,11 @@ import com.materialkolor.PaletteStyle
 import com.materialkolor.dynamicColorScheme
 import com.materialkolor.dynamiccolor.ColorSpec
 import com.materialkolor.ktx.animateColorScheme
-import com.programmersbox.common.backup.Zipper
-import com.programmersbox.common.components.Toaster
-import com.programmersbox.common.components.ToasterState
 import com.programmersbox.common.di.cmpModules
-import com.programmersbox.common.qrcode.QrCodeRepository
+import com.programmersbox.common.presentation.backup.Zipper
+import com.programmersbox.common.presentation.components.Toaster
+import com.programmersbox.common.presentation.components.ToasterState
+import com.programmersbox.common.presentation.qrcode.QrCodeRepository
 import kotlinx.cinterop.ExperimentalForeignApi
 import org.koin.compose.KoinApplication
 import org.koin.compose.koinInject

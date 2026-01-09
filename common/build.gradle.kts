@@ -116,6 +116,8 @@ kotlin {
             implementation(libs.aboutlibraries.core)
             implementation(libs.aboutlibraries.compose.core)
             implementation(libs.aboutlibraries.compose.m3)
+
+            implementation(libs.okio)
         }
 
         commonTest.dependencies {

@@ -21,6 +21,7 @@ import kotlinx.coroutines.withContext
 import okio.FileSystem
 import okio.Path
 import okio.Path.Companion.toPath
+import okio.buffer
 import okio.openZip
 import okio.use
 import platform.Foundation.NSError
@@ -41,6 +42,8 @@ actual class Zipper {
         platformFile: PlatformFile,
         itemsToZip: Map<String, String>
     ) {
+        //FIXME: This suddenly doesn't work anymore
+
         // 1. Move memScoped to the top level so pointers stay valid
         // 2. Run on IO context
         withContext(Dispatchers.IO) {
@@ -150,53 +153,57 @@ actual class Zipper {
         platformFile: PlatformFile,
         onInfo: suspend (fileName: String, jsonString: String) -> Unit
     ) {
-        //TODO: Doesn't work only with the zip from ios
-        withContext(Dispatchers.Default) {
-            // 1. Convert platform path to Okio Path
-            // Assuming 'platformFile.path' returns the absolute string path
-            val zipPath = platformFile.path
-                .removePrefix("file://")
-                .toPath()
+        // 1. Get the path from your platform object
+        // If platformFile holds an NSURL, use .path!! to get the string
+        val zipPath = platformFile.path.toPath()
+        println("Zip path: $zipPath")
 
-            // 2. Open the Zip as a virtual FileSystem
-            // 'use' automatically closes the zip when done
-            FileSystem.SYSTEM.openZip(zipPath).use { zipFileSystem ->
+        // 2. Open the file as a ZIP FileSystem
+        // Okio treats the ZIP file almost like a folder you can navigate
+        val zipFileSystem = FileSystem.SYSTEM.openZip(zipPath)
 
-                // 3. List all files inside the zip
-                // listRecursively returns a sequence of paths inside the zip
-                val allPaths = zipFileSystem.listRecursively("/".toPath())
+        try {
+            // 3. List all files in the root of the zip (or recursively if needed)
+            // "." represents the root of the zip archive
+            val entries = zipFileSystem
+                .listRecursively("/".toPath())
+                .toList()
 
-                for (entryPath in allPaths) {
-                    // 4. Check if it is a file and ends with .json
-                    val metadata = zipFileSystem.metadata(entryPath)
-                    val name = entryPath.name
-                    // 🛡️ GUARD: Ignore macOS ghost files and metadata folders
-                    val isGhostFile = name.startsWith("._")
-                    val isMacOsDir = entryPath.toString().contains("__MACOSX")
-                    val isJson = name.endsWith(".json", ignoreCase = true)
+            for (entryPath in entries) {
+                // Check metadata to ensure it's a file, not a directory
+                val metadata = zipFileSystem.metadata(entryPath)
+                println("File: $entryPath")
+                println("Name: ${entryPath.name}")
+                if (metadata.isRegularFile) {
 
-                    if (
-                        metadata.isRegularFile &&
-                        isJson && !isGhostFile && !isMacOsDir
-                    ) {
+                    // 4. Read the file content
+                    zipFileSystem.source(entryPath).buffer().use { bufferedSource ->
+                        val content = bufferedSource.readUtf8()
 
-                        // 5. Read the content directly from the zip stream
-                        val jsonString = zipFileSystem.read(entryPath) {
-                            readUtf8()
-                        }
-
-                        // 6. Pass data back (still on background thread)
+                        // 5. Invoke your callback
+                        // entryPath.name gives "file.json"
                         val duration = measureTime {
                             onInfo(
-                                entryPath.name
-                                    .split("/")
-                                    .last(),
-                                jsonString
+                                entryPath.name,
+                                content
                             )
                         }
                         println("Unzipped ${entryPath.name} in $duration")
                     }
                 }
+            }
+        } catch (e: Exception) {
+            // Handle Zip format errors or IO exceptions here
+            println("Error reading zip: ${e.message}")
+            throw e
+        } finally {
+            // 6. Crucial: Close the ZipFileSystem to release file handles
+            // We can't use .use {} on the FileSystem itself in older Okio versions,
+            // but explicit close is safe.
+            try {
+                zipFileSystem.close()
+            } catch (e: Exception) {
+                println("Error closing zip: ${e.message}")
             }
         }
     }

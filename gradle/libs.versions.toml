@@ -23,6 +23,7 @@ datastore-version = "1.2.0"
 material3Version = "1.11.0-alpha01"
 lifecycleViewmodelCompose = "2.10.0-alpha07"
 materialKolorVersion = "4.0.5"
+okio = "3.16.4"
 paging-version = "3.4.0-beta01"
 kamel-image = "1.0.8"
 kotlinx-coroutines-core = "1.10.2"
@@ -105,6 +106,7 @@ lifecycle-viewmodel-compose = { module = "org.jetbrains.androidx.lifecycle:lifec
 lifecycle-runtime-compose = { group = "org.jetbrains.androidx.lifecycle", name = "lifecycle-runtime-compose", version.ref = "lifecycleViewmodelCompose" }
 androidx-room-compiler = { group = "androidx.room", name = "room-compiler", version.ref = "androidx-room" }
 androidx-room-runtime = { group = "androidx.room", name = "room-runtime", version.ref = "androidx-room" }
+okio = { module = "com.squareup.okio:okio", version.ref = "okio" }
 paging-runtime = { module = "androidx.paging:paging-common", version.ref = "paging-version" }
 paging-compose = { module = "androidx.paging:paging-compose", version.ref = "paging-version" }
 ktor-core = { module = "io.ktor:ktor-client-core", version.ref = "ktor-version" }

@@ -32,7 +32,6 @@ import platform.Foundation.NSString
 import platform.Foundation.NSTemporaryDirectory
 import platform.Foundation.NSURL
 import platform.Foundation.NSUTF8StringEncoding
-import platform.Foundation.create
 import platform.Foundation.writeToFile
 import kotlin.time.measureTime
 
@@ -42,16 +41,13 @@ actual class Zipper {
         platformFile: PlatformFile,
         itemsToZip: Map<String, String>
     ) {
-        //FIXME: This suddenly doesn't work anymore
-
-        // 1. Move memScoped to the top level so pointers stay valid
-        // 2. Run on IO context
         withContext(Dispatchers.IO) {
+            // We create the scope here so it lives through the entire operation
             memScoped {
                 saveMultipleJsonsToZip(
                     jsonMap = itemsToZip,
-                    zipName = platformFile.nsUrl,
-                    scope = this // Pass the memory scope if needed, or just use memScoped inside the helper
+                    destinationUrl = platformFile.nsUrl,
+                    scope = this
                 )
             }
         }
@@ -60,75 +56,96 @@ actual class Zipper {
     @OptIn(ExperimentalForeignApi::class, BetaInteropApi::class)
     private fun saveMultipleJsonsToZip(
         jsonMap: Map<String, String>,
-        zipName: NSURL,
-        scope: MemScope // Keeping it explicitly scoped is safer
+        destinationUrl: NSURL,
+        scope: MemScope
     ) {
         val fileManager = NSFileManager.defaultManager
-        val finalZipURL = zipName
 
-        // 1. Define Staging Path
-        val stagingPath = NSTemporaryDirectory() + "civitai_backup"
+        // 1. Prepare Staging Area
+        // Use NSTemporaryDirectory() safely. Note: It usually includes the trailing slash.
+        val stagingPath = NSTemporaryDirectory() + "civitai_backup_stage"
 
-        // 🧹 CRITICAL: Clean staging area FIRST to prevent "Zips inside Zips" or stale files
+        // Clean previous staging if exists
         if (fileManager.fileExistsAtPath(stagingPath)) {
-            val error = scope.alloc<ObjCObjectVar<NSError?>>()
-            fileManager.removeItemAtPath(stagingPath, error.ptr)
+            val removeError = scope.alloc<ObjCObjectVar<NSError?>>()
+            fileManager.removeItemAtPath(stagingPath, removeError.ptr)
         }
 
-        // 2. Create fresh directory
-        fileManager.createDirectoryAtPath(stagingPath, true, null, null)
+        // Create fresh directory
+        // attributes: null means default permissions
+        if (!fileManager.createDirectoryAtPath(stagingPath, true, null, null)) {
+            println("❌ Failed to create staging directory")
+            return
+        }
 
-        // 3. Write JSON strings
+        // 2. Write JSONs to Staging
         jsonMap.forEach { (name, content) ->
-            val filePath = "$stagingPath/$name"
-            NSString
-                .create(content)
-                ?.writeToFile(
-                    path = filePath,
-                    atomically = true,
-                    encoding = NSUTF8StringEncoding,
-                    error = null
-                )
+            // Ensure name ends in .json
+            val safeName = if (name.endsWith(".json")) name else "$name.json"
+            val filePath = "$stagingPath/$safeName"
+
+            (content as NSString).writeToFile(
+                path = filePath,
+                atomically = true,
+                encoding = NSUTF8StringEncoding,
+                error = null
+            )
         }
 
-        // 4. Prepare for Zipping
+        // 3. Coordinate Zipping
         val stagingURL = NSURL.fileURLWithPath(stagingPath)
         val coordinator = NSFileCoordinator()
 
-        // Allocate the error pointer inside the valid scope passed from above
-        val errorPtr = scope.alloc<ObjCObjectVar<NSError?>>()
+        // Allocate error pointer for the COORDINATOR itself
+        val coordinatorError = scope.alloc<ObjCObjectVar<NSError?>>()
 
-        // Note: This block is synchronous, so we are safe on threading
-        coordinator.coordinateReadingItemAtURL(
-            stagingURL,
-            NSFileCoordinatorReadingForUploading,
-            null
-        ) { zipURL ->
-            if (zipURL != null) {
-                // Clean up old zip at destination if it exists
-                if (fileManager.fileExistsAtPath(finalZipURL.path!!)) {
-                    fileManager.removeItemAtURL(finalZipURL, null)
-                }
+        var securityScoped = false
 
-                // 5. Move the generated zip to the public Documents folder
-                val success = fileManager.moveItemAtURL(
-                    srcURL = zipURL,
-                    toURL = finalZipURL,
-                    error = errorPtr.ptr // Pointer is now valid!
-                )
+        try {
+            // CRITICAL: If this URL is from a picker, we MUST unlock it
+            securityScoped = destinationUrl.startAccessingSecurityScopedResource()
 
-                if (success) {
-                    println("✅ ZIP SUCCESS: ${finalZipURL.path}")
-                    // Clean up staging folder to keep device clean
-                    fileManager.removeItemAtPath(stagingPath, null)
+            coordinator.coordinateReadingItemAtURL(
+                url = stagingURL,
+                options = NSFileCoordinatorReadingForUploading, // This triggers the Zip creation
+                error = coordinatorError.ptr // <--- FIX: Capture why it fails
+            ) { tempZipUrl ->
+
+                if (tempZipUrl != null) {
+                    // Remove existing file at destination to prevent move failure
+                    if (fileManager.fileExistsAtPath(destinationUrl.path!!)) {
+                        fileManager.removeItemAtURL(destinationUrl, null)
+                    }
+
+                    val moveError = scope.alloc<ObjCObjectVar<NSError?>>()
+
+                    val success = fileManager.moveItemAtURL(
+                        srcURL = tempZipUrl,
+                        toURL = destinationUrl,
+                        error = moveError.ptr
+                    )
+
+                    if (success) {
+                        println("✅ ZIP SUCCESS at: ${destinationUrl.path}")
+                    } else {
+                        val msg = moveError.value?.localizedDescription ?: "Unknown Move Error"
+                        println("❌ ZIP MOVE FAILED: $msg")
+                    }
                 } else {
-                    val errorMsg = errorPtr.value?.localizedDescription ?: "Unknown error"
-                    println("❌ ZIP FAILED to move: $errorMsg")
-                    // Throwing here might crash the app if not caught in UI layer, logging is safer
+                    // If tempZipUrl is null, look at the coordinatorError
+                    val msg =
+                        coordinatorError.value?.localizedDescription ?: "Unknown Coordinator Error"
+                    println("❌ ZIP COORDINATION FAILED: $msg")
                 }
-            } else {
-                println("❌ ZIP FAILED: Coordinator returned null URL")
             }
+        } finally {
+            // CRITICAL: Always release the lock
+            if (securityScoped) {
+                destinationUrl.stopAccessingSecurityScopedResource()
+            }
+
+            // Clean up staging
+            fileManager.removeItemAtPath(stagingPath, null)
         }
     }
 

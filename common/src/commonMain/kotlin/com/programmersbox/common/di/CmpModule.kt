@@ -1,9 +1,9 @@
 package com.programmersbox.common.di
 
 import androidx.compose.material3.adaptive.ExperimentalMaterial3AdaptiveApi
-import com.dokar.sonner.ToasterState
 import com.programmersbox.common.DataStore
 import com.programmersbox.common.Network
+import com.programmersbox.common.components.ToasterState
 import com.programmersbox.common.db.AppDatabase
 import com.programmersbox.common.db.getRoomDatabase
 import kotlinx.coroutines.CoroutineScope

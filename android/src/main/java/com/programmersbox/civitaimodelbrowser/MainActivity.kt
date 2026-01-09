@@ -32,8 +32,6 @@ import androidx.compose.ui.platform.UriHandler
 import androidx.core.net.toUri
 import androidx.core.view.WindowCompat
 import androidx.fragment.app.FragmentActivity
-import com.dokar.sonner.Toaster
-import com.dokar.sonner.ToasterState
 import com.materialkolor.PaletteStyle
 import com.materialkolor.dynamicColorScheme
 import com.materialkolor.dynamiccolor.ColorSpec
@@ -41,6 +39,8 @@ import com.materialkolor.ktx.animateColorScheme
 import com.programmersbox.common.DataStore
 import com.programmersbox.common.ThemeMode
 import com.programmersbox.common.UIShow
+import com.programmersbox.common.components.Toaster
+import com.programmersbox.common.components.ToasterState
 import io.kamel.core.config.KamelConfig
 import io.kamel.core.config.takeFrom
 import io.kamel.image.config.Default

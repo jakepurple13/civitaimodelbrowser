@@ -83,7 +83,6 @@ kotlin {
             implementation(libs.ksoup)
             api(libs.haze)
             api(libs.haze.materials)
-            api(libs.sonner)
             api(libs.androidx.room.runtime)
             implementation(libs.androidx.sqlite.bundled)
             //add("ksp", libs.androidx.room.compiler)

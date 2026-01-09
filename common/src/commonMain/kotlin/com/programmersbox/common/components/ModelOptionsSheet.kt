@@ -60,8 +60,6 @@ import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.dokar.sonner.ToastType
-import com.dokar.sonner.ToasterState
 import com.programmersbox.common.CloseButton
 import com.programmersbox.common.ModelType
 import com.programmersbox.common.Models

@@ -27,7 +27,6 @@ okio = "3.16.4"
 paging-version = "3.4.0-beta01"
 kamel-image = "1.0.8"
 kotlinx-coroutines-core = "1.10.2"
-sonner = "0.3.8"
 androidx-material = "1.13.0"
 
 ksp = "2.3.4"
@@ -118,7 +117,6 @@ kamel-image = { module = "media.kamel:kamel-image-default", version.ref = "kamel
 kamel-image-bitmap-resizing = { module = "media.kamel:kamel-decoder-image-bitmap-resizing", version.ref = "kamel-image" }
 kotlinx-coroutines-core = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", version.ref = "kotlinx-coroutines-core" }
 kotlinx-coroutines-swing = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-swing", version.ref = "kotlinx-coroutines-core" }
-sonner = { module = "io.github.dokar3:sonner", version.ref = "sonner" }
 androidx-material = { group = "com.google.android.material", name = "material", version.ref = "androidx-material" }
 
 androidx-sqlite-bundled = { module = "androidx.sqlite:sqlite-bundled", version.ref = "sqlite" }

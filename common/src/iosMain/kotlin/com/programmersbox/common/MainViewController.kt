@@ -13,13 +13,13 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.window.ComposeUIViewController
-import com.dokar.sonner.Toaster
-import com.dokar.sonner.ToasterState
 import com.materialkolor.PaletteStyle
 import com.materialkolor.dynamicColorScheme
 import com.materialkolor.dynamiccolor.ColorSpec
 import com.materialkolor.ktx.animateColorScheme
 import com.programmersbox.common.backup.Zipper
+import com.programmersbox.common.components.Toaster
+import com.programmersbox.common.components.ToasterState
 import com.programmersbox.common.di.cmpModules
 import com.programmersbox.common.qrcode.QrCodeRepository
 import kotlinx.cinterop.ExperimentalForeignApi

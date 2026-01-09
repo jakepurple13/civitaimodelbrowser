@@ -1,5 +1,6 @@
 package com.programmersbox.common.presentation.backup
 
+import com.programmersbox.common.NotificationHandler
 import com.programmersbox.common.presentation.components.ToastType
 import com.programmersbox.common.presentation.components.ToasterState
 import io.github.vinceglb.filekit.PlatformFile
@@ -228,6 +229,7 @@ actual class Zipper {
 
 actual class BackupRestoreHandler(
     private val toasterState: ToasterState,
+    private val notificationHandler: NotificationHandler,
 ) {
     private val scope = CoroutineScope(Dispatchers.IO + Job())
 
@@ -254,6 +256,11 @@ actual class BackupRestoreHandler(
             toasterState.show(
                 "Restore Complete in $duration",
                 type = ToastType.Success
+            )
+            notificationHandler.notify(
+                title = "Restore Complete",
+                message = "Restore Complete in $duration",
+                uuid = "restore_complete",
             )
         }
     }

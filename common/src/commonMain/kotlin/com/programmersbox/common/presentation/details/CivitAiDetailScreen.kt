@@ -44,6 +44,7 @@ import androidx.compose.material3.BottomAppBar
 import androidx.compose.material3.BottomAppBarDefaults
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
+import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.CircularWavyProgressIndicator
 import androidx.compose.material3.ElevatedAssistChip
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -462,10 +463,19 @@ fun CivitAiDetailScreen(
         }
 
         is DetailViewState.Error -> {
-            Surface {
+            Scaffold(
+                topBar = {
+                    CenterAlignedTopAppBar(
+                        title = { Text("Error") },
+                        navigationIcon = { BackButton() }
+                    )
+                }
+            ) { padding ->
                 Box(
                     contentAlignment = Alignment.Center,
-                    modifier = Modifier.fillMaxSize()
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(padding)
                 ) {
                     Column(
                         horizontalAlignment = Alignment.CenterHorizontally

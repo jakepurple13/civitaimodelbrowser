@@ -253,8 +253,8 @@ fun CloseButton() {
     ) { Icon(Icons.Default.Close, null) }
 }
 
-enum class CivitSort(val value: String) {
+enum class CivitSort(val value: String, val visualName: String = value) {
     Newest("Newest"),
     HighestRated("Highest Rated"),
-    MostDownloaded("Most Downloaded")
+    MostDownloaded("Most Downloaded", "Most Popular")
 }

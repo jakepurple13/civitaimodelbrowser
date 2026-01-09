@@ -1,6 +1,6 @@
 [versions]
+alarmee = "2.6.0"
 appVersion = "4.4.3"
-
 biometricauth = "1.1.0"
 biometricVersion = "1.4.0-alpha05"
 blurhashVersion = "0.0-4-ALPHA"
@@ -31,6 +31,7 @@ androidx-material = "1.13.0"
 
 ksp = "2.3.4"
 androidx-room = "2.8.4"
+permissions = "0.20.1"
 sqlite = "2.6.2"
 
 cmp-nav3 = "1.1.0-alpha01"
@@ -75,6 +76,7 @@ google-firebase-crashlytics = { id = "com.google.firebase.crashlytics", version.
 google-firebase-performance = { id = "com.google.firebase.firebase-perf", version.ref = "googlePerformancePlugin" }
 
 [libraries]
+alarmee = { module = "io.github.tweener:alarmee", version.ref = "alarmee" }
 androidx-appcompat = { module = "androidx.appcompat:appcompat", version = "1.7.1" }
 androidx-biometric = { module = "androidx.biometric:biometric", version.ref = "biometricVersion" }
 androidx-biometric-compose = { module = "androidx.biometric:biometric-compose", version.ref = "biometricVersion" }
@@ -139,6 +141,8 @@ filekit-core = { module = "io.github.vinceglb:filekit-core", version.ref = "file
 filekit-dialogs = { module = "io.github.vinceglb:filekit-dialogs", version.ref = "filekit" }
 filekit-dialogs-compose = { module = "io.github.vinceglb:filekit-dialogs-compose", version.ref = "filekit" }
 
+permissions = { module = "dev.icerock.moko:permissions", version.ref = "permissions" }
+permissions-notifications = { module = "dev.icerock.moko:permissions-notifications", version.ref = "permissions" }
 qrose = { module = "io.github.alexzhirkevich:qrose", version.ref = "qrose" }
 scanner = { module = "io.github.kalinjul.easyqrscan:scanner", version.ref = "scanner" }
 

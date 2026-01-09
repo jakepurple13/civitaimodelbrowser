@@ -646,7 +646,7 @@ private fun CivitTopBar(
                             index = index,
                             count = CivitSort.entries.size
                         ),
-                        label = { Text(searchType.name) }
+                        label = { Text(searchType.visualName) }
                     )
                 }
             }

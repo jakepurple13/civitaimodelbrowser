@@ -44,7 +44,6 @@ kotlin {
         }
     }
     listOf(
-        iosX64(),
         iosArm64(),
         iosSimulatorArm64()
     ).forEach { iosTarget ->
@@ -166,6 +165,10 @@ kotlin {
             implementation(libs.gitlive.firebase.crashlytics)
             implementation(libs.gitlive.firebase.perf)
             implementation(libs.kotlin.native.zxing)
+
+            implementation(libs.permissions)
+            implementation(libs.permissions.notifications)
+            implementation(libs.alarmee)
         }
 
         //val desktopTest by getting
@@ -177,7 +180,6 @@ dependencies {
     add("kspAndroid", libs.androidx.room.compiler)
     add("kspJvm", libs.androidx.room.compiler)
     add("kspIosSimulatorArm64", libs.androidx.room.compiler)
-    add("kspIosX64", libs.androidx.room.compiler)
     add("kspIosArm64", libs.androidx.room.compiler)
 }
 

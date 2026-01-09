@@ -5,7 +5,6 @@ import androidx.compose.animation.core.animateOffsetAsState
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.gestures.TransformableState
-import androidx.compose.foundation.gestures.rememberTransformableState
 import androidx.compose.foundation.gestures.transformable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.lazy.grid.GridCells
@@ -28,6 +27,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.composed
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.Dp
@@ -114,54 +114,6 @@ fun LazyGridState.isScrollingUp(): Boolean {
     }.value
 }
 
-interface ScaleRotateOffsetResetScope {
-
-    fun reset()
-
-    @OptIn(ExperimentalFoundationApi::class)
-    fun Modifier.scaleRotateOffsetReset(
-        canScale: Boolean = true,
-        canRotate: Boolean = true,
-        canOffset: Boolean = true,
-        onClick: () -> Unit = {},
-        onLongClick: () -> Unit = {},
-    ): Modifier = this.composed {
-        var scale by remember { mutableFloatStateOf(1f) }
-        var rotation by remember { mutableFloatStateOf(0f) }
-        var offset by remember { mutableStateOf(Offset.Zero) }
-
-        val state = rememberTransformableState { zoomChange, offsetChange, rotationChange ->
-            if (canScale) scale *= zoomChange
-            if (canRotate) rotation += rotationChange
-            if (canOffset) offset += offsetChange
-        }
-
-        val animScale = animateFloatAsState(scale, label = "").value
-        val (x, y) = animateOffsetAsState(offset, label = "").value
-        graphicsLayer(
-            scaleX = animScale,
-            scaleY = animScale,
-            rotationZ = animateFloatAsState(rotation, label = "").value,
-            translationX = x,
-            translationY = y
-        )
-            // add transformable to listen to multitouch transformation events
-            // after offset
-            .transformable(state = state)
-            .combinedClickable(
-                onClick = onClick,
-                onDoubleClick = {
-                    scale = 1f
-                    rotation = 0f
-                    offset = Offset.Zero
-                },
-                onLongClick = onLongClick,
-                indication = null,
-                interactionSource = remember { MutableInteractionSource() }
-            )
-    }
-}
-
 @Composable
 fun rememberSROState(): SROState = remember { SROState() }
 
@@ -223,22 +175,19 @@ fun Modifier.ifTrue(isTrue: Boolean, modifierBlock: Modifier.() -> Modifier) =
 
 @Composable
 fun BackButton() {
-    val navEvent = LocalNavigationEventDispatcherOwner.current?.navigationEventDispatcher
-
-    val navInput = remember { DirectNavigationEventInput() }
-
-    DisposableEffect(Unit) {
-        navEvent?.addInput(navInput)
-        onDispose { navEvent?.removeInput(navInput) }
-    }
-
-    IconButton(
-        onClick = { navInput.backCompleted() }
-    ) { Icon(Icons.AutoMirrored.Filled.ArrowBack, null) }
+    BackAction(Icons.AutoMirrored.Filled.ArrowBack)
 }
 
 @Composable
 fun CloseButton() {
+    BackAction(Icons.Default.Close)
+}
+
+@Composable
+private fun BackAction(
+    icon: ImageVector,
+    modifier: Modifier = Modifier,
+) {
     val navEvent = LocalNavigationEventDispatcherOwner.current?.navigationEventDispatcher
 
     val navInput = remember { DirectNavigationEventInput() }
@@ -249,8 +198,9 @@ fun CloseButton() {
     }
 
     IconButton(
-        onClick = { navInput.backCompleted() }
-    ) { Icon(Icons.Default.Close, null) }
+        onClick = { navInput.backCompleted() },
+        modifier = modifier
+    ) { Icon(icon, null) }
 }
 
 enum class CivitSort(val value: String, val visualName: String = value) {

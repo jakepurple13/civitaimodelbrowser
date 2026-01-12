@@ -16,6 +16,7 @@ import com.programmersbox.common.Screen
 import com.programmersbox.common.presentation.backup.BackupScreen
 import com.programmersbox.common.presentation.backup.RestoreScreen
 import com.programmersbox.common.presentation.blacklisted.BlacklistedScreen
+import com.programmersbox.common.presentation.components.WebViewScreen
 import com.programmersbox.common.presentation.creator.CivitAiUserScreen
 import com.programmersbox.common.presentation.details.CivitAiDetailScreen
 import com.programmersbox.common.presentation.details.CivitAiModelImagesScreen
@@ -116,6 +117,10 @@ private fun Module.home() {
         CivitAiImagesScreen(
             onNavigateToUser = { username -> backStack.add(Screen.User(username)) }
         )
+    }
+
+    navigation<Screen.WebView> {
+        WebViewScreen(url = it.url)
     }
 }
 

@@ -7,6 +7,7 @@ blurhashVersion = "0.0-4-ALPHA"
 browser = "1.9.0"
 composeMultiplatformMediaPlayerVersion = "1.0.51"
 composeScrollbars = "1.0.4"
+composewebview = "1.0.0-alpha-05"
 gitlive = "2.4.0"
 haze = "1.7.1"
 kmpIo = "0.2.3"
@@ -88,6 +89,7 @@ biometricauth = { module = "io.github.zaval:biometricauth", version.ref = "biome
 compose-multiplatform-media-player = { module = "network.chaintech:compose-multiplatform-media-player", version.ref = "composeMultiplatformMediaPlayerVersion" }
 blurhash = { module = "io.github.brys0:blurhash", version.ref = "blurhashVersion" }
 composeScrollbars = { module = "com.github.GIGAMOLE:ComposeScrollbars", version.ref = "composeScrollbars" }
+composewebview = { module = "io.github.kdroidfilter:composewebview", version.ref = "composewebview" }
 datastore-core = { module = "androidx.datastore:datastore-core", version.ref = "datastore-version" }
 datastore-preferences = { module = "androidx.datastore:datastore-preferences-core", version.ref = "datastore-version" }
 datastore-core-okio = { group = "androidx.datastore", name = "datastore-core-okio", version.ref = "datastore-version" }

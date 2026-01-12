@@ -37,8 +37,10 @@ import com.materialkolor.dynamicColorScheme
 import com.materialkolor.dynamiccolor.ColorSpec
 import com.materialkolor.ktx.animateColorScheme
 import com.programmersbox.common.DataStore
+import com.programmersbox.common.Screen
 import com.programmersbox.common.ThemeMode
 import com.programmersbox.common.UIShow
+import com.programmersbox.common.di.NavigationHandler
 import com.programmersbox.common.presentation.components.Toaster
 import com.programmersbox.common.presentation.components.ToasterState
 import io.kamel.core.config.KamelConfig
@@ -71,8 +73,13 @@ class MainActivity : FragmentActivity() {
             ) {
                 val toaster = koinInject<ToasterState>()
                 val defaultUriHandler = LocalUriHandler.current
-                val customUriHandler =
-                    remember { customTabsUriHandler { defaultUriHandler.openUri(it) } }
+                val navHandler = koinInject<NavigationHandler>()
+                val customUriHandler = remember {
+                    customTabsUriHandler(
+                        onFailure = { defaultUriHandler.openUri(it) },
+                        onFallback = { navHandler.backStack.add(Screen.WebView(it)) }
+                    )
+                }
                 CompositionLocalProvider(
                     LocalUriHandler provides customUriHandler,
                     LocalKamelConfig provides customKamelConfig()
@@ -103,6 +110,7 @@ class MainActivity : FragmentActivity() {
 
 fun Context.customTabsUriHandler(
     onFailure: (String) -> Unit,
+    onFallback: (String) -> Unit = onFailure
 ) = object : UriHandler {
     override fun openUri(uri: String) {
         runCatching {
@@ -115,7 +123,9 @@ fun Context.customTabsUriHandler(
                 .setShareState(CustomTabsIntent.SHARE_STATE_ON)
                 .build()
                 .launchUrl(this@customTabsUriHandler, uri.toUri())
-        }.onFailure { onFailure(uri) }
+        }
+            .recoverCatching { onFailure(uri) }
+            .onFailure { onFallback(uri) }
     }
 }
 

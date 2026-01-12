@@ -179,4 +179,7 @@ sealed class Screen {
 
     @Serializable
     data object Search : NavKey
+
+    @Serializable
+    data class WebView(val url: String) : NavKey
 }

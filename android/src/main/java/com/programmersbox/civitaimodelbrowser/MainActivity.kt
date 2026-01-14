@@ -35,6 +35,7 @@ import androidx.fragment.app.FragmentActivity
 import com.materialkolor.PaletteStyle
 import com.materialkolor.dynamicColorScheme
 import com.materialkolor.dynamiccolor.ColorSpec
+import com.materialkolor.ktx.animateColorScheme
 import com.programmersbox.common.DataStore
 import com.programmersbox.common.Screen
 import com.programmersbox.common.ThemeMode
@@ -153,7 +154,7 @@ fun CustomMaterialTheme(
 ) {
     val systemDarkTheme = isSystemInDarkTheme()
     val context = LocalContext.current
-    val colorScheme = remember(darkTheme, systemDarkTheme, dynamicColor) {
+    val colorScheme = remember(darkTheme, systemDarkTheme, dynamicColor, isAmoled) {
         if (dynamicColor && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
             when (darkTheme) {
                 ThemeMode.System -> if (systemDarkTheme)
@@ -185,6 +186,12 @@ fun CustomMaterialTheme(
 
                 ThemeMode.Light -> expressiveLightColorScheme()
             }
+        }.let { colorScheme ->
+            isAmoledMode(
+                colorScheme = colorScheme,
+                isDarkMode = systemDarkTheme,
+                isAmoled = isAmoled
+            )
         }
     }
 
@@ -203,11 +210,7 @@ fun CustomMaterialTheme(
     }
 
     MaterialExpressiveTheme(
-        colorScheme = isAmoledMode(
-            colorScheme = colorScheme,
-            isDarkMode = systemDarkTheme,
-            isAmoled = isAmoled
-        ),
+        colorScheme = animateColorScheme(colorScheme),
         typography = MaterialTheme.typography,
         motionScheme = MotionScheme.expressive(),
         content = content

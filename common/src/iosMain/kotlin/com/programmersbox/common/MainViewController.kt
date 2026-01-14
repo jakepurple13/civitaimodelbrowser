@@ -16,6 +16,7 @@ import androidx.compose.ui.window.ComposeUIViewController
 import com.materialkolor.PaletteStyle
 import com.materialkolor.dynamicColorScheme
 import com.materialkolor.dynamiccolor.ColorSpec
+import com.materialkolor.ktx.animateColorScheme
 import com.programmersbox.common.di.cmpModules
 import com.programmersbox.common.presentation.backup.Zipper
 import com.programmersbox.common.presentation.components.Toaster
@@ -94,8 +95,8 @@ fun CustomMaterialTheme(
 ) {
     val isDarkMode = isSystemInDarkTheme()
     MaterialExpressiveTheme(
-        colorScheme = isAmoledMode(
-            remember(darkTheme, isDarkMode) {
+        colorScheme = animateColorScheme(
+            remember(darkTheme, isDarkMode, isAmoled) {
                 when (darkTheme) {
                     ThemeMode.System -> if (isDarkMode)
                         dynamicColorScheme(
@@ -115,10 +116,14 @@ fun CustomMaterialTheme(
                     )
 
                     ThemeMode.Light -> expressiveLightColorScheme()
+                }.let { colorScheme ->
+                    isAmoledMode(
+                        colorScheme = colorScheme,
+                        isDarkMode = darkTheme == ThemeMode.Dark || isDarkMode,
+                        isAmoled = isAmoled
+                    )
                 }
-            },
-            darkTheme == ThemeMode.Dark || isDarkMode,
-            isAmoled
+            }
         ),
         shapes = shapes,
         typography = typography,

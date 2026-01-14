@@ -7,7 +7,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import com.materialkolor.ktx.animateColorScheme
 import com.programmersbox.common.db.BlacklistedItemRoom
 import org.koin.core.module.Module
 import kotlin.jvm.JvmInline
@@ -74,16 +73,13 @@ value class ApplicationInfo(
     val versionName: String
 )
 
-@Composable
 fun isAmoledMode(
     colorScheme: ColorScheme,
     isDarkMode: Boolean,
     isAmoled: Boolean,
-): ColorScheme = animateColorScheme(
-    colorScheme.copy(
-        background = if (isAmoled && isDarkMode) Color.Black else colorScheme.background,
-        onBackground = if (isAmoled && isDarkMode) Color.White else colorScheme.onBackground,
-        surface = if (isAmoled && isDarkMode) Color.Black else colorScheme.surface,
-        onSurface = if (isAmoled && isDarkMode) Color.White else colorScheme.onSurface,
-    )
+): ColorScheme = colorScheme.copy(
+    background = if (isAmoled && isDarkMode) Color.Black else colorScheme.background,
+    onBackground = if (isAmoled && isDarkMode) Color.White else colorScheme.onBackground,
+    surface = if (isAmoled && isDarkMode) Color.Black else colorScheme.surface,
+    onSurface = if (isAmoled && isDarkMode) Color.White else colorScheme.onSurface,
 )

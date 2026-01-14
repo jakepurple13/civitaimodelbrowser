@@ -84,9 +84,12 @@ internal fun WindowWithBar(
         onCloseRequest = onCloseRequest,
         visible = visible,
     ) {
-        val isDarkMode by koinInject<DataStore>().rememberThemeMode()
+        val dataStore = koinInject<DataStore>()
+        val isDarkMode by dataStore.rememberThemeMode()
+        val isAmoled by dataStore.rememberIsAmoled()
         CustomMaterialTheme(
-            darkTheme = isDarkMode
+            darkTheme = isDarkMode,
+            isAmoled = isAmoled
         ) {
             CompositionLocalProvider(LocalWindow provides this) {
                 frameWindowScope()

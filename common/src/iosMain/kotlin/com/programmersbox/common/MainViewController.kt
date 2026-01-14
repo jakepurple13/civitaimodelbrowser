@@ -16,7 +16,6 @@ import androidx.compose.ui.window.ComposeUIViewController
 import com.materialkolor.PaletteStyle
 import com.materialkolor.dynamicColorScheme
 import com.materialkolor.dynamiccolor.ColorSpec
-import com.materialkolor.ktx.animateColorScheme
 import com.programmersbox.common.di.cmpModules
 import com.programmersbox.common.presentation.backup.Zipper
 import com.programmersbox.common.presentation.components.Toaster
@@ -65,9 +64,12 @@ fun MainViewController() = ComposeUIViewController {
             }
         )
     ) {
-        val isDarkMode by koinInject<DataStore>().rememberThemeMode()
+        val dataStore = koinInject<DataStore>()
+        val isDarkMode by dataStore.rememberThemeMode()
+        val isAmoled by dataStore.rememberIsAmoled()
         CustomMaterialTheme(
-            darkTheme = isDarkMode
+            darkTheme = isDarkMode,
+            isAmoled = isAmoled
         ) {
             App(
                 onShareClick = {}
@@ -85,13 +87,14 @@ fun MainViewController() = ComposeUIViewController {
 @Composable
 fun CustomMaterialTheme(
     darkTheme: ThemeMode,
+    isAmoled: Boolean,
     shapes: Shapes = MaterialTheme.shapes,
     typography: Typography = MaterialTheme.typography,
     content: @Composable () -> Unit,
 ) {
     val isDarkMode = isSystemInDarkTheme()
     MaterialExpressiveTheme(
-        colorScheme = animateColorScheme(
+        colorScheme = isAmoledMode(
             remember(darkTheme, isDarkMode) {
                 when (darkTheme) {
                     ThemeMode.System -> if (isDarkMode)
@@ -113,7 +116,9 @@ fun CustomMaterialTheme(
 
                     ThemeMode.Light -> expressiveLightColorScheme()
                 }
-            }
+            },
+            darkTheme == ThemeMode.Dark || isDarkMode,
+            isAmoled
         ),
         shapes = shapes,
         typography = typography,

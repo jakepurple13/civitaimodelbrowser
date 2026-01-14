@@ -35,12 +35,12 @@ import androidx.fragment.app.FragmentActivity
 import com.materialkolor.PaletteStyle
 import com.materialkolor.dynamicColorScheme
 import com.materialkolor.dynamiccolor.ColorSpec
-import com.materialkolor.ktx.animateColorScheme
 import com.programmersbox.common.DataStore
 import com.programmersbox.common.Screen
 import com.programmersbox.common.ThemeMode
 import com.programmersbox.common.UIShow
 import com.programmersbox.common.di.NavigationHandler
+import com.programmersbox.common.isAmoledMode
 import com.programmersbox.common.presentation.components.Toaster
 import com.programmersbox.common.presentation.components.ToasterState
 import io.kamel.core.config.KamelConfig
@@ -66,10 +66,13 @@ class MainActivity : FragmentActivity() {
                     notificationPermission.launch(android.Manifest.permission.POST_NOTIFICATIONS)
                 }
             }
+            val dataStore = koinInject<DataStore>()
 
-            val isDarkMode by koinInject<DataStore>().rememberThemeMode()
+            val isDarkMode by dataStore.rememberThemeMode()
+            val isAmoled by dataStore.rememberIsAmoled()
             CustomMaterialTheme(
-                darkTheme = isDarkMode
+                darkTheme = isDarkMode,
+                isAmoled = isAmoled
             ) {
                 val toaster = koinInject<ToasterState>()
                 val defaultUriHandler = LocalUriHandler.current
@@ -144,6 +147,7 @@ private fun customKamelConfig(): KamelConfig {
 @Composable
 fun CustomMaterialTheme(
     darkTheme: ThemeMode,
+    isAmoled: Boolean,
     dynamicColor: Boolean = true,
     content: @Composable () -> Unit,
 ) {
@@ -199,7 +203,11 @@ fun CustomMaterialTheme(
     }
 
     MaterialExpressiveTheme(
-        colorScheme = animateColorScheme(colorScheme),
+        colorScheme = isAmoledMode(
+            colorScheme = colorScheme,
+            isDarkMode = systemDarkTheme,
+            isAmoled = isAmoled
+        ),
         typography = MaterialTheme.typography,
         motionScheme = MotionScheme.expressive(),
         content = content

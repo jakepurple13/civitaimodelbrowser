@@ -115,6 +115,12 @@ class DataStore private constructor(
         mapToString = { json.encodeToString(it) }
     )
 
+    @Composable
+    fun rememberIsAmoled(): MutableState<Boolean> = rememberPreference(
+        key = booleanPreferencesKey("is_amoled"),
+        defaultValue = false
+    )
+
     open class DataStoreType<T>(
         val key: Preferences.Key<T>,
         protected val dataStore: DataStore<Preferences>,

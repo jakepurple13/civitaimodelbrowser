@@ -19,6 +19,7 @@ import androidx.compose.material.icons.filled.BlurOff
 import androidx.compose.material.icons.filled.BlurOn
 import androidx.compose.material.icons.filled.BorderBottom
 import androidx.compose.material.icons.filled.Brightness4
+import androidx.compose.material.icons.filled.Brightness7
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Card
@@ -100,6 +101,7 @@ private fun BehaviorSettings(
         var showBlur by dataStore.rememberShowBlur()
         var blurType by dataStore.rememberBlurType()
         var useProgressive by dataStore.rememberUseProgressive()
+        var isAmoled by dataStore.rememberIsAmoled()
         Card(
             onClick = { showBlur = !showBlur }
         ) {
@@ -282,6 +284,21 @@ private fun BehaviorSettings(
                     Icon(
                         Icons.Default.ArrowDropDown,
                         null
+                    )
+                }
+            )
+        }
+
+        Card(
+            onClick = { isAmoled = !isAmoled }
+        ) {
+            ListItem(
+                leadingContent = { Icon(Icons.Default.Brightness7, null) },
+                headlineContent = { Text("Use Amoled Mode") },
+                trailingContent = {
+                    Switch(
+                        checked = isAmoled,
+                        onCheckedChange = null
                     )
                 }
             )

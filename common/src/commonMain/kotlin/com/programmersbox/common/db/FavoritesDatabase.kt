@@ -218,22 +218,6 @@ interface FavoritesDao {
     }
 
     @Ignore
-    fun getFavoriteModels(
-        json: Json = Json {
-            isLenient = true
-            ignoreUnknownKeys = true
-            coerceInputValues = true
-        },
-        includeNsfw: Boolean,
-    ) = if (includeNsfw) {
-        getFavorites()
-    } else {
-        getFavoritesWithNSFW(false)
-    }.map { value ->
-        value.map { favorite -> favorite.toModel(json) }
-    }
-
-    @Ignore
     private fun FavoriteRoom.toModel(json: Json) = when (favoriteType) {
         FavoriteType.Model -> {
             FavoriteModel.Model(

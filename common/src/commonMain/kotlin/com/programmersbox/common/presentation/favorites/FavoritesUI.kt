@@ -11,8 +11,6 @@ import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
-import androidx.compose.foundation.layout.FlowRow
-import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -35,7 +33,6 @@ import androidx.compose.material.icons.filled.ArrowUpward
 import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Favorite
-import androidx.compose.material.icons.filled.Image
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Preview
 import androidx.compose.material.icons.filled.Share
@@ -43,7 +40,6 @@ import androidx.compose.material3.AppBarRow
 import androidx.compose.material3.AppBarWithSearch
 import androidx.compose.material3.BottomAppBarDefaults
 import androidx.compose.material3.Card
-import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.FloatingActionButton
@@ -55,11 +51,13 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SearchBarDefaults
+import androidx.compose.material3.SegmentedButton
+import androidx.compose.material3.SegmentedButtonDefaults
+import androidx.compose.material3.SingleChoiceSegmentedButtonRow
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.material3.rememberSearchBarState
 import androidx.compose.runtime.Composable
@@ -85,7 +83,6 @@ import com.programmersbox.common.ComposableUtils
 import com.programmersbox.common.CustomScrollBar
 import com.programmersbox.common.DataStore
 import com.programmersbox.common.NetworkConnectionRepository
-import com.programmersbox.common.SheetDetails
 import com.programmersbox.common.adaptiveGridCell
 import com.programmersbox.common.db.FavoriteModel
 import com.programmersbox.common.db.FavoriteType
@@ -153,42 +150,6 @@ fun FavoritesUI(
         lazyGridState.scrollToItem(0)
     }
 
-    if (showSortedByDialog) {
-        SheetDetails(
-            onDismiss = { showSortedByDialog = false },
-            content = {
-                Surface {
-                    Column(
-                        modifier = Modifier.fillMaxWidth()
-                    ) {
-                        CenterAlignedTopAppBar(
-                            title = { Text("Sort By") },
-                            windowInsets = WindowInsets(0.dp),
-                            colors = TopAppBarDefaults.topAppBarColors(
-                                containerColor = Color.Transparent
-                            )
-                        )
-
-                        FlowRow(
-                            horizontalArrangement = Arrangement.SpaceBetween,
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(24.dp)
-                        ) {
-                            SortedBy.entries.forEach {
-                                FilterChip(
-                                    selected = it == viewModel.sortedBy,
-                                    label = { Text(it.name) },
-                                    onClick = { viewModel.sortedBy = it }
-                                )
-                            }
-                        }
-                    }
-                }
-            }
-        )
-    }
-
     val bottomBarScrollBehavior = BottomAppBarDefaults.exitAlwaysScrollBehavior()
 
     Scaffold(
@@ -245,16 +206,16 @@ fun FavoritesUI(
                             Text("(${animateIntAsState(list.size).value})")
                             AppBarRow {
                                 clickableItem(
-                                    onClick = { showSortedByDialog = true },
+                                    onClick = { showSortedByDialog = !showSortedByDialog },
                                     icon = { Icon(Icons.AutoMirrored.Filled.Sort, null) },
                                     label = "Sort By"
                                 )
-                                toggleableItem(
+                                /*toggleableItem(
                                     checked = reverseFavorites,
                                     onCheckedChange = { reverseFavorites = it },
                                     icon = { Icon(Icons.Default.Image, null) },
                                     label = "Reverse"
-                                )
+                                )*/
                             }
                         },
                         colors = appBarWithSearchColors,
@@ -311,6 +272,26 @@ fun FavoritesUI(
                                 },
                                 label = { Text(IMAGE_FILTER) }
                             )
+                        }
+                    }
+
+                    AnimatedVisibility(showSortedByDialog) {
+                        SingleChoiceSegmentedButtonRow(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(horizontal = 16.dp)
+                        ) {
+                            SortedBy.entries.forEachIndexed { index, sortType ->
+                                SegmentedButton(
+                                    selected = sortType == viewModel.sortedBy,
+                                    onClick = { viewModel.sortedBy = sortType },
+                                    shape = SegmentedButtonDefaults.itemShape(
+                                        index = index,
+                                        count = SortedBy.entries.size
+                                    ),
+                                    label = { Text(sortType.name) }
+                                )
+                            }
                         }
                     }
                 }

@@ -14,10 +14,9 @@ import com.programmersbox.common.db.FavoritesDao
 import com.programmersbox.common.paging.CivitBrowserUserPagingSource
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.IO
-import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
 import kotlin.random.Random
 
 class CivitAiUserViewModel(
@@ -26,21 +25,26 @@ class CivitAiUserViewModel(
     val database: FavoritesDao,
     val username: String,
 ) : ViewModel() {
-    val pager = Pager(
-        PagingConfig(
-            pageSize = PAGE_LIMIT,
-            enablePlaceholders = true
-        ),
-    ) {
-        CivitBrowserUserPagingSource(
-            network = network,
-            username = username,
-            includeNsfw = runBlocking { dataStore.includeNsfw.flow.first() }
-        )
-    }
+    val pager = dataStore
+        .includeNsfw
         .flow
-        .flowOn(Dispatchers.IO)
-        .cachedIn(viewModelScope)
+        .flatMapLatest { includeNsfw ->
+            Pager(
+                PagingConfig(
+                    pageSize = PAGE_LIMIT,
+                    enablePlaceholders = true
+                ),
+            ) {
+                CivitBrowserUserPagingSource(
+                    network = network,
+                    username = username,
+                    includeNsfw = includeNsfw
+                )
+            }
+                .flow
+                .flowOn(Dispatchers.IO)
+                .cachedIn(viewModelScope)
+        }
 
     fun addToFavorites(
         creator: Creator,

@@ -18,6 +18,7 @@ const val PAGE_LIMIT = 20
 class Network {
     companion object {
         private const val URL = "https://civitai.com/api/v1/"
+        const val CIVITAI_MODELS_URL = "https://civitai.com/models/"
     }
 
     private val json: Json = Json {

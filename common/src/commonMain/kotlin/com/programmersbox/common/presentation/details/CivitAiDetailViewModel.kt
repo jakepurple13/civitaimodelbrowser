@@ -23,7 +23,7 @@ class CivitAiDetailViewModel(
     private val id: String?,
     private val database: FavoritesDao,
 ) : ViewModel() {
-    val modelUrl = "https://civitai.com/models/$id"
+    val modelUrl = "${Network.CIVITAI_MODELS_URL}$id"
     var models by mutableStateOf<DetailViewState>(DetailViewState.Loading)
     val showMoreInfo = mutableStateMapOf<Long, Boolean>()
 

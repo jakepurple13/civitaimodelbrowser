@@ -39,24 +39,26 @@ class CivitAiViewModel(
     init {
         combine(
             dataStore
-            .includeNsfw
-            .flow
+                .includeNsfw
+                .flow
                 .distinctUntilChanged(),
             snapshotFlow { sort }
-        ) { includeNsfw, sort -> includeNsfw to sort }
-            .flatMapLatest {
-                Pager(
-                    PagingConfig(
-                        pageSize = PAGE_LIMIT,
-                        enablePlaceholders = true
-                    ),
-                ) {
-                    CivitBrowserPagingSource(
-                        network = network,
-                        includeNsfw = it.first,
-                        sort = it.second
-                    )
-                }
+        ) { includeNsfw, sort ->
+            Pager(
+                PagingConfig(
+                    pageSize = PAGE_LIMIT,
+                    enablePlaceholders = true
+                ),
+            ) {
+                CivitBrowserPagingSource(
+                    network = network,
+                    includeNsfw = includeNsfw,
+                    sort = sort
+                )
+            }
+        }
+            .flatMapLatest { pager ->
+                pager
                     .flow
                     .flowOn(Dispatchers.IO)
                     .cachedIn(viewModelScope)

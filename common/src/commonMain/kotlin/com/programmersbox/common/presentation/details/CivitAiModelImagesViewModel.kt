@@ -40,7 +40,6 @@ class CivitAiModelImagesViewModel(
         .getFavoriteModels()
         .map { it.filterIsInstance<FavoriteModel.Image>() }
 
-
     init {
         dataStore.includeNsfw.flow
             .flatMapLatest {

@@ -42,14 +42,23 @@ android {
         debug {
             applicationIdSuffix = ".debug"
         }
-        getByName("release") {
-            isMinifyEnabled = false
-        }
 
         create("beta") {
             initWith(getByName("debug"))
             matchingFallbacks.add("debug")
             isDebuggable = false
+        }
+
+        getByName("release") {
+            isMinifyEnabled = false
+        }
+
+        create("releaseMinified") {
+            isMinifyEnabled = true
+            proguardFiles(
+                getDefaultProguardFile("proguard-android-optimize.txt"),
+                "proguard-rules.pro"
+            )
         }
     }
 }

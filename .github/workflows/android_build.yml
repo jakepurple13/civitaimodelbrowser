@@ -154,3 +154,67 @@ jobs:
         with:
           name: Signed Civit Apk
           path: civit-release.apk
+
+  apkMinified:
+    name: Generate Apk
+    timeout-minutes: 60
+    continue-on-error: true
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+
+      - run: |
+          echo $CIVIT_SERVICES > android/google-services.json
+        env:
+          CIVIT_SERVICES: ${{ secrets.CIVIT_SERVICES }}
+
+      - name: Setup JDK
+        uses: actions/setup-java@v5
+        with:
+          distribution: adopt
+          java-version: 21
+
+      - name: Get tag name
+        id: get_tag_name
+        run: |
+          set -x
+          echo "VERSION_TAG=${GITHUB_REF/refs\/tags\//}" >> $GITHUB_ENV
+
+      - name: Export Libraries
+        uses: gradle/gradle-build-action@v2
+        with:
+          gradle-version: current
+          arguments: "exportLibraryDefinitions"
+
+      - name: Build Artifacts
+        id: buildApks
+        uses: gradle/gradle-build-action@v2
+        with:
+          gradle-version: current
+          wrapper-cache-enabled: true
+          dependencies-cache-enabled: true
+          configuration-cache-enabled: true
+          arguments: android:assembleReleaseMinified
+
+      - uses: kevin-david/zipalign-sign-android-release@v2.0.1
+        name: Sign app APK
+        id: civit_apk_sign
+        with:
+          releaseDirectory: android/build/outputs/apk/releaseMinified/
+          signingKeyBase64: ${{ secrets.SIGNING_KEY }}
+          alias: ${{ secrets.ALIAS }}
+          keyStorePassword: ${{ secrets.KEYSTORE_PASSWORD }}
+          keyPassword: ${{ secrets.KEY_PASSWORD }}
+        env:
+          # override default build-tools version (33.0.0) -- optional
+          BUILD_TOOLS_VERSION: "34.0.0"
+
+      - name: Clean up build artifacts
+        run: |
+          cp ${{ steps.civit_apk_sign.outputs.signedReleaseFile }} civit-release-minified.apk
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: Signed Civit Apk
+          path: civit-release-minified.apk

@@ -199,7 +199,7 @@ jobs:
 
       - uses: kevin-david/zipalign-sign-android-release@v2.0.1
         name: Sign minified app APK
-        id: civit_apk_sign
+        id: civit_minified_apk_sign
         with:
           releaseDirectory: android/build/outputs/apk/releaseMinified/
           signingKeyBase64: ${{ secrets.SIGNING_KEY }}
@@ -212,9 +212,9 @@ jobs:
 
       - name: Clean up build artifacts
         run: |
-          cp ${{ steps.civit_apk_sign.outputs.signedReleaseFile }} civit-release-minified.apk
+          cp ${{ steps.civit_minified_apk_sign.outputs.signedReleaseFile }} civit-release-minified.apk
 
       - uses: actions/upload-artifact@v4
         with:
-          name: Signed Civit Apk
+          name: Signed Minified Civit Apk
           path: civit-release-minified.apk

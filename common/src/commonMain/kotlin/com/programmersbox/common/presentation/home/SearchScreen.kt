@@ -35,7 +35,6 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SearchBarDefaults
 import androidx.compose.material3.SearchBarValue
 import androidx.compose.material3.Text
@@ -59,9 +58,11 @@ import androidx.paging.compose.collectAsLazyPagingItems
 import com.programmersbox.common.BackButton
 import com.programmersbox.common.DataStore
 import com.programmersbox.common.NetworkConnectionRepository
+import com.programmersbox.common.WindowedScaffold
 import com.programmersbox.common.adaptiveGridCell
 import com.programmersbox.common.db.FavoritesDao
 import com.programmersbox.common.db.SearchHistoryItem
+import com.programmersbox.common.presentation.components.CivitRail
 import dev.chrisbanes.haze.HazeProgressive
 import dev.chrisbanes.haze.LocalHazeStyle
 import dev.chrisbanes.haze.hazeEffect
@@ -103,7 +104,7 @@ fun SearchScreen(
         .searchFlow
         .collectAsStateWithLifecycle(persistentListOf())
 
-    Scaffold(
+    WindowedScaffold(
         topBar = {
             SearchAppBar(
                 searchQuery = viewModel.searchQuery,
@@ -124,7 +125,8 @@ fun SearchScreen(
                     style = hazeStyle
                 }
             )
-        }
+        },
+        rail = { CivitRail() },
     ) { paddingValues ->
         LazyVerticalGrid(
             columns = adaptiveGridCell(),
@@ -270,7 +272,6 @@ private fun SearchAppBar(
             verticalArrangement = Arrangement.spacedBy(4.dp)
         ) {
             items(searchHistory) { item ->
-
                 var showDialog by remember { mutableStateOf(false) }
 
                 if (showDialog) {

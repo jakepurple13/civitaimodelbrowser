@@ -100,7 +100,8 @@ class MainActivity : FragmentActivity() {
                                     null
                                 )
                             )
-                        }
+                        },
+                        activity = this
                     )
                 }
                 Toaster(

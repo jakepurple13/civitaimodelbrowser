@@ -47,7 +47,6 @@ import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SegmentedButton
 import androidx.compose.material3.SegmentedButtonDefaults
 import androidx.compose.material3.SingleChoiceSegmentedButtonRow
@@ -91,6 +90,7 @@ import com.programmersbox.common.DataStore
 import com.programmersbox.common.ModelType
 import com.programmersbox.common.Models
 import com.programmersbox.common.NetworkConnectionRepository
+import com.programmersbox.common.WindowedScaffold
 import com.programmersbox.common.adaptiveGridCell
 import com.programmersbox.common.db.BlacklistedItemRoom
 import com.programmersbox.common.db.FavoriteModel
@@ -98,6 +98,7 @@ import com.programmersbox.common.db.FavoritesDao
 import com.programmersbox.common.isScrollingUp
 import com.programmersbox.common.paging.itemKeyIndexed
 import com.programmersbox.common.presentation.components.CivitBottomBar
+import com.programmersbox.common.presentation.components.CivitRail
 import com.programmersbox.common.presentation.components.LoadingImage
 import com.programmersbox.common.presentation.components.ModelOptionsSheet
 import com.programmersbox.common.showRefreshButton
@@ -148,7 +149,7 @@ fun CivitAiScreen(
 
     val bottomBarScrollBehavior = BottomAppBarDefaults.exitAlwaysScrollBehavior()
 
-    Scaffold(
+    WindowedScaffold(
         topBar = {
             CivitTopBar(
                 showBlur = showBlur,
@@ -171,6 +172,7 @@ fun CivitAiScreen(
                 }
             )
         },
+        rail = { CivitRail() },
         bottomBar = {
             CivitBottomBar(
                 showBlur = showBlur,

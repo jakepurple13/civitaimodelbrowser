@@ -49,7 +49,6 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SearchBarDefaults
 import androidx.compose.material3.SegmentedButton
 import androidx.compose.material3.SegmentedButtonDefaults
@@ -83,6 +82,7 @@ import com.programmersbox.common.ComposableUtils
 import com.programmersbox.common.CustomScrollBar
 import com.programmersbox.common.DataStore
 import com.programmersbox.common.NetworkConnectionRepository
+import com.programmersbox.common.WindowedScaffold
 import com.programmersbox.common.adaptiveGridCell
 import com.programmersbox.common.db.FavoriteModel
 import com.programmersbox.common.db.FavoriteType
@@ -90,6 +90,7 @@ import com.programmersbox.common.db.FavoritesDao
 import com.programmersbox.common.db.ListDao
 import com.programmersbox.common.isScrollingUp
 import com.programmersbox.common.presentation.components.CivitBottomBar
+import com.programmersbox.common.presentation.components.CivitRail
 import com.programmersbox.common.presentation.components.ImageSheet
 import com.programmersbox.common.presentation.components.ListChoiceScreen
 import com.programmersbox.common.presentation.components.LoadingImage
@@ -152,7 +153,7 @@ fun FavoritesUI(
 
     val bottomBarScrollBehavior = BottomAppBarDefaults.exitAlwaysScrollBehavior()
 
-    Scaffold(
+    WindowedScaffold(
         topBar = {
             Surface(
                 color = if (showBlur) Color.Transparent else MaterialTheme.colorScheme.surface
@@ -309,6 +310,7 @@ fun FavoritesUI(
                 ) { Icon(Icons.Default.ArrowUpward, null) }
             }
         },
+        rail = { CivitRail() },
         bottomBar = {
             CivitBottomBar(
                 showBlur = showBlur,

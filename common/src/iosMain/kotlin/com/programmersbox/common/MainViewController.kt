@@ -8,7 +8,10 @@ import androidx.compose.material3.MotionScheme
 import androidx.compose.material3.Shapes
 import androidx.compose.material3.Typography
 import androidx.compose.material3.expressiveLightColorScheme
+import androidx.compose.material3.windowsizeclass.ExperimentalMaterial3WindowSizeClassApi
+import androidx.compose.material3.windowsizeclass.calculateWindowSizeClass
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.graphics.Color
@@ -33,7 +36,7 @@ import platform.Foundation.NSFileManager
 import platform.Foundation.NSURL
 import platform.Foundation.NSUserDomainMask
 
-@OptIn(ExperimentalForeignApi::class)
+@OptIn(ExperimentalForeignApi::class, ExperimentalMaterial3WindowSizeClassApi::class)
 fun MainViewController() = ComposeUIViewController {
     KoinApplication(
         configuration = koinConfiguration(
@@ -72,14 +75,18 @@ fun MainViewController() = ComposeUIViewController {
             darkTheme = isDarkMode,
             isAmoled = isAmoled
         ) {
-            App(
-                onShareClick = {}
-            )
+            CompositionLocalProvider(
+                LocalWindowClassSize provides calculateWindowSizeClass().widthSizeClass
+            ) {
+                App(
+                    onShareClick = {}
+                )
 
-            Toaster(
-                state = koinInject<ToasterState>(),
-                richColors = true
-            )
+                Toaster(
+                    state = koinInject<ToasterState>(),
+                    richColors = true
+                )
+            }
         }
     }
 }

@@ -63,6 +63,8 @@ googlePerformancePlugin = "2.0.2"
 firebaseBom = "34.7.0"
 firebase-cocoapods = "11.8.0"
 
+material3WindowSizeClassVersion = "1.9.0"
+
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp-version" }
 android-library = { id = "com.android.library", version.ref = "agp-version" }
@@ -129,6 +131,7 @@ cmp-navigation3-ui = { group = "org.jetbrains.androidx.navigation3", name = "nav
 cmp-lifecycle-viewmodel-navigation3 = { module = "org.jetbrains.androidx.lifecycle:lifecycle-viewmodel-navigation3", version.ref = "cmpLifecycle" }
 cmp-navigationevent-compose = { module = "org.jetbrains.androidx.navigationevent:navigationevent-compose", version.ref = "cmp-navevent" }
 cmp-material3-adaptive-nav3 = { module = "org.jetbrains.compose.material3.adaptive:adaptive-navigation3", version.ref = "cmp-nav3-material3" }
+material3-window-size = { module = "org.jetbrains.compose.material3:material3-window-size-class", version.ref = "material3WindowSizeClassVersion" }
 
 koin-bom = { module = "io.insert-koin:koin-bom", version.ref = "koin" }
 koin-core = { module = "io.insert-koin:koin-core" }

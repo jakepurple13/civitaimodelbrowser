@@ -61,6 +61,7 @@ kotlin {
             api(compose.ui)
             api(compose.foundation)
             api(compose.materialIconsExtended)
+            api(libs.material3.window.size)
             //api(compose.material3)
             api(libs.material3)
             api(compose.components.resources)

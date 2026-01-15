@@ -59,7 +59,7 @@ internal fun App(
             Actions(
                 shareUrl = onShareClick,
             )
-        }
+        },
     ) {
         SharedTransitionLayout {
 

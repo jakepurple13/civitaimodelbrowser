@@ -24,7 +24,6 @@ import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LargeTopAppBar
 import androidx.compose.material3.ListItem
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
@@ -37,8 +36,10 @@ import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.unit.dp
 import com.programmersbox.common.ApplicationInfo
 import com.programmersbox.common.BackButton
+import com.programmersbox.common.WindowedScaffold
 import com.programmersbox.common.getPlatformName
 import com.programmersbox.common.presentation.components.CivitBottomBar
+import com.programmersbox.common.presentation.components.CivitRail
 import com.programmersbox.common.presentation.components.icons.Github
 import com.programmersbox.resources.Res
 import com.programmersbox.resources.civitai_logo
@@ -58,7 +59,7 @@ fun SettingsScreen(
 ) {
     val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
 
-    Scaffold(
+    WindowedScaffold(
         topBar = {
             LargeTopAppBar(
                 title = { Text("Settings") },
@@ -72,6 +73,7 @@ fun SettingsScreen(
                 bottomBarScrollBehavior = null,
             )
         },
+        rail = { CivitRail() },
         modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection)
     ) { padding ->
         Column(

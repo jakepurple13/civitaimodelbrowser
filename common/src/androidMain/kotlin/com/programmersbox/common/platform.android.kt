@@ -1,5 +1,6 @@
 package com.programmersbox.common
 
+import android.app.Activity
 import android.app.DownloadManager
 import android.content.Context
 import android.os.Environment
@@ -11,7 +12,10 @@ import androidx.compose.foundation.lazy.grid.LazyGridState
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.rememberModalBottomSheetState
+import androidx.compose.material3.windowsizeclass.ExperimentalMaterial3WindowSizeClassApi
+import androidx.compose.material3.windowsizeclass.calculateWindowSizeClass
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Modifier
 import androidx.core.content.getSystemService
 import androidx.core.net.toUri
@@ -60,13 +64,19 @@ public actual fun getPlatformName(): String {
     return "Android ${android.os.Build.VERSION.SDK_INT}"
 }
 
+@OptIn(ExperimentalMaterial3WindowSizeClassApi::class)
 @Composable
 public fun UIShow(
     onShareClick: (String) -> Unit,
+    activity: Activity
 ) {
-    App(
-        onShareClick = onShareClick,
-    )
+    CompositionLocalProvider(
+        LocalWindowClassSize provides calculateWindowSizeClass(activity).widthSizeClass
+    ) {
+        App(
+            onShareClick = onShareClick,
+        )
+    }
 }
 
 @OptIn(ExperimentalMaterial3Api::class)

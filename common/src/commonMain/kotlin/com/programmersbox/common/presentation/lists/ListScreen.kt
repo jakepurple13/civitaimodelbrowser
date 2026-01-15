@@ -27,7 +27,6 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SegmentedButton
 import androidx.compose.material3.SegmentedButtonDefaults
 import androidx.compose.material3.SingleChoiceSegmentedButtonRow
@@ -58,9 +57,11 @@ import com.programmersbox.common.BackButton
 import com.programmersbox.common.ComposableUtils
 import com.programmersbox.common.DataStore
 import com.programmersbox.common.NetworkConnectionRepository
+import com.programmersbox.common.WindowedScaffold
 import com.programmersbox.common.db.CustomList
 import com.programmersbox.common.db.toImageHash
 import com.programmersbox.common.presentation.components.CivitBottomBar
+import com.programmersbox.common.presentation.components.CivitRail
 import com.programmersbox.common.presentation.components.LoadingImage
 import com.programmersbox.common.presentation.components.rememberBiometricOpening
 import dev.chrisbanes.haze.HazeProgressive
@@ -105,7 +106,7 @@ fun ListScreen(
 
     val bottomBarScrollBehavior = BottomAppBarDefaults.exitAlwaysScrollBehavior()
 
-    Scaffold(
+    WindowedScaffold(
         topBar = {
             TopAppBar(
                 title = { Text("Custom Lists") },
@@ -165,6 +166,7 @@ fun ListScreen(
                 }
             )
         },
+        rail = { CivitRail() },
         bottomBar = {
             CivitBottomBar(
                 showBlur = showBlur,

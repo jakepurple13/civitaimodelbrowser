@@ -8,7 +8,10 @@ import androidx.compose.foundation.rememberScrollbarAdapter
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.rememberModalBottomSheetState
+import androidx.compose.material3.windowsizeclass.ExperimentalMaterial3WindowSizeClassApi
+import androidx.compose.material3.windowsizeclass.calculateWindowSizeClass
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
@@ -133,14 +136,19 @@ public actual fun getPlatformName(): String {
     return "Jvm ${System.getProperty("java.version")}"
 }
 
+@OptIn(ExperimentalMaterial3WindowSizeClassApi::class)
 @Composable
 public fun UIShow(
     onShareClick: (String) -> Unit,
     producePath: () -> String,
 ) {
-    App(
-        onShareClick = onShareClick,
-    )
+    CompositionLocalProvider(
+        LocalWindowClassSize provides calculateWindowSizeClass().widthSizeClass
+    ) {
+        App(
+            onShareClick = onShareClick,
+        )
+    }
 }
 
 @OptIn(ExperimentalMaterial3Api::class)

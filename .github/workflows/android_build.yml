@@ -156,7 +156,7 @@ jobs:
           path: civit-release.apk
 
   apkMinified:
-    name: Generate Apk
+    name: Generate Minified Apk
     timeout-minutes: 60
     continue-on-error: true
     runs-on: ubuntu-latest
@@ -187,7 +187,7 @@ jobs:
           gradle-version: current
           arguments: "exportLibraryDefinitions"
 
-      - name: Build Artifacts
+      - name: Build Minified Artifacts
         id: buildApks
         uses: gradle/gradle-build-action@v2
         with:
@@ -198,7 +198,7 @@ jobs:
           arguments: android:assembleReleaseMinified
 
       - uses: kevin-david/zipalign-sign-android-release@v2.0.1
-        name: Sign app APK
+        name: Sign minified app APK
         id: civit_apk_sign
         with:
           releaseDirectory: android/build/outputs/apk/releaseMinified/

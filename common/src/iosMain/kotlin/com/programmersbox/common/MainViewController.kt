@@ -21,13 +21,23 @@ import com.materialkolor.dynamicColorScheme
 import com.materialkolor.dynamiccolor.ColorSpec
 import com.materialkolor.ktx.animateColorScheme
 import com.programmersbox.common.di.cmpModules
+import com.programmersbox.common.presentation.backup.BackupRepository
+import com.programmersbox.common.presentation.backup.RestoreInfo
 import com.programmersbox.common.presentation.backup.Zipper
+import com.programmersbox.common.presentation.components.ToastType
 import com.programmersbox.common.presentation.components.Toaster
 import com.programmersbox.common.presentation.components.ToasterState
 import com.programmersbox.common.presentation.qrcode.QrCodeRepository
+import dev.brewkits.kmpworkmanager.background.data.IosWorker
+import dev.brewkits.kmpworkmanager.background.data.IosWorkerFactory
+import dev.brewkits.kmpworkmanager.kmpWorkerModule
 import kotlinx.cinterop.ExperimentalForeignApi
+import kotlinx.serialization.json.Json
+import nl.adaptivity.xmlutil.core.impl.multiplatform.name
 import org.koin.compose.KoinApplication
 import org.koin.compose.koinInject
+import org.koin.core.component.KoinComponent
+import org.koin.core.component.inject
 import org.koin.core.module.dsl.singleOf
 import org.koin.dsl.koinConfiguration
 import org.koin.dsl.module
@@ -35,6 +45,7 @@ import platform.Foundation.NSDocumentDirectory
 import platform.Foundation.NSFileManager
 import platform.Foundation.NSURL
 import platform.Foundation.NSUserDomainMask
+import kotlin.time.measureTime
 
 @OptIn(ExperimentalForeignApi::class, ExperimentalMaterial3WindowSizeClassApi::class)
 fun MainViewController() = ComposeUIViewController {
@@ -44,6 +55,7 @@ fun MainViewController() = ComposeUIViewController {
                 modules(
                     cmpModules(),
                     createPlatformModule(),
+                    kmpWorkerModule(MyWorkerFactory(), setOf("restoring")),
                     module {
                         factory { ApplicationInfo(BuildKonfig.VERSION_NAME) }
                         single<() -> String> {
@@ -137,4 +149,59 @@ fun CustomMaterialTheme(
         motionScheme = MotionScheme.expressive(),
         content = content
     )
+}
+
+class RestoreWorker : IosWorker, KoinComponent {
+    private val backupRepository: BackupRepository by inject()
+    private val toasterState: ToasterState by inject()
+    private val notificationHandler: NotificationHandler by inject()
+    override suspend fun doWork(input: String?): Boolean {
+        println("Restore Worker: $input")
+        val inputData = Json.decodeFromString<RestoreInfo>(input ?: return false)
+        val platformFile = inputData.platformFile
+        val includeFavorites = inputData.includeFavorites
+        val includeBlacklisted = inputData.includeBlacklisted
+        val includeSettings = inputData.includeSettings
+        val includeSearchHistory = inputData.includeSearchHistory
+        val listsToInclude = emptyList<String>()//inputData.listItemsByUuid
+
+        println("Will restore $includeFavorites $includeBlacklisted $includeSettings $includeSearchHistory")
+        println("Will restore lists: ${listsToInclude.size}")
+
+        println("Restoring $platformFile")
+        val readItems = backupRepository.readItems(platformFile)
+        val duration = measureTime {
+            backupRepository.restoreItems(
+                backupItems = readItems.copy(lists = readItems.lists?.filter { it.item.uuid in listsToInclude }),
+                includeSettings = includeSettings,
+                includeFavorites = includeFavorites,
+                includeBlacklisted = includeBlacklisted,
+                includeSearchHistory = includeSearchHistory,
+            )
+        }
+        println("Restored in $duration")
+
+        notificationHandler.notify(
+            title = "Restore Complete",
+            message = "Restore Complete in $duration",
+            uuid = "restore_complete",
+        )
+
+        toasterState.show(
+            "Backup Complete in $duration",
+            type = ToastType.Success
+        )
+
+        return true
+    }
+}
+
+class MyWorkerFactory : IosWorkerFactory {
+    override fun createWorker(workerClassName: String): IosWorker? {
+        println("Worker Factory: $workerClassName")
+        return when (workerClassName) {
+            RestoreWorker::class.name -> RestoreWorker()
+            else -> null
+        }
+    }
 }

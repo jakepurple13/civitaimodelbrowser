@@ -51,6 +51,7 @@ kotlin {
             baseName = "common"
             isStatic = true
             linkerOpts.add("-lsqlite3")
+            freeCompilerArgs += "-Xadd-light-debug=enable"
         }
     }
     applyDefaultHierarchyTemplate()
@@ -172,6 +173,8 @@ kotlin {
             implementation(libs.permissions)
             implementation(libs.permissions.notifications)
             implementation(libs.alarmee)
+
+            implementation("dev.brewkits:kmpworkmanager:2.0.0")
         }
 
         //val desktopTest by getting

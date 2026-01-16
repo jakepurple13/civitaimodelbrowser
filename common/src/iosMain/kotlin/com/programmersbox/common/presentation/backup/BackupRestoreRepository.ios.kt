@@ -1,8 +1,15 @@
 package com.programmersbox.common.presentation.backup
 
 import com.programmersbox.common.NotificationHandler
+import com.programmersbox.common.RestoreWorker
 import com.programmersbox.common.presentation.components.ToastType
 import com.programmersbox.common.presentation.components.ToasterState
+import dev.brewkits.kmpworkmanager.background.domain.BackgroundTaskScheduler
+import dev.brewkits.kmpworkmanager.background.domain.Constraints
+import dev.brewkits.kmpworkmanager.background.domain.ExistingPolicy
+import dev.brewkits.kmpworkmanager.background.domain.Qos
+import dev.brewkits.kmpworkmanager.background.domain.TaskTrigger
+import dev.brewkits.kmpworkmanager.background.domain.enqueue
 import io.github.vinceglb.filekit.PlatformFile
 import io.github.vinceglb.filekit.path
 import kotlinx.cinterop.BetaInteropApi
@@ -19,6 +26,10 @@ import kotlinx.coroutines.IO
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import kotlinx.serialization.Serializable
+import kotlinx.serialization.encodeToString
+import kotlinx.serialization.json.Json
+import nl.adaptivity.xmlutil.core.impl.multiplatform.name
 import okio.FileSystem
 import okio.Path
 import okio.Path.Companion.toPath
@@ -230,6 +241,7 @@ actual class Zipper {
 actual class BackupRestoreHandler(
     private val toasterState: ToasterState,
     private val notificationHandler: NotificationHandler,
+    private val scheduler: BackgroundTaskScheduler
 ) {
     private val scope = CoroutineScope(Dispatchers.IO + Job())
 
@@ -243,7 +255,29 @@ actual class BackupRestoreHandler(
         listItemsByUuid: List<String>
     ) {
         scope.launch {
-            val duration = measureTime {
+            println("Enqueueing restore")
+            runCatching {
+                scheduler.enqueue(
+                    "restoring-task",
+                    trigger = TaskTrigger.OneTime(),
+                    workerClassName = RestoreWorker::class.name,
+                    policy = ExistingPolicy.REPLACE,
+                    constraints = Constraints(
+                        qos = Qos.UserInitiated
+                    ),
+                    inputJson = Json.encodeToString(
+                        RestoreInfo(
+                            platformFile = platformFile,
+                            includeFavorites = includeFavorites,
+                            includeBlacklisted = includeBlacklisted,
+                            includeSettings = includeSettings,
+                            includeSearchHistory = includeSearchHistory,
+                            //listItemsByUuid = listItemsByUuid
+                        )
+                    )
+                )
+            }.onFailure { it.printStackTrace() }
+            /*val duration = measureTime {
                 backupRepository.restoreItems(
                     backupItems = backupRepository.readItems(platformFile),
                     includeSettings = includeSettings,
@@ -261,7 +295,17 @@ actual class BackupRestoreHandler(
                 title = "Restore Complete",
                 message = "Restore Complete in $duration",
                 uuid = "restore_complete",
-            )
+            )*/
         }
     }
 }
+
+@Serializable
+data class RestoreInfo(
+    val platformFile: PlatformFile,
+    val includeFavorites: Boolean,
+    val includeBlacklisted: Boolean,
+    val includeSettings: Boolean,
+    val includeSearchHistory: Boolean,
+    //val listItemsByUuid: List<String>,
+)

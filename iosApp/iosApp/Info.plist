@@ -8,5 +8,16 @@
 	<true/>
 	<key>CADisableMinimumFrameDurationOnPhone</key>
 	<true/>
+    <key>BGTaskSchedulerPermittedIdentifiers</key>
+    <array>
+        <string>restoring-task</string>
+    </array>
+
+    <key>UIBackgroundModes</key>
+    <array>
+        <string>processing</string>
+        <string>fetch</string>
+        <string>remote-notification</string>
+    </array>
 </dict>
 </plist>

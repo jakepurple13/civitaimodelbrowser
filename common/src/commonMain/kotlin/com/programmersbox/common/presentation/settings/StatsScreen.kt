@@ -241,6 +241,7 @@ private fun NsfwStats(
     modifier: Modifier = Modifier,
 ) {
     OutlinedCard(
+        onClick = { onShowNsfwStatsChange(!showNsfwStats) },
         border = BorderStroke(1.dp, MaterialTheme.colorScheme.error),
         modifier = modifier
             .animateContentSize()
@@ -257,7 +258,7 @@ private fun NsfwStats(
             trailingContent = {
                 Switch(
                     checked = showNsfwStats,
-                    onCheckedChange = onShowNsfwStatsChange,
+                    onCheckedChange = null,
                     colors = SwitchDefaults.colors(
                         checkedThumbColor = MaterialTheme.colorScheme.error,
                         checkedTrackColor = MaterialTheme.colorScheme.errorContainer,

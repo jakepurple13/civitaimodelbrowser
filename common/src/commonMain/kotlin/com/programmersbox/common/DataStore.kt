@@ -116,6 +116,14 @@ class DataStore private constructor(
     )
 
     @Composable
+    fun rememberDoubleClickBehavior(): MutableState<DoubleClickBehavior> = rememberPreferenceType(
+        key = stringPreferencesKey("double_click_behavior"),
+        defaultValue = DoubleClickBehavior.Blacklist,
+        mapToValue = { json.decodeFromString<DoubleClickBehavior>(it) },
+        mapToString = { json.encodeToString(it) }
+    )
+
+    @Composable
     fun rememberIsAmoled(): MutableState<Boolean> = rememberPreference(
         key = booleanPreferencesKey("is_amoled"),
         defaultValue = false
@@ -282,4 +290,11 @@ data class BlurType(
 ) {
     @Composable
     fun toHazeStyle() = type.toHazeStyle(level)
+}
+
+@Serializable
+enum class DoubleClickBehavior(val visualName: String) {
+    DoNothing("Do Nothing"),
+    Blacklist("Blacklist/Unblacklist"),
+    Favorite("Favorite/Unfavorite")
 }

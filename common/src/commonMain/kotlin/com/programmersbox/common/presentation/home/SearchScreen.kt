@@ -57,6 +57,7 @@ import androidx.paging.LoadState
 import androidx.paging.compose.collectAsLazyPagingItems
 import com.programmersbox.common.BackButton
 import com.programmersbox.common.DataStore
+import com.programmersbox.common.Models
 import com.programmersbox.common.NetworkConnectionRepository
 import com.programmersbox.common.WindowedScaffold
 import com.programmersbox.common.adaptiveGridCell
@@ -99,6 +100,19 @@ fun SearchScreen(
     val showNsfw by dataStore.showNsfw()
     val blurStrength by dataStore.hideNsfwStrength()
     val hazeStyle = LocalHazeStyle.current
+    val scope = rememberCoroutineScope()
+
+    val doubleClickBehavior by dataStore.rememberDoubleClickBehavior()
+    val doubleClickBehaviorAction: ((Models) -> Unit)? by remember {
+        derivedStateOf {
+            createDoubleClickBehaviorAction(
+                doubleClickBehavior = doubleClickBehavior,
+                blacklisted = blacklisted,
+                db = db,
+                scope = scope,
+            )
+        }
+    }
 
     val searchList by viewModel
         .searchFlow
@@ -148,6 +162,7 @@ fun SearchScreen(
                 shouldShowMedia = shouldShowMedia,
                 onNavigateToUser = onNavigateToUser,
                 onNavigateToDetailImages = onNavigateToDetailImages,
+                onDoubleClick = doubleClickBehaviorAction,
             )
             if (
                 lazyPagingItems.itemCount == 0 &&

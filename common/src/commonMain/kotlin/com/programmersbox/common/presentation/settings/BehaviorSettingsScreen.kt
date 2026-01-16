@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.AdsClick
 import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.filled.BlurCircular
 import androidx.compose.material.icons.filled.BlurLinear
@@ -53,6 +54,7 @@ import androidx.compose.ui.unit.dp
 import com.programmersbox.common.BackButton
 import com.programmersbox.common.BlurType
 import com.programmersbox.common.DataStore
+import com.programmersbox.common.DoubleClickBehavior
 import com.programmersbox.common.HazeBlur
 import com.programmersbox.common.ThemeMode
 import com.programmersbox.resources.Res
@@ -102,6 +104,7 @@ fun BehaviorSettings(
         var blurType by dataStore.rememberBlurType()
         var useProgressive by dataStore.rememberUseProgressive()
         var isAmoled by dataStore.rememberIsAmoled()
+        var doubleClickBehavior by dataStore.rememberDoubleClickBehavior()
         Card(
             onClick = { showBlur = !showBlur }
         ) {
@@ -299,6 +302,63 @@ fun BehaviorSettings(
                     Switch(
                         checked = isAmoled,
                         onCheckedChange = null
+                    )
+                }
+            )
+        }
+
+        HorizontalDivider()
+
+        var showDoubleClickBehaviorDialog by remember { mutableStateOf(false) }
+
+        if (showDoubleClickBehaviorDialog) {
+            AlertDialog(
+                onDismissRequest = { showDoubleClickBehaviorDialog = false },
+                title = { Text("Double Click Behavior") },
+                text = {
+                    Column {
+                        DoubleClickBehavior.entries.forEach {
+                            Card(
+                                onClick = { doubleClickBehavior = it },
+                                colors = CardDefaults.cardColors(
+                                    containerColor = Color.Transparent
+                                )
+                            ) {
+                                ListItem(
+                                    headlineContent = { Text(it.visualName) },
+                                    trailingContent = {
+                                        RadioButton(
+                                            selected = it == doubleClickBehavior,
+                                            onClick = null
+                                        )
+                                    },
+                                    colors = ListItemDefaults.colors(
+                                        containerColor = Color.Transparent
+                                    )
+                                )
+                            }
+                        }
+                    }
+                },
+                confirmButton = {
+                    TextButton(
+                        onClick = { showDoubleClickBehaviorDialog = false }
+                    ) { Text("Confirm") }
+                }
+            )
+        }
+
+        Card(
+            onClick = { showDoubleClickBehaviorDialog = true }
+        ) {
+            ListItem(
+                leadingContent = { Icon(Icons.Default.AdsClick, null) },
+                headlineContent = { Text("Double Click Behavior") },
+                supportingContent = { Text(doubleClickBehavior.visualName) },
+                trailingContent = {
+                    Icon(
+                        Icons.Default.ArrowDropDown,
+                        null
                     )
                 }
             )

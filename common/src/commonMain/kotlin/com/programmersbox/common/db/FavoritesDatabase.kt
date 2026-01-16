@@ -126,6 +126,9 @@ interface FavoritesDao {
     @Query("SELECT EXISTS(SELECT * FROM favorite_table WHERE favoriteType = :type AND id = :id)")
     fun getFavoritesByType(type: FavoriteType, id: Long): Flow<Boolean>
 
+    @Query("SELECT EXISTS(SELECT * FROM favorite_table WHERE favoriteType = :type AND id = :id)")
+    suspend fun getFavoritesByTypeSync(type: FavoriteType, id: Long): Boolean
+
     @Query("SELECT EXISTS(SELECT * FROM favorite_table WHERE favoriteType = :type AND imageUrl = :imageUrl)")
     fun getFavoritesImages(type: FavoriteType, imageUrl: String?): Flow<Boolean>
 

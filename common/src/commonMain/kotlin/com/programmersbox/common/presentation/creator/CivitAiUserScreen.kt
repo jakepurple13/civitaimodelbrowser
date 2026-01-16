@@ -45,6 +45,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.paging.compose.collectAsLazyPagingItems
 import com.programmersbox.common.BackButton
 import com.programmersbox.common.DataStore
+import com.programmersbox.common.Models
 import com.programmersbox.common.NetworkConnectionRepository
 import com.programmersbox.common.adaptiveGridCell
 import com.programmersbox.common.db.FavoriteType
@@ -54,6 +55,7 @@ import com.programmersbox.common.presentation.components.ListChoiceScreen
 import com.programmersbox.common.presentation.components.LoadingImage
 import com.programmersbox.common.presentation.components.ToastType
 import com.programmersbox.common.presentation.components.ToasterState
+import com.programmersbox.common.presentation.home.createDoubleClickBehaviorAction
 import com.programmersbox.common.presentation.home.modelItems
 import com.programmersbox.common.presentation.qrcode.QrCodeType
 import com.programmersbox.common.presentation.qrcode.ShareViaQrCode
@@ -83,6 +85,19 @@ fun CivitAiUserScreen(
     val blacklisted by database.getBlacklisted().collectAsStateWithLifecycle(emptyList())
     val showBlur by dataStore.rememberShowBlur()
     val useProgressive by dataStore.rememberUseProgressive()
+    val scope = rememberCoroutineScope()
+
+    val doubleClickBehavior by dataStore.rememberDoubleClickBehavior()
+    val doubleClickBehaviorAction: ((Models) -> Unit)? by remember {
+        derivedStateOf {
+            createDoubleClickBehaviorAction(
+                doubleClickBehavior = doubleClickBehavior,
+                blacklisted = blacklisted,
+                db = database,
+                scope = scope,
+            )
+        }
+    }
 
     val lazyPagingItems = viewModel.pager.collectAsLazyPagingItems()
 
@@ -107,7 +122,6 @@ fun CivitAiUserScreen(
         )
     }
 
-    val scope = rememberCoroutineScope()
     var showLists by remember { mutableStateOf(false) }
     val listState = rememberModalBottomSheetState(true)
 
@@ -269,6 +283,7 @@ fun CivitAiUserScreen(
                     database = favorites,
                     blacklisted = blacklisted,
                     shouldShowMedia = shouldShowMedia,
+                    onDoubleClick = doubleClickBehaviorAction
                 )
             }
         }

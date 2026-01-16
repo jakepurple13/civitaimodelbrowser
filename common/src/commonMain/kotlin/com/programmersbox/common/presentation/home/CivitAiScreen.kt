@@ -87,6 +87,7 @@ import chaintech.videoplayer.ui.preview.VideoPreviewComposable
 import com.programmersbox.common.CivitSort
 import com.programmersbox.common.ComposableUtils
 import com.programmersbox.common.DataStore
+import com.programmersbox.common.DoubleClickBehavior
 import com.programmersbox.common.ModelType
 import com.programmersbox.common.Models
 import com.programmersbox.common.NetworkConnectionRepository
@@ -94,6 +95,7 @@ import com.programmersbox.common.WindowedScaffold
 import com.programmersbox.common.adaptiveGridCell
 import com.programmersbox.common.db.BlacklistedItemRoom
 import com.programmersbox.common.db.FavoriteModel
+import com.programmersbox.common.db.FavoriteType
 import com.programmersbox.common.db.FavoritesDao
 import com.programmersbox.common.isScrollingUp
 import com.programmersbox.common.paging.itemKeyIndexed
@@ -107,6 +109,7 @@ import dev.chrisbanes.haze.LocalHazeStyle
 import dev.chrisbanes.haze.hazeEffect
 import dev.chrisbanes.haze.hazeSource
 import dev.chrisbanes.haze.rememberHazeState
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import org.koin.compose.koinInject
 import org.koin.compose.viewmodel.koinViewModel
@@ -148,6 +151,18 @@ fun CivitAiScreen(
     val hazeStyle = LocalHazeStyle.current
 
     val bottomBarScrollBehavior = BottomAppBarDefaults.exitAlwaysScrollBehavior()
+
+    val doubleClickBehavior by dataStore.rememberDoubleClickBehavior()
+    val doubleClickBehaviorAction: ((Models) -> Unit)? by remember {
+        derivedStateOf {
+            createDoubleClickBehaviorAction(
+                doubleClickBehavior = doubleClickBehavior,
+                blacklisted = blacklisted,
+                db = db,
+                scope = scope,
+            )
+        }
+    }
 
     WindowedScaffold(
         topBar = {
@@ -239,6 +254,7 @@ fun CivitAiScreen(
                     shouldShowMedia = shouldShowMedia,
                     onNavigateToUser = onNavigateToUser,
                     onNavigateToDetailImages = onNavigateToDetailImages,
+                    onDoubleClick = doubleClickBehaviorAction
                 )
             }
         }
@@ -259,6 +275,7 @@ fun LazyGridScope.modelItems(
     shouldShowMedia: Boolean,
     onNavigateToUser: ((String) -> Unit)? = null,
     onNavigateToDetailImages: ((Long, String) -> Unit)? = null,
+    onDoubleClick: ((Models) -> Unit)? = null,
 ) {
     items(
         count = lazyPagingItems.itemCount,
@@ -284,6 +301,7 @@ fun LazyGridScope.modelItems(
                 models = models,
                 onClick = { onNavigateToDetail(models.id.toString()) },
                 onLongClick = { showSheet = true },
+                onDoubleClick = onDoubleClick?.let { action -> { action(models) } },
                 showNsfw = showNsfw,
                 blurStrength = blurStrength.dp,
                 shouldShowMedia = shouldShowMedia,
@@ -343,6 +361,7 @@ private fun ModelItem(
     blurStrength: Dp,
     onClick: () -> Unit,
     onLongClick: () -> Unit,
+    onDoubleClick: (() -> Unit)?,
     isFavorite: Boolean,
     isBlacklisted: Boolean,
     shouldShowMedia: Boolean,
@@ -365,6 +384,7 @@ private fun ModelItem(
         isFavorite = isFavorite,
         isBlacklisted = isBlacklisted,
         onLongClick = onLongClick,
+        onDoubleClick = onDoubleClick,
         shouldShowMedia = shouldShowMedia,
         blurHash = imageModel?.hash,
         creatorImage = models.creator?.image,
@@ -392,6 +412,7 @@ fun CoverCard(
     creatorImage: String? = null,
     onLongClick: () -> Unit = {},
     onClick: () -> Unit = {},
+    onDoubleClick: (() -> Unit)? = null,
 ) {
     Surface(
         tonalElevation = 4.dp,
@@ -404,7 +425,8 @@ fun CoverCard(
             .clip(MaterialTheme.shapes.medium)
             .combinedClickable(
                 onLongClick = onLongClick,
-                onClick = onClick
+                onClick = onClick,
+                onDoubleClick = onDoubleClick
             )
     ) {
         CardContent(
@@ -656,6 +678,64 @@ private fun CivitTopBar(
     }
 }
 
+fun createDoubleClickBehaviorAction(
+    doubleClickBehavior: DoubleClickBehavior,
+    blacklisted: List<BlacklistedItemRoom>,
+    db: FavoritesDao,
+    scope: CoroutineScope,
+): ((Models) -> Unit)? = when (doubleClickBehavior) {
+    DoubleClickBehavior.DoNothing -> null
+    DoubleClickBehavior.Blacklist -> {
+        { models: Models ->
+            scope.launch {
+                if (blacklisted.any { b -> b.id == models.id }) {
+                    blacklisted.find { b -> b.id == models.id }
+                        ?.let { db.delete(it) }
+                } else {
+                    db.blacklistItem(
+                        models.id,
+                        models.name,
+                        models.nsfw,
+                        models.modelVersions
+                            .firstOrNull { it.images.isNotEmpty() }
+                            ?.images
+                            ?.firstOrNull()
+                            ?.url
+                    )
+                }
+            }
+        }
+    }
+
+    DoubleClickBehavior.Favorite -> {
+        { models: Models ->
+            scope.launch {
+                if (db.getFavoritesByTypeSync(FavoriteType.Model, models.id)) {
+                    db.removeModel(models.id)
+                } else {
+                    val modelImage = models
+                        .modelVersions
+                        .firstOrNull { it.images.isNotEmpty() }
+                        ?.images
+                        ?.firstOrNull()
+                    db.addFavorite(
+                        id = models.id,
+                        name = models.name,
+                        description = models.description,
+                        type = models.type,
+                        nsfw = models.nsfw,
+                        imageUrl = modelImage?.url,
+                        favoriteType = FavoriteType.Model,
+                        modelId = models.id,
+                        hash = modelImage?.hash,
+                        creatorName = models.creator?.username,
+                        creatorImage = models.creator?.image,
+                    )
+                }
+            }
+        }
+    }
+}
 
 @Composable
 fun BlacklistHandling(

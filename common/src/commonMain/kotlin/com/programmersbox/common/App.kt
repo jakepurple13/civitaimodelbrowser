@@ -182,4 +182,7 @@ sealed class Screen {
 
     @Serializable
     data class WebView(val url: String) : NavKey
+
+    @Serializable
+    data object Onboarding : NavKey
 }

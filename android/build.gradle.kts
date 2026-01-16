@@ -49,6 +49,17 @@ android {
             isDebuggable = false
         }
 
+        create("betaMinified") {
+            initWith(getByName("debug"))
+            matchingFallbacks.add("debug")
+            isDebuggable = false
+            isMinifyEnabled = true
+            proguardFiles(
+                getDefaultProguardFile("proguard-android-optimize.txt"),
+                "proguard-rules.pro"
+            )
+        }
+
         getByName("release") {
             isMinifyEnabled = false
         }

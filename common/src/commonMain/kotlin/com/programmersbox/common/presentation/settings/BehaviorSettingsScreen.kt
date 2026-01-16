@@ -90,7 +90,7 @@ fun BehaviorSettingsScreen() {
 }
 
 @Composable
-private fun BehaviorSettings(
+fun BehaviorSettings(
     dataStore: DataStore,
     modifier: Modifier = Modifier,
 ) {

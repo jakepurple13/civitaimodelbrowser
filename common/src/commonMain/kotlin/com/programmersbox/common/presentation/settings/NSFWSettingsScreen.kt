@@ -68,7 +68,7 @@ fun NsfwSettingsScreen() {
 }
 
 @Composable
-private fun NsfwSettings(
+fun NsfwSettings(
     dataStore: DataStore,
     modifier: Modifier = Modifier,
 ) {

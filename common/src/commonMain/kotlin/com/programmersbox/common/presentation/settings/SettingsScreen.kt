@@ -13,6 +13,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Api
 import androidx.compose.material.icons.filled.Backup
+import androidx.compose.material.icons.filled.CatchingPokemon
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.NoAdultContent
 import androidx.compose.material.icons.filled.QrCodeScanner
@@ -56,6 +57,7 @@ fun SettingsScreen(
     onNavigateToAbout: () -> Unit,
     onNavigateToNsfw: () -> Unit,
     onNavigateToBehavior: () -> Unit,
+    onNavigateToOnboarding: () -> Unit,
 ) {
     val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
 
@@ -130,6 +132,15 @@ fun SettingsScreen(
                 ListItem(
                     headlineContent = { Text("Stats") },
                     leadingContent = { Icon(Icons.Default.QueryStats, null) }
+                )
+            }
+
+            Card(
+                onClick = onNavigateToOnboarding
+            ) {
+                ListItem(
+                    headlineContent = { Text("View Onboarding Again") },
+                    leadingContent = { Icon(Icons.Default.CatchingPokemon, null) }
                 )
             }
 

@@ -119,6 +119,9 @@ kotlin {
             implementation(libs.okio)
 
             implementation(libs.composewebview)
+
+            implementation(libs.multiplatform.markdown.renderer)
+            implementation(libs.multiplatform.markdown.renderer.m3)
         }
 
         commonTest.dependencies {

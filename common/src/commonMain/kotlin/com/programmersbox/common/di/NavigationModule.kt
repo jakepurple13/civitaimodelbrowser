@@ -12,6 +12,7 @@ import androidx.compose.runtime.mutableStateListOf
 import androidx.navigation3.runtime.NavKey
 import androidx.navigation3.scene.DialogSceneStrategy
 import androidx.navigation3.ui.NavDisplay
+import com.programmersbox.common.DataStore
 import com.programmersbox.common.Screen
 import com.programmersbox.common.presentation.backup.BackupScreen
 import com.programmersbox.common.presentation.backup.RestoreScreen
@@ -26,12 +27,14 @@ import com.programmersbox.common.presentation.home.SearchScreen
 import com.programmersbox.common.presentation.images.CivitAiImagesScreen
 import com.programmersbox.common.presentation.lists.ListDetailScreen
 import com.programmersbox.common.presentation.lists.ListScreen
+import com.programmersbox.common.presentation.onboarding.OnboardingScreen
 import com.programmersbox.common.presentation.qrcode.ScanQrCode
 import com.programmersbox.common.presentation.settings.AboutScreen
 import com.programmersbox.common.presentation.settings.BehaviorSettingsScreen
 import com.programmersbox.common.presentation.settings.NsfwSettingsScreen
 import com.programmersbox.common.presentation.settings.SettingsScreen
 import com.programmersbox.common.presentation.settings.StatsScreen
+import kotlinx.coroutines.runBlocking
 import org.koin.compose.koinInject
 import org.koin.compose.viewmodel.koinViewModel
 import org.koin.core.annotation.KoinExperimentalAPI
@@ -122,6 +125,13 @@ private fun Module.home() {
     navigation<Screen.WebView> {
         WebViewScreen(url = it.url)
     }
+
+    navigation<Screen.Onboarding> {
+        val backStack = koinInject<NavigationHandler>().backStack
+        OnboardingScreen(
+            onFinish = { backStack.removeAll { it == Screen.Onboarding } }
+        )
+    }
 }
 
 @OptIn(KoinExperimentalAPI::class, ExperimentalMaterial3AdaptiveApi::class)
@@ -203,7 +213,11 @@ private fun Module.settingsNavigation() {
             onNavigateToStats = { backStack.add(Screen.Settings.Stats) },
             onNavigateToAbout = { backStack.add(Screen.Settings.About) },
             onNavigateToNsfw = { backStack.add(Screen.Settings.Nsfw) },
-            onNavigateToBehavior = { backStack.add(Screen.Settings.Behavior) }
+            onNavigateToBehavior = { backStack.add(Screen.Settings.Behavior) },
+            onNavigateToOnboarding = {
+                backStack.removeAll { it is Screen.Settings }
+                backStack.add(Screen.Onboarding)
+            }
         )
     }
 
@@ -250,6 +264,19 @@ private fun slideUpAnimation() = NavDisplay.transitionSpec {
     )
 }
 
-class NavigationHandler {
-    val backStack = mutableStateListOf<NavKey>(Screen.List)
+class NavigationHandler(
+    private val dataStore: DataStore
+) {
+    val backStack = mutableStateListOf<NavKey>(
+        Screen.List,
+        *listOfNotNull(
+            runBlocking {
+                if (dataStore.hasGoneThroughOnboarding.get()) {
+                    null
+                } else {
+                    Screen.Onboarding
+                }
+            }
+        ).toTypedArray()
+    )
 }

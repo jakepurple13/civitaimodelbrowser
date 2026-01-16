@@ -121,6 +121,12 @@ class DataStore private constructor(
         defaultValue = false
     )
 
+    val hasGoneThroughOnboarding = DataStoreTypeNonNull(
+        key = booleanPreferencesKey("hasGoneThroughOnboarding"),
+        defaultValue = false,
+        dataStore = dataStore
+    )
+
     open class DataStoreType<T>(
         val key: Preferences.Key<T>,
         protected val dataStore: DataStore<Preferences>,

@@ -63,7 +63,7 @@ googlePerformancePlugin = "2.0.2"
 firebaseBom = "34.7.0"
 firebase-cocoapods = "11.8.0"
 
-material3WindowSizeClassVersion = "1.9.0"
+material3WindowSizeClassVersion = "1.10.0+dev3105"
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp-version" }

@@ -300,6 +300,13 @@ private fun ImageCard(
                             modifier = Modifier
                                 .background(Color.Black)
                                 .matchParentSize()
+                                .then(
+                                    if (!showNsfw && images.nsfwLevel.canNotShow()) {
+                                        Modifier.blur(nsfwBlurStrength.dp)
+                                    } else {
+                                        Modifier
+                                    }
+                                )
                         ) {
                             VideoPreviewComposable(
                                 url = images.url,
@@ -321,13 +328,13 @@ private fun ImageCard(
                             name = images.url,
                             isNsfw = images.nsfwLevel.canNotShow(),
                             hash = images.hash,
-                            modifier = Modifier.let {
+                            modifier = Modifier.then(
                                 if (!showNsfw && images.nsfwLevel.canNotShow()) {
-                                    it.blur(nsfwBlurStrength.dp)
+                                    Modifier.blur(nsfwBlurStrength.dp)
                                 } else {
-                                    it
+                                    Modifier
                                 }
-                            }
+                            )
                         )
                     }
                 }
@@ -412,13 +419,13 @@ private fun ImageCard2(
                                     isNsfw = image.nsfwLevel.canNotShow(),
                                     hash = image.hash,
                                     modifier = Modifier
-                                        .let {
+                                        .then(
                                             if (!showNsfw && image.nsfwLevel.canNotShow()) {
-                                                it.blur(nsfwBlurStrength.dp)
+                                                Modifier.blur(nsfwBlurStrength.dp)
                                             } else {
-                                                it
+                                                Modifier
                                             }
-                                        }
+                                        )
                                         .weight(1f)
                                         .fillMaxWidth()
                                 )

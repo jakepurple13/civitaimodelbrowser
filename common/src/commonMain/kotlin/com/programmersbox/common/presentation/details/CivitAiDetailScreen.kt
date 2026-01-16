@@ -556,6 +556,13 @@ private fun ImageCard(
                         modifier = Modifier
                             .background(Color.Black)
                             .matchParentSize()
+                            .then(
+                                if (!showNsfw && images.nsfw.canNotShow()) {
+                                    Modifier.blur(nsfwBlurStrength.dp)
+                                } else {
+                                    Modifier
+                                }
+                            )
                     ) {
                         VideoPreviewComposable(
                             url = images.url,
@@ -577,13 +584,13 @@ private fun ImageCard(
                         name = images.url,
                         hash = images.hash,
                         isNsfw = images.nsfw.canNotShow(),
-                        modifier = Modifier.let {
+                        modifier = Modifier.then(
                             if (!showNsfw && images.nsfw.canNotShow()) {
-                                it.blur(nsfwBlurStrength.dp)
+                                Modifier.blur(nsfwBlurStrength.dp)
                             } else {
-                                it
+                                Modifier
                             }
-                        }
+                        )
                     )
                 }
             }

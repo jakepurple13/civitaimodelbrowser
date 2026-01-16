@@ -45,7 +45,7 @@ fun MainViewController() = ComposeUIViewController {
                     cmpModules(),
                     createPlatformModule(),
                     module {
-                        factory { ApplicationInfo("4.3.5") }
+                        factory { ApplicationInfo(BuildKonfig.VERSION_NAME) }
                         single<() -> String> {
                             {
                                 val documentDirectory: NSURL? = NSFileManager

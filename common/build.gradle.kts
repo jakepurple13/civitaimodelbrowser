@@ -207,6 +207,13 @@ buildkonfig {
             value = apiKey ?: "",
             const = true
         )
+
+        buildConfigField(
+            type = STRING,
+            name = "VERSION_NAME",
+            value = libs.versions.appVersion.get(),
+            const = true
+        )
     }
 }
 

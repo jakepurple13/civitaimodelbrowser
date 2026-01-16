@@ -126,7 +126,7 @@ fun CustomMaterialTheme(
                 }.let { colorScheme ->
                     isAmoledMode(
                         colorScheme = colorScheme,
-                        isDarkMode = darkTheme == ThemeMode.Dark || isDarkMode,
+                        isDarkMode = (isDarkMode && darkTheme == ThemeMode.System) || darkTheme == ThemeMode.Dark,
                         isAmoled = isAmoled
                     )
                 }

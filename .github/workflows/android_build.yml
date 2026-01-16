@@ -137,7 +137,7 @@ jobs:
         name: Sign app APK
         id: civit_browser_sign
         with:
-          releaseDirectory: android/build/outputs/bundle/release/
+          releaseDirectory: android/build/outputs/bundle/releaseMinified/
           signingKeyBase64: ${{ secrets.SIGNING_KEY }}
           alias: ${{ secrets.ALIAS }}
           keyStorePassword: ${{ secrets.KEYSTORE_PASSWORD }}

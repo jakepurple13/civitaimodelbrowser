@@ -60,7 +60,7 @@ easylauncher = "6.4.1"
 googleGmsGoogleServices = "4.4.4"
 googleFirebaseCrashlytics = "3.0.6"
 googlePerformancePlugin = "2.0.2"
-firebaseBom = "34.7.0"
+firebaseBom = "34.8.0"
 firebase-cocoapods = "11.8.0"
 
 material3WindowSizeClassVersion = "1.9.0"

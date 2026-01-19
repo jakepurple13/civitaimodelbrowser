@@ -27,7 +27,7 @@ materialKolorVersion = "4.1.0"
 multiplatformMarkdownRenderer = "0.39.1"
 okio = "3.16.4"
 paging-version = "3.4.0-rc01"
-kamel-image = "1.0.8"
+kamel-image = "1.0.9"
 kotlinx-coroutines-core = "1.10.2"
 androidx-material = "1.13.0"
 

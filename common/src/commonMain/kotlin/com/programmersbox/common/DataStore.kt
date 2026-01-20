@@ -189,11 +189,11 @@ class DataStore private constructor(
     }
 
     @Composable
-    private fun <T> rememberPreferenceType(
-        key: Preferences.Key<String>,
+    private fun <T, R> rememberPreferenceType(
+        key: Preferences.Key<R>,
         defaultValue: T,
-        mapToValue: (String) -> T,
-        mapToString: (T) -> String,
+        mapToValue: (R) -> T,
+        mapToString: (T) -> R,
     ): MutableState<T> {
         val coroutineScope = rememberCoroutineScope()
         val state by remember {

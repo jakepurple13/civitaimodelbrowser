@@ -1,5 +1,6 @@
 package com.programmersbox.common.presentation.components
 
+import androidx.compose.foundation.layout.RowScope
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.List
 import androidx.compose.material.icons.automirrored.outlined.List
@@ -23,6 +24,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.navigation3.runtime.NavKey
 import com.programmersbox.common.Screen
 import com.programmersbox.common.di.NavigationHandler
 import org.koin.compose.koinInject
@@ -37,13 +39,28 @@ fun CivitBottomBar(
     val backStack = koinInject<NavigationHandler>().backStack
     val currentScreen = backStack.lastOrNull()
 
+    @Composable
+    fun RowScope.NavBarItem(
+        screen: NavKey,
+        onClick: () -> Unit,
+        icon: @Composable (Boolean) -> Unit,
+        label: String,
+    ) {
+        NavigationBarItem(
+            selected = screen == currentScreen,
+            onClick = onClick,
+            icon = { icon(screen == currentScreen) },
+            label = { Text(label) },
+        )
+    }
+
     BottomAppBar(
         containerColor = if (showBlur) Color.Transparent else BottomAppBarDefaults.containerColor,
         scrollBehavior = bottomBarScrollBehavior,
         modifier = modifier
     ) {
-        NavigationBarItem(
-            selected = Screen.List == currentScreen,
+        NavBarItem(
+            screen = Screen.List,
             onClick = {
                 if (currentScreen != Screen.List) {
                     backStack.clear()
@@ -52,15 +69,15 @@ fun CivitBottomBar(
             },
             icon = {
                 Icon(
-                    if (Screen.List == currentScreen) Icons.Default.Home
-                    else Icons.Outlined.Home, null
+                    if (it) Icons.Default.Home else Icons.Outlined.Home,
+                    null
                 )
             },
-            label = { Text("Home") },
+            label = "Home",
         )
 
-        NavigationBarItem(
-            selected = Screen.Favorites == currentScreen,
+        NavBarItem(
+            screen = Screen.Favorites,
             onClick = {
                 if (currentScreen != Screen.Favorites) {
                     backStack.removeAll { it == Screen.Favorites }
@@ -69,15 +86,15 @@ fun CivitBottomBar(
             },
             icon = {
                 Icon(
-                    if (Screen.Favorites == currentScreen) Icons.Default.Favorite
-                    else Icons.Outlined.FavoriteBorder, null
+                    if (it) Icons.Default.Favorite else Icons.Outlined.FavoriteBorder,
+                    null
                 )
             },
-            label = { Text("Favorites") },
+            label = "Favorites",
         )
 
-        NavigationBarItem(
-            selected = Screen.CustomList == currentScreen,
+        NavBarItem(
+            screen = Screen.CustomList,
             onClick = {
                 if (currentScreen != Screen.CustomList) {
                     backStack.removeAll { it == Screen.CustomList }
@@ -86,15 +103,15 @@ fun CivitBottomBar(
             },
             icon = {
                 Icon(
-                    if (Screen.CustomList == currentScreen) Icons.AutoMirrored.Filled.List
-                    else Icons.AutoMirrored.Outlined.List, null
+                    if (it) Icons.AutoMirrored.Filled.List else Icons.AutoMirrored.Outlined.List,
+                    null
                 )
             },
-            label = { Text("Lists") },
+            label = "Lists",
         )
 
-        NavigationBarItem(
-            selected = Screen.Settings == currentScreen,
+        NavBarItem(
+            screen = Screen.Settings,
             onClick = {
                 if (currentScreen != Screen.Settings) {
                     backStack.removeAll { it == Screen.Settings }
@@ -103,11 +120,11 @@ fun CivitBottomBar(
             },
             icon = {
                 Icon(
-                    if (Screen.Settings == currentScreen) Icons.Default.Settings
-                    else Icons.Outlined.Settings, null
+                    if (it) Icons.Default.Settings else Icons.Outlined.Settings,
+                    null
                 )
             },
-            label = { Text("Settings") },
+            label = "Settings",
         )
     }
 }
@@ -119,14 +136,29 @@ fun CivitRail(
     val backStack = koinInject<NavigationHandler>().backStack
     val currentScreen = backStack.lastOrNull()
 
+    @Composable
+    fun NavRailItem(
+        screen: NavKey,
+        onClick: () -> Unit,
+        icon: @Composable (Boolean) -> Unit,
+        label: String,
+    ) {
+        NavigationRailItem(
+            selected = screen == currentScreen,
+            onClick = onClick,
+            icon = { icon(screen == currentScreen) },
+            label = { Text(label) },
+        )
+    }
+
     NavigationRail(
         modifier = modifier,
         header = {
 
         }
     ) {
-        NavigationRailItem(
-            selected = Screen.List == currentScreen,
+        NavRailItem(
+            screen = Screen.List,
             onClick = {
                 if (currentScreen != Screen.List) {
                     backStack.clear()
@@ -135,16 +167,15 @@ fun CivitRail(
             },
             icon = {
                 Icon(
-                    if (Screen.List == currentScreen) Icons.Default.Home
-                    else Icons.Outlined.Home,
+                    if (it) Icons.Default.Home else Icons.Outlined.Home,
                     null
                 )
             },
-            label = { Text("Home") },
+            label = "Home",
         )
 
-        NavigationRailItem(
-            selected = Screen.Favorites == currentScreen,
+        NavRailItem(
+            screen = Screen.Favorites,
             onClick = {
                 if (currentScreen != Screen.Favorites) {
                     backStack.removeAll { it == Screen.Favorites }
@@ -153,16 +184,15 @@ fun CivitRail(
             },
             icon = {
                 Icon(
-                    if (Screen.Favorites == currentScreen) Icons.Default.Favorite
-                    else Icons.Outlined.FavoriteBorder,
+                    if (it) Icons.Default.Favorite else Icons.Outlined.FavoriteBorder,
                     null
                 )
             },
-            label = { Text("Favorites") },
+            label = "Favorites",
         )
 
-        NavigationRailItem(
-            selected = Screen.CustomList == currentScreen,
+        NavRailItem(
+            screen = Screen.CustomList,
             onClick = {
                 if (currentScreen != Screen.CustomList) {
                     backStack.removeAll { it == Screen.CustomList }
@@ -171,16 +201,15 @@ fun CivitRail(
             },
             icon = {
                 Icon(
-                    if (Screen.CustomList == currentScreen) Icons.AutoMirrored.Filled.List
-                    else Icons.AutoMirrored.Outlined.List,
+                    if (it) Icons.AutoMirrored.Filled.List else Icons.AutoMirrored.Outlined.List,
                     null
                 )
             },
-            label = { Text("Lists") },
+            label = "Lists",
         )
 
-        NavigationRailItem(
-            selected = Screen.Search == currentScreen,
+        NavRailItem(
+            screen = Screen.Search,
             onClick = {
                 if (currentScreen != Screen.Search) {
                     backStack.removeAll { it == Screen.Search }
@@ -189,16 +218,15 @@ fun CivitRail(
             },
             icon = {
                 Icon(
-                    if (Screen.Search == currentScreen) Icons.Default.Search
-                    else Icons.Outlined.Search,
+                    if (it) Icons.Default.Search else Icons.Outlined.Search,
                     null
                 )
             },
-            label = { Text("Search") },
+            label = "Search",
         )
 
-        NavigationRailItem(
-            selected = Screen.Settings == currentScreen,
+        NavRailItem(
+            screen = Screen.Settings,
             onClick = {
                 if (currentScreen != Screen.Settings) {
                     backStack.removeAll { it == Screen.Settings }
@@ -207,12 +235,11 @@ fun CivitRail(
             },
             icon = {
                 Icon(
-                    if (Screen.Settings == currentScreen) Icons.Default.Settings
-                    else Icons.Outlined.Settings,
+                    if (it) Icons.Default.Settings else Icons.Outlined.Settings,
                     null
                 )
             },
-            label = { Text("Settings") },
+            label = "Settings",
         )
     }
 }

@@ -2,10 +2,15 @@ package com.programmersbox.common.presentation.components
 
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.List
+import androidx.compose.material.icons.automirrored.outlined.List
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material.icons.outlined.FavoriteBorder
+import androidx.compose.material.icons.outlined.Home
+import androidx.compose.material.icons.outlined.Search
+import androidx.compose.material.icons.outlined.Settings
 import androidx.compose.material3.BottomAppBar
 import androidx.compose.material3.BottomAppBarDefaults
 import androidx.compose.material3.BottomAppBarScrollBehavior
@@ -45,7 +50,12 @@ fun CivitBottomBar(
                     backStack.add(Screen.List)
                 }
             },
-            icon = { Icon(Icons.Default.Home, null) },
+            icon = {
+                Icon(
+                    if (Screen.List == currentScreen) Icons.Default.Home
+                    else Icons.Outlined.Home, null
+                )
+            },
             label = { Text("Home") },
         )
 
@@ -57,7 +67,12 @@ fun CivitBottomBar(
                     backStack.add(Screen.Favorites)
                 }
             },
-            icon = { Icon(Icons.Default.Favorite, null) },
+            icon = {
+                Icon(
+                    if (Screen.Favorites == currentScreen) Icons.Default.Favorite
+                    else Icons.Outlined.FavoriteBorder, null
+                )
+            },
             label = { Text("Favorites") },
         )
 
@@ -69,7 +84,12 @@ fun CivitBottomBar(
                     backStack.add(Screen.CustomList)
                 }
             },
-            icon = { Icon(Icons.AutoMirrored.Filled.List, null) },
+            icon = {
+                Icon(
+                    if (Screen.CustomList == currentScreen) Icons.AutoMirrored.Filled.List
+                    else Icons.AutoMirrored.Outlined.List, null
+                )
+            },
             label = { Text("Lists") },
         )
 
@@ -81,7 +101,12 @@ fun CivitBottomBar(
                     backStack.add(Screen.Settings)
                 }
             },
-            icon = { Icon(Icons.Default.Settings, null) },
+            icon = {
+                Icon(
+                    if (Screen.Settings == currentScreen) Icons.Default.Settings
+                    else Icons.Outlined.Settings, null
+                )
+            },
             label = { Text("Settings") },
         )
     }
@@ -108,7 +133,13 @@ fun CivitRail(
                     backStack.add(Screen.List)
                 }
             },
-            icon = { Icon(Icons.Default.Home, null) },
+            icon = {
+                Icon(
+                    if (Screen.List == currentScreen) Icons.Default.Home
+                    else Icons.Outlined.Home,
+                    null
+                )
+            },
             label = { Text("Home") },
         )
 
@@ -120,7 +151,13 @@ fun CivitRail(
                     backStack.add(Screen.Favorites)
                 }
             },
-            icon = { Icon(Icons.Default.Favorite, null) },
+            icon = {
+                Icon(
+                    if (Screen.Favorites == currentScreen) Icons.Default.Favorite
+                    else Icons.Outlined.FavoriteBorder,
+                    null
+                )
+            },
             label = { Text("Favorites") },
         )
 
@@ -132,7 +169,13 @@ fun CivitRail(
                     backStack.add(Screen.CustomList)
                 }
             },
-            icon = { Icon(Icons.AutoMirrored.Filled.List, null) },
+            icon = {
+                Icon(
+                    if (Screen.CustomList == currentScreen) Icons.AutoMirrored.Filled.List
+                    else Icons.AutoMirrored.Outlined.List,
+                    null
+                )
+            },
             label = { Text("Lists") },
         )
 
@@ -144,7 +187,13 @@ fun CivitRail(
                     backStack.add(Screen.Search)
                 }
             },
-            icon = { Icon(Icons.Default.Search, null) },
+            icon = {
+                Icon(
+                    if (Screen.Search == currentScreen) Icons.Default.Search
+                    else Icons.Outlined.Search,
+                    null
+                )
+            },
             label = { Text("Search") },
         )
 
@@ -156,7 +205,13 @@ fun CivitRail(
                     backStack.add(Screen.Settings)
                 }
             },
-            icon = { Icon(Icons.Default.Settings, null) },
+            icon = {
+                Icon(
+                    if (Screen.Settings == currentScreen) Icons.Default.Settings
+                    else Icons.Outlined.Settings,
+                    null
+                )
+            },
             label = { Text("Settings") },
         )
     }

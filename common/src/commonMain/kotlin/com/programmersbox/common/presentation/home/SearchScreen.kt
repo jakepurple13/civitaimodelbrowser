@@ -71,6 +71,7 @@ import dev.chrisbanes.haze.hazeSource
 import dev.chrisbanes.haze.rememberHazeState
 import kotlinx.collections.immutable.PersistentList
 import kotlinx.collections.immutable.persistentListOf
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.launch
 import org.koin.compose.koinInject
 import org.koin.compose.viewmodel.koinViewModel
@@ -87,8 +88,14 @@ fun SearchScreen(
     val shouldShowMedia by remember { derivedStateOf { connectionRepository.shouldShowMedia } }
     val db = koinInject<FavoritesDao>()
     val dataStore = koinInject<DataStore>()
-    val database by db
-        .getFavoriteModels()
+    val showFavorites by dataStore.rememberShowFavorites()
+    val database by remember {
+        derivedStateOf {
+            if (showFavorites) db.getFavoriteModels()
+            else flowOf(emptyList())
+        }
+    }
+        .value
         .collectAsStateWithLifecycle(emptyList())
 
     val blacklisted by db

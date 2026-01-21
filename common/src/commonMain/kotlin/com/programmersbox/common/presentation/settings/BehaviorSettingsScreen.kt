@@ -22,6 +22,7 @@ import androidx.compose.material.icons.filled.BorderBottom
 import androidx.compose.material.icons.filled.Brightness4
 import androidx.compose.material.icons.filled.Brightness7
 import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -57,7 +58,18 @@ import com.programmersbox.common.DataStore
 import com.programmersbox.common.DoubleClickBehavior
 import com.programmersbox.common.HazeBlur
 import com.programmersbox.common.ThemeMode
-import com.programmersbox.resources.*
+import com.programmersbox.resources.Res
+import com.programmersbox.resources.behavior_settings
+import com.programmersbox.resources.blur_type
+import com.programmersbox.resources.civitai_logo
+import com.programmersbox.resources.confirm
+import com.programmersbox.resources.double_click_behavior
+import com.programmersbox.resources.progressive_blur_description
+import com.programmersbox.resources.show_blur
+import com.programmersbox.resources.theme_mode
+import com.programmersbox.resources.use_amoled_mode
+import com.programmersbox.resources.use_progressive_blur
+import com.programmersbox.resources.use_toolbar
 import dev.chrisbanes.haze.HazeState
 import dev.chrisbanes.haze.HazeStyle
 import dev.chrisbanes.haze.hazeEffect
@@ -105,6 +117,8 @@ fun BehaviorSettings(
         var useProgressive by dataStore.rememberUseProgressive()
         var isAmoled by dataStore.rememberIsAmoled()
         var doubleClickBehavior by dataStore.rememberDoubleClickBehavior()
+        var showFavorites by dataStore.rememberShowFavorites()
+
         Card(
             onClick = { showBlur = !showBlur }
         ) {
@@ -308,6 +322,22 @@ fun BehaviorSettings(
         }
 
         HorizontalDivider()
+
+        Card(
+            onClick = { showFavorites = !showFavorites }
+        ) {
+            ListItem(
+                leadingContent = { Icon(Icons.Default.Favorite, null) },
+                headlineContent = { Text("Show Favorites") },
+                supportingContent = { Text("Show favorites in the list") },
+                trailingContent = {
+                    Switch(
+                        checked = showFavorites,
+                        onCheckedChange = null
+                    )
+                }
+            )
+        }
 
         var showDoubleClickBehaviorDialog by remember { mutableStateOf(false) }
 

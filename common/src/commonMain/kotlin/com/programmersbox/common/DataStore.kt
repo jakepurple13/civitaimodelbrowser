@@ -94,6 +94,12 @@ class DataStore private constructor(
     )
 
     @Composable
+    fun rememberShowFavorites() = rememberPreference(
+        booleanPreferencesKey("show_favorites"),
+        true
+    )
+
+    @Composable
     fun rememberThemeMode(): MutableState<ThemeMode> = rememberPreferenceType(
         key = stringPreferencesKey("theme_mode"),
         defaultValue = ThemeMode.System,

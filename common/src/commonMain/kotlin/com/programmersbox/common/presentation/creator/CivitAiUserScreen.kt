@@ -64,6 +64,7 @@ import dev.chrisbanes.haze.LocalHazeStyle
 import dev.chrisbanes.haze.hazeEffect
 import dev.chrisbanes.haze.hazeSource
 import dev.chrisbanes.haze.rememberHazeState
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.launch
 import org.koin.compose.koinInject
 import org.koin.compose.viewmodel.koinViewModel
@@ -81,7 +82,15 @@ fun CivitAiUserScreen(
     val showNsfw by dataStore.showNsfw()
     val blurStrength by dataStore.hideNsfwStrength()
     val database = koinInject<FavoritesDao>()
-    val favorites by database.getFavoriteModels().collectAsStateWithLifecycle(emptyList())
+    val showFavorites by dataStore.rememberShowFavorites()
+    val favorites by remember {
+        derivedStateOf {
+            if (showFavorites) database.getFavoriteModels()
+            else flowOf(emptyList())
+        }
+    }
+        .value
+        .collectAsStateWithLifecycle(emptyList())
     val blacklisted by database.getBlacklisted().collectAsStateWithLifecycle(emptyList())
     val showBlur by dataStore.rememberShowBlur()
     val useProgressive by dataStore.rememberUseProgressive()

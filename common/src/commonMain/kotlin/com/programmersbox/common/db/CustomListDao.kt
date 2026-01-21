@@ -42,6 +42,18 @@ interface ListDao {
     )
     fun getTypeCounts(): Flow<DataCounts>
 
+    //Search both CustomListItem and CustomListInfo
+    @Transaction
+    @Query(
+        """
+        SELECT * FROM CustomListItem
+        WHERE name LIKE '%' || :query || '%'
+        OR uuid IN (SELECT uuid FROM CustomListInfo WHERE name LIKE '%' || :query || '%' OR description LIKE '%' || :query || '%')
+        ORDER BY useBiometric ASC, time DESC
+    """
+    )
+    fun search(query: String): Flow<List<CustomList>>
+
     @Query("SELECT COUNT(uuid) FROM CustomListInfo")
     fun getAllListItemsCount(): Flow<Int>
 

@@ -144,6 +144,7 @@
     <string name="search_lists">Search Lists</string>
     <string name="dfs">DFS: Searches the list name first, then the items</string>
     <string name="bfs">BFS: Searches the items first, then the list name</string>
+    <string name="sql">SQL: Searches both the list name and the items using SQL</string>
     <string name="authenticate_to_view">Authenticate to view %1$s</string>
     <string name="last_updated">Last Updated: %1$s</string>
 </resources>

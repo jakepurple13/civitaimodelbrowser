@@ -5,7 +5,7 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 enum class SearchType {
-    DFS, BFS
+    DFS, BFS, SQL
 }
 
 /**

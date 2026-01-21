@@ -77,6 +77,7 @@ import com.programmersbox.resources.dfs
 import com.programmersbox.resources.last_updated
 import com.programmersbox.resources.list_name
 import com.programmersbox.resources.search_lists
+import com.programmersbox.resources.sql
 import dev.chrisbanes.haze.HazeProgressive
 import dev.chrisbanes.haze.LocalHazeStyle
 import dev.chrisbanes.haze.hazeEffect
@@ -263,6 +264,14 @@ fun ListScreen(
                             )
                             Text(
                                 stringResource(Res.string.bfs),
+                                textAlign = TextAlign.Center,
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(horizontal = 16.dp)
+                            )
+
+                            Text(
+                                stringResource(Res.string.sql),
                                 textAlign = TextAlign.Center,
                                 modifier = Modifier
                                     .fillMaxWidth()

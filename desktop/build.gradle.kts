@@ -46,6 +46,17 @@ buildkonfig {
     }
 }
 
+compose.resources {
+    publicResClass = true
+    packageOfResClass = "com.programmersbox.desktop.resources"
+    generateResClass = always
+    nameOfResClass = "DesktopResources"
+    customDirectory(
+        sourceSetName = "jvmMain",
+        directoryProvider = provider { layout.projectDirectory.dir("src/jvmMain/resources") }
+    )
+}
+
 compose.desktop {
     application {
         mainClass = "MainKt"
@@ -65,10 +76,10 @@ compose.desktop {
 
             appResourcesRootDir.set(project.layout.projectDirectory.dir("resources"))
             fun iconFile(extension: String) = project
-                .file("src/jvmMain/resources/")
+                .file("src/jvmMain/resources/files/")
                 .resolve("civitai_logo.$extension")
             macOS {
-                iconFile.set(project.file("src/jvmMain/resources/civitmaclogo.icns"))
+                iconFile.set(project.file("src/jvmMain/resources/files/civitmaclogo.icns"))
                 dockName = "CivitAi Model Browser"
             }
             windows {

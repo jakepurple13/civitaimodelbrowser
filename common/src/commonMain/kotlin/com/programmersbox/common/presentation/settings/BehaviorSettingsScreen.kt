@@ -57,14 +57,14 @@ import com.programmersbox.common.DataStore
 import com.programmersbox.common.DoubleClickBehavior
 import com.programmersbox.common.HazeBlur
 import com.programmersbox.common.ThemeMode
-import com.programmersbox.resources.Res
-import com.programmersbox.resources.civitai_logo
+import com.programmersbox.resources.*
 import dev.chrisbanes.haze.HazeState
 import dev.chrisbanes.haze.HazeStyle
 import dev.chrisbanes.haze.hazeEffect
 import dev.chrisbanes.haze.hazeSource
 import dev.chrisbanes.haze.rememberHazeState
 import org.jetbrains.compose.resources.painterResource
+import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.koinInject
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -77,7 +77,7 @@ fun BehaviorSettingsScreen() {
     Scaffold(
         topBar = {
             LargeTopAppBar(
-                title = { Text("Behavior Settings") },
+                title = { Text(stringResource(Res.string.behavior_settings)) },
                 navigationIcon = { BackButton() },
                 scrollBehavior = scrollBehavior
             )
@@ -115,7 +115,7 @@ fun BehaviorSettings(
                         null
                     )
                 },
-                headlineContent = { Text("Show Blur") },
+                headlineContent = { Text(stringResource(Res.string.show_blur)) },
                 trailingContent = {
                     Switch(
                         checked = showBlur,
@@ -142,8 +142,8 @@ fun BehaviorSettings(
                                 null
                             )
                         },
-                        headlineContent = { Text("Use Progressive Blur") },
-                        supportingContent = { Text("Have the blur effect transition smoothly. It does use more resources.") },
+                        headlineContent = { Text(stringResource(Res.string.use_progressive_blur)) },
+                        supportingContent = { Text(stringResource(Res.string.progressive_blur_description)) },
                         trailingContent = {
                             Switch(
                                 checked = useProgressive,
@@ -157,7 +157,7 @@ fun BehaviorSettings(
                     onClick = { showBlurOptions = !showBlurOptions }
                 ) {
                     ListItem(
-                        headlineContent = { Text("Blur Type") },
+                        headlineContent = { Text(stringResource(Res.string.blur_type)) },
                         trailingContent = { Text("${blurType.type.name} ${blurType.level.name}") },
                         leadingContent = { Icon(Icons.Default.BlurCircular, null) }
                     )
@@ -225,7 +225,7 @@ fun BehaviorSettings(
         ) {
             ListItem(
                 leadingContent = { Icon(Icons.Default.BorderBottom, null) },
-                headlineContent = { Text("Use Toolbar") },
+                headlineContent = { Text(stringResource(Res.string.use_toolbar)) },
                 trailingContent = {
                     Switch(
                         checked = useToolbar,
@@ -242,7 +242,7 @@ fun BehaviorSettings(
         if (showThemeModeDialog) {
             AlertDialog(
                 onDismissRequest = { showThemeModeDialog = false },
-                title = { Text("Theme Mode") },
+                title = { Text(stringResource(Res.string.theme_mode)) },
                 text = {
                     Column {
                         ThemeMode.entries.forEach {
@@ -271,7 +271,7 @@ fun BehaviorSettings(
                 confirmButton = {
                     TextButton(
                         onClick = { showThemeModeDialog = false }
-                    ) { Text("Confirm") }
+                    ) { Text(stringResource(Res.string.confirm)) }
                 }
             )
         }
@@ -281,7 +281,7 @@ fun BehaviorSettings(
         ) {
             ListItem(
                 leadingContent = { Icon(Icons.Default.Brightness4, null) },
-                headlineContent = { Text("Theme Mode") },
+                headlineContent = { Text(stringResource(Res.string.theme_mode)) },
                 supportingContent = { Text(themeMode.name) },
                 trailingContent = {
                     Icon(
@@ -297,7 +297,7 @@ fun BehaviorSettings(
         ) {
             ListItem(
                 leadingContent = { Icon(Icons.Default.Brightness7, null) },
-                headlineContent = { Text("Use Amoled Mode") },
+                headlineContent = { Text(stringResource(Res.string.use_amoled_mode)) },
                 trailingContent = {
                     Switch(
                         checked = isAmoled,
@@ -314,7 +314,7 @@ fun BehaviorSettings(
         if (showDoubleClickBehaviorDialog) {
             AlertDialog(
                 onDismissRequest = { showDoubleClickBehaviorDialog = false },
-                title = { Text("Double Click Behavior") },
+                title = { Text(stringResource(Res.string.double_click_behavior)) },
                 text = {
                     Column {
                         DoubleClickBehavior.entries.forEach {
@@ -343,7 +343,7 @@ fun BehaviorSettings(
                 confirmButton = {
                     TextButton(
                         onClick = { showDoubleClickBehaviorDialog = false }
-                    ) { Text("Confirm") }
+                    ) { Text(stringResource(Res.string.confirm)) }
                 }
             )
         }
@@ -353,7 +353,7 @@ fun BehaviorSettings(
         ) {
             ListItem(
                 leadingContent = { Icon(Icons.Default.AdsClick, null) },
-                headlineContent = { Text("Double Click Behavior") },
+                headlineContent = { Text(stringResource(Res.string.double_click_behavior)) },
                 supportingContent = { Text(doubleClickBehavior.visualName) },
                 trailingContent = {
                     Icon(

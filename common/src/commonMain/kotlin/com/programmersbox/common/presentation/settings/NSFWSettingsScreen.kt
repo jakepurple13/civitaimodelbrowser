@@ -38,8 +38,14 @@ import com.programmersbox.common.ComposableUtils
 import com.programmersbox.common.DataStore
 import com.programmersbox.resources.Res
 import com.programmersbox.resources.civitai_logo
+import com.programmersbox.resources.default_is_6
+import com.programmersbox.resources.include_nsfw_content
+import com.programmersbox.resources.nsfw_settings
+import com.programmersbox.resources.show_nsfw_content
+import com.programmersbox.resources.strength
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.painterResource
+import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.koinInject
 import kotlin.math.roundToInt
 
@@ -53,7 +59,7 @@ fun NsfwSettingsScreen() {
     Scaffold(
         topBar = {
             LargeTopAppBar(
-                title = { Text("NSFW Settings") },
+                title = { Text(stringResource(Res.string.nsfw_settings)) },
                 navigationIcon = { BackButton() },
                 scrollBehavior = scrollBehavior
             )
@@ -85,7 +91,7 @@ fun NsfwSettings(
             onClick = { scope.launch { includeNsfw.update(!includeNsfwEnabled) } }
         ) {
             ListItem(
-                headlineContent = { Text("Include NSFW Content?") },
+                headlineContent = { Text(stringResource(Res.string.include_nsfw_content)) },
                 trailingContent = {
                     Switch(
                         checked = includeNsfwEnabled,
@@ -101,7 +107,7 @@ fun NsfwSettings(
                 onClick = { showNsfw = !showNsfw }
             ) {
                 ListItem(
-                    headlineContent = { Text("Show NSFW Content?") },
+                    headlineContent = { Text(stringResource(Res.string.show_nsfw_content)) },
                     trailingContent = {
                         Switch(
                             checked = showNsfw,
@@ -127,8 +133,15 @@ fun NsfwSettings(
             ) {
                 var nsfwBlurStrength by dataStore.hideNsfwStrength()
                 ListItem(
-                    overlineContent = { Text("Default is 6") },
-                    headlineContent = { Text("Strength: ${nsfwBlurStrength.roundToInt()}") },
+                    overlineContent = { Text(stringResource(Res.string.default_is_6)) },
+                    headlineContent = {
+                        Text(
+                            stringResource(
+                                Res.string.strength,
+                                nsfwBlurStrength.roundToInt()
+                            )
+                        )
+                    },
                     supportingContent = {
                         val range = 5f..100f
                         Slider(

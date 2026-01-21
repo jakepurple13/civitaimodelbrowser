@@ -23,8 +23,11 @@ import com.programmersbox.common.ApplicationInfo
 import com.programmersbox.common.BackButton
 import com.programmersbox.common.getPlatformName
 import com.programmersbox.resources.Res
+import com.programmersbox.resources.about
+import com.programmersbox.resources.central_app_name
 import com.programmersbox.resources.civitai_logo
 import org.jetbrains.compose.resources.painterResource
+import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.koinInject
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -39,7 +42,7 @@ fun AboutScreen() {
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("About") },
+                title = { Text(stringResource(Res.string.about)) },
                 navigationIcon = { BackButton() },
                 actions = {
                     Text("(${libraries?.libraries?.size ?: 0})")
@@ -66,7 +69,7 @@ fun AboutScreen() {
                                 .align(Alignment.CenterHorizontally)
                                 .size(100.dp)
                         )
-                        Text("CivitAi Model Browser")
+                        Text(stringResource(Res.string.central_app_name))
                         Text(getPlatformName())
                         Text("v${koinInject<ApplicationInfo>().versionName}")
                         HorizontalDivider()

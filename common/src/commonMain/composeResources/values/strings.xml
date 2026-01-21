@@ -1,3 +1,85 @@
 <resources>
     <string name="central_app_name">CivitAi Model Browser</string>
+    <string name="home">Home</string>
+    <string name="favorites">Favorites</string>
+    <string name="stats">Stats</string>
+    <string name="blacklisted">Blacklisted</string>
+    <string name="settings">Settings</string>
+    <string name="exit">Exit</string>
+    <string name="file">File</string>
+    <string name="view">View</string>
+    <string name="search">Search</string>
+
+    <!-- Settings Screen -->
+    <string name="scan_qr_code">Scan QR Code</string>
+    <string name="nsfw_settings">NSFW Settings</string>
+    <string name="behavior_settings">Behavior Settings</string>
+    <string name="view_onboarding_again">View Onboarding Again</string>
+    <string name="backup">Backup</string>
+    <string name="restore">Restore</string>
+    <string name="about">About</string>
+    <string name="open_civitai">Open CivitAi</string>
+    <string name="open_civitai_rest_api">Open CivitAi REST API</string>
+    <string name="open_github">Open CivitAi Model Browser GitHub</string>
+
+    <!-- NSFW Settings -->
+    <string name="include_nsfw_content">Include NSFW Content?</string>
+    <string name="show_nsfw_content">Show NSFW Content?</string>
+    <string name="default_is_6">Default is 6</string>
+    <string name="strength">Strength: %d</string>
+
+    <!-- Behavior Settings -->
+    <string name="show_blur">Show Blur</string>
+    <string name="use_progressive_blur">Use Progressive Blur</string>
+    <string name="progressive_blur_description">Have the blur effect transition smoothly. It does use more resources.</string>
+    <string name="blur_type">Blur Type</string>
+    <string name="use_toolbar">Use Toolbar</string>
+    <string name="theme_mode">Theme Mode</string>
+    <string name="confirm">Confirm</string>
+    <string name="use_amoled_mode">Use Amoled Mode</string>
+    <string name="double_click_behavior">Double Click Behavior</string>
+
+    <!-- Search Screen -->
+    <string name="start_searching">Start Searching!</string>
+    <string name="search_favorites">Search Favorites</string>
+    <string name="search_history_remove_title">Remove from History?</string>
+    <string name="search_history_remove_message">Remove this search from history?</string>
+    <string name="dismiss">Dismiss</string>
+
+    <!-- Stats Screen -->
+    <string name="global_stats">Global Stats</string>
+    <string name="favorites_deep_dive">Favorites Deep Dive</string>
+    <string name="list_stats">List Stats</string>
+    <string name="lists_deep_dive">Lists Deep Dive</string>
+    <string name="favorites_without_nsfw">Favorites without NSFW</string>
+    <string name="show_nsfw_stats">Show NSFW Stats</string>
+    <string name="nsfw_in_lists">NSFW in Lists</string>
+    <string name="deep_dive">Deep Dive</string>
+
+    <!-- Common -->
+    <string name="something_went_wrong">Something went wrong</string>
+    <string name="try_again">Try Again</string>
+    <string name="click_to_play">Click to Play</string>
+    <string name="nsfw">NSFW</string>
+    <string name="cancel">Cancel</string>
+    <string name="yes">Yes</string>
+    <string name="no">No</string>
+    <string name="delete">Delete</string>
+    <string name="rename">Rename</string>
+    <string name="done">Done</string>
+    <string name="reset">Reset</string>
+    <string name="share">Share</string>
+    <string name="download">Download</string>
+    <string name="unblacklist">Unblacklist</string>
+    <string name="blacklist">Blacklist</string>
+    <string name="open">Open</string>
+    <string name="open_images">Open Images</string>
+    <string name="unfavorite_model">Unfavorite Model</string>
+    <string name="favorite_model">Favorite Model</string>
+    <string name="add_to_list">Add to List</string>
+    <string name="lists">Lists</string>
+    <string name="info">Info</string>
+    <string name="view_creators_models">View %s\'s models</string>
+    <string name="made_by">Made by %s</string>
+    <string name="added_to">Added to %s</string>
 </resources>

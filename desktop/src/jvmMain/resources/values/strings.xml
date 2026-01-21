@@ -1,0 +1,8 @@
+<resources>
+    <string name="new_stats_window">New Stats Window</string>
+    <string name="new_backup_window">New Backup Window</string>
+    <string name="new_restore_window">New Restore Window</string>
+    <string name="new_about_window">New About Window</string>
+    <string name="new_nsfw_settings_window">New Nsfw Settings Window</string>
+    <string name="new_behavior_settings_window">New Behavior Settings Window</string>
+</resources>

@@ -37,14 +37,28 @@ import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.unit.dp
 import com.programmersbox.common.ApplicationInfo
 import com.programmersbox.common.BackButton
+import com.programmersbox.common.Consts
 import com.programmersbox.common.WindowedScaffold
 import com.programmersbox.common.getPlatformName
 import com.programmersbox.common.presentation.components.CivitBottomBar
 import com.programmersbox.common.presentation.components.CivitRail
 import com.programmersbox.common.presentation.components.icons.Github
 import com.programmersbox.resources.Res
+import com.programmersbox.resources.about
+import com.programmersbox.resources.backup
+import com.programmersbox.resources.behavior_settings
 import com.programmersbox.resources.civitai_logo
+import com.programmersbox.resources.nsfw_settings
+import com.programmersbox.resources.open_civitai
+import com.programmersbox.resources.open_civitai_rest_api
+import com.programmersbox.resources.open_github
+import com.programmersbox.resources.restore
+import com.programmersbox.resources.scan_qr_code
+import com.programmersbox.resources.settings
+import com.programmersbox.resources.stats
+import com.programmersbox.resources.view_onboarding_again
 import org.jetbrains.compose.resources.painterResource
+import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.koinInject
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -64,7 +78,7 @@ fun SettingsScreen(
     WindowedScaffold(
         topBar = {
             LargeTopAppBar(
-                title = { Text("Settings") },
+                title = { Text(stringResource(Res.string.settings)) },
                 navigationIcon = { BackButton() },
                 scrollBehavior = scrollBehavior
             )
@@ -88,7 +102,7 @@ fun SettingsScreen(
                 onClick = onNavigateToQrCode
             ) {
                 ListItem(
-                    headlineContent = { Text("Scan QR Code") },
+                    headlineContent = { Text(stringResource(Res.string.scan_qr_code)) },
                     leadingContent = { Icon(Icons.Default.QrCodeScanner, null) }
                 )
             }
@@ -99,7 +113,7 @@ fun SettingsScreen(
                 onClick = onNavigateToNsfw
             ) {
                 ListItem(
-                    headlineContent = { Text("NSFW Settings") },
+                    headlineContent = { Text(stringResource(Res.string.nsfw_settings)) },
                     leadingContent = { Icon(Icons.Default.NoAdultContent, null) }
                 )
             }
@@ -110,7 +124,7 @@ fun SettingsScreen(
                 onClick = onNavigateToBehavior
             ) {
                 ListItem(
-                    headlineContent = { Text("Behavior Settings") },
+                    headlineContent = { Text(stringResource(Res.string.behavior_settings)) },
                     leadingContent = { Icon(Icons.Default.Api, null) }
                 )
             }
@@ -130,7 +144,7 @@ fun SettingsScreen(
                 onClick = onNavigateToStats
             ) {
                 ListItem(
-                    headlineContent = { Text("Stats") },
+                    headlineContent = { Text(stringResource(Res.string.stats)) },
                     leadingContent = { Icon(Icons.Default.QueryStats, null) }
                 )
             }
@@ -139,7 +153,7 @@ fun SettingsScreen(
                 onClick = onNavigateToOnboarding
             ) {
                 ListItem(
-                    headlineContent = { Text("View Onboarding Again") },
+                    headlineContent = { Text(stringResource(Res.string.view_onboarding_again)) },
                     leadingContent = { Icon(Icons.Default.CatchingPokemon, null) }
                 )
             }
@@ -163,7 +177,7 @@ private fun BackupRestoreSettings(
             onClick = onNavigateToBackup
         ) {
             ListItem(
-                headlineContent = { Text("Backup") },
+                headlineContent = { Text(stringResource(Res.string.backup)) },
                 leadingContent = { Icon(Icons.Default.Backup, null) }
             )
         }
@@ -172,7 +186,7 @@ private fun BackupRestoreSettings(
             onClick = onNavigateToRestore
         ) {
             ListItem(
-                headlineContent = { Text("Restore") },
+                headlineContent = { Text(stringResource(Res.string.restore)) },
                 leadingContent = { Icon(Icons.Default.Restore, null) }
             )
         }
@@ -189,16 +203,16 @@ private fun ColumnScope.AboutSettings(
         onClick = onNavigateToAbout
     ) {
         ListItem(
-            headlineContent = { Text("About") },
+            headlineContent = { Text(stringResource(Res.string.about)) },
             leadingContent = { Icon(Icons.Default.Info, null) }
         )
     }
 
     Card(
-        onClick = { uriHandler.openUri("https://civitai.com/") }
+        onClick = { uriHandler.openUri(Consts.CIVIT_URL) }
     ) {
         ListItem(
-            headlineContent = { Text("Open CivitAi") },
+            headlineContent = { Text(stringResource(Res.string.open_civitai)) },
             leadingContent = {
                 Image(
                     painter = painterResource(Res.drawable.civitai_logo),
@@ -212,10 +226,10 @@ private fun ColumnScope.AboutSettings(
     }
 
     Card(
-        onClick = { uriHandler.openUri("https://github.com/civitai/civitai/wiki/REST-API-Reference") }
+        onClick = { uriHandler.openUri(Consts.CIVIT_REST_API) }
     ) {
         ListItem(
-            headlineContent = { Text("Open CivitAi REST API") },
+            headlineContent = { Text(stringResource(Res.string.open_civitai_rest_api)) },
             leadingContent = {
                 Icon(
                     Icons.Github,
@@ -229,10 +243,10 @@ private fun ColumnScope.AboutSettings(
     }
 
     Card(
-        onClick = { uriHandler.openUri("https://github.com/jakepurple13/civitaimodelbrowser/") }
+        onClick = { uriHandler.openUri(Consts.CIVIT_GITHUB) }
     ) {
         ListItem(
-            headlineContent = { Text("Open CivitAi Model Browser GitHub") },
+            headlineContent = { Text(stringResource(Res.string.open_github)) },
             leadingContent = {
                 Icon(
                     Icons.Github,

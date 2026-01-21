@@ -26,9 +26,25 @@ import com.programmersbox.common.presentation.settings.BehaviorSettingsScreen
 import com.programmersbox.common.presentation.settings.NsfwSettingsScreen
 import com.programmersbox.common.presentation.settings.StatsScreen
 import com.programmersbox.desktop.BuildKonfig
+import com.programmersbox.desktop.resources.DesktopResources
+import com.programmersbox.desktop.resources.new_about_window
+import com.programmersbox.desktop.resources.new_backup_window
+import com.programmersbox.desktop.resources.new_behavior_settings_window
+import com.programmersbox.desktop.resources.new_nsfw_settings_window
+import com.programmersbox.desktop.resources.new_restore_window
+import com.programmersbox.desktop.resources.new_stats_window
 import com.programmersbox.resources.Res
+import com.programmersbox.resources.blacklisted
 import com.programmersbox.resources.central_app_name
 import com.programmersbox.resources.civitai_logo
+import com.programmersbox.resources.exit
+import com.programmersbox.resources.favorites
+import com.programmersbox.resources.file
+import com.programmersbox.resources.home
+import com.programmersbox.resources.search
+import com.programmersbox.resources.settings
+import com.programmersbox.resources.stats
+import com.programmersbox.resources.view
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.KoinApplication
@@ -82,7 +98,7 @@ fun main() {
                     tooltip = stringResource(Res.string.central_app_name),
                     menu = {
                         Item(
-                            "Home",
+                            stringResource(Res.string.home),
                             onClick = {
                                 navHandler.backStack.clear()
                                 navHandler.backStack.add(Screen.List)
@@ -90,28 +106,28 @@ fun main() {
                             enabled = navHandler.backStack.lastOrNull() != Screen.List,
                         )
                         Item(
-                            "Favorites",
+                            stringResource(Res.string.favorites),
                             onClick = { navHandler.backStack.add(Screen.Favorites) },
                             enabled = navHandler.backStack.lastOrNull() != Screen.Favorites,
                         )
                         Item(
-                            "Stats",
+                            stringResource(Res.string.stats),
                             onClick = { navHandler.backStack.add(Screen.Settings.Stats) },
                             enabled = navHandler.backStack.lastOrNull() != Screen.Settings.Stats,
                         )
                         Item(
-                            "Blacklisted",
+                            stringResource(Res.string.blacklisted),
                             onClick = { navHandler.backStack.add(Screen.Settings.Blacklisted) },
                             enabled = navHandler.backStack.lastOrNull() != Screen.Settings.Blacklisted,
                         )
                         Item(
-                            "Settings",
+                            stringResource(Res.string.settings),
                             onClick = { navHandler.backStack.add(Screen.Settings) },
                             enabled = navHandler.backStack.lastOrNull() != Screen.Settings,
                         )
                         Separator()
                         Item(
-                            "Exit",
+                            stringResource(Res.string.exit),
                             onClick = ::exitApplication
                         )
                     }
@@ -129,42 +145,42 @@ fun main() {
                     onCloseRequest = ::exitApplication,
                     frameWindowScope = {
                         MenuBar {
-                            Menu("File") {
+                            Menu(stringResource(Res.string.file)) {
                                 Item(
-                                    "New Stats Window",
+                                    stringResource(DesktopResources.string.new_stats_window),
                                     onClick = { appState.openNewWindow(Screen.Settings.Stats) }
                                 )
                                 Item(
-                                    "New Backup Window",
+                                    stringResource(DesktopResources.string.new_backup_window),
                                     onClick = { appState.openNewWindow(Screen.Settings.Backup) }
                                 )
                                 Item(
-                                    "New Restore Window",
+                                    stringResource(DesktopResources.string.new_restore_window),
                                     onClick = { appState.openNewWindow(Screen.Settings.Restore) }
                                 )
                                 Item(
-                                    "New About Window",
+                                    stringResource(DesktopResources.string.new_about_window),
                                     onClick = { appState.openNewWindow(Screen.Settings.About) }
                                 )
-                                Menu("Settings") {
+                                Menu(stringResource(Res.string.settings)) {
                                     Item(
-                                        "New Nsfw Settings Window",
+                                        stringResource(DesktopResources.string.new_nsfw_settings_window),
                                         onClick = { appState.openNewWindow(Screen.Settings.Nsfw) }
                                     )
                                     Item(
-                                        "New Behavior Settings Window",
+                                        stringResource(DesktopResources.string.new_behavior_settings_window),
                                         onClick = { appState.openNewWindow(Screen.Settings.Behavior) }
                                     )
                                 }
                                 Separator()
                                 Item(
-                                    "Exit",
+                                    stringResource(Res.string.exit),
                                     onClick = ::exitApplication
                                 )
                             }
-                            Menu("View") {
+                            Menu(stringResource(Res.string.view)) {
                                 Item(
-                                    "Home",
+                                    stringResource(Res.string.home),
                                     onClick = {
                                         navHandler.backStack.clear()
                                         navHandler.backStack.add(Screen.List)
@@ -172,27 +188,27 @@ fun main() {
                                     enabled = navHandler.backStack.lastOrNull() != Screen.List,
                                 )
                                 Item(
-                                    "Favorites",
+                                    stringResource(Res.string.favorites),
                                     onClick = { navHandler.backStack.add(Screen.Favorites) },
                                     enabled = navHandler.backStack.lastOrNull() != Screen.Favorites,
                                 )
                                 Item(
-                                    "Search",
+                                    stringResource(Res.string.search),
                                     onClick = { navHandler.backStack.add(Screen.Search) },
                                     enabled = navHandler.backStack.lastOrNull() != Screen.Search,
                                 )
                                 Item(
-                                    "Stats",
+                                    stringResource(Res.string.stats),
                                     onClick = { navHandler.backStack.add(Screen.Settings.Stats) },
                                     enabled = navHandler.backStack.lastOrNull() != Screen.Settings.Stats,
                                 )
                                 Item(
-                                    "Blacklisted",
+                                    stringResource(Res.string.blacklisted),
                                     onClick = { navHandler.backStack.add(Screen.Settings.Blacklisted) },
                                     enabled = navHandler.backStack.lastOrNull() != Screen.Settings.Blacklisted,
                                 )
                                 Item(
-                                    "Settings",
+                                    stringResource(Res.string.settings),
                                     onClick = { navHandler.backStack.add(Screen.Settings) },
                                     enabled = navHandler.backStack.lastOrNull() != Screen.Settings,
                                 )

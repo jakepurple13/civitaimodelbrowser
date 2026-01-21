@@ -63,7 +63,7 @@ fun main() {
                                     ).absolutePath
                                 }
                             }
-                            single { getDatabaseBuilder(get()) }
+                            singleOf(::getDatabaseBuilder)
                             singleOf(::TrayState)
                             singleOf(::QrCodeRepository)
                             singleOf(::Zipper)

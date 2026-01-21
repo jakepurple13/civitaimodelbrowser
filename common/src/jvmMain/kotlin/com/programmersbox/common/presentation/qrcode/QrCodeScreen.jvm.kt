@@ -2,6 +2,8 @@ package com.programmersbox.common.presentation.qrcode
 
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.toAwtImage
+import androidx.compose.ui.window.Notification
+import androidx.compose.ui.window.TrayState
 import ca.gosyer.appdirs.AppDirs
 import com.google.zxing.BinaryBitmap
 import com.google.zxing.client.j2se.BufferedImageLuminanceSource
@@ -22,6 +24,7 @@ import java.io.IOException
 
 actual class QrCodeRepository(
     private val appDirs: AppDirs,
+    private val trayState: TrayState,
 ) {
     private val reader: QRCodeReader by lazy { QRCodeReader() }
 
@@ -47,19 +50,39 @@ actual class QrCodeRepository(
         val transferable = ImageTransferable(bitmap.toAwtImage())
         val clipboard = Toolkit.getDefaultToolkit().systemClipboard
         clipboard.setContents(transferable, null)
+        trayState.sendNotification(
+            Notification(
+                title = "Qr Code Copied!",
+                message = "",
+                type = Notification.Type.Info
+            )
+        )
     }
 
     actual suspend fun saveImage(bitmap: ImageBitmap, title: String) {
-        appDirs.getUserDataDir()
         val file = File(appDirs.getUserDataDir(), "$title-${System.currentTimeMillis()}.png")
         if (!file.exists()) withContext(Dispatchers.IO) { file.createNewFile() }
         file.writeBytes(bitmap.encodeToByteArray())
         println("Saved to ${file.absolutePath}")
+        trayState.sendNotification(
+            Notification(
+                title = "Qr Code Saved!",
+                message = "Saved to ${file.absolutePath}",
+                type = Notification.Type.Info
+            )
+        )
     }
 
     actual suspend fun shareUrl(url: String, title: String) {
         val clipboard = Toolkit.getDefaultToolkit().systemClipboard
         clipboard.setContents(StringSelection(url), null)
+        trayState.sendNotification(
+            Notification(
+                title = "Url Copied!",
+                message = "",
+                type = Notification.Type.Info
+            )
+        )
     }
 
     private class ImageTransferable(private val image: Image) : Transferable {

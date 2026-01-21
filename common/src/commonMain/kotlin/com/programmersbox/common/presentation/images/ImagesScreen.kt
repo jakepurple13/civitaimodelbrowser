@@ -60,11 +60,23 @@ import com.programmersbox.common.presentation.components.ImageSheet
 import com.programmersbox.common.presentation.components.LoadingImage
 import com.programmersbox.common.presentation.components.MultipleImageSheet
 import com.programmersbox.common.presentation.home.BlacklistHandling
+import com.programmersbox.resources.Res
+import com.programmersbox.resources.cfg_scale_with_param
+import com.programmersbox.resources.clip_skip_with_param
+import com.programmersbox.resources.images
+import com.programmersbox.resources.model_with_param
+import com.programmersbox.resources.negative_prompt_with_param
+import com.programmersbox.resources.prompt_with_param
+import com.programmersbox.resources.sampler_with_param
+import com.programmersbox.resources.seed_with_param
+import com.programmersbox.resources.size_with_param
+import com.programmersbox.resources.steps_with_param
 import dev.chrisbanes.haze.HazeProgressive
 import dev.chrisbanes.haze.LocalHazeStyle
 import dev.chrisbanes.haze.hazeEffect
 import dev.chrisbanes.haze.hazeSource
 import dev.chrisbanes.haze.rememberHazeState
+import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.koinInject
 import org.koin.compose.viewmodel.koinViewModel
 
@@ -120,23 +132,65 @@ fun CivitAiImagesScreen(
                     Column(
                         modifier = Modifier.padding(4.dp)
                     ) {
-                        meta.model?.let { Text("Model: $it") }
+                        meta.model?.let { Text(stringResource(Res.string.model_with_param, it)) }
                         HorizontalDivider()
-                        meta.prompt?.let { Text("Prompt: $it") }
+                        meta.prompt?.let { Text(stringResource(Res.string.prompt_with_param, it)) }
                         HorizontalDivider()
-                        meta.negativePrompt?.let { Text("Negative Prompt: $it") }
+                        meta.negativePrompt?.let {
+                            Text(
+                                stringResource(
+                                    Res.string.negative_prompt_with_param,
+                                    it
+                                )
+                            )
+                        }
                         HorizontalDivider()
-                        meta.seed?.let { Text("Seed: $it") }
+                        meta.seed?.let {
+                            Text(
+                                stringResource(
+                                    Res.string.seed_with_param,
+                                    it.toString()
+                                )
+                            )
+                        }
                         HorizontalDivider()
-                        meta.sampler?.let { Text("Sampler: $it") }
+                        meta.sampler?.let {
+                            Text(
+                                stringResource(
+                                    Res.string.sampler_with_param,
+                                    it
+                                )
+                            )
+                        }
                         HorizontalDivider()
-                        meta.steps?.let { Text("Steps: $it") }
+                        meta.steps?.let {
+                            Text(
+                                stringResource(
+                                    Res.string.steps_with_param,
+                                    it.toString()
+                                )
+                            )
+                        }
                         HorizontalDivider()
-                        meta.clipSkip?.let { Text("Clip Skip: $it") }
+                        meta.clipSkip?.let {
+                            Text(
+                                stringResource(
+                                    Res.string.clip_skip_with_param,
+                                    it.toString()
+                                )
+                            )
+                        }
                         HorizontalDivider()
-                        meta.size?.let { Text("Size: $it") }
+                        meta.size?.let { Text(stringResource(Res.string.size_with_param, it)) }
                         HorizontalDivider()
-                        meta.cfgScale?.let { Text("Cfg Scale: $it") }
+                        meta.cfgScale?.let {
+                            Text(
+                                stringResource(
+                                    Res.string.cfg_scale_with_param,
+                                    it.toString()
+                                )
+                            )
+                        }
                     }
                 }
             }
@@ -163,7 +217,7 @@ fun CivitAiImagesScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Images") },
+                title = { Text(stringResource(Res.string.images)) },
                 navigationIcon = { BackButton() },
                 actions = { Text("(${lazyPagingItems.itemCount})") },
                 colors = if (showBlur)

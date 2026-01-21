@@ -115,6 +115,18 @@
     <string name="choose_a_list">Choose a list</string>
     <string name="list_name">List Name</string>
     <string name="list_created">List Created</string>
+    <string name="delete_list_title">Delete List</string>
+    <string name="delete_list_message">Are you sure you want to delete this list?</string>
+    <string name="rename_list">Rename List</string>
+    <string name="rename_list_message">Are you sure you want to change the name?</string>
+    <string name="last_time_updated">Last time updated: %s</string>
+    <string name="items_count">Items: %d</string>
+    <string name="use_biometrics_to_view">Use Biometrics to View?</string>
+    <string name="list_count_param">List Count: %d</string>
+    <string name="remove_items">Remove Items</string>
+    <string name="remove_items_message">Are you sure you want to remove %1$d items from %2$s?</string>
+    <string name="delete_multiple">Delete Multiple?</string>
+    <string name="remove">Remove</string>
     <string name="view_model">View Model</string>
     <string name="model_with_param">Model: %1$s</string>
     <string name="prompt_with_param">Prompt: %1$s</string>
@@ -128,7 +140,6 @@
 
     <!-- Lists -->
     <string name="custom_lists">Custom Lists</string>
-    <string name="remove_items">Remove Items</string>
     <string name="delete_list">Delete List</string>
     <string name="search_lists">Search Lists</string>
     <string name="dfs">DFS: Searches the list name first, then the items</string>

@@ -64,7 +64,7 @@ fun main() {
                                 }
                             }
                             single { getDatabaseBuilder(get()) }
-                            single { TrayState() }
+                            singleOf(::TrayState)
                             singleOf(::QrCodeRepository)
                             singleOf(::Zipper)
                         }
@@ -77,6 +77,7 @@ fun main() {
                 Tray(
                     state = koinInject<TrayState>(),
                     icon = painterResource(Res.drawable.civitai_logo),
+                    tooltip = "CivitAi Model Browser",
                     menu = {
                         Item(
                             "Home",

@@ -27,8 +27,10 @@ import com.programmersbox.common.presentation.settings.NsfwSettingsScreen
 import com.programmersbox.common.presentation.settings.StatsScreen
 import com.programmersbox.desktop.BuildKonfig
 import com.programmersbox.resources.Res
+import com.programmersbox.resources.central_app_name
 import com.programmersbox.resources.civitai_logo
 import org.jetbrains.compose.resources.painterResource
+import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.KoinApplication
 import org.koin.compose.koinInject
 import org.koin.core.module.dsl.singleOf
@@ -77,7 +79,7 @@ fun main() {
                 Tray(
                     state = koinInject<TrayState>(),
                     icon = painterResource(Res.drawable.civitai_logo),
-                    tooltip = "CivitAi Model Browser",
+                    tooltip = stringResource(Res.string.central_app_name),
                     menu = {
                         Item(
                             "Home",

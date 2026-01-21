@@ -99,12 +99,38 @@ import com.programmersbox.common.presentation.components.ImageSheet
 import com.programmersbox.common.presentation.components.LoadingImage
 import com.programmersbox.common.presentation.components.ModelOptionsSheet
 import com.programmersbox.common.presentation.favorites.CoverCard
+import com.programmersbox.resources.Res
+import com.programmersbox.resources.cancel
+import com.programmersbox.resources.click_to_play
+import com.programmersbox.resources.confirm
+import com.programmersbox.resources.creators
+import com.programmersbox.resources.delete
+import com.programmersbox.resources.delete_list_message
+import com.programmersbox.resources.delete_list_title
+import com.programmersbox.resources.delete_multiple
+import com.programmersbox.resources.images
+import com.programmersbox.resources.items_count
+import com.programmersbox.resources.last_time_updated
+import com.programmersbox.resources.list_count_param
+import com.programmersbox.resources.models
+import com.programmersbox.resources.no
+import com.programmersbox.resources.nsfw
+import com.programmersbox.resources.remove
+import com.programmersbox.resources.remove_items
+import com.programmersbox.resources.remove_items_message
+import com.programmersbox.resources.rename_list
+import com.programmersbox.resources.rename_list_message
+import com.programmersbox.resources.search
+import com.programmersbox.resources.use_biometrics_to_view
+import com.programmersbox.resources.view_model
+import com.programmersbox.resources.yes
 import dev.chrisbanes.haze.HazeProgressive
 import dev.chrisbanes.haze.LocalHazeStyle
 import dev.chrisbanes.haze.hazeEffect
 import dev.chrisbanes.haze.hazeSource
 import dev.chrisbanes.haze.rememberHazeState
 import kotlinx.coroutines.launch
+import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.koinInject
 import org.koin.compose.viewmodel.koinViewModel
 
@@ -158,20 +184,20 @@ fun ListDetailScreen(
     if (showDeleteDialog) {
         AlertDialog(
             onDismissRequest = { showDeleteDialog = false },
-            title = { Text("Delete List") },
-            text = { Text("Are you sure you want to delete this list?") },
+            title = { Text(stringResource(Res.string.delete_list_title)) },
+            text = { Text(stringResource(Res.string.delete_list_message)) },
             confirmButton = {
                 TextButton(
                     onClick = {
                         viewModel.deleteAll()
                         showDeleteDialog = false
                     }
-                ) { Text("Yes") }
+                ) { Text(stringResource(Res.string.yes)) }
             },
             dismissButton = {
                 TextButton(
                     onClick = { showDeleteDialog = false }
-                ) { Text("No") }
+                ) { Text(stringResource(Res.string.no)) }
             }
         )
     }
@@ -224,7 +250,7 @@ fun ListDetailScreen(
                         placeholder = {
                             Text(
                                 modifier = Modifier.fillMaxWidth(),
-                                text = "Search",
+                                text = stringResource(Res.string.search),
                                 textAlign = TextAlign.Center,
                             )
                         },
@@ -305,7 +331,7 @@ fun ListDetailScreen(
                                 onFavorite = {},
                                 onRemoveFromFavorite = {},
                                 onDismiss = { sheetDetails = false },
-                                nsfwText = "NSFW",
+                                nsfwText = stringResource(Res.string.nsfw),
                                 actions = {
                                     TextButton(
                                         onClick = {
@@ -313,7 +339,7 @@ fun ListDetailScreen(
                                             onNavigateToDetail(item.modelId.toString())
                                         }
                                     ) {
-                                        Text("View Model")
+                                        Text(stringResource(Res.string.view_model))
                                         Icon(Icons.AutoMirrored.Filled.ArrowRightAlt, null)
                                     }
                                 },
@@ -379,18 +405,20 @@ private fun InfoSheet(
     if (showAdd) {
         AlertDialog(
             onDismissRequest = { showAdd = false },
-            title = { Text("Rename List") },
-            text = { Text("Are you sure you want to change the name?") },
+            title = { Text(stringResource(Res.string.rename_list)) },
+            text = { Text(stringResource(Res.string.rename_list_message)) },
             confirmButton = {
                 TextButton(
                     onClick = {
                         rename(currentName)
                         showAdd = false
                     }
-                ) { Text("Confirm") }
+                ) { Text(stringResource(Res.string.confirm)) }
             },
             dismissButton = {
-                TextButton(onClick = { showAdd = false }) { Text("Cancel") }
+                TextButton(onClick = {
+                    showAdd = false
+                }) { Text(stringResource(Res.string.cancel)) }
             }
         )
     }
@@ -470,7 +498,12 @@ private fun InfoSheet(
                 ListItem(
                     overlineContent = {
                         val dataTimeFormatter = remember { createDateTimeFormatItem(true) }
-                        Text("Last time updated: ${dataTimeFormatter.format(customItem.item.time.toLocalDateTime())}")
+                        Text(
+                            stringResource(
+                                Res.string.last_time_updated,
+                                dataTimeFormatter.format(customItem.item.time.toLocalDateTime())
+                            )
+                        )
                     },
                     headlineContent = {},
                     leadingContent = {
@@ -506,7 +539,7 @@ private fun InfoSheet(
                                             horizontalArrangement = Arrangement.SpaceEvenly,
                                             modifier = Modifier.matchParentSize()
                                         ) {
-                                            Text("Click to Play")
+                                            Text(stringResource(Res.string.click_to_play))
                                             Icon(Icons.Default.PlayArrow, null)
                                         }
                                     }
@@ -534,10 +567,10 @@ private fun InfoSheet(
                     },
                     supportingContent = {
                         Column {
-                            Text("Items: ${customItem.list.size}")
-                            Text("Models: ${customItem.list.filter { it.favoriteType == FavoriteType.Model }.size}")
-                            Text("Images: ${customItem.list.filter { it.favoriteType == FavoriteType.Image }.size}")
-                            Text("Creators: ${customItem.list.filter { it.favoriteType == FavoriteType.Creator }.size}")
+                            Text(stringResource(Res.string.items_count, customItem.list.size))
+                            Text("${stringResource(Res.string.models)}: ${customItem.list.filter { it.favoriteType == FavoriteType.Model }.size}")
+                            Text("${stringResource(Res.string.images)}: ${customItem.list.filter { it.favoriteType == FavoriteType.Image }.size}")
+                            Text("${stringResource(Res.string.creators)}: ${customItem.list.filter { it.favoriteType == FavoriteType.Creator }.size}")
                         }
                     },
                     colors = ListItemDefaults.colors(
@@ -553,7 +586,7 @@ private fun InfoSheet(
                 shape = RectangleShape
             ) {
                 ListItem(
-                    headlineContent = { Text("Use Biometrics to View?") },
+                    headlineContent = { Text(stringResource(Res.string.use_biometrics_to_view)) },
                     trailingContent = {
                         Switch(
                             checked = customItem.item.useBiometric,
@@ -566,7 +599,7 @@ private fun InfoSheet(
             HorizontalDivider()
 
             Text(
-                "List Count: ${customItem.list.size}",
+                stringResource(Res.string.list_count_param, customItem.list.size),
                 modifier = Modifier.padding(horizontal = 16.dp)
             )
 
@@ -590,7 +623,7 @@ private fun InfoSheet(
                     )
                 ) {
                     Icon(Icons.Default.RemoveCircle, null)
-                    Text("Remove Items")
+                    Text(stringResource(Res.string.remove_items))
                 }
 
                 ActionItem(
@@ -607,7 +640,7 @@ private fun InfoSheet(
                     ),
                 ) {
                     Icon(Icons.Default.Delete, null)
-                    Text("Delete")
+                    Text(stringResource(Res.string.delete))
                 }
             }
         }
@@ -706,8 +739,16 @@ private fun RemoveItemsSheet(
             onDismissRequest = if (removing) {
                 {}
             } else onPopupDismiss,
-            title = { Text("Delete") },
-            text = { Text("Are you sure you want to remove ${itemsToDelete.size} items from ${customList.item.name}?") },
+            title = { Text(stringResource(Res.string.delete)) },
+            text = {
+                Text(
+                    stringResource(
+                        Res.string.remove_items_message,
+                        itemsToDelete.size,
+                        customList.item.name
+                    )
+                )
+            },
             confirmButton = {
                 TextButton(
                     onClick = {
@@ -725,16 +766,16 @@ private fun RemoveItemsSheet(
                         }
                     },
                     enabled = !removing
-                ) { Text("Yes") }
+                ) { Text(stringResource(Res.string.yes)) }
             },
-            dismissButton = { TextButton(onClick = onDismiss) { Text("No") } },
+            dismissButton = { TextButton(onClick = onDismiss) { Text(stringResource(Res.string.no)) } },
         )
     }
 
     Scaffold(
         topBar = {
             CenterAlignedTopAppBar(
-                title = { Text("Delete Multiple?") },
+                title = { Text(stringResource(Res.string.delete_multiple)) },
                 windowInsets = WindowInsets(0.dp),
             )
         },
@@ -748,7 +789,7 @@ private fun RemoveItemsSheet(
                     modifier = Modifier
                         .weight(1f)
                         .padding(horizontal = 4.dp)
-                ) { Text("Cancel") }
+                ) { Text(stringResource(Res.string.cancel)) }
 
                 Button(
                     onClick = { showPopup = true },
@@ -756,7 +797,7 @@ private fun RemoveItemsSheet(
                     modifier = Modifier
                         .weight(1f)
                         .padding(horizontal = 4.dp)
-                ) { Text("Remove") }
+                ) { Text(stringResource(Res.string.remove)) }
             }
         }
     ) { padding ->
@@ -772,10 +813,11 @@ private fun RemoveItemsSheet(
                 val outlineColor = MaterialTheme.colorScheme.outline
                 Surface(
                     onClick = {
-                        if (item in itemsToDelete)
-                            itemsToDelete.remove(item)
-                        else
+                        if (itemsToDelete.contains(item)) {
+                            itemsToDelete.removeAll { it == item }
+                        } else {
                             itemsToDelete.add(item)
+                        }
                     },
                     modifier = Modifier
                         .animateItem()

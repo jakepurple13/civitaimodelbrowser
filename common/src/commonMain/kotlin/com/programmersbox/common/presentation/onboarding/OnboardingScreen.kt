@@ -28,7 +28,19 @@ import com.programmersbox.common.presentation.onboarding.topics.FinishContent
 import com.programmersbox.common.presentation.onboarding.topics.WelcomeContent
 import com.programmersbox.common.presentation.settings.BehaviorSettings
 import com.programmersbox.common.presentation.settings.NsfwSettings
+import com.programmersbox.resources.Res
+import com.programmersbox.resources.back
+import com.programmersbox.resources.central_app_name
+import com.programmersbox.resources.confirm
+import com.programmersbox.resources.dismiss
+import com.programmersbox.resources.finish
+import com.programmersbox.resources.next
+import com.programmersbox.resources.skip
+import com.programmersbox.resources.skip_onboarding_message
+import com.programmersbox.resources.skip_onboarding_title
+import com.programmersbox.resources.welcome
 import kotlinx.coroutines.launch
+import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.koinInject
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
@@ -53,8 +65,8 @@ fun OnboardingScreen(
         topBar = {
             Column {
                 TopAppBar(
-                    title = { Text("Welcome!") },
-                    subtitle = { Text("Civit Ai Model Browser") },
+                    title = { Text(stringResource(Res.string.welcome)) },
+                    subtitle = { Text(stringResource(Res.string.central_app_name)) },
                     actions = {
                         var skipOnboarding by remember { mutableStateOf(false) }
 
@@ -70,21 +82,21 @@ fun OnboardingScreen(
                                                     onFinish()
                                                 }
                                         }
-                                    ) { Text("Confirm") }
+                                    ) { Text(stringResource(Res.string.confirm)) }
                                 },
                                 dismissButton = {
                                     TextButton(
                                         onClick = { skipOnboarding = false }
-                                    ) { Text("Dismiss") }
+                                    ) { Text(stringResource(Res.string.dismiss)) }
                                 },
-                                title = { Text("Skip Onboarding?") },
-                                text = { Text("Are you sure you want to skip onboarding?") }
+                                title = { Text(stringResource(Res.string.skip_onboarding_title)) },
+                                text = { Text(stringResource(Res.string.skip_onboarding_message)) }
                             )
                         }
 
                         TextButton(
                             onClick = { skipOnboarding = true }
-                        ) { Text("Skip") }
+                        ) { Text(stringResource(Res.string.skip)) }
                     }
                 )
                 HorizontalDivider()
@@ -101,7 +113,7 @@ fun OnboardingScreen(
                             }
                         },
                         enabled = pagerState.canScrollBackward
-                    ) { Text("Back") }
+                    ) { Text(stringResource(Res.string.back)) }
 
                     OnboardingIndicator(pagerState)
                 },
@@ -117,9 +129,9 @@ fun OnboardingScreen(
                         }
                     ) {
                         if (pagerState.canScrollForward) {
-                            Text("Next")
+                            Text(stringResource(Res.string.next))
                         } else {
-                            Text("Finish!")
+                            Text(stringResource(Res.string.finish))
                         }
                     }
                 }

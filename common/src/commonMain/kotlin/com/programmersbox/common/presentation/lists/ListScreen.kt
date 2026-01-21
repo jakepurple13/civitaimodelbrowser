@@ -49,6 +49,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
@@ -64,6 +65,18 @@ import com.programmersbox.common.presentation.components.CivitBottomBar
 import com.programmersbox.common.presentation.components.CivitRail
 import com.programmersbox.common.presentation.components.LoadingImage
 import com.programmersbox.common.presentation.components.rememberBiometricOpening
+import com.programmersbox.resources.Res
+import com.programmersbox.resources.authenticate_to_view
+import com.programmersbox.resources.bfs
+import com.programmersbox.resources.cancel
+import com.programmersbox.resources.click_to_play
+import com.programmersbox.resources.confirm
+import com.programmersbox.resources.create_new_list
+import com.programmersbox.resources.custom_lists
+import com.programmersbox.resources.dfs
+import com.programmersbox.resources.last_updated
+import com.programmersbox.resources.list_name
+import com.programmersbox.resources.search_lists
 import dev.chrisbanes.haze.HazeProgressive
 import dev.chrisbanes.haze.LocalHazeStyle
 import dev.chrisbanes.haze.hazeEffect
@@ -78,6 +91,7 @@ import kotlinx.datetime.format.DateTimeFormat
 import kotlinx.datetime.format.Padding
 import kotlinx.datetime.format.char
 import kotlinx.datetime.toLocalDateTime
+import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.koinInject
 import org.koin.compose.viewmodel.koinViewModel
 import kotlin.time.ExperimentalTime
@@ -109,7 +123,7 @@ fun ListScreen(
     WindowedScaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Custom Lists") },
+                title = { Text(stringResource(Res.string.custom_lists)) },
                 navigationIcon = { BackButton() },
                 actions = {
                     Text("(${viewModel.list.size})")
@@ -119,12 +133,12 @@ fun ListScreen(
                         var name by remember { mutableStateOf("") }
                         AlertDialog(
                             onDismissRequest = { showAdd = false },
-                            title = { Text("Create New List") },
+                            title = { Text(stringResource(Res.string.create_new_list)) },
                             text = {
                                 OutlinedTextField(
                                     value = name,
                                     onValueChange = { name = it },
-                                    label = { Text("List Name") },
+                                    label = { Text(stringResource(Res.string.list_name)) },
                                     singleLine = true,
                                     modifier = Modifier.fillMaxWidth()
                                 )
@@ -138,12 +152,12 @@ fun ListScreen(
                                         }
                                     },
                                     enabled = name.isNotEmpty()
-                                ) { Text("Confirm") }
+                                ) { Text(stringResource(Res.string.confirm)) }
                             },
                             dismissButton = {
                                 TextButton(
                                     onClick = { showAdd = false }
-                                ) { Text("Cancel") }
+                                ) { Text(stringResource(Res.string.cancel)) }
                             }
                         )
                     }
@@ -202,9 +216,9 @@ fun ListScreen(
                     OutlinedTextField(
                         value = viewModel.search,
                         onValueChange = { viewModel.search = it },
-                        label = { Text("Search Lists") },
+                        label = { Text(stringResource(Res.string.search_lists)) },
                         singleLine = true,
-                        placeholder = { Text("Search Lists") },
+                        placeholder = { Text(stringResource(Res.string.search_lists)) },
                         trailingIcon = {
                             IconButton(
                                 onClick = { viewModel.search = "" }
@@ -241,12 +255,18 @@ fun ListScreen(
                                 }
                             }
                             Text(
-                                "DFS: Searches the list name first, then the items",
-                                modifier = Modifier.padding(horizontal = 16.dp)
+                                stringResource(Res.string.dfs),
+                                textAlign = TextAlign.Center,
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(horizontal = 16.dp)
                             )
                             Text(
-                                "BFS: Searches the items first, then the list name",
-                                modifier = Modifier.padding(horizontal = 16.dp)
+                                stringResource(Res.string.bfs),
+                                textAlign = TextAlign.Center,
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(horizontal = 16.dp)
                             )
                         }
                     }
@@ -258,7 +278,7 @@ fun ListScreen(
                 key = { it.item.uuid }
             ) { list ->
                 val biometricOpen = rememberBiometricOpening(
-                    title = "Authenticate to view ${list.item.name}",
+                    title = stringResource(Res.string.authenticate_to_view, list.item.name),
                     onAuthenticationSucceeded = { onNavigateToDetail(list.item.uuid) }
                 )
                 ElevatedCard(
@@ -296,7 +316,7 @@ private fun ListCard(
     val imageHashing = list.toImageHash()
     val time = remember { dateTimeFormatter.format(list.item.time.toLocalDateTime()) }
     ListItem(
-        overlineContent = { Text("Last Updated: $time") },
+        overlineContent = { Text(stringResource(Res.string.last_updated, time)) },
         trailingContent = { Text("(${list.list.size})") },
         headlineContent = { Text(list.item.name) },
         leadingContent = {
@@ -322,7 +342,7 @@ private fun ListCard(
                             horizontalArrangement = Arrangement.SpaceEvenly,
                             modifier = Modifier.matchParentSize()
                         ) {
-                            Text("Click to Play")
+                            Text(stringResource(Res.string.click_to_play))
                             Icon(Icons.Default.PlayArrow, null)
                         }
                     }

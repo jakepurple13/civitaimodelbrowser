@@ -68,10 +68,18 @@ import com.programmersbox.common.SheetDetails
 import com.programmersbox.common.presentation.details.blurGradient
 import com.programmersbox.common.rememberSROState
 import com.programmersbox.common.scaleRotateOffsetReset
+import com.programmersbox.resources.Res
+import com.programmersbox.resources.done
+import com.programmersbox.resources.download
+import com.programmersbox.resources.info
+import com.programmersbox.resources.nsfw
+import com.programmersbox.resources.reset
+import com.programmersbox.resources.share
 import io.kamel.image.KamelImage
 import io.kamel.image.asyncPainterResource
 import kotlinx.coroutines.launch
 import okio.Path.Companion.toPath
+import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.koinInject
 
 @Composable
@@ -134,7 +142,7 @@ private fun SheetContent(
     val painter = asyncPainterResource(image)
     val downloadHandler = koinInject<DownloadHandler>()
     val scope = rememberCoroutineScope()
-    val actions = LocalActions.current
+    val actionItems = LocalActions.current
     SelectionContainer(
         modifier = Modifier.navigationBarsPadding()
     ) {
@@ -142,7 +150,7 @@ private fun SheetContent(
         if (showInfo) {
             AlertDialog(
                 onDismissRequest = { showInfo = false },
-                title = { Text("Info") },
+                title = { Text(stringResource(Res.string.info)) },
                 text = {
                     Column(
                         modifier = Modifier.verticalScroll(rememberScrollState())
@@ -153,7 +161,7 @@ private fun SheetContent(
                                 modifier = Modifier.padding(horizontal = 4.dp)
                             ) {
                                 ElevatedAssistChip(
-                                    label = { Text("NSFW") },
+                                    label = { Text(stringResource(Res.string.nsfw)) },
                                     onClick = {},
                                     colors = AssistChipDefaults.elevatedAssistChipColors(
                                         disabledLabelColor = MaterialTheme.colorScheme.error,
@@ -187,7 +195,7 @@ private fun SheetContent(
                 confirmButton = {
                     TextButton(
                         onClick = { showInfo = false }
-                    ) { Text("Done") }
+                    ) { Text(stringResource(Res.string.done)) }
                 }
             )
         }
@@ -234,13 +242,13 @@ private fun SheetContent(
                         selected = false,
                         onClick = { sroState.reset() },
                         icon = { Icon(Icons.Default.Refresh, null) },
-                        label = { Text("Reset") },
+                        label = { Text(stringResource(Res.string.reset)) },
                     )
                     NavigationBarItem(
                         selected = false,
-                        onClick = { actions.shareUrl(image) },
+                        onClick = { actionItems.shareUrl(image) },
                         icon = { Icon(Icons.Default.Share, null) },
-                        label = { Text("Share") },
+                        label = { Text(stringResource(Res.string.share)) },
                     )
                     NavigationBarItem(
                         selected = false,
@@ -251,7 +259,7 @@ private fun SheetContent(
                             )
                         },
                         icon = { Icon(Icons.Default.Download, null) },
-                        label = { Text("Download") },
+                        label = { Text(stringResource(Res.string.download)) },
                     )
                 }
             },
@@ -335,7 +343,7 @@ private fun VideoSheetContent(
                                 modifier = Modifier.padding(horizontal = 4.dp)
                             ) {
                                 ElevatedAssistChip(
-                                    label = { Text("NSFW") },
+                                    label = { Text(stringResource(Res.string.nsfw)) },
                                     onClick = {},
                                     colors = AssistChipDefaults.elevatedAssistChipColors(
                                         disabledLabelColor = MaterialTheme.colorScheme.error,
@@ -415,7 +423,7 @@ private fun VideoSheetContent(
                         selected = false,
                         onClick = { actions.shareUrl(video) },
                         icon = { Icon(Icons.Default.Share, null) },
-                        label = { Text("Share") },
+                        label = { Text(stringResource(Res.string.share)) },
                     )
                     NavigationBarItem(
                         selected = false,
@@ -426,7 +434,7 @@ private fun VideoSheetContent(
                             )
                         },
                         icon = { Icon(Icons.Default.Download, null) },
-                        label = { Text("Download") },
+                        label = { Text(stringResource(Res.string.download)) },
                     )
                 }
             },
@@ -479,7 +487,6 @@ fun MultipleImageSheet(
                             Color.LightGray
                         Box(
                             modifier = Modifier
-                                .padding(2.dp)
                                 .clip(CircleShape)
                                 .background(color)
                                 .size(16.dp)
@@ -490,6 +497,7 @@ fun MultipleImageSheet(
                                         )
                                     }
                                 }
+                                .padding(2.dp)
                         )
                     }
                 }

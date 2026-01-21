@@ -14,8 +14,8 @@ import org.koin.dsl.module
 @OptIn(ExperimentalMaterial3AdaptiveApi::class)
 fun cmpModules() = module {
     singleOf(::Network)
-    single { DataStore.getStore(get()) }
-    single { getRoomDatabase(get()) }
+    singleOf(::getRoomDatabase)
+    singleOf(DataStore::getStore)
     single { get<AppDatabase>().getDao() }
     single { get<AppDatabase>().getListDao() }
     single { get<AppDatabase>().getSearchHistoryDao() }

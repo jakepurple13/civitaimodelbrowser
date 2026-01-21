@@ -18,7 +18,9 @@ import androidx.compose.ui.unit.dp
 import com.mikepenz.markdown.m3.Markdown
 import com.programmersbox.resources.Res
 import com.programmersbox.resources.civitai_logo
+import com.programmersbox.resources.welcome_description
 import org.jetbrains.compose.resources.painterResource
+import org.jetbrains.compose.resources.stringResource
 
 @Composable
 internal fun WelcomeContent() {
@@ -45,19 +47,7 @@ internal fun WelcomeContent() {
 
         // language="Markdown"
         Markdown(
-            """
-Experience the world of AI art models with a stunning, adaptive interface built for Android, iOS, and Desktop. Whether you are on a phone or tablet, enjoy a fluid Material 3 design featuring dynamic colors and beautiful glassmorphism effects.
-
-**Key Features**:
-
-  - **Explore & Discover**: Browse the latest, top-rated, and most downloaded models from CivitAI with advanced search and filtering.
-
-  - **Curate Your Collection**: Organize your inspiration with Favorites and Custom Lists. Securely backup and restore your data at any time.
-
-  - **Total Control**: Manage your feed with a robust Blacklist and advanced NSFW handling—featuring customizable blur strength and toggle controls.
-
-  - **Insights & Sharing**: Track your browsing stats and easily share models via QR codes.
-            """.trimIndent(),
+            stringResource(Res.string.welcome_description),
             modifier = Modifier.padding(16.dp)
         )
     }

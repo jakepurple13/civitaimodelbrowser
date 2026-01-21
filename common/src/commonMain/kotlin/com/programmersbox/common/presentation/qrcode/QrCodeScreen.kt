@@ -58,7 +58,17 @@ import com.programmersbox.common.ComposableUtils
 import com.programmersbox.common.Screen
 import com.programmersbox.common.presentation.components.LoadingImage
 import com.programmersbox.resources.Res
+import com.programmersbox.resources.camera_required_message
 import com.programmersbox.resources.civitai_logo
+import com.programmersbox.resources.open
+import com.programmersbox.resources.open_settings
+import com.programmersbox.resources.qr_code
+import com.programmersbox.resources.save
+import com.programmersbox.resources.scan_qr_code_title
+import com.programmersbox.resources.share
+import com.programmersbox.resources.share_url
+import com.programmersbox.resources.upload_image_gallery
+import com.programmersbox.resources.waiting_for_qr_code
 import io.github.alexzhirkevich.qrose.options.QrLogoPadding
 import io.github.alexzhirkevich.qrose.options.QrLogoShape
 import io.github.alexzhirkevich.qrose.options.circle
@@ -72,6 +82,7 @@ import kotlinx.coroutines.launch
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 import org.jetbrains.compose.resources.painterResource
+import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.koinInject
 import org.koin.compose.viewmodel.koinViewModel
 import org.publicvalue.multiplatform.qrcode.CameraPosition
@@ -181,7 +192,7 @@ fun ShareViaQrCode(
                         )
                         Image(
                             painter = painter,
-                            contentDescription = "QR code",
+                            contentDescription = stringResource(Res.string.qr_code),
                             modifier = Modifier
                                 .background(
                                     MaterialTheme.colorScheme.onSurface,
@@ -204,7 +215,7 @@ fun ShareViaQrCode(
                     },
                     shapes = ButtonDefaults.shapes(),
                     modifier = Modifier.fillMaxWidth(.75f)
-                ) { Text("Share") }
+                ) { Text(stringResource(Res.string.share)) }
 
                 ElevatedButton(
                     onClick = {
@@ -217,7 +228,7 @@ fun ShareViaQrCode(
                     },
                     shapes = ButtonDefaults.shapes(),
                     modifier = Modifier.fillMaxWidth(.75f)
-                ) { Text("Save") }
+                ) { Text(stringResource(Res.string.save)) }
 
                 OutlinedButton(
                     onClick = {
@@ -227,7 +238,7 @@ fun ShareViaQrCode(
                     },
                     shapes = ButtonDefaults.shapes(),
                     modifier = Modifier.fillMaxWidth(.75f)
-                ) { Text("Share Url") }
+                ) { Text(stringResource(Res.string.share_url)) }
             }
         }
     }
@@ -257,7 +268,7 @@ fun ScanQrCode(
         Scaffold(
             topBar = {
                 CenterAlignedTopAppBar(
-                    title = { Text("Scan QR code") },
+                    title = { Text(stringResource(Res.string.scan_qr_code_title)) },
                     windowInsets = WindowInsets(0.dp),
                 )
             },
@@ -305,13 +316,13 @@ fun ScanQrCode(
                                     )
                             ) {
                                 Text(
-                                    text = "Camera is required for QR Code scanning",
+                                    text = stringResource(Res.string.camera_required_message),
                                     textAlign = TextAlign.Center,
                                     modifier = Modifier.padding(6.dp)
                                 )
                                 ElevatedButton(
                                     onClick = { permissionState.goToSettings() }
-                                ) { Text("Open Settings") }
+                                ) { Text(stringResource(Res.string.open_settings)) }
                             }
                         },
                         modifier = Modifier
@@ -355,11 +366,11 @@ fun ScanQrCode(
                     onClick = { filePicker.launch() },
                     shapes = ButtonDefaults.shapes(),
                     modifier = Modifier.fillMaxWidth(.75f)
-                ) { Text("Upload Image from Gallery") }
+                ) { Text(stringResource(Res.string.upload_image_gallery)) }
 
                 if (qrCodeInfo == null) {
                     Text(
-                        "Waiting for QR code",
+                        stringResource(Res.string.waiting_for_qr_code),
                         modifier = Modifier.align(Alignment.CenterHorizontally)
                     )
                 } else {
@@ -407,7 +418,7 @@ fun ScanQrCode(
                     enabled = qrCodeInfo != null,
                     shapes = ButtonDefaults.shapes(),
                     modifier = Modifier.fillMaxWidth(.75f)
-                ) { Text("Open") }
+                ) { Text(stringResource(Res.string.open)) }
             }
         }
     }

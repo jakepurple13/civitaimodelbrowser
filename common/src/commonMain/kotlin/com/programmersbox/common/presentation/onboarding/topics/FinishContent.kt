@@ -16,10 +16,15 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.programmersbox.resources.Res
+import com.programmersbox.resources.all_done
 import com.programmersbox.resources.civitai_logo
+import com.programmersbox.resources.onboarding_finish_description
+import com.programmersbox.resources.press_finish_to_start
 import org.jetbrains.compose.resources.painterResource
+import org.jetbrains.compose.resources.stringResource
 
 @Composable
 internal fun FinishContent() {
@@ -45,16 +50,26 @@ internal fun FinishContent() {
         HorizontalDivider()
 
         Column(
-            modifier = Modifier.padding(16.dp)
+            horizontalAlignment = Alignment.CenterHorizontally,
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp)
         ) {
             Text(
-                "All done!",
+                stringResource(Res.string.all_done),
                 style = MaterialTheme.typography.headlineMedium,
+                textAlign = TextAlign.Center
             )
 
-            Text("Remember you can change all of these settings at any time.")
+            Text(
+                stringResource(Res.string.onboarding_finish_description),
+                textAlign = TextAlign.Center
+            )
 
-            Text("Press finish to start using the app!")
+            Text(
+                stringResource(Res.string.press_finish_to_start),
+                textAlign = TextAlign.Center
+            )
         }
     }
 }

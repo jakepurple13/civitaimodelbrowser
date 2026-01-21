@@ -71,7 +71,29 @@ import com.programmersbox.common.db.ListDao
 import com.programmersbox.common.presentation.home.BlacklistHandling
 import com.programmersbox.common.presentation.qrcode.QrCodeType
 import com.programmersbox.common.presentation.qrcode.ShareViaQrCode
+import com.programmersbox.resources.Res
+import com.programmersbox.resources.add_to_list
+import com.programmersbox.resources.added_to
+import com.programmersbox.resources.blacklist
+import com.programmersbox.resources.cancel
+import com.programmersbox.resources.choose_a_list
+import com.programmersbox.resources.confirm
+import com.programmersbox.resources.create_new_list
+import com.programmersbox.resources.creators
+import com.programmersbox.resources.favorite_model
+import com.programmersbox.resources.list_created
+import com.programmersbox.resources.list_name
+import com.programmersbox.resources.made_by
+import com.programmersbox.resources.nsfw
+import com.programmersbox.resources.open
+import com.programmersbox.resources.open_images
+import com.programmersbox.resources.share
+import com.programmersbox.resources.unblacklist
+import com.programmersbox.resources.unfavorite_model
+import com.programmersbox.resources.view_creators_models
 import kotlinx.coroutines.launch
+import org.jetbrains.compose.resources.getString
+import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.koinInject
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
@@ -129,7 +151,7 @@ fun ModelOptionsSheet(
                     ) {
                         ListItem(
                             leadingContent = { Icon(Icons.Default.Block, null) },
-                            headlineContent = { Text("Unblacklist") }
+                            headlineContent = { Text(stringResource(Res.string.unblacklist)) }
                         )
                     }
                 } else {
@@ -139,7 +161,7 @@ fun ModelOptionsSheet(
                     ) {
                         ListItem(
                             leadingContent = { Icon(Icons.Default.Block, null) },
-                            headlineContent = { Text("Blacklist") }
+                            headlineContent = { Text(stringResource(Res.string.blacklist)) }
                         )
                     }
                 }
@@ -156,7 +178,7 @@ fun ModelOptionsSheet(
                 ) {
                     ListItem(
                         leadingContent = { Icon(Icons.Default.Preview, null) },
-                        headlineContent = { Text("Open") }
+                        headlineContent = { Text(stringResource(Res.string.open)) }
                     )
                 }
             }
@@ -188,7 +210,13 @@ fun ModelOptionsSheet(
                                     ?: Icon(Icons.Default.Person, null)
                             },
                             headlineContent = {
-                                Text("View ${models.creator?.username ?: "Creator"}'s models")
+                                Text(
+                                    stringResource(
+                                        Res.string.view_creators_models,
+                                        models.creator?.username
+                                            ?: stringResource(Res.string.creators)
+                                    )
+                                )
                             }
                         )
                     }
@@ -207,7 +235,7 @@ fun ModelOptionsSheet(
                     ) {
                         ListItem(
                             leadingContent = { Icon(Icons.Default.Image, null) },
-                            headlineContent = { Text("Open Images") }
+                            headlineContent = { Text(stringResource(Res.string.open_images)) }
                         )
                     }
                 }
@@ -233,7 +261,7 @@ fun ModelOptionsSheet(
                 ) {
                     ListItem(
                         leadingContent = { Icon(Icons.Default.Share, null) },
-                        headlineContent = { Text("Share") }
+                        headlineContent = { Text(stringResource(Res.string.share)) }
                     )
                 }
             }
@@ -251,7 +279,7 @@ fun ModelOptionsSheet(
                     ) {
                         ListItem(
                             leadingContent = { Icon(Icons.Default.Favorite, null) },
-                            headlineContent = { Text("Unfavorite Model") }
+                            headlineContent = { Text(stringResource(Res.string.unfavorite_model)) }
                         )
                     }
                 } else {
@@ -278,7 +306,7 @@ fun ModelOptionsSheet(
                     ) {
                         ListItem(
                             leadingContent = { Icon(Icons.Default.Favorite, null) },
-                            headlineContent = { Text("Favorite Model") }
+                            headlineContent = { Text(stringResource(Res.string.favorite_model)) }
                         )
                     }
                 }
@@ -313,7 +341,7 @@ fun ModelOptionsSheet(
                                         creatorImage = models.creator?.image,
                                     )
                                     toaster.show(
-                                        "Added to ${item.item.name}",
+                                        getString(Res.string.added_to, item.item.name),
                                         type = ToastType.Success
                                     )
                                     listState.hide()
@@ -334,7 +362,7 @@ fun ModelOptionsSheet(
                 ) {
                     ListItem(
                         leadingContent = { Icon(Icons.AutoMirrored.Filled.PlaylistAdd, null) },
-                        headlineContent = { Text("Add to List") }
+                        headlineContent = { Text(stringResource(Res.string.add_to_list)) }
                     )
                 }
             }
@@ -354,7 +382,7 @@ fun ModelOptionsSheet(
                         models
                             .creator
                             ?.username
-                            ?.let { Text("Made by $it") }
+                            ?.let { Text(stringResource(Res.string.made_by, it)) }
                     }
                 )
 
@@ -379,7 +407,7 @@ fun ModelOptionsSheet(
 
                     if (models.nsfw) {
                         ElevatedAssistChip(
-                            label = { Text("NSFW") },
+                            label = { Text(stringResource(Res.string.nsfw)) },
                             onClick = {},
                             colors = AssistChipDefaults.elevatedAssistChipColors(
                                 disabledLabelColor = MaterialTheme.colorScheme.error,
@@ -479,7 +507,7 @@ fun ModelOptionsSheet(
                 ) {
                     ListItem(
                         leadingContent = { Icon(Icons.Default.Preview, null) },
-                        headlineContent = { Text("Open") }
+                        headlineContent = { Text(stringResource(Res.string.open)) }
                     )
                 }
             }
@@ -508,7 +536,12 @@ fun ModelOptionsSheet(
                                     ?: Icon(Icons.Default.Person, null)
                             },
                             headlineContent = {
-                                Text("View ${creatorName ?: "Creator"}'s models")
+                                Text(
+                                    stringResource(
+                                        Res.string.view_creators_models,
+                                        creatorName ?: stringResource(Res.string.creators)
+                                    )
+                                )
                             }
                         )
                     }
@@ -535,7 +568,7 @@ fun ModelOptionsSheet(
                 ) {
                     ListItem(
                         leadingContent = { Icon(Icons.Default.Share, null) },
-                        headlineContent = { Text("Share") }
+                        headlineContent = { Text(stringResource(Res.string.share)) }
                     )
                 }
             }
@@ -553,7 +586,7 @@ fun ModelOptionsSheet(
                     ) {
                         ListItem(
                             leadingContent = { Icon(Icons.Default.Favorite, null) },
-                            headlineContent = { Text("Unfavorite Model") }
+                            headlineContent = { Text(stringResource(Res.string.unfavorite_model)) }
                         )
                     }
                 } else {
@@ -581,7 +614,7 @@ fun ModelOptionsSheet(
                     ) {
                         ListItem(
                             leadingContent = { Icon(Icons.Default.Favorite, null) },
-                            headlineContent = { Text("Favorite Model") }
+                            headlineContent = { Text(stringResource(Res.string.favorite_model)) }
                         )
                     }
                 }
@@ -616,7 +649,7 @@ fun ModelOptionsSheet(
                                         creatorImage = creatorImage,
                                     )
                                     toaster.show(
-                                        "Added to ${item.item.name}",
+                                        getString(Res.string.added_to, item.item.name),
                                         type = ToastType.Success
                                     )
                                     listState.hide()
@@ -637,7 +670,7 @@ fun ModelOptionsSheet(
                 ) {
                     ListItem(
                         leadingContent = { Icon(Icons.AutoMirrored.Filled.PlaylistAdd, null) },
-                        headlineContent = { Text("Add to List") }
+                        headlineContent = { Text(stringResource(Res.string.add_to_list)) }
                     )
                 }
             }
@@ -676,7 +709,7 @@ fun ModelOptionsSheet(
 
                     if (nsfw) {
                         ElevatedAssistChip(
-                            label = { Text("NSFW") },
+                            label = { Text(stringResource(Res.string.nsfw)) },
                             onClick = {},
                             colors = AssistChipDefaults.elevatedAssistChipColors(
                                 disabledLabelColor = MaterialTheme.colorScheme.error,
@@ -734,7 +767,7 @@ fun ListChoiceScreen(
         .getAllLists()
         .collectAsStateWithLifecycle(emptyList())
     ListBottomScreen(
-        title = "Choose a list",
+        title = stringResource(Res.string.choose_a_list),
         list = list,
         navigationIcon = navigationIcon,
         onClick = onClick,
@@ -747,7 +780,7 @@ fun ListChoiceScreen(
                     ListItem(
                         headlineContent = {
                             Text(
-                                "Create New List",
+                                stringResource(Res.string.create_new_list),
                                 style = MaterialTheme.typography.titleLarge
                             )
                         },
@@ -758,12 +791,12 @@ fun ListChoiceScreen(
                     var name by remember { mutableStateOf("") }
                     AlertDialog(
                         onDismissRequest = { showAdd = false },
-                        title = { Text("Create New List") },
+                        title = { Text(stringResource(Res.string.create_new_list)) },
                         text = {
                             OutlinedTextField(
                                 value = name,
                                 onValueChange = { name = it },
-                                label = { Text("List Name") },
+                                label = { Text(stringResource(Res.string.list_name)) },
                                 singleLine = true,
                                 modifier = Modifier.fillMaxWidth()
                             )
@@ -777,12 +810,12 @@ fun ListChoiceScreen(
                                     }
                                 },
                                 enabled = name.isNotEmpty()
-                            ) { Text("Confirm") }
+                            ) { Text(stringResource(Res.string.confirm)) }
                         },
                         dismissButton = {
                             TextButton(
                                 onClick = { showAdd = false }
-                            ) { Text("Cancel") }
+                            ) { Text(stringResource(Res.string.cancel)) }
                         }
                     )
                 }
@@ -801,16 +834,17 @@ fun ListChoiceScreen(
 @Composable
 fun ListChoiceScreen(
     username: String,
-    navigationIcon: @Composable () -> Unit = { CloseButton() },
     onClick: (CustomList) -> Unit,
+    navigationIcon: @Composable () -> Unit = { CloseButton() },
 ) {
     val dao = koinInject<ListDao>()
     val scope = rememberCoroutineScope()
     val list by dao
         .getAllLists()
         .collectAsStateWithLifecycle(emptyList())
+
     ListBottomScreen(
-        title = "Choose a list",
+        title = stringResource(Res.string.choose_a_list),
         list = list,
         navigationIcon = navigationIcon,
         onClick = onClick,
@@ -823,7 +857,7 @@ fun ListChoiceScreen(
                     ListItem(
                         headlineContent = {
                             Text(
-                                "Create New List",
+                                stringResource(Res.string.create_new_list),
                                 style = MaterialTheme.typography.titleLarge
                             )
                         },
@@ -835,12 +869,12 @@ fun ListChoiceScreen(
                     var name by remember { mutableStateOf("") }
                     AlertDialog(
                         onDismissRequest = { showAdd = false },
-                        title = { Text("Create New List") },
+                        title = { Text(stringResource(Res.string.create_new_list)) },
                         text = {
                             OutlinedTextField(
                                 value = name,
                                 onValueChange = { name = it },
-                                label = { Text("List Name") },
+                                label = { Text(stringResource(Res.string.list_name)) },
                                 singleLine = true,
                                 modifier = Modifier.fillMaxWidth()
                             )
@@ -850,17 +884,20 @@ fun ListChoiceScreen(
                                 onClick = {
                                     scope.launch {
                                         dao.create(name)
-                                        toaster.show("List Created", type = ToastType.Success)
+                                        toaster.show(
+                                            getString(Res.string.list_created),
+                                            type = ToastType.Success
+                                        )
                                         showAdd = false
                                     }
                                 },
                                 enabled = name.isNotEmpty()
-                            ) { Text("Confirm") }
+                            ) { Text(stringResource(Res.string.confirm)) }
                         },
                         dismissButton = {
                             TextButton(
                                 onClick = { showAdd = false }
-                            ) { Text("Cancel") }
+                            ) { Text(stringResource(Res.string.cancel)) }
                         }
                     )
                 }
@@ -884,25 +921,25 @@ interface ModelOptionsScope {
     operator fun get(index: Int): @Composable (Shape) -> Unit
 }
 
-private class ModelOptionsScopeImpl(
+@Composable
+private fun ModelOptionsScopeImpl(
     content: ModelOptionsScope.() -> Unit = {},
 ) : ModelOptionsScope {
-    val intervals: MutableIntervalList<@Composable (Shape) -> Unit> = MutableIntervalList()
+    val intervals: MutableIntervalList<@Composable (Shape) -> Unit> =
+        remember { MutableIntervalList() }
 
-    override val size: Int get() = intervals.size
-
-    override fun get(index: Int): @Composable ((Shape) -> Unit) = intervals[index].value
-
-    init {
-        apply(content)
-    }
-
-    override fun item(content: @Composable (Shape) -> Unit) {
-        intervals.addInterval(1, content)
+    return remember(content) {
+        object : ModelOptionsScope {
+            override val size: Int get() = intervals.size
+            override fun get(index: Int): @Composable (Shape) -> Unit = intervals[index].value
+            override fun item(content: @Composable (Shape) -> Unit) {
+                intervals.addInterval(1, content)
+            }
+        }.apply(content)
     }
 }
 
 @Composable
 fun rememberModelOptionsScope(
     content: ModelOptionsScope.() -> Unit = {},
-): ModelOptionsScope = remember { ModelOptionsScopeImpl(content) }
+): ModelOptionsScope = ModelOptionsScopeImpl(content)

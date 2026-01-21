@@ -27,6 +27,13 @@ import androidx.compose.ui.graphics.Color
 import androidx.navigation3.runtime.NavKey
 import com.programmersbox.common.Screen
 import com.programmersbox.common.di.NavigationHandler
+import com.programmersbox.resources.Res
+import com.programmersbox.resources.favorites
+import com.programmersbox.resources.home
+import com.programmersbox.resources.lists
+import com.programmersbox.resources.search
+import com.programmersbox.resources.settings
+import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.koinInject
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -73,7 +80,7 @@ fun CivitBottomBar(
                     null
                 )
             },
-            label = "Home",
+            label = stringResource(Res.string.home),
         )
 
         NavBarItem(
@@ -90,7 +97,7 @@ fun CivitBottomBar(
                     null
                 )
             },
-            label = "Favorites",
+            label = stringResource(Res.string.favorites),
         )
 
         NavBarItem(
@@ -107,7 +114,7 @@ fun CivitBottomBar(
                     null
                 )
             },
-            label = "Lists",
+            label = stringResource(Res.string.lists),
         )
 
         NavBarItem(
@@ -124,7 +131,7 @@ fun CivitBottomBar(
                     null
                 )
             },
-            label = "Settings",
+            label = stringResource(Res.string.settings),
         )
     }
 }
@@ -171,7 +178,7 @@ fun CivitRail(
                     null
                 )
             },
-            label = "Home",
+            label = stringResource(Res.string.home),
         )
 
         NavRailItem(
@@ -188,7 +195,7 @@ fun CivitRail(
                     null
                 )
             },
-            label = "Favorites",
+            label = stringResource(Res.string.favorites),
         )
 
         NavRailItem(
@@ -205,7 +212,7 @@ fun CivitRail(
                     null
                 )
             },
-            label = "Lists",
+            label = stringResource(Res.string.lists),
         )
 
         NavRailItem(
@@ -222,7 +229,7 @@ fun CivitRail(
                     null
                 )
             },
-            label = "Search",
+            label = stringResource(Res.string.search),
         )
 
         NavRailItem(
@@ -239,7 +246,7 @@ fun CivitRail(
                     null
                 )
             },
-            label = "Settings",
+            label = stringResource(Res.string.settings),
         )
     }
 }

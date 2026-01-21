@@ -81,6 +81,7 @@ import com.programmersbox.common.BackButton
 import com.programmersbox.common.ComposableUtils
 import com.programmersbox.common.CustomScrollBar
 import com.programmersbox.common.DataStore
+import com.programmersbox.common.Network
 import com.programmersbox.common.NetworkConnectionRepository
 import com.programmersbox.common.WindowedScaffold
 import com.programmersbox.common.adaptiveGridCell
@@ -100,12 +101,33 @@ import com.programmersbox.common.presentation.components.rememberModelOptionsSco
 import com.programmersbox.common.presentation.home.CardContent
 import com.programmersbox.common.presentation.qrcode.QrCodeType
 import com.programmersbox.common.presentation.qrcode.ShareViaQrCode
+import com.programmersbox.resources.Res
+import com.programmersbox.resources.add_to_list
+import com.programmersbox.resources.added_to
+import com.programmersbox.resources.cfg_scale_with_param
+import com.programmersbox.resources.clip_skip_with_param
+import com.programmersbox.resources.model_with_param
+import com.programmersbox.resources.negative_prompt_with_param
+import com.programmersbox.resources.nsfw
+import com.programmersbox.resources.open
+import com.programmersbox.resources.prompt_with_param
+import com.programmersbox.resources.sampler_with_param
+import com.programmersbox.resources.search_favorites
+import com.programmersbox.resources.seed_with_param
+import com.programmersbox.resources.share
+import com.programmersbox.resources.size_with_param
+import com.programmersbox.resources.steps_with_param
+import com.programmersbox.resources.unfavorite
+import com.programmersbox.resources.view_creators_models
+import com.programmersbox.resources.view_model
 import dev.chrisbanes.haze.HazeProgressive
 import dev.chrisbanes.haze.LocalHazeStyle
 import dev.chrisbanes.haze.hazeEffect
 import dev.chrisbanes.haze.hazeSource
 import dev.chrisbanes.haze.rememberHazeState
 import kotlinx.coroutines.launch
+import org.jetbrains.compose.resources.getString
+import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.koinInject
 import org.koin.compose.viewmodel.koinViewModel
 
@@ -191,7 +213,7 @@ fun FavoritesUI(
                                 searchBarState = searchBarState,
                                 textFieldState = viewModel.search,
                                 onSearch = {},
-                                placeholder = { Text("Search Favorites") },
+                                placeholder = { Text(stringResource(Res.string.search_favorites)) },
                                 trailingIcon = {
                                     AnimatedVisibility(viewModel.search.text.isNotEmpty()) {
                                         IconButton(
@@ -391,7 +413,7 @@ fun FavoritesUI(
                                     viewModel.removeImage(sheetModel.imageUrl.orEmpty())
                                 },
                                 onDismiss = { sheetDetails = null },
-                                nsfwText = "NSFW",
+                                nsfwText = stringResource(Res.string.nsfw),
                                 actions = {
                                     TextButton(
                                         onClick = {
@@ -399,7 +421,7 @@ fun FavoritesUI(
                                             onNavigateToDetail(sheetModel.modelId)
                                         }
                                     ) {
-                                        Text("View Model")
+                                        Text(stringResource(Res.string.view_model))
                                         Icon(Icons.AutoMirrored.Filled.ArrowRightAlt, null)
                                     }
                                 },
@@ -408,23 +430,86 @@ fun FavoritesUI(
                                         Column(
                                             modifier = Modifier.padding(4.dp)
                                         ) {
-                                            meta.model?.let { Text("Model: $it") }
+                                            meta.model?.let {
+                                                Text(
+                                                    stringResource(
+                                                        Res.string.model_with_param,
+                                                        it
+                                                    )
+                                                )
+                                            }
                                             HorizontalDivider()
-                                            meta.prompt?.let { Text("Prompt: $it") }
+                                            meta.prompt?.let {
+                                                Text(
+                                                    stringResource(
+                                                        Res.string.prompt_with_param,
+                                                        it
+                                                    )
+                                                )
+                                            }
                                             HorizontalDivider()
-                                            meta.negativePrompt?.let { Text("Negative Prompt: $it") }
+                                            meta.negativePrompt?.let {
+                                                Text(
+                                                    stringResource(
+                                                        Res.string.negative_prompt_with_param,
+                                                        it
+                                                    )
+                                                )
+                                            }
                                             HorizontalDivider()
-                                            meta.seed?.let { Text("Seed: $it") }
+                                            meta.seed?.let {
+                                                Text(
+                                                    stringResource(
+                                                        Res.string.seed_with_param,
+                                                        it.toString()
+                                                    )
+                                                )
+                                            }
                                             HorizontalDivider()
-                                            meta.sampler?.let { Text("Sampler: $it") }
+                                            meta.sampler?.let {
+                                                Text(
+                                                    stringResource(
+                                                        Res.string.sampler_with_param,
+                                                        it
+                                                    )
+                                                )
+                                            }
                                             HorizontalDivider()
-                                            meta.steps?.let { Text("Steps: $it") }
+                                            meta.steps?.let {
+                                                Text(
+                                                    stringResource(
+                                                        Res.string.steps_with_param,
+                                                        it.toString()
+                                                    )
+                                                )
+                                            }
                                             HorizontalDivider()
-                                            meta.clipSkip?.let { Text("Clip Skip: $it") }
+                                            meta.clipSkip?.let {
+                                                Text(
+                                                    stringResource(
+                                                        Res.string.clip_skip_with_param,
+                                                        it
+                                                    )
+                                                )
+                                            }
                                             HorizontalDivider()
-                                            meta.size?.let { Text("Size: $it") }
+                                            meta.size?.let {
+                                                Text(
+                                                    stringResource(
+                                                        Res.string.size_with_param,
+                                                        it
+                                                    )
+                                                )
+                                            }
                                             HorizontalDivider()
-                                            meta.cfgScale?.let { Text("Cfg Scale: $it") }
+                                            meta.cfgScale?.let {
+                                                Text(
+                                                    stringResource(
+                                                        Res.string.cfg_scale_with_param,
+                                                        it.toString()
+                                                    )
+                                                )
+                                            }
                                         }
                                     }
                                 }
@@ -656,7 +741,7 @@ fun FavoritesCreatorOptionsSheet(
                 ) {
                     ListItem(
                         leadingContent = { Icon(Icons.Default.Preview, null) },
-                        headlineContent = { Text("Open") }
+                        headlineContent = { Text(stringResource(Res.string.open)) }
                     )
                 }
             }
@@ -667,7 +752,7 @@ fun FavoritesCreatorOptionsSheet(
                 if (showQrCode) {
                     ShareViaQrCode(
                         title = models.name,
-                        url = "https://civitai.com/models/${models.id}",
+                        url = "${Network.CIVITAI_MODELS_URL}${models.id}",
                         qrCodeType = QrCodeType.User,
                         id = models.id.toString(),
                         username = models.name,
@@ -681,7 +766,7 @@ fun FavoritesCreatorOptionsSheet(
                 ) {
                     ListItem(
                         leadingContent = { Icon(Icons.Default.Share, null) },
-                        headlineContent = { Text("Share") }
+                        headlineContent = { Text(stringResource(Res.string.share)) }
                     )
                 }
             }
@@ -715,7 +800,7 @@ fun FavoritesCreatorOptionsSheet(
                                         creatorImage = models.imageUrl
                                     )
                                     toaster.show(
-                                        "Added to ${item.item.name}",
+                                        getString(Res.string.added_to, item.item.name),
                                         type = ToastType.Success
                                     )
                                     listState.hide()
@@ -735,7 +820,7 @@ fun FavoritesCreatorOptionsSheet(
                 ) {
                     ListItem(
                         leadingContent = { Icon(Icons.AutoMirrored.Filled.PlaylistAdd, null) },
-                        headlineContent = { Text("Add to List") }
+                        headlineContent = { Text(stringResource(Res.string.add_to_list)) }
                     )
                 }
             }
@@ -752,7 +837,7 @@ fun FavoritesCreatorOptionsSheet(
                 ) {
                     ListItem(
                         leadingContent = { Icon(Icons.Default.Favorite, null) },
-                        headlineContent = { Text("Unfavorite") }
+                        headlineContent = { Text(stringResource(Res.string.unfavorite)) }
                     )
                 }
             }
@@ -824,7 +909,7 @@ fun FavoritesModelOptionsSheet(
                 ) {
                     ListItem(
                         leadingContent = { Icon(Icons.Default.Preview, null) },
-                        headlineContent = { Text("Open") }
+                        headlineContent = { Text(stringResource(Res.string.open)) }
                     )
                 }
             }
@@ -855,7 +940,7 @@ fun FavoritesModelOptionsSheet(
                                     ?: Icon(Icons.Default.Person, null)
                             },
                             headlineContent = {
-                                Text("View ${models.creatorName ?: "Creator"}'s models")
+                                Text(stringResource(Res.string.view_creators_models, models.name))
                             }
                         )
                     }
@@ -868,7 +953,7 @@ fun FavoritesModelOptionsSheet(
                 if (showQrCode) {
                     ShareViaQrCode(
                         title = models.name,
-                        url = "https://civitai.com/models/${models.id}",
+                        url = "${Network.CIVITAI_MODELS_URL}${models.id}",
                         qrCodeType = QrCodeType.Model,
                         id = models.id.toString(),
                         username = "",
@@ -882,7 +967,7 @@ fun FavoritesModelOptionsSheet(
                 ) {
                     ListItem(
                         leadingContent = { Icon(Icons.Default.Share, null) },
-                        headlineContent = { Text("Share") }
+                        headlineContent = { Text(stringResource(Res.string.share)) }
                     )
                 }
             }
@@ -931,7 +1016,7 @@ fun FavoritesModelOptionsSheet(
                 ) {
                     ListItem(
                         leadingContent = { Icon(Icons.AutoMirrored.Filled.PlaylistAdd, null) },
-                        headlineContent = { Text("Add to List") }
+                        headlineContent = { Text(stringResource(Res.string.add_to_list)) }
                     )
                 }
             }
@@ -948,7 +1033,7 @@ fun FavoritesModelOptionsSheet(
                 ) {
                     ListItem(
                         leadingContent = { Icon(Icons.Default.Favorite, null) },
-                        headlineContent = { Text("Unfavorite") }
+                        headlineContent = { Text(stringResource(Res.string.unfavorite)) }
                     )
                 }
             }

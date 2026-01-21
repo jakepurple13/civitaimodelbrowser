@@ -2,6 +2,10 @@
     <string name="central_app_name">CivitAi Model Browser</string>
     <string name="home">Home</string>
     <string name="favorites">Favorites</string>
+    <string name="models">Models</string>
+    <string name="creators">Creators</string>
+    <string name="images">Images</string>
+    <string name="searches">Searches</string>
     <string name="stats">Stats</string>
     <string name="blacklisted">Blacklisted</string>
     <string name="settings">Settings</string>
@@ -26,7 +30,7 @@
     <string name="include_nsfw_content">Include NSFW Content?</string>
     <string name="show_nsfw_content">Show NSFW Content?</string>
     <string name="default_is_6">Default is 6</string>
-    <string name="strength">Strength: %d</string>
+    <string name="strength">Strength: %1$d</string>
 
     <!-- Behavior Settings -->
     <string name="show_blur">Show Blur</string>
@@ -79,7 +83,46 @@
     <string name="add_to_list">Add to List</string>
     <string name="lists">Lists</string>
     <string name="info">Info</string>
-    <string name="view_creators_models">View %s\'s models</string>
-    <string name="made_by">Made by %s</string>
-    <string name="added_to">Added to %s</string>
+    <string name="view_creators_models">View %1$s's models</string>
+    <string name="made_by">Made by %1$s</string>
+    <string name="added_to">Added to %1$s</string>
+
+    <!-- Onboarding -->
+    <string name="welcome">Welcome!</string>
+    <string name="welcome_description">Experience the world of AI art models with a stunning, adaptive interface built for Android, iOS, and Desktop. Whether you are on a phone or tablet, enjoy a fluid Material 3 design featuring dynamic colors and beautiful glassmorphism effects.\n\n**Key Features**:\n\n  - **Explore &amp; Discover**: Browse the latest, top-rated, and most downloaded models from CivitAI with advanced search and filtering.\n\n  - **Curate Your Collection**: Organize your inspiration with Favorites and Custom Lists. Securely backup and restore your data at any time.\n\n  - **Total Control**: Manage your feed with a robust Blacklist and advanced NSFW handling—featuring customizable blur strength and toggle controls.\n\n  - **Insights &amp; Sharing**: Track your browsing stats and easily share models via QR codes.</string>
+    <string name="all_done">All done!</string>
+    <string name="onboarding_finish_description">Remember you can change all of these settings at any time.</string>
+    <string name="press_finish_to_start">Press finish to start using the app!</string>
+    <string name="skip">Skip</string>
+    <string name="back">Back</string>
+    <string name="next">Next</string>
+    <string name="finish">Finish!</string>
+    <string name="skip_onboarding_title">Skip Onboarding?</string>
+    <string name="skip_onboarding_message">Are you sure you want to skip onboarding?</string>
+
+    <!-- QR Code -->
+    <string name="qr_code">QR code</string>
+    <string name="share_url">Share Url</string>
+    <string name="save">Save</string>
+    <string name="scan_qr_code_title">Scan QR code</string>
+    <string name="camera_required_message">Camera is required for QR Code scanning</string>
+    <string name="open_settings">Open Settings</string>
+    <string name="upload_image_gallery">Upload Image from Gallery</string>
+    <string name="waiting_for_qr_code">Waiting for QR code</string>
+    <string name="unfavorite">Unfavorite</string>
+    <string name="favorite">Favorite</string>
+    <string name="create_new_list">Create New List</string>
+    <string name="choose_a_list">Choose a list</string>
+    <string name="list_name">List Name</string>
+    <string name="list_created">List Created</string>
+    <string name="view_model">View Model</string>
+    <string name="model_with_param">Model: %1$s</string>
+    <string name="prompt_with_param">Prompt: %1$s</string>
+    <string name="negative_prompt_with_param">Negative Prompt: %1$s</string>
+    <string name="seed_with_param">Seed: %1$s</string>
+    <string name="sampler_with_param">Sampler: %1$s</string>
+    <string name="steps_with_param">Steps: %1$s</string>
+    <string name="clip_skip_with_param">Clip Skip: %1$s</string>
+    <string name="size_with_param">Size: %1$s</string>
+    <string name="cfg_scale_with_param">Cfg Scale: %1$s</string>
 </resources>

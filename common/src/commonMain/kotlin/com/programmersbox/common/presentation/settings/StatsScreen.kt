@@ -73,12 +73,30 @@ import com.programmersbox.common.db.FavoriteType
 import com.programmersbox.common.db.FavoritesDao
 import com.programmersbox.common.db.ListDao
 import com.programmersbox.common.db.SearchHistoryDao
+import com.programmersbox.resources.Res
+import com.programmersbox.resources.blacklisted
+import com.programmersbox.resources.creators
+import com.programmersbox.resources.favorites
+import com.programmersbox.resources.favorites_deep_dive
+import com.programmersbox.resources.favorites_without_nsfw
+import com.programmersbox.resources.global_stats
+import com.programmersbox.resources.images
+import com.programmersbox.resources.list_stats
+import com.programmersbox.resources.lists
+import com.programmersbox.resources.lists_deep_dive
+import com.programmersbox.resources.models
+import com.programmersbox.resources.nsfw
+import com.programmersbox.resources.nsfw_in_lists
+import com.programmersbox.resources.searches
+import com.programmersbox.resources.show_nsfw_stats
+import com.programmersbox.resources.stats
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.PersistentList
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.launch
+import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.koinInject
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -133,7 +151,7 @@ fun StatsScreen() {
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Stats") },
+                title = { Text(stringResource(Res.string.stats)) },
                 navigationIcon = { BackButton() },
                 scrollBehavior = scrollBehavior,
             )
@@ -158,7 +176,7 @@ fun StatsScreen() {
             item(contentType = "favorites deep dive") {
                 DeepDive(
                     dataCounts = favoritesCount,
-                    title = "Favorites Deep Dive",
+                    title = stringResource(Res.string.favorites_deep_dive),
                     modifier = Modifier.animateItem()
                 )
             }
@@ -172,7 +190,7 @@ fun StatsScreen() {
 
             item(contentType = "list title") {
                 Text(
-                    "List Stats",
+                    stringResource(Res.string.list_stats),
                     style = MaterialTheme.typography.titleLarge,
                     modifier = Modifier
                         .animateItem()
@@ -183,11 +201,12 @@ fun StatsScreen() {
             item(contentType = "list deep dive") {
                 DeepDive(
                     dataCounts = itemCount,
-                    title = "Lists Deep Dive",
+                    title = stringResource(Res.string.lists_deep_dive),
                     modifier = Modifier.animateItem()
                 )
             }
 
+            //TODO: Convert this to the SegmentedListItem when it comes to compose multiplatform
             items(
                 items = listItems,
                 contentType = { "list" },
@@ -222,7 +241,7 @@ private fun FavoritesDeeperStats(
         modifier = modifier.padding(horizontal = 16.dp)
     ) {
         ListItem(
-            headlineContent = { Text("Favorites without NSFW") },
+            headlineContent = { Text(stringResource(Res.string.favorites_without_nsfw)) },
             trailingContent = { Text(favorites.filterNot { it.nsfw }.size.toString()) },
             colors = ListItemDefaults.colors(
                 containerColor = Color.Transparent
@@ -248,7 +267,7 @@ private fun NsfwStats(
             .padding(16.dp)
     ) {
         ListItem(
-            headlineContent = { Text("Show NSFW Stats") },
+            headlineContent = { Text(stringResource(Res.string.show_nsfw_stats)) },
             leadingContent = {
                 Icon(
                     Icons.Default.NoAdultContent, null,
@@ -285,19 +304,19 @@ private fun NsfwStats(
                     modifier = Modifier.fillMaxWidth()
                 ) {
                     GlobalStatItem(
-                        title = "Favorites",
+                        title = stringResource(Res.string.favorites),
                         value = favorites.filter { it.nsfw }.size,
                         color = primaryErrorContainer
                     )
 
                     GlobalStatItem(
-                        title = "Blacklisted",
+                        title = stringResource(Res.string.blacklisted),
                         value = blacklisted.filter { it.nsfw }.size,
                         color = secondaryErrorContainer
                     )
 
                     GlobalStatItem(
-                        title = "NSFW in Lists",
+                        title = stringResource(Res.string.nsfw_in_lists),
                         value = lists.sumOf { it.list.count { item -> item.nsfw } },
                         color = MaterialTheme.colorScheme.tertiaryContainer
                             .blend(MaterialTheme.colorScheme.errorContainer)
@@ -309,7 +328,7 @@ private fun NsfwStats(
                 )
 
                 Text(
-                    "Favorites",
+                    stringResource(Res.string.favorites),
                     style = MaterialTheme.typography.titleLarge,
                     modifier = Modifier.padding(horizontal = 16.dp)
                 )
@@ -322,19 +341,19 @@ private fun NsfwStats(
                         .padding(horizontal = 16.dp)
                 ) {
                     DeepDiveChip(
-                        title = "Models",
+                        title = stringResource(Res.string.models),
                         value = favorites.filter { it.nsfw && it.favoriteType == FavoriteType.Model }.size,
                         icon = Icons.Default.ModelTraining,
                         color = primaryErrorContainer
                     )
                     DeepDiveChip(
-                        title = "Images",
+                        title = stringResource(Res.string.images),
                         value = favorites.filter { it.nsfw && it.favoriteType == FavoriteType.Image }.size,
                         icon = Icons.Default.Image,
                         color = secondaryErrorContainer
                     )
                     DeepDiveChip(
-                        title = "Creators",
+                        title = stringResource(Res.string.creators),
                         value = favorites.filter { it.nsfw && it.favoriteType == FavoriteType.Creator }.size,
                         icon = Icons.Default.Person,
                         color = tertiaryErrorContainer
@@ -346,7 +365,7 @@ private fun NsfwStats(
                 )
 
                 Text(
-                    "Lists",
+                    stringResource(Res.string.lists),
                     style = MaterialTheme.typography.titleLarge,
                     modifier = Modifier.padding(horizontal = 16.dp)
                 )
@@ -367,19 +386,19 @@ private fun NsfwStats(
                     }
 
                     DeepDiveChip(
-                        title = "Models",
+                        title = stringResource(Res.string.models),
                         value = listsNsfw[FavoriteType.Model] ?: 0,
                         icon = Icons.Default.ModelTraining,
                         color = primaryErrorContainer
                     )
                     DeepDiveChip(
-                        title = "Images",
+                        title = stringResource(Res.string.images),
                         value = listsNsfw[FavoriteType.Image] ?: 0,
                         icon = Icons.Default.Image,
                         color = secondaryErrorContainer
                     )
                     DeepDiveChip(
-                        title = "Creators",
+                        title = stringResource(Res.string.creators),
                         value = listsNsfw[FavoriteType.Creator] ?: 0,
                         icon = Icons.Default.Person,
                         color = tertiaryErrorContainer
@@ -391,13 +410,13 @@ private fun NsfwStats(
                 )
 
                 Text(
-                    "Blacklisted",
+                    stringResource(Res.string.blacklisted),
                     style = MaterialTheme.typography.titleLarge,
                     modifier = Modifier.padding(horizontal = 16.dp)
                 )
 
                 DeepDiveChip(
-                    title = "Blacklisted",
+                    title = stringResource(Res.string.blacklisted),
                     value = blacklisted.filter { it.nsfw }.size,
                     icon = Icons.Default.Block,
                     color = MaterialTheme.colorScheme.errorContainer,
@@ -426,20 +445,20 @@ private fun ListStats(
                         verticalArrangement = Arrangement.spacedBy(8.dp),
                         modifier = Modifier.fillMaxWidth()
                     ) {
-                        Text("Models: ${list.list.filter { it.favoriteType == FavoriteType.Model }.size}")
-                        Text("Images: ${list.list.filter { it.favoriteType == FavoriteType.Image }.size}")
-                        Text("Creators: ${list.list.filter { it.favoriteType == FavoriteType.Creator }.size}")
+                        Text("${stringResource(Res.string.models)}: ${list.list.filter { it.favoriteType == FavoriteType.Model }.size}")
+                        Text("${stringResource(Res.string.images)}: ${list.list.filter { it.favoriteType == FavoriteType.Image }.size}")
+                        Text("${stringResource(Res.string.creators)}: ${list.list.filter { it.favoriteType == FavoriteType.Creator }.size}")
                     }
 
-                    Text("NSFW: ${list.list.filter { it.nsfw }.size}")
+                    Text("${stringResource(Res.string.nsfw)}: ${list.list.filter { it.nsfw }.size}")
                     FlowRow(
                         horizontalArrangement = Arrangement.spacedBy(8.dp),
                         verticalArrangement = Arrangement.spacedBy(8.dp),
                         modifier = Modifier.fillMaxWidth()
                     ) {
-                        Text("Models: ${list.list.filter { it.favoriteType == FavoriteType.Model && it.nsfw }.size}")
-                        Text("Images: ${list.list.filter { it.favoriteType == FavoriteType.Image && it.nsfw }.size}")
-                        Text("Creators: ${list.list.filter { it.favoriteType == FavoriteType.Creator && it.nsfw }.size}")
+                        Text("${stringResource(Res.string.models)}: ${list.list.filter { it.favoriteType == FavoriteType.Model && it.nsfw }.size}")
+                        Text("${stringResource(Res.string.images)}: ${list.list.filter { it.favoriteType == FavoriteType.Image && it.nsfw }.size}")
+                        Text("${stringResource(Res.string.creators)}: ${list.list.filter { it.favoriteType == FavoriteType.Creator && it.nsfw }.size}")
                     }
                 }
             },
@@ -489,21 +508,21 @@ private fun DeepDive(
                 modifier = Modifier.fillMaxWidth()
             ) {
                 DeepDiveChip(
-                    title = "Models",
+                    title = stringResource(Res.string.models),
                     value = modelCount,
                     icon = Icons.Default.ModelTraining,
                     color = MaterialTheme.colorScheme.primaryContainer
                 )
 
                 DeepDiveChip(
-                    title = "Images",
+                    title = stringResource(Res.string.images),
                     value = imageCount,
                     icon = Icons.Default.Image,
                     color = MaterialTheme.colorScheme.secondaryContainer
                 )
 
                 DeepDiveChip(
-                    title = "Creators",
+                    title = stringResource(Res.string.creators),
                     value = creatorCount,
                     icon = Icons.Default.Person,
                     color = MaterialTheme.colorScheme.tertiaryContainer
@@ -574,7 +593,7 @@ private fun GlobalStats(
         modifier = modifier.padding(4.dp)
     ) {
         Text(
-            "Global Stats",
+            stringResource(Res.string.global_stats),
             style = MaterialTheme.typography.titleLarge,
             modifier = Modifier.padding(16.dp)
         )
@@ -586,7 +605,7 @@ private fun GlobalStats(
                 contentType = "favorites"
             ) {
                 GlobalStatItem(
-                    title = "Favorites",
+                    title = stringResource(Res.string.favorites),
                     value = favoritesCount.imageCount
                             + favoritesCount.modelCount
                             + favoritesCount.creatorCount,
@@ -598,7 +617,7 @@ private fun GlobalStats(
                 contentType = "blacklisted"
             ) {
                 GlobalStatItem(
-                    title = "Blacklisted",
+                    title = stringResource(Res.string.blacklisted),
                     value = blacklistedCount,
                     color = MaterialTheme.colorScheme.secondaryContainer
                 )
@@ -608,7 +627,7 @@ private fun GlobalStats(
                 contentType = "lists"
             ) {
                 GlobalStatItem(
-                    title = "Total Lists",
+                    title = stringResource(Res.string.lists),
                     value = listCount,
                     color = MaterialTheme.colorScheme.tertiaryContainer
                 )
@@ -618,7 +637,7 @@ private fun GlobalStats(
                 contentType = "searches"
             ) {
                 GlobalStatItem(
-                    title = "Searches",
+                    title = stringResource(Res.string.searches),
                     value = searchCount,
                     color = MaterialTheme.colorScheme.surfaceContainerHighest
                 )

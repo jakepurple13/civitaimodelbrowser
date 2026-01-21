@@ -125,4 +125,14 @@
     <string name="clip_skip_with_param">Clip Skip: %1$s</string>
     <string name="size_with_param">Size: %1$s</string>
     <string name="cfg_scale_with_param">Cfg Scale: %1$s</string>
+
+    <!-- Lists -->
+    <string name="custom_lists">Custom Lists</string>
+    <string name="remove_items">Remove Items</string>
+    <string name="delete_list">Delete List</string>
+    <string name="search_lists">Search Lists</string>
+    <string name="dfs">DFS: Searches the list name first, then the items</string>
+    <string name="bfs">BFS: Searches the items first, then the list name</string>
+    <string name="authenticate_to_view">Authenticate to view %1$s</string>
+    <string name="last_updated">Last Updated: %1$s</string>
 </resources>

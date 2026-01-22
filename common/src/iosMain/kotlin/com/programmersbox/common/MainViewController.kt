@@ -163,7 +163,7 @@ class RestoreWorker : IosWorker, KoinComponent {
         val includeBlacklisted = inputData.includeBlacklisted
         val includeSettings = inputData.includeSettings
         val includeSearchHistory = inputData.includeSearchHistory
-        val listsToInclude = emptyList<String>()//inputData.listItemsByUuid
+        val listsToInclude = inputData.listItemsByUuid
 
         println("Will restore $includeFavorites $includeBlacklisted $includeSettings $includeSearchHistory")
         println("Will restore lists: ${listsToInclude.size}")

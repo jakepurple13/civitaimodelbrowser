@@ -2,14 +2,12 @@ package com.programmersbox.common.presentation.backup
 
 import com.programmersbox.common.NotificationHandler
 import com.programmersbox.common.RestoreWorker
-import com.programmersbox.common.presentation.components.ToastType
 import com.programmersbox.common.presentation.components.ToasterState
 import dev.brewkits.kmpworkmanager.background.domain.BackgroundTaskScheduler
 import dev.brewkits.kmpworkmanager.background.domain.Constraints
 import dev.brewkits.kmpworkmanager.background.domain.ExistingPolicy
 import dev.brewkits.kmpworkmanager.background.domain.Qos
 import dev.brewkits.kmpworkmanager.background.domain.TaskTrigger
-import dev.brewkits.kmpworkmanager.background.domain.enqueue
 import io.github.vinceglb.filekit.PlatformFile
 import io.github.vinceglb.filekit.path
 import kotlinx.cinterop.BetaInteropApi
@@ -27,7 +25,6 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.Serializable
-import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import nl.adaptivity.xmlutil.core.impl.multiplatform.name
 import okio.FileSystem
@@ -272,11 +269,13 @@ actual class BackupRestoreHandler(
                             includeBlacklisted = includeBlacklisted,
                             includeSettings = includeSettings,
                             includeSearchHistory = includeSearchHistory,
-                            //listItemsByUuid = listItemsByUuid
+                            listItemsByUuid = listItemsByUuid
                         )
                     )
                 )
-            }.onFailure { it.printStackTrace() }
+            }
+                .onSuccess { println("Result: $it") }
+                .onFailure { it.printStackTrace() }
             /*val duration = measureTime {
                 backupRepository.restoreItems(
                     backupItems = backupRepository.readItems(platformFile),
@@ -307,5 +306,5 @@ data class RestoreInfo(
     val includeBlacklisted: Boolean,
     val includeSettings: Boolean,
     val includeSearchHistory: Boolean,
-    //val listItemsByUuid: List<String>,
+    val listItemsByUuid: List<String>,
 )

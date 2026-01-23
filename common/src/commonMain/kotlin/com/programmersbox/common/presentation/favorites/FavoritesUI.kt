@@ -628,6 +628,7 @@ private fun ModelItem(
         imageUrl = models.imageUrl.orEmpty(),
         name = models.name,
         type = models.type,
+        creatorImage = models.creatorImage,
         isNsfw = models.nsfw,
         showNsfw = showNsfw,
         blurStrength = blurStrength,
@@ -653,6 +654,7 @@ fun CoverCard(
     blurHash: String?,
     shouldShowMedia: Boolean,
     modifier: Modifier = Modifier,
+    creatorImage: String? = null,
     onClick: () -> Unit = {},
 ) {
     Surface(
@@ -670,7 +672,7 @@ fun CoverCard(
             blurHash = blurHash,
             blurStrength = blurStrength,
             shouldShowMedia = shouldShowMedia,
-            creatorImage = null
+            creatorImage = creatorImage
         )
     }
 }
@@ -686,6 +688,7 @@ fun CoverCard(
     blurHash: String?,
     shouldShowMedia: Boolean,
     modifier: Modifier = Modifier,
+    creatorImage: String? = null,
     onClick: () -> Unit = {},
     onLongClick: () -> Unit = {},
 ) {
@@ -708,7 +711,7 @@ fun CoverCard(
             blurStrength = blurStrength,
             blurHash = blurHash,
             shouldShowMedia = shouldShowMedia,
-            creatorImage = null
+            creatorImage = creatorImage
         )
     }
 }
@@ -940,7 +943,12 @@ fun FavoritesModelOptionsSheet(
                                     ?: Icon(Icons.Default.Person, null)
                             },
                             headlineContent = {
-                                Text(stringResource(Res.string.view_creators_models, models.name))
+                                Text(
+                                    stringResource(
+                                        Res.string.view_creators_models,
+                                        models.creatorName ?: models.name
+                                    )
+                                )
                             }
                         )
                     }

@@ -42,7 +42,7 @@ class ListViewModel(
                 if (it.second != SearchType.SQL) {
                     flowOf(emptyList())
                 } else {
-                    listDao.search(it.first)
+                    listDao.searchListsWithFts(it.first)
                 }
             }
             .onEach {

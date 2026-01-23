@@ -33,7 +33,8 @@ class ListDetailViewModel(
     }
 
     init {
-        listDao.getCustomListItemFlow(uuid)
+        listDao
+            .getCustomListItemFlow(uuid)
             .onEach {
                 customList = it
                 itemList.clear()

@@ -11,6 +11,7 @@ import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import androidx.room.RoomDatabase
 import androidx.room.RoomDatabaseConstructor
+import androidx.room.Transaction
 import androidx.sqlite.driver.bundled.BundledSQLiteDriver
 import com.programmersbox.common.Creator
 import com.programmersbox.common.ImageMeta
@@ -28,8 +29,11 @@ import kotlinx.serialization.json.Json
         CustomListInfo::class,
         CustomListItem::class,
         SearchHistoryItem::class,
+        CustomListItemFts::class,
+        CustomListInfoFts::class,
+        FavoriteRoomFts::class,
     ],
-    version = 10,
+    version = 14,
     autoMigrations = [
         AutoMigration(from = 1, to = 2),
         AutoMigration(from = 2, to = 3),
@@ -40,6 +44,7 @@ import kotlinx.serialization.json.Json
         AutoMigration(from = 7, to = 8),
         AutoMigration(from = 8, to = 9),
         AutoMigration(from = 9, to = 10),
+        AutoMigration(from = 10, to = 11),
     ]
 )
 
@@ -62,6 +67,12 @@ fun getRoomDatabase(
         //.addMigrations(MIGRATIONS)
         .setDriver(BundledSQLiteDriver())
         .setQueryCoroutineContext(Dispatchers.IO)
+        .addCallback(getFtsCallback())
+        .addMigrations(
+            MIGRATION_FTS,
+            MIGRATION_FAVORITES_FTS,
+            MIGRATION_FAVORITES_FTS_2,
+        )
         .build()
 }
 
@@ -182,6 +193,53 @@ interface FavoritesDao {
         includeNsfw: Boolean,
         types: List<String>?
     ): Flow<List<FavoriteRoom>>
+
+    @Transaction
+    @Query(
+        """
+        SELECT * FROM favorite_table
+        WHERE 
+          -- 1. NSFW Filter
+          (:includeNsfw = 1 OR nsfw = 0)
+          
+          -- 2. Type Filter (If flag is TRUE, ignore list. If FALSE, check list)
+          AND (:filterAllTypes = 1 OR type IN (:filterTypes))
+          
+          -- 3. Search Filter (Handles Empty vs Search)
+          AND (
+             :query = '' 
+             OR id IN (
+                SELECT rowid FROM FavoriteRoomFts 
+                WHERE FavoriteRoomFts MATCH :query
+             )
+          )
+        ORDER BY dateAdded DESC
+    """
+    )
+    fun searchFavorites(
+        query: String,
+        filterTypes: List<String>,
+        filterAllTypes: Boolean,
+        includeNsfw: Boolean
+    ): Flow<List<FavoriteRoom>>
+
+    @Ignore
+    fun ftsFavorites(
+        query: String,
+        json: Json = Json {
+            isLenient = true
+            ignoreUnknownKeys = true
+            coerceInputValues = true
+        },
+        includeNsfw: Boolean,
+        type: List<String>,
+    ) = searchFavorites(
+        query = if (query.isBlank()) "" else "*$query*",
+        includeNsfw = includeNsfw,
+        filterTypes = type,
+        filterAllTypes = type.isEmpty(),
+    )
+        .map { value -> value.map { favorite -> favorite.toModel(json) } }
 
     @Ignore
     fun searchForFavorites(

@@ -42,7 +42,6 @@ interface ListDao {
     )
     fun getTypeCounts(): Flow<DataCounts>
 
-    //Search both CustomListItem and CustomListInfo
     @Transaction
     @Query(
         """
@@ -157,5 +156,31 @@ interface ListDao {
         )
         updateFullList(item.item)
         return true
+    }
+
+    @Transaction
+    @Query(
+        """
+    SELECT * FROM CustomListItem
+    WHERE uuid IN (
+        SELECT uuid FROM CustomListItemFts 
+        WHERE CustomListItemFts MATCH :ftsQuery
+    )
+    OR uuid IN (
+        SELECT parentUuid FROM CustomListInfoFts 
+        WHERE CustomListInfoFts MATCH :ftsQuery
+    )
+    ORDER BY useBiometric ASC, time DESC
+    """
+    )
+    fun searchCustomListsQuickly(ftsQuery: String): Flow<List<CustomList>>
+
+    @Ignore
+    fun searchListsWithFts(userInput: String): Flow<List<CustomList>> {
+        // If input is "vacation", this becomes "*vacation*"
+        // This tells FTS to look for the word anywhere in the string.
+        val ftsQuery = "*$userInput*"
+
+        return searchCustomListsQuickly(ftsQuery)
     }
 }

@@ -299,7 +299,6 @@ fun ListDetailScreen(
                 .hazeSource(state = hazeState)
         ) {
             items(viewModel.searchedList) { item ->
-
                 var sheetDetails by remember { mutableStateOf(false) }
                 when (item.favoriteType) {
                     FavoriteType.Model -> {
@@ -356,6 +355,7 @@ fun ListDetailScreen(
                     name = item.name,
                     type = item.type,
                     isNsfw = item.nsfw,
+                    creatorImage = item.creatorImage,
                     showNsfw = showNsfw,
                     blurStrength = blurStrength.dp,
                     blurHash = item.hash,

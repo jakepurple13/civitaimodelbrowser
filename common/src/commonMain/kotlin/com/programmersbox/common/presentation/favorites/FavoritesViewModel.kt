@@ -27,7 +27,7 @@ class FavoritesViewModel(
     private var includeNsfw by mutableStateOf(false)
     val viewingList by derivedStateOf {
         dao
-            .searchForFavorites(
+            .ftsFavorites(
                 query = search.text.toString(),
                 type = filterList,
                 includeNsfw = includeNsfw

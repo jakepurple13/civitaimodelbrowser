@@ -1,5 +1,5 @@
 [versions]
-appVersion = "4.5.0"
+appVersion = "4.6.0"
 alarmee = "2.6.0"
 biometricauth = "1.1.0"
 biometricVersion = "1.4.0-alpha05"

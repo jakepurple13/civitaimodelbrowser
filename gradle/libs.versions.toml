@@ -45,7 +45,7 @@ koin = "4.2.0-beta4"
 
 filekit = "0.12.0"
 
-qrose = "1.0.1"
+qrose = "1.1.0"
 scanner = "0.6.0"
 javase = "3.5.4"
 coreVersion = "3.5.4"

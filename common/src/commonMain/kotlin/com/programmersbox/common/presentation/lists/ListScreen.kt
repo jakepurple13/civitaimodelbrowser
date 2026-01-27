@@ -20,11 +20,12 @@ import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.BottomAppBarDefaults
-import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.ListItem
+import androidx.compose.material3.ListItemDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.SegmentedButton
@@ -290,7 +291,13 @@ fun ListScreen(
                     title = stringResource(Res.string.authenticate_to_view, list.item.name),
                     onAuthenticationSucceeded = { onNavigateToDetail(list.item.uuid) }
                 )
-                ElevatedCard(
+
+                ListCard(
+                    list = list,
+                    dateTimeFormatter = dataTimeFormatter,
+                    showNsfw = showNsfw,
+                    blurStrength = blurStrength.dp,
+                    shouldShowMedia = shouldShowMedia,
                     onClick = {
                         if (list.item.useBiometric) {
                             biometricOpen.authenticate(customListItem = list.item)
@@ -299,20 +306,13 @@ fun ListScreen(
                         }
                     },
                     modifier = Modifier.animateItem()
-                ) {
-                    ListCard(
-                        list = list,
-                        dateTimeFormatter = dataTimeFormatter,
-                        showNsfw = showNsfw,
-                        blurStrength = blurStrength.dp,
-                        shouldShowMedia = shouldShowMedia
-                    )
-                }
+                )
             }
         }
     }
 }
 
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 private fun ListCard(
     list: CustomList,
@@ -320,6 +320,7 @@ private fun ListCard(
     showNsfw: Boolean,
     blurStrength: Dp,
     shouldShowMedia: Boolean,
+    onClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val imageHashing = list.toImageHash()
@@ -327,7 +328,8 @@ private fun ListCard(
     ListItem(
         overlineContent = { Text(stringResource(Res.string.last_updated, time)) },
         trailingContent = { Text("(${list.list.size})") },
-        headlineContent = { Text(list.item.name) },
+        content = { Text(list.item.name) },
+        onClick = onClick,
         leadingContent = {
             Box {
                 val imageModifier = Modifier
@@ -387,6 +389,7 @@ private fun ListCard(
                 }
             }
         },
+        colors = ListItemDefaults.colors(containerColor = MaterialTheme.colorScheme.surfaceContainer),
         modifier = modifier
     )
 }

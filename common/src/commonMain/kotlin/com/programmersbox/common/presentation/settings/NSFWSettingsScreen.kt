@@ -2,6 +2,7 @@ package com.programmersbox.common.presentation.settings
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -12,11 +13,13 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.NoAdultContent
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
-import androidx.compose.material3.Card
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LargeTopAppBar
 import androidx.compose.material3.ListItem
+import androidx.compose.material3.ListItemDefaults
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Slider
 import androidx.compose.material3.Switch
@@ -73,6 +76,7 @@ fun NsfwSettingsScreen() {
     }
 }
 
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun NsfwSettings(
     dataStore: DataStore,
@@ -85,46 +89,43 @@ fun NsfwSettings(
     val includeNsfwEnabled by includeNsfw.flow.collectAsStateWithLifecycle(false)
 
     Column(
+        verticalArrangement = Arrangement.spacedBy(ListItemDefaults.SegmentedGap),
         modifier = modifier.verticalScroll(rememberScrollState())
     ) {
-        Card(
-            onClick = { scope.launch { includeNsfw.update(!includeNsfwEnabled) } }
-        ) {
+        ListItem(
+            content = { Text(stringResource(Res.string.include_nsfw_content)) },
+            trailingContent = {
+                Switch(
+                    checked = includeNsfwEnabled,
+                    onCheckedChange = null
+                )
+            },
+            leadingContent = { Icon(Icons.Default.NoAdultContent, null) },
+            onClick = { scope.launch { includeNsfw.update(!includeNsfwEnabled) } },
+            colors = ListItemDefaults.colors(containerColor = MaterialTheme.colorScheme.surfaceContainer)
+        )
+
+        AnimatedVisibility(includeNsfwEnabled) {
             ListItem(
-                headlineContent = { Text(stringResource(Res.string.include_nsfw_content)) },
+                content = { Text(stringResource(Res.string.show_nsfw_content)) },
                 trailingContent = {
                     Switch(
-                        checked = includeNsfwEnabled,
+                        checked = showNsfw,
                         onCheckedChange = null
                     )
                 },
-                leadingContent = { Icon(Icons.Default.NoAdultContent, null) }
+                leadingContent = {
+                    Icon(
+                        if (showNsfw)
+                            Icons.Default.Visibility
+                        else
+                            Icons.Default.VisibilityOff,
+                        null
+                    )
+                },
+                onClick = { showNsfw = !showNsfw },
+                colors = ListItemDefaults.colors(containerColor = MaterialTheme.colorScheme.surfaceContainer)
             )
-        }
-
-        AnimatedVisibility(includeNsfwEnabled) {
-            Card(
-                onClick = { showNsfw = !showNsfw }
-            ) {
-                ListItem(
-                    headlineContent = { Text(stringResource(Res.string.show_nsfw_content)) },
-                    trailingContent = {
-                        Switch(
-                            checked = showNsfw,
-                            onCheckedChange = null
-                        )
-                    },
-                    leadingContent = {
-                        Icon(
-                            if (showNsfw)
-                                Icons.Default.Visibility
-                            else
-                                Icons.Default.VisibilityOff,
-                            null
-                        )
-                    }
-                )
-            }
         }
 
         AnimatedVisibility(!showNsfw && includeNsfwEnabled) {
@@ -150,7 +151,8 @@ fun NsfwSettings(
                             steps = (range.endInclusive - range.start).roundToInt(),
                             valueRange = range
                         )
-                    }
+                    },
+                    colors = ListItemDefaults.colors(containerColor = MaterialTheme.colorScheme.surfaceContainer)
                 )
 
                 Image(

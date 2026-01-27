@@ -18,14 +18,13 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ChevronRight
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.PlayArrow
-import androidx.compose.material3.Card
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.ListItem
-import androidx.compose.material3.ListItemDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Switch
@@ -166,6 +165,7 @@ fun BackupAndRestoreList(
     }
 }
 
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 private fun FavoriteSwitch(
     favoriteCount: Int,
@@ -173,26 +173,22 @@ private fun FavoriteSwitch(
     onCheckedChange: (Boolean) -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    Card(
-        onClick = { onCheckedChange(!checked) },
-        modifier = modifier
-    ) {
-        ListItem(
-            headlineContent = { Text("Favorites ($favoriteCount)") },
-            trailingContent = {
-                Switch(
-                    checked = checked,
-                    onCheckedChange = onCheckedChange
-                )
-            },
-            supportingContent = { Text("Favorite models, creators, and images") },
-            colors = ListItemDefaults.colors(
-                containerColor = Color.Transparent
+    ListItem(
+        content = { Text("Favorites ($favoriteCount)") },
+        trailingContent = {
+            Switch(
+                checked = checked,
+                onCheckedChange = null
             )
-        )
-    }
+        },
+        supportingContent = { Text("Favorite models, creators, and images") },
+        checked = checked,
+        onCheckedChange = onCheckedChange,
+        modifier = modifier
+    )
 }
 
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 private fun SearchHistorySwitch(
     searchHistoryCount: Int,
@@ -200,26 +196,22 @@ private fun SearchHistorySwitch(
     onCheckedChange: (Boolean) -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    Card(
-        onClick = { onCheckedChange(!checked) },
-        modifier = modifier
-    ) {
-        ListItem(
-            headlineContent = { Text("Search History ($searchHistoryCount)") },
-            trailingContent = {
-                Switch(
-                    checked = checked,
-                    onCheckedChange = onCheckedChange
-                )
-            },
-            supportingContent = { Text("All search queries") },
-            colors = ListItemDefaults.colors(
-                containerColor = Color.Transparent
+    ListItem(
+        content = { Text("Search History ($searchHistoryCount)") },
+        trailingContent = {
+            Switch(
+                checked = checked,
+                onCheckedChange = null
             )
-        )
-    }
+        },
+        supportingContent = { Text("All search queries") },
+        onCheckedChange = onCheckedChange,
+        checked = checked,
+        modifier = modifier
+    )
 }
 
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 private fun BlacklistedSwitch(
     blacklistedCount: Int,
@@ -227,26 +219,17 @@ private fun BlacklistedSwitch(
     onCheckedChange: (Boolean) -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    Card(
-        onClick = { onCheckedChange(!checked) },
+    ListItem(
+        content = { Text("Blacklisted ($blacklistedCount)") },
+        trailingContent = { Switch(checked = checked, onCheckedChange = null) },
+        supportingContent = { Text("Blocked models and images") },
+        onCheckedChange = onCheckedChange,
+        checked = checked,
         modifier = modifier
-    ) {
-        ListItem(
-            headlineContent = { Text("Blacklisted ($blacklistedCount)") },
-            trailingContent = {
-                Switch(
-                    checked = checked,
-                    onCheckedChange = onCheckedChange
-                )
-            },
-            supportingContent = { Text("Blocked models and images") },
-            colors = ListItemDefaults.colors(
-                containerColor = Color.Transparent
-            )
-        )
-    }
+    )
 }
 
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 private fun SettingsSwitch(
     checked: Boolean,
@@ -254,32 +237,27 @@ private fun SettingsSwitch(
     supportingContent: @Composable ColumnScope.() -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    Card(
-        onClick = { onCheckedChange(!checked) },
-        modifier = modifier
-    ) {
-        ListItem(
-            headlineContent = { Text("App Settings") },
-            trailingContent = {
-                Switch(
-                    checked = checked,
-                    onCheckedChange = onCheckedChange
-                )
-            },
-            supportingContent = {
-                Column {
-                    Text("App settings like theme, etc.")
-                    supportingContent()
-                }
-            },
-            colors = ListItemDefaults.colors(
-                containerColor = Color.Transparent
+    ListItem(
+        content = { Text("App Settings") },
+        trailingContent = {
+            Switch(
+                checked = checked,
+                onCheckedChange = null
             )
-        )
-    }
+        },
+        supportingContent = {
+            Column {
+                Text("App settings like theme, etc.")
+                supportingContent()
+            }
+        },
+        checked = checked,
+        onCheckedChange = onCheckedChange,
+        modifier = modifier
+    )
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 private fun ListsToInclude(
     title: String,
@@ -296,7 +274,9 @@ private fun ListsToInclude(
             onDismissRequest = { showAdd = false },
             containerColor = MaterialTheme.colorScheme.surface,
         ) {
-            LazyColumn {
+            LazyColumn(
+                verticalArrangement = Arrangement.spacedBy(4.dp)
+            ) {
                 item(
                     contentType = "title"
                 ) {
@@ -312,7 +292,18 @@ private fun ListsToInclude(
                 item(
                     contentType = "add all"
                 ) {
-                    Card(
+                    ListItem(
+                        content = { Text("Select All") },
+                        trailingContent = {
+                            TriStateCheckbox(
+                                state = when {
+                                    listsToInclude.size == list.size -> ToggleableState.On
+                                    listsToInclude.isEmpty() -> ToggleableState.Off
+                                    else -> ToggleableState.Indeterminate
+                                },
+                                onClick = null
+                            )
+                        },
                         onClick = {
                             if (listsToInclude.size == list.size) {
                                 list.forEach { onRemoveList(it.item.uuid) }
@@ -320,27 +311,7 @@ private fun ListsToInclude(
                                 list.forEach { onAddList(it.item.uuid) }
                             }
                         }
-                    ) {
-                        ListItem(
-                            headlineContent = { Text("Select All") },
-                            trailingContent = {
-                                TriStateCheckbox(
-                                    state = when {
-                                        listsToInclude.size == list.size -> ToggleableState.On
-                                        listsToInclude.isEmpty() -> ToggleableState.Off
-                                        else -> ToggleableState.Indeterminate
-                                    },
-                                    onClick = {
-                                        if (listsToInclude.size == list.size) {
-                                            list.forEach { onRemoveList(it.item.uuid) }
-                                        } else {
-                                            list.forEach { onAddList(it.item.uuid) }
-                                        }
-                                    }
-                                )
-                            }
-                        )
-                    }
+                    )
                 }
                 items(
                     list,
@@ -358,20 +329,15 @@ private fun ListsToInclude(
         }
     }
 
-    Card(
+    ListItem(
+        content = { Text("Select Lists (${listsToInclude.size} selected)") },
+        trailingContent = { Icon(Icons.Default.ChevronRight, null) },
         onClick = { showAdd = !showAdd },
         modifier = modifier.animateContentSize()
-    ) {
-        ListItem(
-            headlineContent = { Text("Select Lists (${listsToInclude.size} selected)") },
-            trailingContent = { Icon(Icons.Default.ChevronRight, null) },
-            colors = ListItemDefaults.colors(
-                containerColor = Color.Transparent
-            )
-        )
-    }
+    )
 }
 
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 private fun ListItemToAdd(
     customList: CustomList,
@@ -379,82 +345,74 @@ private fun ListItemToAdd(
     onAddList: (String) -> Unit,
     onRemoveList: (String) -> Unit,
 ) {
-    Card(
-        onClick = {
-            if (customList.item.uuid in listsToInclude) {
-                onRemoveList(customList.item.uuid)
-            } else {
+    ListItem(
+        content = { Text(customList.item.name) },
+        overlineContent = { Text("Items: ${customList.list.size}") },
+        supportingContent = {
+            Column {
+                customList.list.take(3).forEach { info ->
+                    Text(
+                        text = info.name,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
+                    )
+                }
+            }
+        },
+        checked = customList.item.uuid in listsToInclude,
+        onCheckedChange = {
+            if (it) {
                 onAddList(customList.item.uuid)
+            } else {
+                onRemoveList(customList.item.uuid)
+            }
+        },
+        trailingContent = {
+            Checkbox(
+                checked = customList.item.uuid in listsToInclude,
+                onCheckedChange = null
+            )
+        },
+        leadingContent = {
+            val imageHashing = customList.toImageHash()
+
+            val imageModifier = Modifier
+                .size(
+                    ComposableUtils.IMAGE_WIDTH / 3,
+                    ComposableUtils.IMAGE_HEIGHT / 3
+                )
+                .clip(MaterialTheme.shapes.medium)
+
+            if (imageHashing?.url?.endsWith("mp4") == true) {
+                Box(
+                    contentAlignment = Alignment.Center,
+                    modifier = Modifier
+                        .background(Color.Black)
+                        .then(imageModifier)
+                ) {
+                    VideoPreviewComposable(
+                        url = imageHashing.url,
+                        frameCount = 5,
+                        contentScale = ContentScale.Crop,
+                    )
+                    Row(
+                        verticalAlignment = Alignment.Bottom,
+                        horizontalArrangement = Arrangement.SpaceEvenly,
+                        modifier = Modifier.matchParentSize()
+                    ) {
+                        Text("Click to Play")
+                        Icon(Icons.Default.PlayArrow, null)
+                    }
+                }
+            } else {
+                LoadingImage(
+                    imageUrl = imageHashing?.url.orEmpty(),
+                    isNsfw = customList.list.any { it.nsfw },
+                    name = "",
+                    hash = imageHashing?.hash,
+                    modifier = imageModifier,
+                )
             }
         }
-    ) {
-        ListItem(
-            headlineContent = { Text(customList.item.name) },
-            overlineContent = { Text("Items: ${customList.list.size}") },
-            supportingContent = {
-                Column {
-                    customList.list.take(3).forEach { info ->
-                        Text(
-                            text = info.name,
-                            maxLines = 1,
-                            overflow = TextOverflow.Ellipsis
-                        )
-                    }
-                }
-            },
-            trailingContent = {
-                Checkbox(
-                    checked = customList.item.uuid in listsToInclude,
-                    onCheckedChange = {
-                        if (it) {
-                            onAddList(customList.item.uuid)
-                        } else {
-                            onRemoveList(customList.item.uuid)
-                        }
-                    }
-                )
-            },
-            leadingContent = {
-                val imageHashing = customList.toImageHash()
-
-                val imageModifier = Modifier
-                    .size(
-                        ComposableUtils.IMAGE_WIDTH / 3,
-                        ComposableUtils.IMAGE_HEIGHT / 3
-                    )
-                    .clip(MaterialTheme.shapes.medium)
-
-                if (imageHashing?.url?.endsWith("mp4") == true) {
-                    Box(
-                        contentAlignment = Alignment.Center,
-                        modifier = Modifier
-                            .background(Color.Black)
-                            .then(imageModifier)
-                    ) {
-                        VideoPreviewComposable(
-                            url = imageHashing.url,
-                            frameCount = 5,
-                            contentScale = ContentScale.Crop,
-                        )
-                        Row(
-                            verticalAlignment = Alignment.Bottom,
-                            horizontalArrangement = Arrangement.SpaceEvenly,
-                            modifier = Modifier.matchParentSize()
-                        ) {
-                            Text("Click to Play")
-                            Icon(Icons.Default.PlayArrow, null)
-                        }
-                    }
-                } else {
-                    LoadingImage(
-                        imageUrl = imageHashing?.url.orEmpty(),
-                        isNsfw = customList.list.any { it.nsfw },
-                        name = "",
-                        hash = imageHashing?.hash,
-                        modifier = imageModifier,
-                    )
-                }
-            }
-        )
-    }
+    )
 }

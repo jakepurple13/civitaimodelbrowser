@@ -8,7 +8,6 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.animation.togetherWith
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -31,6 +30,7 @@ import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.AppBarWithSearch
 import androidx.compose.material3.ExpandedFullScreenSearchBar
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.ListItem
@@ -101,6 +101,7 @@ fun SearchScreen(
     val blacklisted by db
         .getBlacklisted()
         .collectAsStateWithLifecycle(emptyList())
+
     val showBlur by dataStore.rememberShowBlur()
     val hazeState = rememberHazeState(showBlur)
     val useProgressive by dataStore.rememberUseProgressive()
@@ -197,7 +198,7 @@ fun SearchScreen(
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 private fun SearchAppBar(
     searchQuery: TextFieldState,
@@ -320,21 +321,20 @@ private fun SearchAppBar(
                 }
 
                 ListItem(
-                    headlineContent = { Text(item.searchQuery) },
+                    content = { Text(item.searchQuery) },
                     leadingContent = { Icon(Icons.Default.History, null) },
                     trailingContent = {
                         IconButton(
                             onClick = { showDialog = true }
                         ) { Icon(Icons.Default.Clear, null) }
                     },
-                    modifier = Modifier
-                        .animateItem()
-                        .clickable {
-                            scope.launch {
-                                searchQuery.setTextAndPlaceCursorAtEnd(item.searchQuery)
-                                searchBarState.animateToCollapsed()
-                            }.invokeOnCompletion { onSearch(item.searchQuery) }
-                        }
+                    onClick = {
+                        scope.launch {
+                            searchQuery.setTextAndPlaceCursorAtEnd(item.searchQuery)
+                            searchBarState.animateToCollapsed()
+                        }.invokeOnCompletion { onSearch(item.searchQuery) }
+                    },
+                    modifier = Modifier.animateItem()
                 )
             }
         }

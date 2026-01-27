@@ -3,10 +3,11 @@ package com.programmersbox.common.presentation.settings
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Cached
-import androidx.compose.material3.Card
-import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.Icon
 import androidx.compose.material3.ListItem
+import androidx.compose.material3.ListItemDefaults
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.platform.LocalContext
@@ -14,14 +15,15 @@ import com.programmersbox.common.presentation.components.ToastType
 import com.programmersbox.common.presentation.components.ToasterState
 import org.koin.compose.koinInject
 
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 actual fun ColumnScope.ExtraSettings() {
     val context = LocalContext.current
     val snackBarState = koinInject<ToasterState>()
 
-    HorizontalDivider()
-
-    Card(
+    ListItem(
+        content = { Text("Clear Cache") },
+        leadingContent = { Icon(Icons.Default.Cached, null) },
         onClick = {
             runCatching {
                 context
@@ -43,11 +45,7 @@ actual fun ColumnScope.ExtraSettings() {
                 .onSuccess { snackBarState.show("Cache Cleared", type = ToastType.Success) }
                 .onFailure { snackBarState.show("Failed to Clear Cache", type = ToastType.Error) }
                 .onFailure { it.printStackTrace() }
-        }
-    ) {
-        ListItem(
-            headlineContent = { Text("Clear Cache") },
-            leadingContent = { Icon(Icons.Default.Cached, null) }
-        )
-    }
+        },
+        colors = ListItemDefaults.colors(containerColor = MaterialTheme.colorScheme.surfaceContainer)
+    )
 }

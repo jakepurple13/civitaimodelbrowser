@@ -27,6 +27,7 @@ import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LargeTopAppBar
@@ -35,6 +36,7 @@ import androidx.compose.material3.ListItemDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SegmentedListItem
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
@@ -103,12 +105,17 @@ fun BehaviorSettingsScreen() {
     }
 }
 
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun BehaviorSettings(
     dataStore: DataStore,
     modifier: Modifier = Modifier,
 ) {
+    val colors =
+        ListItemDefaults.colors(containerColor = MaterialTheme.colorScheme.surfaceContainer)
+
     Column(
+        verticalArrangement = Arrangement.spacedBy(16.dp),
         modifier = modifier.verticalScroll(rememberScrollState())
     ) {
         var useToolbar by dataStore.rememberUseToolbar()
@@ -119,34 +126,38 @@ fun BehaviorSettings(
         var doubleClickBehavior by dataStore.rememberDoubleClickBehavior()
         var showFavorites by dataStore.rememberShowFavorites()
 
-        Card(
-            onClick = { showBlur = !showBlur }
+        Column(
+            verticalArrangement = Arrangement.spacedBy(ListItemDefaults.SegmentedGap)
         ) {
-            ListItem(
+            SegmentedListItem(
                 leadingContent = {
                     Icon(
                         if (showBlur) Icons.Default.BlurOn else Icons.Default.BlurOff,
                         null
                     )
                 },
-                headlineContent = { Text(stringResource(Res.string.show_blur)) },
+                content = { Text(stringResource(Res.string.show_blur)) },
                 trailingContent = {
                     Switch(
                         checked = showBlur,
                         onCheckedChange = null
                     )
-                }
+                },
+                onClick = { showBlur = !showBlur },
+                colors = colors,
+                shapes = ListItemDefaults.segmentedShapes(
+                    0,
+                    if (showBlur) 3 else 1
+                )
             )
-        }
 
-        AnimatedVisibility(showBlur) {
-            var showBlurOptions by remember { mutableStateOf(false) }
+            AnimatedVisibility(showBlur) {
+                var showBlurOptions by remember { mutableStateOf(false) }
 
-            Column {
-                Card(
-                    onClick = { useProgressive = !useProgressive }
+                Column(
+                    verticalArrangement = Arrangement.spacedBy(ListItemDefaults.SegmentedGap)
                 ) {
-                    ListItem(
+                    SegmentedListItem(
                         leadingContent = {
                             Icon(
                                 if (useProgressive)
@@ -156,24 +167,26 @@ fun BehaviorSettings(
                                 null
                             )
                         },
-                        headlineContent = { Text(stringResource(Res.string.use_progressive_blur)) },
+                        content = { Text(stringResource(Res.string.use_progressive_blur)) },
                         supportingContent = { Text(stringResource(Res.string.progressive_blur_description)) },
                         trailingContent = {
                             Switch(
                                 checked = useProgressive,
                                 onCheckedChange = null
                             )
-                        }
+                        },
+                        onClick = { useProgressive = !useProgressive },
+                        colors = colors,
+                        shapes = ListItemDefaults.segmentedShapes(1, 3)
                     )
-                }
 
-                Card(
-                    onClick = { showBlurOptions = !showBlurOptions }
-                ) {
-                    ListItem(
-                        headlineContent = { Text(stringResource(Res.string.blur_type)) },
+                    SegmentedListItem(
+                        content = { Text(stringResource(Res.string.blur_type)) },
                         trailingContent = { Text("${blurType.type.name} ${blurType.level.name}") },
-                        leadingContent = { Icon(Icons.Default.BlurCircular, null) }
+                        leadingContent = { Icon(Icons.Default.BlurCircular, null) },
+                        onClick = { showBlurOptions = !showBlurOptions },
+                        colors = colors,
+                        shapes = ListItemDefaults.segmentedShapes(2, 3)
                     )
 
                     AnimatedVisibility(showBlurOptions) {
@@ -224,173 +237,152 @@ fun BehaviorSettings(
                         }
                     }
                 }
-                AnimatedVisibility(!showBlurOptions) {
-                    HorizontalDivider()
-                }
             }
         }
 
-        AnimatedVisibility(!showBlur) {
-            HorizontalDivider()
-        }
-
-        Card(
-            onClick = { useToolbar = !useToolbar }
+        Column(
+            verticalArrangement = Arrangement.spacedBy(ListItemDefaults.SegmentedGap)
         ) {
-            ListItem(
+            SegmentedListItem(
                 leadingContent = { Icon(Icons.Default.BorderBottom, null) },
-                headlineContent = { Text(stringResource(Res.string.use_toolbar)) },
-                trailingContent = {
-                    Switch(
-                        checked = useToolbar,
-                        onCheckedChange = { useToolbar = it }
-                    )
-                }
+                content = { Text(stringResource(Res.string.use_toolbar)) },
+                trailingContent = { Switch(checked = useToolbar, onCheckedChange = null) },
+                colors = colors,
+                shapes = ListItemDefaults.segmentedShapes(0, 3),
+                onClick = { useToolbar = !useToolbar }
             )
-        }
 
-        var themeMode by dataStore.rememberThemeMode()
+            var themeMode by dataStore.rememberThemeMode()
 
-        var showThemeModeDialog by remember { mutableStateOf(false) }
+            var showThemeModeDialog by remember { mutableStateOf(false) }
 
-        if (showThemeModeDialog) {
-            AlertDialog(
-                onDismissRequest = { showThemeModeDialog = false },
-                title = { Text(stringResource(Res.string.theme_mode)) },
-                text = {
-                    Column {
-                        ThemeMode.entries.forEach {
-                            Card(
-                                onClick = { themeMode = it },
-                                colors = CardDefaults.cardColors(
-                                    containerColor = Color.Transparent
-                                )
-                            ) {
-                                ListItem(
-                                    headlineContent = { Text(it.name) },
-                                    trailingContent = {
-                                        RadioButton(
-                                            selected = it == themeMode,
-                                            onClick = null
-                                        )
-                                    },
-                                    colors = ListItemDefaults.colors(
+            if (showThemeModeDialog) {
+                AlertDialog(
+                    onDismissRequest = { showThemeModeDialog = false },
+                    title = { Text(stringResource(Res.string.theme_mode)) },
+                    text = {
+                        Column {
+                            ThemeMode.entries.forEach {
+                                Card(
+                                    onClick = { themeMode = it },
+                                    colors = CardDefaults.cardColors(
                                         containerColor = Color.Transparent
                                     )
-                                )
+                                ) {
+                                    ListItem(
+                                        headlineContent = { Text(it.name) },
+                                        trailingContent = {
+                                            RadioButton(
+                                                selected = it == themeMode,
+                                                onClick = null
+                                            )
+                                        },
+                                        colors = ListItemDefaults.colors(
+                                            containerColor = Color.Transparent
+                                        )
+                                    )
+                                }
                             }
                         }
+                    },
+                    confirmButton = {
+                        TextButton(
+                            onClick = { showThemeModeDialog = false }
+                        ) { Text(stringResource(Res.string.confirm)) }
                     }
-                },
-                confirmButton = {
-                    TextButton(
-                        onClick = { showThemeModeDialog = false }
-                    ) { Text(stringResource(Res.string.confirm)) }
-                }
-            )
-        }
+                )
+            }
 
-        Card(
-            onClick = { showThemeModeDialog = true }
-        ) {
-            ListItem(
+            SegmentedListItem(
                 leadingContent = { Icon(Icons.Default.Brightness4, null) },
-                headlineContent = { Text(stringResource(Res.string.theme_mode)) },
+                content = { Text(stringResource(Res.string.theme_mode)) },
                 supportingContent = { Text(themeMode.name) },
-                trailingContent = {
-                    Icon(
-                        Icons.Default.ArrowDropDown,
-                        null
-                    )
-                }
+                trailingContent = { Icon(Icons.Default.ArrowDropDown, null) },
+                colors = colors,
+                shapes = ListItemDefaults.segmentedShapes(1, 3),
+                onClick = { showThemeModeDialog = true }
             )
-        }
 
-        Card(
-            onClick = { isAmoled = !isAmoled }
-        ) {
-            ListItem(
+            SegmentedListItem(
                 leadingContent = { Icon(Icons.Default.Brightness7, null) },
-                headlineContent = { Text(stringResource(Res.string.use_amoled_mode)) },
-                trailingContent = {
-                    Switch(
-                        checked = isAmoled,
-                        onCheckedChange = null
-                    )
-                }
+                content = { Text(stringResource(Res.string.use_amoled_mode)) },
+                trailingContent = { Switch(checked = isAmoled, onCheckedChange = null) },
+                colors = colors,
+                shapes = ListItemDefaults.segmentedShapes(2, 3),
+                onClick = { isAmoled = !isAmoled }
             )
         }
 
-        HorizontalDivider()
-
-        Card(
-            onClick = { showFavorites = !showFavorites }
+        Column(
+            verticalArrangement = Arrangement.spacedBy(ListItemDefaults.SegmentedGap)
         ) {
-            ListItem(
+            SegmentedListItem(
                 leadingContent = { Icon(Icons.Default.Favorite, null) },
-                headlineContent = { Text("Show Favorites") },
+                content = { Text("Show Favorites") },
                 supportingContent = { Text("Show favorites in the list") },
                 trailingContent = {
                     Switch(
                         checked = showFavorites,
                         onCheckedChange = null
                     )
-                }
+                },
+                colors = colors,
+                shapes = ListItemDefaults.segmentedShapes(0, 2),
+                onClick = { showFavorites = !showFavorites }
             )
-        }
 
-        var showDoubleClickBehaviorDialog by remember { mutableStateOf(false) }
+            var showDoubleClickBehaviorDialog by remember { mutableStateOf(false) }
 
-        if (showDoubleClickBehaviorDialog) {
-            AlertDialog(
-                onDismissRequest = { showDoubleClickBehaviorDialog = false },
-                title = { Text(stringResource(Res.string.double_click_behavior)) },
-                text = {
-                    Column {
-                        DoubleClickBehavior.entries.forEach {
-                            Card(
-                                onClick = { doubleClickBehavior = it },
-                                colors = CardDefaults.cardColors(
-                                    containerColor = Color.Transparent
-                                )
-                            ) {
-                                ListItem(
-                                    headlineContent = { Text(it.visualName) },
-                                    trailingContent = {
-                                        RadioButton(
-                                            selected = it == doubleClickBehavior,
-                                            onClick = null
-                                        )
-                                    },
-                                    colors = ListItemDefaults.colors(
+            if (showDoubleClickBehaviorDialog) {
+                AlertDialog(
+                    onDismissRequest = { showDoubleClickBehaviorDialog = false },
+                    title = { Text(stringResource(Res.string.double_click_behavior)) },
+                    text = {
+                        Column {
+                            DoubleClickBehavior.entries.forEach {
+                                Card(
+                                    onClick = { doubleClickBehavior = it },
+                                    colors = CardDefaults.cardColors(
                                         containerColor = Color.Transparent
                                     )
-                                )
+                                ) {
+                                    ListItem(
+                                        headlineContent = { Text(it.visualName) },
+                                        trailingContent = {
+                                            RadioButton(
+                                                selected = it == doubleClickBehavior,
+                                                onClick = null
+                                            )
+                                        },
+                                        colors = ListItemDefaults.colors(
+                                            containerColor = Color.Transparent
+                                        )
+                                    )
+                                }
                             }
                         }
+                    },
+                    confirmButton = {
+                        TextButton(
+                            onClick = { showDoubleClickBehaviorDialog = false }
+                        ) { Text(stringResource(Res.string.confirm)) }
                     }
-                },
-                confirmButton = {
-                    TextButton(
-                        onClick = { showDoubleClickBehaviorDialog = false }
-                    ) { Text(stringResource(Res.string.confirm)) }
-                }
-            )
-        }
+                )
+            }
 
-        Card(
-            onClick = { showDoubleClickBehaviorDialog = true }
-        ) {
-            ListItem(
+            SegmentedListItem(
                 leadingContent = { Icon(Icons.Default.AdsClick, null) },
-                headlineContent = { Text(stringResource(Res.string.double_click_behavior)) },
+                content = { Text(stringResource(Res.string.double_click_behavior)) },
                 supportingContent = { Text(doubleClickBehavior.visualName) },
                 trailingContent = {
                     Icon(
                         Icons.Default.ArrowDropDown,
                         null
                     )
-                }
+                },
+                colors = colors,
+                shapes = ListItemDefaults.segmentedShapes(1, 2),
+                onClick = { showDoubleClickBehaviorDialog = true }
             )
         }
     }

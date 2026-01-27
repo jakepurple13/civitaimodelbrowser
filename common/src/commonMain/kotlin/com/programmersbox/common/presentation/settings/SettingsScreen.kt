@@ -1,6 +1,7 @@
 package com.programmersbox.common.presentation.settings
 
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Spacer
@@ -19,12 +20,13 @@ import androidx.compose.material.icons.filled.NoAdultContent
 import androidx.compose.material.icons.filled.QrCodeScanner
 import androidx.compose.material.icons.filled.QueryStats
 import androidx.compose.material.icons.filled.Restore
-import androidx.compose.material3.Card
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LargeTopAppBar
-import androidx.compose.material3.ListItem
+import androidx.compose.material3.ListItemDefaults
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.SegmentedListItem
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
@@ -93,43 +95,17 @@ fun SettingsScreen(
         modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection)
     ) { padding ->
         Column(
+            verticalArrangement = Arrangement.spacedBy(16.dp),
             modifier = Modifier
                 .verticalScroll(rememberScrollState())
                 .fillMaxSize()
                 .padding(padding)
         ) {
-            Card(
-                onClick = onNavigateToQrCode
-            ) {
-                ListItem(
-                    headlineContent = { Text(stringResource(Res.string.scan_qr_code)) },
-                    leadingContent = { Icon(Icons.Default.QrCodeScanner, null) }
-                )
-            }
-
-            HorizontalDivider()
-
-            Card(
-                onClick = onNavigateToNsfw
-            ) {
-                ListItem(
-                    headlineContent = { Text(stringResource(Res.string.nsfw_settings)) },
-                    leadingContent = { Icon(Icons.Default.NoAdultContent, null) }
-                )
-            }
-
-            HorizontalDivider()
-
-            Card(
-                onClick = onNavigateToBehavior
-            ) {
-                ListItem(
-                    headlineContent = { Text(stringResource(Res.string.behavior_settings)) },
-                    leadingContent = { Icon(Icons.Default.Api, null) }
-                )
-            }
-
-            HorizontalDivider()
+            NormalSettings(
+                onNavigateToQrCode = onNavigateToQrCode,
+                onNavigateToNsfw = onNavigateToNsfw,
+                onNavigateToBehavior = onNavigateToBehavior,
+            )
 
             BackupRestoreSettings(
                 onNavigateToBackup = onNavigateToBackup,
@@ -138,27 +114,10 @@ fun SettingsScreen(
 
             ExtraSettings()
 
-            HorizontalDivider()
-
-            Card(
-                onClick = onNavigateToStats
-            ) {
-                ListItem(
-                    headlineContent = { Text(stringResource(Res.string.stats)) },
-                    leadingContent = { Icon(Icons.Default.QueryStats, null) }
-                )
-            }
-
-            Card(
-                onClick = onNavigateToOnboarding
-            ) {
-                ListItem(
-                    headlineContent = { Text(stringResource(Res.string.view_onboarding_again)) },
-                    leadingContent = { Icon(Icons.Default.CatchingPokemon, null) }
-                )
-            }
-
-            HorizontalDivider()
+            OtherSettings(
+                onNavigateToStats = onNavigateToStats,
+                onNavigateToOnboarding = onNavigateToOnboarding,
+            )
 
             AboutSettings(
                 onNavigateToAbout = onNavigateToAbout,
@@ -167,52 +126,129 @@ fun SettingsScreen(
     }
 }
 
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
+@Composable
+private fun NormalSettings(
+    onNavigateToQrCode: () -> Unit,
+    onNavigateToNsfw: () -> Unit,
+    onNavigateToBehavior: () -> Unit,
+) {
+    val colors =
+        ListItemDefaults.colors(containerColor = MaterialTheme.colorScheme.surfaceContainer)
+
+    Column(
+        verticalArrangement = Arrangement.spacedBy(ListItemDefaults.SegmentedGap),
+    ) {
+        SegmentedListItem(
+            content = { Text(stringResource(Res.string.scan_qr_code)) },
+            leadingContent = { Icon(Icons.Default.QrCodeScanner, null) },
+            onClick = onNavigateToQrCode,
+            shapes = ListItemDefaults.segmentedShapes(0, 3),
+            colors = colors
+        )
+
+        SegmentedListItem(
+            content = { Text(stringResource(Res.string.nsfw_settings)) },
+            leadingContent = { Icon(Icons.Default.NoAdultContent, null) },
+            onClick = onNavigateToNsfw,
+            shapes = ListItemDefaults.segmentedShapes(1, 3),
+            colors = colors
+        )
+
+
+        SegmentedListItem(
+            content = { Text(stringResource(Res.string.behavior_settings)) },
+            leadingContent = { Icon(Icons.Default.Api, null) },
+            onClick = onNavigateToBehavior,
+            shapes = ListItemDefaults.segmentedShapes(2, 3),
+            colors = colors
+        )
+    }
+}
+
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
+@Composable
+private fun OtherSettings(
+    onNavigateToStats: () -> Unit,
+    onNavigateToOnboarding: () -> Unit,
+) {
+    val colors =
+        ListItemDefaults.colors(containerColor = MaterialTheme.colorScheme.surfaceContainer)
+
+    Column(
+        verticalArrangement = Arrangement.spacedBy(ListItemDefaults.SegmentedGap),
+    ) {
+        SegmentedListItem(
+            content = { Text(stringResource(Res.string.stats)) },
+            leadingContent = { Icon(Icons.Default.QueryStats, null) },
+            onClick = onNavigateToStats,
+            shapes = ListItemDefaults.segmentedShapes(0, 2),
+            colors = colors
+        )
+
+        SegmentedListItem(
+            content = { Text(stringResource(Res.string.view_onboarding_again)) },
+            leadingContent = { Icon(Icons.Default.CatchingPokemon, null) },
+            onClick = onNavigateToOnboarding,
+            shapes = ListItemDefaults.segmentedShapes(1, 2),
+            colors = colors
+        )
+    }
+}
+
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 private fun BackupRestoreSettings(
     onNavigateToBackup: () -> Unit,
     onNavigateToRestore: () -> Unit,
 ) {
-    Column {
-        Card(
-            onClick = onNavigateToBackup
-        ) {
-            ListItem(
-                headlineContent = { Text(stringResource(Res.string.backup)) },
-                leadingContent = { Icon(Icons.Default.Backup, null) }
-            )
-        }
+    val colors =
+        ListItemDefaults.colors(containerColor = MaterialTheme.colorScheme.surfaceContainer)
 
-        Card(
-            onClick = onNavigateToRestore
-        ) {
-            ListItem(
-                headlineContent = { Text(stringResource(Res.string.restore)) },
-                leadingContent = { Icon(Icons.Default.Restore, null) }
-            )
-        }
+    Column(
+        verticalArrangement = Arrangement.spacedBy(ListItemDefaults.SegmentedGap),
+    ) {
+        SegmentedListItem(
+            content = { Text(stringResource(Res.string.backup)) },
+            leadingContent = { Icon(Icons.Default.Backup, null) },
+            onClick = onNavigateToBackup,
+            shapes = ListItemDefaults.segmentedShapes(0, 2),
+            colors = colors
+        )
+
+        SegmentedListItem(
+            content = { Text(stringResource(Res.string.restore)) },
+            leadingContent = { Icon(Icons.Default.Restore, null) },
+            onClick = onNavigateToRestore,
+            shapes = ListItemDefaults.segmentedShapes(1, 2),
+            colors = colors
+        )
     }
 }
 
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
-private fun ColumnScope.AboutSettings(
+private fun AboutSettings(
     onNavigateToAbout: () -> Unit,
 ) {
     val uriHandler = LocalUriHandler.current
 
-    Card(
-        onClick = onNavigateToAbout
-    ) {
-        ListItem(
-            headlineContent = { Text(stringResource(Res.string.about)) },
-            leadingContent = { Icon(Icons.Default.Info, null) }
-        )
-    }
+    val colors =
+        ListItemDefaults.colors(containerColor = MaterialTheme.colorScheme.surfaceContainer)
 
-    Card(
-        onClick = { uriHandler.openUri(Consts.CIVIT_URL) }
+    Column(
+        verticalArrangement = Arrangement.spacedBy(ListItemDefaults.SegmentedGap),
     ) {
-        ListItem(
-            headlineContent = { Text(stringResource(Res.string.open_civitai)) },
+        SegmentedListItem(
+            content = { Text(stringResource(Res.string.about)) },
+            leadingContent = { Icon(Icons.Default.Info, null) },
+            onClick = onNavigateToAbout,
+            shapes = ListItemDefaults.segmentedShapes(0, 4),
+            colors = colors
+        )
+
+        SegmentedListItem(
+            content = { Text(stringResource(Res.string.open_civitai)) },
             leadingContent = {
                 Image(
                     painter = painterResource(Res.drawable.civitai_logo),
@@ -221,15 +257,14 @@ private fun ColumnScope.AboutSettings(
                         .size(24.dp)
                         .clip(CircleShape)
                 )
-            }
+            },
+            onClick = { uriHandler.openUri(Consts.CIVIT_URL) },
+            shapes = ListItemDefaults.segmentedShapes(1, 4),
+            colors = colors
         )
-    }
 
-    Card(
-        onClick = { uriHandler.openUri(Consts.CIVIT_REST_API) }
-    ) {
-        ListItem(
-            headlineContent = { Text(stringResource(Res.string.open_civitai_rest_api)) },
+        SegmentedListItem(
+            content = { Text(stringResource(Res.string.open_civitai_rest_api)) },
             leadingContent = {
                 Icon(
                     Icons.Github,
@@ -238,15 +273,14 @@ private fun ColumnScope.AboutSettings(
                         .size(24.dp)
                         .clip(CircleShape)
                 )
-            }
+            },
+            onClick = { uriHandler.openUri(Consts.CIVIT_REST_API) },
+            shapes = ListItemDefaults.segmentedShapes(2, 4),
+            colors = colors
         )
-    }
 
-    Card(
-        onClick = { uriHandler.openUri(Consts.CIVIT_GITHUB) }
-    ) {
-        ListItem(
-            headlineContent = { Text(stringResource(Res.string.open_github)) },
+        SegmentedListItem(
+            content = { Text(stringResource(Res.string.open_github)) },
             leadingContent = {
                 Icon(
                     Icons.Github,
@@ -255,23 +289,24 @@ private fun ColumnScope.AboutSettings(
                         .size(24.dp)
                         .clip(CircleShape)
                 )
-            }
+            },
+            onClick = { uriHandler.openUri(Consts.CIVIT_GITHUB) },
+            shapes = ListItemDefaults.segmentedShapes(3, 4),
+            colors = colors
+        )
+
+        Spacer(Modifier.padding(6.dp))
+
+        Text(
+            remember { getPlatformName() },
+            modifier = Modifier.align(Alignment.CenterHorizontally)
+        )
+
+        Text(
+            koinInject<ApplicationInfo>().versionName,
+            modifier = Modifier.align(Alignment.CenterHorizontally)
         )
     }
-
-    HorizontalDivider()
-
-    Spacer(Modifier.padding(6.dp))
-
-    Text(
-        remember { getPlatformName() },
-        modifier = Modifier.align(Alignment.CenterHorizontally)
-    )
-
-    Text(
-        koinInject<ApplicationInfo>().versionName,
-        modifier = Modifier.align(Alignment.CenterHorizontally)
-    )
 }
 
 @Composable

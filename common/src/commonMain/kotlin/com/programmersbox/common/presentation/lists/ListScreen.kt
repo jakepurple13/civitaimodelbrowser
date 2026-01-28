@@ -257,6 +257,13 @@ fun ListScreen(
                                 }
                             }
                             Text(
+                                stringResource(Res.string.sql),
+                                textAlign = TextAlign.Center,
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(horizontal = 16.dp)
+                            )
+                            Text(
                                 stringResource(Res.string.dfs),
                                 textAlign = TextAlign.Center,
                                 modifier = Modifier
@@ -265,14 +272,6 @@ fun ListScreen(
                             )
                             Text(
                                 stringResource(Res.string.bfs),
-                                textAlign = TextAlign.Center,
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(horizontal = 16.dp)
-                            )
-
-                            Text(
-                                stringResource(Res.string.sql),
                                 textAlign = TextAlign.Center,
                                 modifier = Modifier
                                     .fillMaxWidth()

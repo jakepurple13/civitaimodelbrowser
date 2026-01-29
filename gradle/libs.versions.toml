@@ -54,7 +54,7 @@ barcodeScanning = "17.3.0"
 connectivity = "2.4.0"
 
 aboutLibraries = "13.2.1"
-workRuntimeKtx = "2.11.0"
+workRuntimeKtx = "2.11.1"
 
 easylauncher = "6.4.1"
 

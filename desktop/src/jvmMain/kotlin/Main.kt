@@ -1,4 +1,5 @@
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.Stable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableStateListOf
@@ -298,6 +299,7 @@ private class MyApplicationState {
     )
 }
 
+@Stable
 private class MyWindowState(
     val destination: NavKey,
     private val close: (MyWindowState) -> Unit

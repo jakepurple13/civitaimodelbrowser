@@ -127,6 +127,7 @@ fun findMaxDepth(
         ?: MaxDepthInfo(0, emptyList())
 
     println("${node.key} -> $max")
+
     return MaxDepthInfo(
         1 + max.maxDepth,
         listOf(node.key) + max.list

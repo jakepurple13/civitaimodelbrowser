@@ -8,12 +8,14 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowRight
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.Stable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableStateListOf
@@ -323,11 +325,13 @@ private class MyWindowState(
     fun close() = close(this)
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun NavigationTree(
     onCloseRequest: () -> Unit,
 ) {
     val navTree = remember { createNavigationGraph() }
+    val maxDepth = remember { findMaxDepth(navTree) }
     WindowWithBar(
         windowTitle = "Navigation Tree",
         onCloseRequest = onCloseRequest
@@ -336,13 +340,25 @@ fun NavigationTree(
             Column(
                 modifier = Modifier
                     .padding(padding)
-                    .padding(16.dp)
+                    .padding(horizontal = 16.dp)
                     .fillMaxSize()
                     .verticalScroll(rememberScrollState())
             ) {
+                MaxDepthInfoItem(maxDepth)
+                HorizontalDivider()
                 Graph(navTree)
             }
         }
+    }
+}
+
+@Composable
+private fun MaxDepthInfoItem(
+    maxDepthInfo: MaxDepthInfo
+) {
+    Column {
+        Text("Max Depth: ${maxDepthInfo.maxDepth}")
+        Text("Path: ${maxDepthInfo.list.joinToString(" -> ") { it.toString() }}")
     }
 }
 
@@ -381,6 +397,7 @@ private fun Graph(
     }
 }
 
+@Stable
 data class NavNode(
     val key: NavKey,
     val children: MutableList<NavNode> = mutableListOf(),
@@ -388,6 +405,31 @@ data class NavNode(
     fun add(child: NavNode) {
         children.add(child)
     }
+}
+
+@Stable
+data class MaxDepthInfo(
+    val maxDepth: Int,
+    val list: List<NavKey>
+)
+
+fun findMaxDepth(
+    node: NavNode,
+    set: MutableSet<NavKey> = mutableSetOf()
+): MaxDepthInfo {
+    if (node.key in set) return MaxDepthInfo(node.children.size, node.children.map { it.key })
+    set.add(node.key)
+    val max = node
+        .children
+        .map { findMaxDepth(it, set) }
+        .maxByOrNull { it.maxDepth }
+        ?: MaxDepthInfo(0, emptyList())
+
+    println("${node.key} -> $max")
+    return MaxDepthInfo(
+        1 + max.maxDepth,
+        listOf(node.key) + max.list
+    )
 }
 
 fun createNavigationGraph(): NavNode {

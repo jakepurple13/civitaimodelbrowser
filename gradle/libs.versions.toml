@@ -41,7 +41,7 @@ cmp-navevent = "1.0.0"
 cmpLifecycle = "2.10.0-alpha08"
 cmp-nav3-material3 = "1.3.0-alpha04"
 
-koin = "4.2.0-beta4"
+koin = "4.2.0-RC1"
 
 filekit = "0.12.0"
 

@@ -17,10 +17,6 @@ if (file("google-services.json").exists()) {
 group = "com.programmersbox"
 version = "1.0-SNAPSHOT"
 
-repositories {
-    mavenCentral()
-}
-
 android {
     namespace = "com.programmersbox.civitaimodelbrowser"
     compileSdk = 36

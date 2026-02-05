@@ -21,12 +21,6 @@ import androidx.core.content.getSystemService
 import androidx.core.net.toUri
 import androidx.room.Room
 import androidx.room.RoomDatabase
-import com.gigamole.composescrollbars.Scrollbars
-import com.gigamole.composescrollbars.config.ScrollbarsConfig
-import com.gigamole.composescrollbars.config.ScrollbarsOrientation
-import com.gigamole.composescrollbars.rememberScrollbarsState
-import com.gigamole.composescrollbars.scrolltype.ScrollbarsScrollType
-import com.gigamole.composescrollbars.scrolltype.knobtype.ScrollbarsDynamicKnobType
 import com.programmersbox.common.db.AppDatabase
 import com.programmersbox.common.db.BlacklistedItemRoom
 import com.programmersbox.common.presentation.backup.BackupRestoreHandler
@@ -103,19 +97,7 @@ internal actual fun CustomScrollBar(
     lazyGridState: LazyGridState,
     modifier: Modifier
 ) {
-    Scrollbars(
-        state = rememberScrollbarsState(
-            config = ScrollbarsConfig(
-                orientation = ScrollbarsOrientation.Vertical
-            ),
-            scrollType = ScrollbarsScrollType.Lazy.Grid.Dynamic(
-                knobType = ScrollbarsDynamicKnobType.Auto(),
-                state = lazyGridState,
-                spanCount = 3
-            )
-        ),
-        modifier = modifier
-    )
+
 }
 
 @Composable

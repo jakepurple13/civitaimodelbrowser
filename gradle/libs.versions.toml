@@ -7,7 +7,6 @@ blurhashVersion = "0.0-4-ALPHA"
 browser = "1.9.0"
 chromaDial = "1.0.0-Alpha4"
 composeMultiplatformMediaPlayerVersion = "1.0.53"
-composeScrollbars = "1.0.4"
 composewebview = "1.0.0-alpha-10"
 gitlive = "2.4.0"
 haze = "1.7.1"
@@ -93,7 +92,6 @@ biometricauth = { module = "io.github.zaval:biometricauth", version.ref = "biome
 chroma-dial = { module = "com.sinasamaki:chroma-dial", version.ref = "chromaDial" }
 compose-multiplatform-media-player = { module = "network.chaintech:compose-multiplatform-media-player", version.ref = "composeMultiplatformMediaPlayerVersion" }
 blurhash = { module = "io.github.brys0:blurhash", version.ref = "blurhashVersion" }
-composeScrollbars = { module = "com.github.GIGAMOLE:ComposeScrollbars", version.ref = "composeScrollbars" }
 composewebview = { module = "io.github.kdroidfilter:composewebview", version.ref = "composewebview" }
 datastore-core = { module = "androidx.datastore:datastore-core", version.ref = "datastore-version" }
 datastore-preferences = { module = "androidx.datastore:datastore-preferences-core", version.ref = "datastore-version" }

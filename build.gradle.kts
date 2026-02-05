@@ -1,17 +1,6 @@
 group = "com.programmersbox"
 version = "1.0-SNAPSHOT"
 
-allprojects {
-    repositories {
-        google()
-        mavenCentral()
-        maven("https://maven.pkg.jetbrains.space/public/p/compose/dev")
-        maven("https://jitpack.io")
-        maven("https://jogamp.org/deployment/maven")
-        maven { url = uri("https://s01.oss.sonatype.org/content/repositories/snapshots") }
-    }
-}
-
 plugins {
     kotlin("jvm") version libs.versions.kotlin.version.get() apply false
     kotlin("multiplatform") version libs.versions.kotlin.version.get() apply false

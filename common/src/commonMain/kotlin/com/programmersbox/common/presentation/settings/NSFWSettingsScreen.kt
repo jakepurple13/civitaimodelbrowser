@@ -1,9 +1,14 @@
 package com.programmersbox.common.presentation.settings
 
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.spring
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -25,6 +30,7 @@ import androidx.compose.material3.Slider
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
@@ -39,6 +45,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.programmersbox.common.BackButton
 import com.programmersbox.common.ComposableUtils
 import com.programmersbox.common.DataStore
+import com.programmersbox.common.LocalWindowClassSize
 import com.programmersbox.resources.Res
 import com.programmersbox.resources.civitai_logo
 import com.programmersbox.resources.default_is_6
@@ -46,6 +53,8 @@ import com.programmersbox.resources.include_nsfw_content
 import com.programmersbox.resources.nsfw_settings
 import com.programmersbox.resources.show_nsfw_content
 import com.programmersbox.resources.strength
+import com.sinasamaki.chroma.dial.Dial
+import com.sinasamaki.chroma.dial.DialColors
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
@@ -100,8 +109,9 @@ fun NsfwSettings(
                     onCheckedChange = null
                 )
             },
+            checked = includeNsfwEnabled,
+            onCheckedChange = { scope.launch { includeNsfw.update(it) } },
             leadingContent = { Icon(Icons.Default.NoAdultContent, null) },
-            onClick = { scope.launch { includeNsfw.update(!includeNsfwEnabled) } },
             colors = ListItemDefaults.colors(containerColor = MaterialTheme.colorScheme.surfaceContainer)
         )
 
@@ -123,49 +133,111 @@ fun NsfwSettings(
                         null
                     )
                 },
-                onClick = { showNsfw = !showNsfw },
+                checked = showNsfw,
+                onCheckedChange = { showNsfw = it },
                 colors = ListItemDefaults.colors(containerColor = MaterialTheme.colorScheme.surfaceContainer)
             )
         }
 
         AnimatedVisibility(!showNsfw && includeNsfwEnabled) {
-            Column(
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                var nsfwBlurStrength by dataStore.hideNsfwStrength()
-                ListItem(
-                    overlineContent = { Text(stringResource(Res.string.default_is_6)) },
-                    headlineContent = {
-                        Text(
-                            stringResource(
-                                Res.string.strength,
-                                nsfwBlurStrength.roundToInt()
-                            )
+            var nsfwBlurStrength by dataStore.hideNsfwStrength()
+            when (LocalWindowClassSize.current) {
+                WindowWidthSizeClass.Compact -> {
+                    Column(
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        ListItem(
+                            overlineContent = { Text(stringResource(Res.string.default_is_6)) },
+                            headlineContent = {
+                                Text(
+                                    stringResource(
+                                        Res.string.strength,
+                                        nsfwBlurStrength.roundToInt()
+                                    )
+                                )
+                            },
+                            supportingContent = {
+                                val range = 5f..100f
+                                Slider(
+                                    value = nsfwBlurStrength,
+                                    onValueChange = { nsfwBlurStrength = it },
+                                    steps = (range.endInclusive - range.start).roundToInt(),
+                                    valueRange = range
+                                )
+                            },
+                            colors = ListItemDefaults.colors(containerColor = MaterialTheme.colorScheme.surfaceContainer)
                         )
-                    },
-                    supportingContent = {
-                        val range = 5f..100f
-                        Slider(
-                            value = nsfwBlurStrength,
-                            onValueChange = { nsfwBlurStrength = it },
-                            steps = (range.endInclusive - range.start).roundToInt(),
-                            valueRange = range
-                        )
-                    },
-                    colors = ListItemDefaults.colors(containerColor = MaterialTheme.colorScheme.surfaceContainer)
-                )
 
-                Image(
-                    painter = painterResource(Res.drawable.civitai_logo),
-                    contentDescription = null,
-                    modifier = Modifier
-                        .align(Alignment.CenterHorizontally)
-                        .size(
-                            ComposableUtils.IMAGE_WIDTH,
-                            ComposableUtils.IMAGE_HEIGHT
+                        Image(
+                            painter = painterResource(Res.drawable.civitai_logo),
+                            contentDescription = null,
+                            modifier = Modifier
+                                .align(Alignment.CenterHorizontally)
+                                .size(
+                                    ComposableUtils.IMAGE_WIDTH,
+                                    ComposableUtils.IMAGE_HEIGHT
+                                )
+                                .blur(nsfwBlurStrength.dp)
                         )
-                        .blur(nsfwBlurStrength.dp)
-                )
+                    }
+                }
+
+                else -> {
+                    Column {
+                        ListItem(
+                            headlineContent = { Text("Blur Strength") },
+                            overlineContent = { Text(stringResource(Res.string.default_is_6)) },
+                        )
+
+                        Row(
+                            horizontalArrangement = Arrangement.SpaceEvenly,
+                            verticalAlignment = Alignment.CenterVertically,
+                            modifier = Modifier.fillMaxWidth()
+                        ) {
+                            Image(
+                                painter = painterResource(Res.drawable.civitai_logo),
+                                contentDescription = null,
+                                modifier = Modifier
+                                    .size(
+                                        ComposableUtils.IMAGE_WIDTH,
+                                        ComposableUtils.IMAGE_HEIGHT
+                                    )
+                                    .blur(nsfwBlurStrength.dp)
+                            )
+
+                            Box(
+                                contentAlignment = Alignment.Center
+                            ) {
+                                val animatedDegree by animateFloatAsState(
+                                    targetValue = nsfwBlurStrength,
+                                    animationSpec = spring(
+                                        stiffness = Spring.StiffnessHigh,
+                                        dampingRatio = Spring.DampingRatioLowBouncy,
+                                    )
+                                )
+
+                                Dial(
+                                    degree = animatedDegree,
+                                    onDegreeChanged = { nsfwBlurStrength = it },
+                                    startDegrees = 0f,
+                                    sweepDegrees = 360f,
+                                    colors = DialColors.default(
+                                        activeTrackColor = MaterialTheme.colorScheme.primaryContainer,
+                                        inactiveTrackColor = MaterialTheme.colorScheme.surfaceContainer,
+                                        thumbColor = MaterialTheme.colorScheme.primary,
+                                        thumbStrokeColor = MaterialTheme.colorScheme.primary,
+                                    ),
+                                    modifier = Modifier.size(150.dp)
+                                )
+
+                                Text(
+                                    nsfwBlurStrength.roundToInt().toString(),
+                                    modifier = Modifier.padding(8.dp)
+                                )
+                            }
+                        }
+                    }
+                }
             }
         }
     }

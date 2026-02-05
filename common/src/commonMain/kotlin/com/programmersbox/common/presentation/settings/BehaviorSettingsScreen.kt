@@ -143,7 +143,8 @@ fun BehaviorSettings(
                         onCheckedChange = null
                     )
                 },
-                onClick = { showBlur = !showBlur },
+                checked = showBlur,
+                onCheckedChange = { showBlur = it },
                 colors = colors,
                 shapes = ListItemDefaults.segmentedShapes(
                     0,
@@ -175,7 +176,8 @@ fun BehaviorSettings(
                                 onCheckedChange = null
                             )
                         },
-                        onClick = { useProgressive = !useProgressive },
+                        checked = useProgressive,
+                        onCheckedChange = { useProgressive = it },
                         colors = colors,
                         shapes = ListItemDefaults.segmentedShapes(1, 3)
                     )
@@ -184,7 +186,8 @@ fun BehaviorSettings(
                         content = { Text(stringResource(Res.string.blur_type)) },
                         trailingContent = { Text("${blurType.type.name} ${blurType.level.name}") },
                         leadingContent = { Icon(Icons.Default.BlurCircular, null) },
-                        onClick = { showBlurOptions = !showBlurOptions },
+                        checked = showBlurOptions,
+                        onCheckedChange = { showBlurOptions = it },
                         colors = colors,
                         shapes = ListItemDefaults.segmentedShapes(2, 3)
                     )
@@ -249,7 +252,8 @@ fun BehaviorSettings(
                 trailingContent = { Switch(checked = useToolbar, onCheckedChange = null) },
                 colors = colors,
                 shapes = ListItemDefaults.segmentedShapes(0, 3),
-                onClick = { useToolbar = !useToolbar }
+                checked = useToolbar,
+                onCheckedChange = { useToolbar = it },
             )
 
             var themeMode by dataStore.rememberThemeMode()
@@ -309,7 +313,8 @@ fun BehaviorSettings(
                 trailingContent = { Switch(checked = isAmoled, onCheckedChange = null) },
                 colors = colors,
                 shapes = ListItemDefaults.segmentedShapes(2, 3),
-                onClick = { isAmoled = !isAmoled }
+                checked = isAmoled,
+                onCheckedChange = { isAmoled = it },
             )
         }
 
@@ -328,7 +333,8 @@ fun BehaviorSettings(
                 },
                 colors = colors,
                 shapes = ListItemDefaults.segmentedShapes(0, 2),
-                onClick = { showFavorites = !showFavorites }
+                checked = showFavorites,
+                onCheckedChange = { showFavorites = it },
             )
 
             var showDoubleClickBehaviorDialog by remember { mutableStateOf(false) }

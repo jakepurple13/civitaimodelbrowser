@@ -5,6 +5,7 @@ biometricauth = "1.1.0"
 biometricVersion = "1.4.0-alpha05"
 blurhashVersion = "0.0-4-ALPHA"
 browser = "1.9.0"
+chromaDial = "1.0.0-Alpha4"
 composeMultiplatformMediaPlayerVersion = "1.0.53"
 composeScrollbars = "1.0.4"
 composewebview = "1.0.0-alpha-10"
@@ -89,6 +90,7 @@ androidx-core = { module = "androidx.core:core-ktx", version = "1.17.0" }
 androidx-activity-compose = "androidx.activity:activity-compose:1.12.3"
 androidx-work-runtime-ktx = { module = "androidx.work:work-runtime-ktx", version.ref = "workRuntimeKtx" }
 biometricauth = { module = "io.github.zaval:biometricauth", version.ref = "biometricauth" }
+chroma-dial = { module = "com.sinasamaki:chroma-dial", version.ref = "chromaDial" }
 compose-multiplatform-media-player = { module = "network.chaintech:compose-multiplatform-media-player", version.ref = "composeMultiplatformMediaPlayerVersion" }
 blurhash = { module = "io.github.brys0:blurhash", version.ref = "blurhashVersion" }
 composeScrollbars = { module = "com.github.GIGAMOLE:ComposeScrollbars", version.ref = "composeScrollbars" }

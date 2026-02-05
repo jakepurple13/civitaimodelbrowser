@@ -855,8 +855,6 @@ fun FavoritesCreatorOptionsSheet(
                 title = { Text(models.name) },
             )
 
-            HorizontalDivider()
-
             val stateHolder = rememberSaveableStateHolder()
 
             Column(
@@ -1065,8 +1063,6 @@ fun FavoritesModelOptionsSheet(
             TopAppBar(
                 title = { Text(models.name) },
             )
-
-            HorizontalDivider()
 
             val stateHolder = rememberSaveableStateHolder()
             Column(

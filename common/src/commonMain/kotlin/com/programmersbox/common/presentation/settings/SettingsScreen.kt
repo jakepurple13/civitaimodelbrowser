@@ -155,7 +155,6 @@ private fun NormalSettings(
             colors = colors
         )
 
-
         SegmentedListItem(
             content = { Text(stringResource(Res.string.behavior_settings)) },
             leadingContent = { Icon(Icons.Default.Api, null) },

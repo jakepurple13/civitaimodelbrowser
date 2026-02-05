@@ -230,10 +230,12 @@ private fun Module.settingsNavigation() {
     settingsNavigation<Screen.Settings.About> { AboutScreen() }
     settingsNavigation<Screen.Settings.Nsfw> { NsfwSettingsScreen() }
     settingsNavigation<Screen.Settings.Behavior> { BehaviorSettingsScreen() }
+
+    platformSettingsNavigation()
 }
 
 @OptIn(ExperimentalMaterial3AdaptiveApi::class, KoinExperimentalAPI::class)
-private inline fun <reified T : NavKey> Module.settingsNavigation(
+inline fun <reified T : NavKey> Module.settingsNavigation(
     metadata: Map<String, Any> = emptyMap(),
     noinline definition: @Composable Scope.(T) -> Unit,
 ) {
@@ -280,3 +282,5 @@ class NavigationHandler(
         ).toTypedArray()
     )
 }
+
+expect fun Module.platformSettingsNavigation()

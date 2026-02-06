@@ -3,7 +3,7 @@
     xmlns:tools="http://schemas.android.com/tools">
 
     <application
-        android:name=".com.programmersbox.civitaimodelbrowser.DebugCivitApplication"
+        android:name=".DebugCivitApplication"
         tools:replace="android:name">
         <provider
             android:name="androidx.core.content.FileProvider"

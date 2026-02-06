@@ -209,7 +209,7 @@ private fun createErrorFromResponse(statusCode: Int, body: String?): NetworkErro
         HTTP_INTERNAL_ERROR -> "Internal Server Error"
         HTTP_BAD_GATEWAY -> "Bad Gateway"
         HTTP_UNAVAILABLE -> "Service Unavailable"
-        else -> "Error"
+        else -> "Error $statusCode"
     }
 
     return NetworkError(

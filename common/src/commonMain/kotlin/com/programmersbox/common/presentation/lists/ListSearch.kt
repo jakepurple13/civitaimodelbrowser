@@ -1,11 +1,20 @@
 package com.programmersbox.common.presentation.lists
 
 import com.programmersbox.common.db.CustomList
+import com.programmersbox.resources.Res
+import com.programmersbox.resources.bfs
+import com.programmersbox.resources.dfs
+import com.programmersbox.resources.sql
 import kotlinx.serialization.Serializable
+import org.jetbrains.compose.resources.StringResource
 
 @Serializable
-enum class SearchType {
-    SQL, DFS, BFS
+enum class SearchType(
+    val res: StringResource
+) {
+    SQL(Res.string.sql),
+    DFS(Res.string.dfs),
+    BFS(Res.string.bfs)
 }
 
 /**

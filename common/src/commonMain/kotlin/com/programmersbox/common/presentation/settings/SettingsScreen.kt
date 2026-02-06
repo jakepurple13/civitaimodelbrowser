@@ -37,6 +37,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.dropUnlessResumed
 import com.programmersbox.common.ApplicationInfo
 import com.programmersbox.common.BackButton
 import com.programmersbox.common.Consts
@@ -102,25 +103,25 @@ fun SettingsScreen(
                 .padding(padding)
         ) {
             NormalSettings(
-                onNavigateToQrCode = onNavigateToQrCode,
-                onNavigateToNsfw = onNavigateToNsfw,
-                onNavigateToBehavior = onNavigateToBehavior,
+                onNavigateToQrCode = dropUnlessResumed(block = onNavigateToQrCode),
+                onNavigateToNsfw = dropUnlessResumed(block = onNavigateToNsfw),
+                onNavigateToBehavior = dropUnlessResumed(block = onNavigateToBehavior),
             )
 
             BackupRestoreSettings(
-                onNavigateToBackup = onNavigateToBackup,
-                onNavigateToRestore = onNavigateToRestore,
+                onNavigateToBackup = dropUnlessResumed(block = onNavigateToBackup),
+                onNavigateToRestore = dropUnlessResumed(block = onNavigateToRestore),
             )
 
             ExtraSettings()
 
             OtherSettings(
-                onNavigateToStats = onNavigateToStats,
-                onNavigateToOnboarding = onNavigateToOnboarding,
+                onNavigateToStats = dropUnlessResumed(block = onNavigateToStats),
+                onNavigateToOnboarding = dropUnlessResumed(block = onNavigateToOnboarding),
             )
 
             AboutSettings(
-                onNavigateToAbout = onNavigateToAbout,
+                onNavigateToAbout = dropUnlessResumed(block = onNavigateToAbout),
             )
         }
     }

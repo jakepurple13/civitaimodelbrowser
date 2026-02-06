@@ -87,6 +87,7 @@ import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.lifecycle.compose.dropUnlessResumed
 import chaintech.videoplayer.ui.preview.VideoPreviewComposable
 import com.programmersbox.common.BackButton
 import com.programmersbox.common.ComposableUtils
@@ -823,7 +824,7 @@ private fun BottomBarContent(
 
             NavigationBarItem(
                 selected = false,
-                onClick = {
+                onClick = dropUnlessResumed {
                     id
                         ?.toLongOrNull()
                         ?.let { onNavigateToDetailImages(it, model.models.name) }

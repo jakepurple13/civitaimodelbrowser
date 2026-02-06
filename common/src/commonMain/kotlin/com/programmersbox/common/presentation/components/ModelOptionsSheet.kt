@@ -58,6 +58,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.lifecycle.compose.dropUnlessResumed
 import com.programmersbox.common.CloseButton
 import com.programmersbox.common.ModelType
 import com.programmersbox.common.Models
@@ -684,7 +685,7 @@ fun ModelOptionsSheet(
                     SegmentedListItem(
                         leadingContent = { Icon(Icons.Default.Preview, null) },
                         content = { Text(stringResource(Res.string.open)) },
-                        onClick = {
+                        onClick = dropUnlessResumed {
                             onNavigateToDetail(models.id.toString())
                             scope.launch { sheetState.hide() }
                                 .invokeOnCompletion { onDialogDismiss() }
@@ -721,7 +722,7 @@ fun ModelOptionsSheet(
                                     )
                                 )
                             },
-                            onClick = {
+                            onClick = dropUnlessResumed {
                                 onNav(models.creator?.username.orEmpty())
                                 scope.launch { sheetState.hide() }
                                     .invokeOnCompletion { onDialogDismiss() }
@@ -737,7 +738,7 @@ fun ModelOptionsSheet(
                         SegmentedListItem(
                             leadingContent = { Icon(Icons.Default.Image, null) },
                             content = { Text(stringResource(Res.string.open_images)) },
-                            onClick = {
+                            onClick = dropUnlessResumed {
                                 onNav(models.id, models.name)
                                 scope.launch { sheetState.hide() }
                                     .invokeOnCompletion { onDialogDismiss() }

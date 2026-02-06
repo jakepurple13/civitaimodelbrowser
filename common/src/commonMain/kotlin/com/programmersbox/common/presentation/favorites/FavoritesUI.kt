@@ -77,6 +77,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.lifecycle.compose.dropUnlessResumed
 import com.programmersbox.common.BackButton
 import com.programmersbox.common.ComposableUtils
 import com.programmersbox.common.CustomScrollBar
@@ -395,7 +396,7 @@ fun FavoritesUI(
 
                         CreatorItem(
                             models = model,
-                            onClick = { onNavigateToUser(model.name) },
+                            onClick = dropUnlessResumed { onNavigateToUser(model.name) },
                             onLongClick = { showSheet = true },
                             modifier = Modifier.animateItem()
                         )
@@ -540,7 +541,7 @@ fun FavoritesUI(
 
                         ModelItem(
                             models = model,
-                            onClick = { onNavigateToDetail(model.id) },
+                            onClick = dropUnlessResumed { onNavigateToDetail(model.id) },
                             showNsfw = showNsfw,
                             blurStrength = blurStrength.dp,
                             onLongClick = { showSheet = true },
@@ -744,7 +745,7 @@ fun FavoritesCreatorOptionsSheet(
                         content = { Text(stringResource(Res.string.open)) },
                         colors = colors,
                         shapes = it,
-                        onClick = {
+                        onClick = dropUnlessResumed {
                             onNavigateToUser(models.name)
                             scope.launch { sheetState.hide() }
                                 .invokeOnCompletion { onDialogDismiss() }
@@ -919,7 +920,7 @@ fun FavoritesModelOptionsSheet(
                         leadingContent = { Icon(Icons.Default.Preview, null) },
                         content = { Text(stringResource(Res.string.open)) },
                         shapes = it,
-                        onClick = {
+                        onClick = dropUnlessResumed {
                             onNavigateToDetail(models.id)
                             scope.launch { sheetState.hide() }
                                 .invokeOnCompletion { onDialogDismiss() }

@@ -78,6 +78,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.lifecycle.compose.dropUnlessResumed
 import androidx.paging.CombinedLoadStates
 import androidx.paging.LoadState
 import androidx.paging.compose.LazyPagingItems
@@ -306,7 +307,7 @@ fun LazyGridScope.modelItems(
 
             ModelItem(
                 models = models,
-                onClick = { onNavigateToDetail(models.id.toString()) },
+                onClick = dropUnlessResumed { onNavigateToDetail(models.id.toString()) },
                 onLongClick = { showSheet = true },
                 onDoubleClick = onDoubleClick?.let { action -> { action(models) } },
                 showNsfw = showNsfw,
@@ -631,7 +632,7 @@ private fun CivitTopBar(
             navigationIcon = {
                 Row {
                     IconButton(
-                        onClick = onNavigateToSearch
+                        onClick = dropUnlessResumed(block = onNavigateToSearch)
                     ) { Icon(Icons.Default.Search, null) }
                     if (showRefreshButton) {
                         IconButton(

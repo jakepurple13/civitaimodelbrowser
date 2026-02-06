@@ -52,6 +52,7 @@ import androidx.compose.ui.graphics.rememberGraphicsLayer
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.compose.dropUnlessResumed
 import androidx.lifecycle.viewModelScope
 import androidx.navigation3.runtime.NavKey
 import com.programmersbox.common.ComposableUtils
@@ -321,7 +322,7 @@ fun ScanQrCode(
                                     modifier = Modifier.padding(6.dp)
                                 )
                                 ElevatedButton(
-                                    onClick = { permissionState.goToSettings() }
+                                    onClick = dropUnlessResumed { permissionState.goToSettings() }
                                 ) { Text(stringResource(Res.string.open_settings)) }
                             }
                         },
@@ -395,23 +396,21 @@ fun ScanQrCode(
                 }
 
                 Button(
-                    onClick = {
-                        scope.launch {
-                            qrCodeInfo?.let {
-                                when (it.qrCodeType) {
-                                    QrCodeType.Model ->
-                                        onNavigate(Screen.Detail(it.id.orEmpty()))
+                    onClick = dropUnlessResumed {
+                        qrCodeInfo?.let {
+                            when (it.qrCodeType) {
+                                QrCodeType.Model ->
+                                    onNavigate(Screen.Detail(it.id.orEmpty()))
 
-                                    QrCodeType.User ->
-                                        onNavigate(Screen.User(it.username.orEmpty()))
+                                QrCodeType.User ->
+                                    onNavigate(Screen.User(it.username.orEmpty()))
 
-                                    QrCodeType.Image -> onNavigate(
-                                        Screen.DetailsImage(
-                                            modelId = it.id.orEmpty(),
-                                            modelName = it.title
-                                        )
+                                QrCodeType.Image -> onNavigate(
+                                    Screen.DetailsImage(
+                                        modelId = it.id.orEmpty(),
+                                        modelName = it.title
                                     )
-                                }
+                                )
                             }
                         }
                     },

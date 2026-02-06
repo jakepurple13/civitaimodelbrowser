@@ -83,6 +83,7 @@ import androidx.compose.ui.platform.LocalWindowInfo
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.dropUnlessResumed
 import chaintech.videoplayer.ui.preview.VideoPreviewComposable
 import com.programmersbox.common.BackButton
 import com.programmersbox.common.ComposableUtils
@@ -359,7 +360,7 @@ fun ListDetailScreen(
                     showNsfw = showNsfw,
                     blurStrength = blurStrength.dp,
                     blurHash = item.hash,
-                    onClick = {
+                    onClick = dropUnlessResumed {
                         when (item.favoriteType) {
                             FavoriteType.Model -> onNavigateToDetail(item.id.toString())
                             FavoriteType.Image -> sheetDetails = true

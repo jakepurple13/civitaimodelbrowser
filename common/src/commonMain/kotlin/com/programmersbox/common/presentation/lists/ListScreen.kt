@@ -54,6 +54,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.dropUnlessResumed
 import chaintech.videoplayer.ui.preview.VideoPreviewComposable
 import com.programmersbox.common.BackButton
 import com.programmersbox.common.ComposableUtils
@@ -68,17 +69,14 @@ import com.programmersbox.common.presentation.components.LoadingImage
 import com.programmersbox.common.presentation.components.rememberBiometricOpening
 import com.programmersbox.resources.Res
 import com.programmersbox.resources.authenticate_to_view
-import com.programmersbox.resources.bfs
 import com.programmersbox.resources.cancel
 import com.programmersbox.resources.click_to_play
 import com.programmersbox.resources.confirm
 import com.programmersbox.resources.create_new_list
 import com.programmersbox.resources.custom_lists
-import com.programmersbox.resources.dfs
 import com.programmersbox.resources.last_updated
 import com.programmersbox.resources.list_name
 import com.programmersbox.resources.search_lists
-import com.programmersbox.resources.sql
 import dev.chrisbanes.haze.HazeProgressive
 import dev.chrisbanes.haze.LocalHazeStyle
 import dev.chrisbanes.haze.hazeEffect
@@ -256,27 +254,16 @@ fun ListScreen(
                                     )
                                 }
                             }
-                            Text(
-                                stringResource(Res.string.sql),
-                                textAlign = TextAlign.Center,
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(horizontal = 16.dp)
-                            )
-                            Text(
-                                stringResource(Res.string.dfs),
-                                textAlign = TextAlign.Center,
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(horizontal = 16.dp)
-                            )
-                            Text(
-                                stringResource(Res.string.bfs),
-                                textAlign = TextAlign.Center,
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(horizontal = 16.dp)
-                            )
+
+                            SearchType.entries.forEach { searchType ->
+                                Text(
+                                    stringResource(searchType.res),
+                                    textAlign = TextAlign.Center,
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(horizontal = 16.dp)
+                                )
+                            }
                         }
                     }
                 }
@@ -297,7 +284,7 @@ fun ListScreen(
                     showNsfw = showNsfw,
                     blurStrength = blurStrength.dp,
                     shouldShowMedia = shouldShowMedia,
-                    onClick = {
+                    onClick = dropUnlessResumed {
                         if (list.item.useBiometric) {
                             biometricOpen.authenticate(customListItem = list.item)
                         } else {

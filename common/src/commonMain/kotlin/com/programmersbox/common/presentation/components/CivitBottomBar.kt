@@ -24,6 +24,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.lifecycle.compose.dropUnlessResumed
 import androidx.navigation3.runtime.NavKey
 import com.programmersbox.common.Screen
 import com.programmersbox.common.di.NavigationHandler
@@ -55,7 +56,7 @@ fun CivitBottomBar(
     ) {
         NavigationBarItem(
             selected = screen == currentScreen,
-            onClick = onClick,
+            onClick = dropUnlessResumed(block = onClick),
             icon = { icon(screen == currentScreen) },
             label = { Text(label) },
         )
@@ -152,7 +153,7 @@ fun CivitRail(
     ) {
         NavigationRailItem(
             selected = screen == currentScreen,
-            onClick = onClick,
+            onClick = dropUnlessResumed(block = onClick),
             icon = { icon(screen == currentScreen) },
             label = { Text(label) },
         )

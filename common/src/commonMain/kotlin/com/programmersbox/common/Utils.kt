@@ -43,6 +43,7 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.dropUnlessResumed
 import androidx.navigationevent.DirectNavigationEventInput
 import androidx.navigationevent.compose.LocalNavigationEventDispatcherOwner
 
@@ -209,7 +210,7 @@ private fun BackAction(
     }
 
     IconButton(
-        onClick = { navInput.backCompleted() },
+        onClick = dropUnlessResumed { navInput.backCompleted() },
         modifier = modifier
     ) { Icon(icon, null) }
 }

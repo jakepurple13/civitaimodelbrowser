@@ -23,6 +23,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.dropUnlessResumed
 import com.programmersbox.common.DataStore
 import com.programmersbox.common.presentation.onboarding.topics.FinishContent
 import com.programmersbox.common.presentation.onboarding.topics.WelcomeContent
@@ -119,7 +120,7 @@ fun OnboardingScreen(
                 },
                 floatingActionButton = {
                     FloatingActionButton(
-                        onClick = {
+                        onClick = dropUnlessResumed {
                             if (pagerState.canScrollForward) {
                                 scope.launch { pagerState.animateScrollToPage(pagerState.currentPage + 1) }
                             } else {

@@ -43,7 +43,6 @@ import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.programmersbox.common.BackButton
-import com.programmersbox.common.ComposableUtils
 import com.programmersbox.common.DataStore
 import com.programmersbox.common.LocalWindowClassSize
 import com.programmersbox.resources.Res
@@ -173,10 +172,7 @@ fun NsfwSettings(
                             contentDescription = null,
                             modifier = Modifier
                                 .align(Alignment.CenterHorizontally)
-                                .size(
-                                    ComposableUtils.IMAGE_WIDTH,
-                                    ComposableUtils.IMAGE_HEIGHT
-                                )
+                                .size(200.dp)
                                 .blur(nsfwBlurStrength.dp)
                         )
                     }
@@ -198,10 +194,7 @@ fun NsfwSettings(
                                 painter = painterResource(Res.drawable.civitai_logo),
                                 contentDescription = null,
                                 modifier = Modifier
-                                    .size(
-                                        ComposableUtils.IMAGE_WIDTH,
-                                        ComposableUtils.IMAGE_HEIGHT
-                                    )
+                                    .size(200.dp)
                                     .blur(nsfwBlurStrength.dp)
                             )
 

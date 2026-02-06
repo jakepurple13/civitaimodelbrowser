@@ -1,6 +1,7 @@
 package com.programmersbox.common
 
 import io.ktor.client.HttpClient
+import io.ktor.client.HttpClientConfig
 import io.ktor.client.call.body
 import io.ktor.client.plugins.HttpTimeout
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
@@ -12,10 +13,15 @@ import io.ktor.http.contentType
 import io.ktor.http.encodeURLQueryComponent
 import io.ktor.serialization.kotlinx.json.json
 import kotlinx.serialization.json.Json
+import org.koin.core.component.KoinComponent
 
 const val PAGE_LIMIT = 20
 
-class Network {
+interface KtorPluginProvider {
+    fun install(config: HttpClientConfig<*>)
+}
+
+class Network : KoinComponent {
     companion object {
         private const val URL = "https://civitai.com/api/v1/"
         const val CIVITAI_MODELS_URL = "https://civitai.com/models/"
@@ -28,15 +34,18 @@ class Network {
         explicitNulls = false
     }
 
-    val client: HttpClient = HttpClient {
-        install(ContentNegotiation) { json(json) }
-        install(HttpTimeout) {
-            requestTimeoutMillis = 10000
-        }
-        defaultRequest {
-            url(URL)
-            bearerAuth(BuildKonfig.API_KEY) //Token goes here!
-            contentType(ContentType.Application.Json)
+    val client: HttpClient by lazy {
+        HttpClient {
+            getKoin().getAll<KtorPluginProvider>().forEach { it.install(this) }
+            install(ContentNegotiation) { json(json) }
+            install(HttpTimeout) {
+                requestTimeoutMillis = 10000
+            }
+            defaultRequest {
+                url(URL)
+                bearerAuth(BuildKonfig.API_KEY) //Token goes here!
+                contentType(ContentType.Application.Json)
+            }
         }
     }
 

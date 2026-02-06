@@ -15,10 +15,14 @@ import org.koin.android.ext.koin.androidContext
 import org.koin.androidx.workmanager.dsl.workerOf
 import org.koin.androidx.workmanager.koin.workManagerFactory
 import org.koin.core.context.startKoin
+import org.koin.core.module.Module
 import org.koin.core.module.dsl.singleOf
 import org.koin.dsl.module
 
 open class CivitApplication : Application(), Configuration.Provider {
+
+    open fun Module.includeMore() {}
+
     override fun onCreate() {
         super.onCreate()
         startKoin {
@@ -32,6 +36,7 @@ open class CivitApplication : Application(), Configuration.Provider {
                     singleOf(::QrCodeRepository)
                     workerOf(::RestoreWorker)
                     factory { ApplicationIcon(R.drawable.civitai_logo) }
+                    includeMore()
                 },
                 cmpModules(),
                 createPlatformModule()

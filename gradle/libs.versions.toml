@@ -8,6 +8,7 @@ browser = "1.9.0"
 chromaDial = "1.0.0-Alpha4"
 composeMultiplatformMediaPlayerVersion = "1.0.53"
 composewebview = "1.0.0-alpha-10"
+debugoverlay = "2.1.0"
 gitlive = "2.4.0"
 haze = "1.7.1"
 kmpIo = "0.3.0"
@@ -96,6 +97,7 @@ composewebview = { module = "io.github.kdroidfilter:composewebview", version.ref
 datastore-core = { module = "androidx.datastore:datastore-core", version.ref = "datastore-version" }
 datastore-preferences = { module = "androidx.datastore:datastore-preferences-core", version.ref = "datastore-version" }
 datastore-core-okio = { group = "androidx.datastore", name = "datastore-core-okio", version.ref = "datastore-version" }
+debugoverlay = { module = "com.ms-square:debugoverlay", version.ref = "debugoverlay" }
 gitlive-firebase-crashlytics = { module = "dev.gitlive:firebase-crashlytics", version.ref = "gitlive" }
 gitlive-firebase-analytics = { module = "dev.gitlive:firebase-analytics", version.ref = "gitlive" }
 gitlive-firebase-perf = { module = "dev.gitlive:firebase-perf", version.ref = "gitlive" }

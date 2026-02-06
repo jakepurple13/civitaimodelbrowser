@@ -18,7 +18,7 @@ import org.koin.core.context.startKoin
 import org.koin.core.module.dsl.singleOf
 import org.koin.dsl.module
 
-class CivitApplication : Application(), Configuration.Provider {
+open class CivitApplication : Application(), Configuration.Provider {
     override fun onCreate() {
         super.onCreate()
         startKoin {

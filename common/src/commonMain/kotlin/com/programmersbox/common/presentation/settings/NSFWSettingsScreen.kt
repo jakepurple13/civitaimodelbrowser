@@ -213,7 +213,7 @@ fun NsfwSettings(
                                     degree = animatedDegree,
                                     onDegreeChanged = { nsfwBlurStrength = it },
                                     startDegrees = 0f,
-                                    sweepDegrees = 360f,
+                                    sweepDegrees = MAX_NSFW_BLUR_STRENGTH,
                                     colors = DialColors.default(
                                         activeTrackColor = MaterialTheme.colorScheme.primaryContainer,
                                         inactiveTrackColor = MaterialTheme.colorScheme.surfaceContainer,
@@ -224,7 +224,7 @@ fun NsfwSettings(
                                 )
 
                                 Text(
-                                    "${((nsfwBlurStrength / 360f) * 100).roundToInt()}%",
+                                    "${((nsfwBlurStrength / MAX_NSFW_BLUR_STRENGTH) * 100).roundToInt()}%",
                                     modifier = Modifier.padding(8.dp)
                                 )
                             }
@@ -235,3 +235,5 @@ fun NsfwSettings(
         }
     }
 }
+
+private const val MAX_NSFW_BLUR_STRENGTH = 360f

@@ -231,7 +231,7 @@ fun NsfwSettings(
                                 )
 
                                 Text(
-                                    nsfwBlurStrength.roundToInt().toString(),
+                                    "${((nsfwBlurStrength / 360f) * 100).roundToInt()}%",
                                     modifier = Modifier.padding(8.dp)
                                 )
                             }

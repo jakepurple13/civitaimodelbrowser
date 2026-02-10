@@ -19,7 +19,7 @@ kotlin {
         compilations.all {
             kotlin {
                 compilerOptions {
-                    jvmToolchain(17)
+                    jvmToolchain(24)
                     freeCompilerArgs.add("-Xexplicit-backing-fields")
                 }
             }
@@ -29,6 +29,11 @@ kotlin {
         jvmMain.dependencies {
             implementation(project(":common"))
             implementation(compose.desktop.currentOs)
+
+            if (System.getenv("CI") != null)
+                implementation(libs.ktor.monitor.logging.no.op)
+            else
+                implementation(libs.ktor.monitor.logging)
         }
         //val jvmTest by getting
     }

@@ -56,6 +56,8 @@ import org.koin.compose.koinInject
 import org.koin.core.module.dsl.singleOf
 import org.koin.dsl.koinConfiguration
 import org.koin.dsl.module
+import ro.cosminmihu.ktor.monitor.KtorMonitor
+import ro.cosminmihu.ktor.monitor.KtorMonitorMenuItem
 import java.awt.Toolkit
 import java.awt.datatransfer.StringSelection
 import java.io.File
@@ -89,6 +91,8 @@ fun main() {
                             singleOf(::TrayState)
                             singleOf(::QrCodeRepository)
                             singleOf(::Zipper)
+
+                            includes(debugModule)
                         }
                     )
                 }
@@ -97,6 +101,7 @@ fun main() {
                 val navHandler = koinInject<NavigationHandler>()
                 val toaster = koinInject<ToasterState>()
                 var showNavTree by remember { mutableStateOf(false) }
+                var showDebug by remember { mutableStateOf(false) }
 
                 Tray(
                     state = koinInject<TrayState>(),
@@ -137,6 +142,7 @@ fun main() {
                             onClick = { showNavTree = !showNavTree },
                             enabled = true
                         )
+                        KtorMonitorMenuItem { showDebug = !showDebug }
                         Separator()
                         Item(
                             stringResource(Res.string.exit),
@@ -233,6 +239,7 @@ fun main() {
                                     onClick = { showNavTree = !showNavTree },
                                     enabled = true
                                 )
+                                KtorMonitorMenuItem { showDebug = !showDebug }
                             }
                         }
                     }
@@ -259,6 +266,15 @@ fun main() {
                     NavigationTree(
                         onCloseRequest = { showNavTree = false }
                     )
+                }
+
+                if (showDebug) {
+                    WindowWithBar(
+                        windowTitle = "Network Debug",
+                        onCloseRequest = { showDebug = false }
+                    ) {
+                        KtorMonitor(useKtorMonitorTheme = false)
+                    }
                 }
             }
         )

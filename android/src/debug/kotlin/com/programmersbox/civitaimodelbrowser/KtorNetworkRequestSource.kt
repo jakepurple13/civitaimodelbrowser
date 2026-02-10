@@ -17,7 +17,6 @@ import io.ktor.http.contentType
 import io.ktor.util.AttributeKey
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import org.koin.dsl.module
 import java.net.HttpURLConnection.HTTP_BAD_GATEWAY
@@ -31,9 +30,9 @@ import java.net.HttpURLConnection.HTTP_UNAVAILABLE
 /**
  * Default maximum body size (2MB) before truncation.
  */
-public const val DEFAULT_MAX_BODY_SIZE: Long = 2 * 1024 * 1024 // 2MB
+const val DEFAULT_MAX_BODY_SIZE: Long = 2 * 1024 * 1024 // 2MB
 
-public val DEFAULT_HEADERS_REDACT: Set<String> = setOf(
+val DEFAULT_HEADERS_REDACT: Set<String> = setOf(
     "authorization",
     "api-key",
     "x-api-key",
@@ -46,21 +45,20 @@ public val DEFAULT_HEADERS_REDACT: Set<String> = setOf(
     "x-access-token"
 )
 
-public val DEFAULT_QUERY_PARAMS_REDACT: Set<String> = setOf(
+val DEFAULT_QUERY_PARAMS_REDACT: Set<String> = setOf(
     "token",
     "key",
     "password"
 )
 
 private const val HTTP_CLIENT_ERROR_START = 400
-private const val HTTP_SERVER_ERROR_START = 500
 
 val debugModule = module {
     single<KtorPluginProvider> { KtorDebugOverlayPlugin() }
 }
 
 @OptIn(InternalDebugOverlayApi::class)
-public class KtorDebugOverlayPlugin(
+class KtorDebugOverlayPlugin(
     private val maxStoredRequests: Int = 100,
     private val headersNameToRedact: Set<String> = DEFAULT_HEADERS_REDACT,
     private val queryParamsNameToRedact: Set<String> = DEFAULT_QUERY_PARAMS_REDACT,
@@ -68,18 +66,18 @@ public class KtorDebugOverlayPlugin(
 ) : NetworkRequestSource, KtorPluginProvider {
 
     private val recentRequests = mutableListOf<NetworkRequest>()
-    private val _requests = MutableStateFlow<List<NetworkRequest>>(emptyList())
 
     init {
         DebugOverlay.configure { networkRequestSource = this@KtorDebugOverlayPlugin }
     }
 
-    override val requests: Flow<List<NetworkRequest>> = _requests.asStateFlow()
+    final override val requests: Flow<List<NetworkRequest>>
+        field = MutableStateFlow<List<NetworkRequest>>(emptyList())
 
     private val startNsKey = AttributeKey<Long>("startNs")
 
     private val plugin = createClientPlugin("DebugOverlayPlugin") {
-        onRequest { request, content ->
+        onRequest { request, _ ->
             request.attributes.put(startNsKey, System.nanoTime())
         }
 
@@ -130,7 +128,7 @@ public class KtorDebugOverlayPlugin(
             headers = requestHeaders,
             contentType = requestContentType,
             contentSize = requestContentLength,
-            content = null // Request body capturing requires more work in Ktor
+            content = request.content.toString()
         )
     }
 
@@ -184,9 +182,7 @@ public class KtorDebugOverlayPlugin(
         if (recentRequests.size > maxStoredRequests) {
             recentRequests.removeAt(0)
         }
-        _requests.update {
-            recentRequests.toList()
-        }
+        requests.update { recentRequests.toList() }
     }
 
     private fun redactUrl(urlStr: String): String {

@@ -53,7 +53,7 @@ javase = "3.5.4"
 coreVersion = "3.5.4"
 barcodeScanning = "17.3.0"
 
-connectivity = "2.4.0"
+connectivity = "2.4.1"
 
 aboutLibraries = "13.2.1"
 workRuntimeKtx = "2.11.1"

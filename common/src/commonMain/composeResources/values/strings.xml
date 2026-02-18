@@ -119,10 +119,10 @@
     <string name="delete_list_message">Are you sure you want to delete this list?</string>
     <string name="rename_list">Rename List</string>
     <string name="rename_list_message">Are you sure you want to change the name?</string>
-    <string name="last_time_updated">Last time updated: %s</string>
-    <string name="items_count">Items: %d</string>
+    <string name="last_time_updated">Last time updated: %1$s</string>
+    <string name="items_count">Items: %1$d</string>
     <string name="use_biometrics_to_view">Use Biometrics to View?</string>
-    <string name="list_count_param">List Count: %d</string>
+    <string name="list_count_param">List Count: %1$d</string>
     <string name="remove_items">Remove Items</string>
     <string name="remove_items_message">Are you sure you want to remove %1$d items from %2$s?</string>
     <string name="delete_multiple">Delete Multiple?</string>

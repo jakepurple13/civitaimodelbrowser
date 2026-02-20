@@ -48,7 +48,7 @@ koin = "4.2.0-RC1"
 filekit = "0.12.0"
 
 qrose = "1.1.2"
-scanner = "0.6.0"
+scanner = "0.7.0"
 javase = "3.5.4"
 coreVersion = "3.5.4"
 barcodeScanning = "17.3.0"

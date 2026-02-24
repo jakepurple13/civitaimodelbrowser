@@ -102,6 +102,7 @@ fun SearchScreen(
         .getBlacklisted()
         .collectAsStateWithLifecycle(emptyList())
 
+    val useNewCardLook by dataStore.rememberUseNewCardLook()
     val showBlur by dataStore.rememberShowBlur()
     val hazeState = rememberHazeState(showBlur)
     val useProgressive by dataStore.rememberUseProgressive()
@@ -171,6 +172,7 @@ fun SearchScreen(
                 onNavigateToUser = onNavigateToUser,
                 onNavigateToDetailImages = onNavigateToDetailImages,
                 onDoubleClick = doubleClickBehaviorAction,
+                useNewCardLook = useNewCardLook,
             )
             if (
                 lazyPagingItems.itemCount == 0 &&

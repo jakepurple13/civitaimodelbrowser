@@ -22,6 +22,7 @@ import androidx.compose.material.icons.filled.BorderBottom
 import androidx.compose.material.icons.filled.Brightness4
 import androidx.compose.material.icons.filled.Brightness7
 import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.filled.CreditCard
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Card
@@ -332,9 +333,27 @@ fun BehaviorSettings(
                     )
                 },
                 colors = colors,
-                shapes = ListItemDefaults.segmentedShapes(0, 2),
+                shapes = ListItemDefaults.segmentedShapes(0, 3),
                 checked = showFavorites,
                 onCheckedChange = { showFavorites = it },
+            )
+
+            var showNewCardLook by dataStore.rememberUseNewCardLook()
+
+            SegmentedListItem(
+                leadingContent = { Icon(Icons.Default.CreditCard, null) },
+                content = { Text("Use new card look?") },
+                supportingContent = { Text("Use the new card look") },
+                trailingContent = {
+                    Switch(
+                        checked = showNewCardLook,
+                        onCheckedChange = null
+                    )
+                },
+                colors = colors,
+                shapes = ListItemDefaults.segmentedShapes(1, 3),
+                checked = showNewCardLook,
+                onCheckedChange = { showNewCardLook = it },
             )
 
             var showDoubleClickBehaviorDialog by remember { mutableStateOf(false) }
@@ -387,7 +406,7 @@ fun BehaviorSettings(
                     )
                 },
                 colors = colors,
-                shapes = ListItemDefaults.segmentedShapes(1, 2),
+                shapes = ListItemDefaults.segmentedShapes(2, 3),
                 onClick = { showDoubleClickBehaviorDialog = true }
             )
         }

@@ -96,6 +96,7 @@ import com.programmersbox.common.presentation.components.CivitRail
 import com.programmersbox.common.presentation.components.ImageSheet
 import com.programmersbox.common.presentation.components.ListChoiceScreen
 import com.programmersbox.common.presentation.components.LoadingImage
+import com.programmersbox.common.presentation.components.ModelCard
 import com.programmersbox.common.presentation.components.ModelOptionsType
 import com.programmersbox.common.presentation.components.ToastType
 import com.programmersbox.common.presentation.components.ToasterState
@@ -156,6 +157,7 @@ fun FavoritesUI(
     var reverseFavorites by dataStore.rememberReverseFavorites()
     val showBlur by dataStore.rememberShowBlur()
     val useProgressive by dataStore.rememberUseProgressive()
+    val useNewCardLook by dataStore.rememberUseNewCardLook()
     val lazyGridState = rememberLazyGridState()
 
     var showSortedByDialog by remember { mutableStateOf(false) }
@@ -398,6 +400,7 @@ fun FavoritesUI(
                             models = model,
                             onClick = dropUnlessResumed { onNavigateToUser(model.name) },
                             onLongClick = { showSheet = true },
+                            useNewCardLook = useNewCardLook,
                             modifier = Modifier.animateItem()
                         )
                     }
@@ -524,6 +527,7 @@ fun FavoritesUI(
                             blurStrength = blurStrength.dp,
                             blurHash = model.hash,
                             shouldShowMedia = shouldShowMedia,
+                            useNewCardLook = useNewCardLook,
                             modifier = Modifier.animateItem()
                         )
                     }
@@ -547,6 +551,7 @@ fun FavoritesUI(
                             onLongClick = { showSheet = true },
                             blurHash = model.hash,
                             shouldShowMedia = shouldShowMedia,
+                            useNewCardLook = useNewCardLook,
                             modifier = Modifier.animateItem()
                         )
                     }
@@ -568,24 +573,42 @@ private fun CreatorItem(
     models: FavoriteModel.Creator,
     onClick: () -> Unit,
     onLongClick: () -> Unit,
+    useNewCardLook: Boolean,
     modifier: Modifier = Modifier,
 ) {
-    CoverCard(
-        imageUrl = models.imageUrl.orEmpty(),
-        name = models.name,
-        type = CREATOR_FILTER,
-        isNsfw = false,
-        showNsfw = true,
-        blurStrength = 0.dp,
-        onClick = onClick,
-        onLongClick = onLongClick,
-        blurHash = null,
-        shouldShowMedia = false,
-        modifier = modifier.size(
-            width = ComposableUtils.IMAGE_WIDTH,
-            height = ComposableUtils.IMAGE_HEIGHT
+    if (useNewCardLook) {
+        ModelCard(
+            imageUrl = models.imageUrl.orEmpty(),
+            name = models.name,
+            type = "Creator",
+            isNsfw = false,
+            showNsfw = true,
+            blurStrength = 0.dp,
+            onClick = onClick,
+            blurHash = null,
+            shouldShowMedia = false,
+            modifier = modifier,
+            isFavorite = false,
+            isBlacklisted = false,
         )
-    )
+    } else {
+        CoverCard(
+            imageUrl = models.imageUrl.orEmpty(),
+            name = models.name,
+            type = CREATOR_FILTER,
+            isNsfw = false,
+            showNsfw = true,
+            blurStrength = 0.dp,
+            onClick = onClick,
+            onLongClick = onLongClick,
+            blurHash = null,
+            shouldShowMedia = false,
+            modifier = modifier.size(
+                width = ComposableUtils.IMAGE_WIDTH,
+                height = ComposableUtils.IMAGE_HEIGHT
+            )
+        )
+    }
 }
 
 @Composable
@@ -595,24 +618,42 @@ private fun ImageItem(
     blurStrength: Dp,
     onClick: () -> Unit,
     shouldShowMedia: Boolean,
+    useNewCardLook: Boolean,
     modifier: Modifier = Modifier,
     blurHash: String? = null,
 ) {
-    CoverCard(
-        imageUrl = models.imageUrl.orEmpty(),
-        name = models.name,
-        type = IMAGE_FILTER,
-        isNsfw = models.nsfw,
-        showNsfw = showNsfw,
-        blurStrength = blurStrength,
-        onClick = onClick,
-        blurHash = blurHash,
-        shouldShowMedia = shouldShowMedia,
-        modifier = modifier.size(
-            width = ComposableUtils.IMAGE_WIDTH,
-            height = ComposableUtils.IMAGE_HEIGHT
+    if (useNewCardLook) {
+        ModelCard(
+            imageUrl = models.imageUrl.orEmpty(),
+            name = models.name,
+            type = "Image",
+            isNsfw = models.nsfw,
+            showNsfw = showNsfw,
+            blurStrength = blurStrength,
+            onClick = onClick,
+            blurHash = blurHash,
+            shouldShowMedia = shouldShowMedia,
+            modifier = modifier,
+            isFavorite = false,
+            isBlacklisted = false,
         )
-    )
+    } else {
+        CoverCard(
+            imageUrl = models.imageUrl.orEmpty(),
+            name = models.name,
+            type = IMAGE_FILTER,
+            isNsfw = models.nsfw,
+            showNsfw = showNsfw,
+            blurStrength = blurStrength,
+            onClick = onClick,
+            blurHash = blurHash,
+            shouldShowMedia = shouldShowMedia,
+            modifier = modifier.size(
+                width = ComposableUtils.IMAGE_WIDTH,
+                height = ComposableUtils.IMAGE_HEIGHT
+            )
+        )
+    }
 }
 
 @Composable
@@ -624,25 +665,45 @@ private fun ModelItem(
     onLongClick: () -> Unit,
     blurHash: String?,
     shouldShowMedia: Boolean,
+    useNewCardLook: Boolean,
     modifier: Modifier = Modifier,
 ) {
-    CoverCard(
-        imageUrl = models.imageUrl.orEmpty(),
-        name = models.name,
-        type = models.type,
-        creatorImage = models.creatorImage,
-        isNsfw = models.nsfw,
-        showNsfw = showNsfw,
-        blurStrength = blurStrength,
-        onClick = onClick,
-        onLongClick = onLongClick,
-        blurHash = blurHash,
-        shouldShowMedia = shouldShowMedia,
-        modifier = modifier.size(
-            width = ComposableUtils.IMAGE_WIDTH,
-            height = ComposableUtils.IMAGE_HEIGHT
+    if (useNewCardLook) {
+        ModelCard(
+            imageUrl = models.imageUrl.orEmpty(),
+            name = models.name,
+            type = models.type,
+            creatorImage = models.creatorImage,
+            isNsfw = models.nsfw,
+            showNsfw = showNsfw,
+            blurStrength = blurStrength,
+            onClick = onClick,
+            onLongClick = onLongClick,
+            blurHash = blurHash,
+            shouldShowMedia = shouldShowMedia,
+            modifier = modifier,
+            isFavorite = false,
+            isBlacklisted = false,
         )
-    )
+    } else {
+        CoverCard(
+            imageUrl = models.imageUrl.orEmpty(),
+            name = models.name,
+            type = models.type,
+            creatorImage = models.creatorImage,
+            isNsfw = models.nsfw,
+            showNsfw = showNsfw,
+            blurStrength = blurStrength,
+            onClick = onClick,
+            onLongClick = onLongClick,
+            blurHash = blurHash,
+            shouldShowMedia = shouldShowMedia,
+            modifier = modifier.size(
+                width = ComposableUtils.IMAGE_WIDTH,
+                height = ComposableUtils.IMAGE_HEIGHT
+            )
+        )
+    }
 }
 
 @Composable

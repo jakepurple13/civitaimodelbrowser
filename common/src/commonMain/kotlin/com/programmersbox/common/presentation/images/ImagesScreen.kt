@@ -176,7 +176,7 @@ fun CivitAiImagesScreen(
                             Text(
                                 stringResource(
                                     Res.string.clip_skip_with_param,
-                                    it.toString()
+                                    it
                                 )
                             )
                         }

@@ -103,7 +103,9 @@ import com.programmersbox.common.paging.itemKeyIndexed
 import com.programmersbox.common.presentation.components.CivitBottomBar
 import com.programmersbox.common.presentation.components.CivitRail
 import com.programmersbox.common.presentation.components.LoadingImage
+import com.programmersbox.common.presentation.components.ModelCard
 import com.programmersbox.common.presentation.components.ModelOptionsSheet
+import com.programmersbox.common.presentation.components.thumbnailUrl
 import com.programmersbox.common.showRefreshButton
 import dev.chrisbanes.haze.HazeProgressive
 import dev.chrisbanes.haze.LocalHazeStyle
@@ -149,6 +151,7 @@ fun CivitAiScreen(
     val useProgressive by dataStore.rememberUseProgressive()
     val showNsfw by dataStore.showNsfw()
     val blurStrength by dataStore.hideNsfwStrength()
+    val useNewCardLook by dataStore.rememberUseNewCardLook()
     val lazyPagingItems = viewModel.pager.collectAsLazyPagingItems()
 
     val hazeState = rememberHazeState(showBlur)
@@ -262,7 +265,8 @@ fun CivitAiScreen(
                     shouldShowMedia = shouldShowMedia,
                     onNavigateToUser = onNavigateToUser,
                     onNavigateToDetailImages = onNavigateToDetailImages,
-                    onDoubleClick = doubleClickBehaviorAction
+                    onDoubleClick = doubleClickBehaviorAction,
+                    useNewCardLook = useNewCardLook
                 )
             }
         }
@@ -281,6 +285,7 @@ fun LazyGridScope.modelItems(
     database: List<FavoriteModel>,
     blacklisted: List<BlacklistedItemRoom>,
     shouldShowMedia: Boolean,
+    useNewCardLook: Boolean,
     onNavigateToUser: ((String) -> Unit)? = null,
     onNavigateToDetailImages: ((Long, String) -> Unit)? = null,
     onDoubleClick: ((Models) -> Unit)? = null,
@@ -320,6 +325,7 @@ fun LazyGridScope.modelItems(
                 checkIfImageUrlIsBlacklisted = { url ->
                     blacklisted.none { b -> b.imageUrl == url }
                 },
+                useNewCardLook = useNewCardLook,
                 modifier = Modifier.animateItem()
             )
         }
@@ -374,6 +380,7 @@ private fun ModelItem(
     isBlacklisted: Boolean,
     shouldShowMedia: Boolean,
     checkIfImageUrlIsBlacklisted: (String) -> Boolean,
+    useNewCardLook: Boolean,
     modifier: Modifier = Modifier,
 ) {
     val imageModel = remember {
@@ -381,26 +388,47 @@ private fun ModelItem(
             mv.images.firstOrNull { it.url.isNotEmpty() && checkIfImageUrlIsBlacklisted(it.url) }
         }
     }
-    CoverCard(
-        imageUrl = remember { imageModel?.url.orEmpty() },
-        name = models.name,
-        type = models.type,
-        isNsfw = models.nsfw || imageModel?.nsfw?.canNotShow() == true,
-        showNsfw = showNsfw,
-        blurStrength = blurStrength,
-        onClick = onClick,
-        isFavorite = isFavorite,
-        isBlacklisted = isBlacklisted,
-        onLongClick = onLongClick,
-        onDoubleClick = onDoubleClick,
-        shouldShowMedia = shouldShowMedia,
-        blurHash = imageModel?.hash,
-        creatorImage = models.creator?.image,
-        modifier = modifier.size(
-            width = ComposableUtils.IMAGE_WIDTH,
-            height = ComposableUtils.IMAGE_HEIGHT
+
+    if (useNewCardLook) {
+        ModelCard(
+            imageUrl = remember { imageModel?.thumbnailUrl().orEmpty() },
+            name = models.name,
+            type = models.type.name,
+            isNsfw = models.nsfw || imageModel?.nsfw?.canNotShow() == true,
+            showNsfw = showNsfw,
+            blurStrength = blurStrength,
+            onClick = onClick,
+            isFavorite = isFavorite,
+            isBlacklisted = isBlacklisted,
+            onLongClick = onLongClick,
+            onDoubleClick = onDoubleClick,
+            shouldShowMedia = shouldShowMedia,
+            blurHash = imageModel?.hash,
+            creatorImage = models.creator?.image,
+            modifier = modifier
         )
-    )
+    } else {
+        CoverCard(
+            imageUrl = remember { imageModel?.url.orEmpty() },
+            name = models.name,
+            type = models.type,
+            isNsfw = models.nsfw || imageModel?.nsfw?.canNotShow() == true,
+            showNsfw = showNsfw,
+            blurStrength = blurStrength,
+            onClick = onClick,
+            isFavorite = isFavorite,
+            isBlacklisted = isBlacklisted,
+            onLongClick = onLongClick,
+            onDoubleClick = onDoubleClick,
+            shouldShowMedia = shouldShowMedia,
+            blurHash = imageModel?.hash,
+            creatorImage = models.creator?.image,
+            modifier = modifier.size(
+                width = ComposableUtils.IMAGE_WIDTH,
+                height = ComposableUtils.IMAGE_HEIGHT
+            )
+        )
+    }
 }
 
 @OptIn(ExperimentalFoundationApi::class)

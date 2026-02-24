@@ -141,6 +141,12 @@ class DataStore private constructor(
         dataStore = dataStore
     )
 
+    @Composable
+    fun rememberUseNewCardLook(): MutableState<Boolean> = rememberPreference(
+        key = booleanPreferencesKey("use_new_card_look"),
+        defaultValue = true,
+    )
+
     open class DataStoreType<T>(
         val key: Preferences.Key<T>,
         protected val dataStore: DataStore<Preferences>,

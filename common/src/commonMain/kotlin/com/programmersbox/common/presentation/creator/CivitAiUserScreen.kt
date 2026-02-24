@@ -82,6 +82,7 @@ fun CivitAiUserScreen(
     val showNsfw by dataStore.showNsfw()
     val blurStrength by dataStore.hideNsfwStrength()
     val database = koinInject<FavoritesDao>()
+    val useNewCardLook by dataStore.rememberUseNewCardLook()
     val showFavorites by dataStore.rememberShowFavorites()
     val favorites by remember {
         derivedStateOf {
@@ -292,7 +293,8 @@ fun CivitAiUserScreen(
                     database = favorites,
                     blacklisted = blacklisted,
                     shouldShowMedia = shouldShowMedia,
-                    onDoubleClick = doubleClickBehaviorAction
+                    onDoubleClick = doubleClickBehaviorAction,
+                    useNewCardLook = useNewCardLook,
                 )
             }
         }

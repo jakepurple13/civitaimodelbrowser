@@ -98,6 +98,7 @@ import com.programmersbox.common.db.toImageHash
 import com.programmersbox.common.presentation.components.HideScreen
 import com.programmersbox.common.presentation.components.ImageSheet
 import com.programmersbox.common.presentation.components.LoadingImage
+import com.programmersbox.common.presentation.components.ModelCard
 import com.programmersbox.common.presentation.components.ModelOptionsSheet
 import com.programmersbox.common.presentation.favorites.CoverCard
 import com.programmersbox.resources.Res
@@ -148,6 +149,7 @@ fun ListDetailScreen(
     val showBlur by dataStore.rememberShowBlur()
     val showNsfw by dataStore.showNsfw()
     val blurStrength by dataStore.hideNsfwStrength()
+    val useNewCardLook by dataStore.rememberUseNewCardLook()
 
     val useProgressive by dataStore.rememberUseProgressive()
     val hazeState = rememberHazeState(showBlur)
@@ -351,32 +353,58 @@ fun ListDetailScreen(
                     FavoriteType.Creator -> {}
                 }
 
-                CoverCard(
-                    imageUrl = item.imageUrl.orEmpty(),
-                    name = item.name,
-                    type = item.type,
-                    isNsfw = item.nsfw,
-                    creatorImage = item.creatorImage,
-                    showNsfw = showNsfw,
-                    blurStrength = blurStrength.dp,
-                    blurHash = item.hash,
-                    onClick = dropUnlessResumed {
-                        when (item.favoriteType) {
-                            FavoriteType.Model -> onNavigateToDetail(item.id.toString())
-                            FavoriteType.Image -> sheetDetails = true
-                            FavoriteType.Creator -> onNavigateToUser(item.name)
-                        }
-                    },
-                    shouldShowMedia = shouldShowMedia,
-                    onLongClick = { sheetDetails = true },
-                    modifier = Modifier
-                        .size(
-                            width = ComposableUtils.IMAGE_WIDTH,
-                            height = ComposableUtils.IMAGE_HEIGHT
-                        )
-                        .clip(MaterialTheme.shapes.medium)
-                        .animateItem()
-                )
+                if (useNewCardLook) {
+                    ModelCard(
+                        imageUrl = item.imageUrl.orEmpty(),
+                        name = item.name,
+                        type = item.type,
+                        isNsfw = item.nsfw,
+                        creatorImage = item.creatorImage,
+                        showNsfw = showNsfw,
+                        blurStrength = blurStrength.dp,
+                        blurHash = item.hash,
+                        onClick = dropUnlessResumed {
+                            when (item.favoriteType) {
+                                FavoriteType.Model -> onNavigateToDetail(item.id.toString())
+                                FavoriteType.Image -> sheetDetails = true
+                                FavoriteType.Creator -> onNavigateToUser(item.name)
+                            }
+                        },
+                        shouldShowMedia = shouldShowMedia,
+                        onLongClick = { sheetDetails = true },
+                        isFavorite = false,
+                        isBlacklisted = false,
+                        modifier = Modifier.animateItem()
+                    )
+                } else {
+                    CoverCard(
+                        imageUrl = item.imageUrl.orEmpty(),
+                        name = item.name,
+                        type = item.type,
+                        isNsfw = item.nsfw,
+                        creatorImage = item.creatorImage,
+                        showNsfw = showNsfw,
+                        blurStrength = blurStrength.dp,
+                        blurHash = item.hash,
+                        onClick = dropUnlessResumed {
+                            when (item.favoriteType) {
+                                FavoriteType.Model -> onNavigateToDetail(item.id.toString())
+                                FavoriteType.Image -> sheetDetails = true
+                                FavoriteType.Creator -> onNavigateToUser(item.name)
+                            }
+                        },
+                        shouldShowMedia = shouldShowMedia,
+                        onLongClick = { sheetDetails = true },
+                        modifier = Modifier
+                            .size(
+                                width = ComposableUtils.IMAGE_WIDTH,
+                                height = ComposableUtils.IMAGE_HEIGHT
+                            )
+                            .clip(MaterialTheme.shapes.medium)
+                            .animateItem()
+                    )
+                }
+
             }
         }
     }

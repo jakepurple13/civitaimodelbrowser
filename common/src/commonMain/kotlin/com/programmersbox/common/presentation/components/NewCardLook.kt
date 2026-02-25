@@ -16,10 +16,10 @@ import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.PlayArrow
-import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedCard
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -63,9 +63,9 @@ fun ModelCard(
         )
     val shape = MaterialTheme.shapes.medium
     val elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
-    val colors = CardDefaults.cardColors()
+    val colors = CardDefaults.outlinedCardColors()
 
-    Card(
+    OutlinedCard(
         modifier = cardModifier,
         shape = shape,
         elevation = elevation,
@@ -73,7 +73,7 @@ fun ModelCard(
         border = if (isFavorite)
             BorderStroke(1.dp, MaterialTheme.colorScheme.primary)
         else
-            null,
+            CardDefaults.outlinedCardBorder(),
     ) {
         Box(
             modifier = Modifier.wrapContentSize()
@@ -217,6 +217,7 @@ private fun ModelCardInfo(
                 Text(
                     text = "NSFW",
                     style = MaterialTheme.typography.labelSmall,
+                    color = MaterialTheme.colorScheme.onError,
                     modifier = Modifier
                         .background(
                             color = MaterialTheme.colorScheme.error,

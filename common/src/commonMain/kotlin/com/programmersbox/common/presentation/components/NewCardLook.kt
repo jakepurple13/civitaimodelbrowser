@@ -1,7 +1,6 @@
 package com.programmersbox.common.presentation.components
 
 import androidx.compose.animation.ExperimentalSharedTransitionApi
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
@@ -15,6 +14,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
@@ -53,27 +53,17 @@ fun ModelCard(
     onClick: () -> Unit = {},
     onDoubleClick: (() -> Unit)? = null,
 ) {
-    val cardModifier = modifier
-        .fillMaxWidth()
-        .clip(MaterialTheme.shapes.medium)
-        .combinedClickable(
-            onClick = onClick,
-            onLongClick = onLongClick,
-            onDoubleClick = onDoubleClick,
-        )
-    val shape = MaterialTheme.shapes.medium
-    val elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
-    val colors = CardDefaults.outlinedCardColors()
-
     OutlinedCard(
-        modifier = cardModifier,
-        shape = shape,
-        elevation = elevation,
-        colors = colors,
-        border = if (isFavorite)
-            BorderStroke(1.dp, MaterialTheme.colorScheme.primary)
-        else
-            CardDefaults.outlinedCardBorder(),
+        shape = MaterialTheme.shapes.medium,
+        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
+        modifier = modifier
+            .fillMaxWidth()
+            .clip(MaterialTheme.shapes.medium)
+            .combinedClickable(
+                onClick = onClick,
+                onLongClick = onLongClick,
+                onDoubleClick = onDoubleClick,
+            ),
     ) {
         Box(
             modifier = Modifier.wrapContentSize()
@@ -89,6 +79,26 @@ fun ModelCard(
                 shouldShowMedia = shouldShowMedia,
                 blurHash = blurHash,
             )
+
+            // Favorite badge overlay
+            if (isFavorite) {
+                Box(
+                    modifier = Modifier
+                        .padding(4.dp)
+                        .size(32.dp)
+                        .clip(CircleShape)
+                        .background(MaterialTheme.colorScheme.primary)
+                        .align(Alignment.TopStart),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Favorite,
+                        contentDescription = "Favorite",
+                        tint = MaterialTheme.colorScheme.onPrimary,
+                        modifier = Modifier.size(24.dp)
+                    )
+                }
+            }
 
             creatorImage?.let { image ->
                 LoadingImage(

@@ -641,25 +641,25 @@ private fun HorizontalToolbarContent(
             containerColor = MaterialTheme.colorScheme.surface,
             sheetState = listState
         ) {
-            val toaster = koinInject<ToasterState>()
             ListChoiceScreen(
                 id = models.id,
-                onClick = { item ->
+                onAdd = { item ->
                     scope.launch {
-                        listDao.addToList(
-                            uuid = item.item.uuid,
-                            id = models.id,
-                            name = models.name,
-                            description = models.description,
-                            type = models.type.name,
-                            nsfw = models.nsfw,
-                            imageUrl = models.modelVersions.firstOrNull()?.images?.firstOrNull()?.url,
-                            favoriteType = FavoriteType.Model,
-                            hash = models.modelVersions.firstOrNull()?.images?.firstOrNull()?.hash,
-                            creatorName = models.creator?.username,
-                            creatorImage = models.creator?.image,
-                        )
-                        toaster.show("Added to ${item.item.name}", type = ToastType.Success)
+                        item.forEach { item ->
+                            listDao.addToList(
+                                uuid = item.item.uuid,
+                                id = models.id,
+                                name = models.name,
+                                description = models.description,
+                                type = models.type.name,
+                                nsfw = models.nsfw,
+                                imageUrl = models.modelVersions.firstOrNull()?.images?.firstOrNull()?.url,
+                                favoriteType = FavoriteType.Model,
+                                hash = models.modelVersions.firstOrNull()?.images?.firstOrNull()?.hash,
+                                creatorName = models.creator?.username,
+                                creatorImage = models.creator?.image,
+                            )
+                        }
                         listState.hide()
                     }.invokeOnCompletion { showLists = false }
                 },
@@ -759,25 +759,25 @@ private fun BottomBarContent(
             containerColor = MaterialTheme.colorScheme.surface,
             sheetState = listState
         ) {
-            val toaster = koinInject<ToasterState>()
             ListChoiceScreen(
                 id = models.id,
-                onClick = { item ->
+                onAdd = { item ->
                     scope.launch {
-                        listDao.addToList(
-                            uuid = item.item.uuid,
-                            id = models.id,
-                            name = models.name,
-                            description = models.description,
-                            type = models.type.name,
-                            nsfw = models.nsfw,
-                            imageUrl = models.modelVersions.firstOrNull()?.images?.firstOrNull()?.url,
-                            favoriteType = FavoriteType.Model,
-                            hash = models.modelVersions.firstOrNull()?.images?.firstOrNull()?.hash,
-                            creatorName = models.creator?.username,
-                            creatorImage = models.creator?.image,
-                        )
-                        toaster.show("Added to ${item.item.name}", type = ToastType.Success)
+                        item.forEach { item ->
+                            listDao.addToList(
+                                uuid = item.item.uuid,
+                                id = models.id,
+                                name = models.name,
+                                description = models.description,
+                                type = models.type.name,
+                                nsfw = models.nsfw,
+                                imageUrl = models.modelVersions.firstOrNull()?.images?.firstOrNull()?.url,
+                                favoriteType = FavoriteType.Model,
+                                hash = models.modelVersions.firstOrNull()?.images?.firstOrNull()?.hash,
+                                creatorName = models.creator?.username,
+                                creatorImage = models.creator?.image,
+                            )
+                        }
                         listState.hide()
                     }.invokeOnCompletion { showLists = false }
                 },

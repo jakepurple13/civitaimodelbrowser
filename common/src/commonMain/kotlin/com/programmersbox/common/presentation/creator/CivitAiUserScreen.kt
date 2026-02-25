@@ -53,8 +53,6 @@ import com.programmersbox.common.db.FavoritesDao
 import com.programmersbox.common.db.ListDao
 import com.programmersbox.common.presentation.components.ListChoiceScreen
 import com.programmersbox.common.presentation.components.LoadingImage
-import com.programmersbox.common.presentation.components.ToastType
-import com.programmersbox.common.presentation.components.ToasterState
 import com.programmersbox.common.presentation.home.createDoubleClickBehaviorAction
 import com.programmersbox.common.presentation.home.modelItems
 import com.programmersbox.common.presentation.qrcode.QrCodeType
@@ -143,25 +141,25 @@ fun CivitAiUserScreen(
                 containerColor = MaterialTheme.colorScheme.surface,
                 sheetState = listState
             ) {
-                val toaster = koinInject<ToasterState>()
                 ListChoiceScreen(
                     username = username,
-                    onClick = { item ->
+                    onAdd = { selectedLists ->
                         scope.launch {
-                            listDao.addToList(
-                                uuid = item.item.uuid,
-                                id = 0,
-                                name = creator.username.orEmpty(),
-                                description = null,
-                                type = "Creator",
-                                nsfw = false,
-                                imageUrl = creator.image,
-                                favoriteType = FavoriteType.Creator,
-                                hash = null,
-                                creatorName = creator.username,
-                                creatorImage = creator.image,
-                            )
-                            toaster.show("Added to ${item.item.name}", type = ToastType.Success)
+                            selectedLists.forEach { item ->
+                                listDao.addToList(
+                                    uuid = item.item.uuid,
+                                    id = 0,
+                                    name = creator.username.orEmpty(),
+                                    description = null,
+                                    type = "Creator",
+                                    nsfw = false,
+                                    imageUrl = creator.image,
+                                    favoriteType = FavoriteType.Creator,
+                                    hash = null,
+                                    creatorName = creator.username,
+                                    creatorImage = creator.image,
+                                )
+                            }
                             listState.hide()
                         }.invokeOnCompletion { showLists = false }
                     },

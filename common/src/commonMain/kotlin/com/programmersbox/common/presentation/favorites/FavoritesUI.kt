@@ -98,15 +98,12 @@ import com.programmersbox.common.presentation.components.ListChoiceScreen
 import com.programmersbox.common.presentation.components.LoadingImage
 import com.programmersbox.common.presentation.components.ModelCard
 import com.programmersbox.common.presentation.components.ModelOptionsType
-import com.programmersbox.common.presentation.components.ToastType
-import com.programmersbox.common.presentation.components.ToasterState
 import com.programmersbox.common.presentation.components.rememberModelOptionsScope
 import com.programmersbox.common.presentation.home.CardContent
 import com.programmersbox.common.presentation.qrcode.QrCodeType
 import com.programmersbox.common.presentation.qrcode.ShareViaQrCode
 import com.programmersbox.resources.Res
 import com.programmersbox.resources.add_to_list
-import com.programmersbox.resources.added_to
 import com.programmersbox.resources.cfg_scale_with_param
 import com.programmersbox.resources.clip_skip_with_param
 import com.programmersbox.resources.model_with_param
@@ -129,7 +126,6 @@ import dev.chrisbanes.haze.hazeEffect
 import dev.chrisbanes.haze.hazeSource
 import dev.chrisbanes.haze.rememberHazeState
 import kotlinx.coroutines.launch
-import org.jetbrains.compose.resources.getString
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.koinInject
 import org.koin.compose.viewmodel.koinViewModel
@@ -843,7 +839,6 @@ fun FavoritesCreatorOptionsSheet(
                     val listState = rememberModalBottomSheetState(true)
                     var showLists by remember { mutableStateOf(false) }
                     if (showLists) {
-                        val toaster = koinInject<ToasterState>()
                         ModalBottomSheet(
                             onDismissRequest = { showLists = false },
                             containerColor = MaterialTheme.colorScheme.surface,
@@ -851,25 +846,23 @@ fun FavoritesCreatorOptionsSheet(
                         ) {
                             ListChoiceScreen(
                                 id = models.id,
-                                onClick = { item ->
+                                onAdd = { selectedLists ->
                                     scope.launch {
-                                        listDao.addToList(
-                                            uuid = item.item.uuid,
-                                            id = models.id,
-                                            name = models.name,
-                                            description = models.name,
-                                            type = models.modelType,
-                                            nsfw = false,
-                                            imageUrl = models.imageUrl,
-                                            favoriteType = FavoriteType.Model,
-                                            hash = null,
-                                            creatorName = models.name,
-                                            creatorImage = models.imageUrl
-                                        )
-                                        toaster.show(
-                                            getString(Res.string.added_to, item.item.name),
-                                            type = ToastType.Success
-                                        )
+                                        selectedLists.forEach { item ->
+                                            listDao.addToList(
+                                                uuid = item.item.uuid,
+                                                id = models.id,
+                                                name = models.name,
+                                                description = models.name,
+                                                type = models.modelType,
+                                                nsfw = false,
+                                                imageUrl = models.imageUrl,
+                                                favoriteType = FavoriteType.Model,
+                                                hash = null,
+                                                creatorName = models.name,
+                                                creatorImage = models.imageUrl
+                                            )
+                                        }
                                         listState.hide()
                                     }.invokeOnCompletion { showLists = false }
                                 },
@@ -1064,21 +1057,23 @@ fun FavoritesModelOptionsSheet(
                         ) {
                             ListChoiceScreen(
                                 id = models.id,
-                                onClick = { item ->
+                                onAdd = { selectedLists ->
                                     scope.launch {
-                                        listDao.addToList(
-                                            uuid = item.item.uuid,
-                                            id = models.id,
-                                            name = models.name,
-                                            description = models.description,
-                                            type = models.type,
-                                            nsfw = models.nsfw,
-                                            imageUrl = models.imageUrl,
-                                            favoriteType = FavoriteType.Model,
-                                            hash = models.hash,
-                                            creatorName = models.creatorName,
-                                            creatorImage = models.creatorImage,
-                                        )
+                                        selectedLists.forEach { item ->
+                                            listDao.addToList(
+                                                uuid = item.item.uuid,
+                                                id = models.id,
+                                                name = models.name,
+                                                description = models.description,
+                                                type = models.type,
+                                                nsfw = models.nsfw,
+                                                imageUrl = models.imageUrl,
+                                                favoriteType = FavoriteType.Model,
+                                                hash = models.hash,
+                                                creatorName = models.creatorName,
+                                                creatorImage = models.creatorImage,
+                                            )
+                                        }
                                         listState.hide()
                                     }.invokeOnCompletion { showLists = false }
                                 },

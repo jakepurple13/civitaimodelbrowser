@@ -89,7 +89,7 @@ import com.programmersbox.common.adaptiveGridCell
 import com.programmersbox.common.db.FavoriteModel
 import com.programmersbox.common.db.FavoriteType
 import com.programmersbox.common.db.FavoritesDao
-import com.programmersbox.common.db.ListDao
+import com.programmersbox.common.db.ListRepository
 import com.programmersbox.common.isScrollingUp
 import com.programmersbox.common.presentation.components.CivitBottomBar
 import com.programmersbox.common.presentation.components.CivitRail
@@ -835,7 +835,7 @@ fun FavoritesCreatorOptionsSheet(
                 }
 
                 add {
-                    val listDao = koinInject<ListDao>()
+                    val listRepository = koinInject<ListRepository>()
                     val listState = rememberModalBottomSheetState(true)
                     var showLists by remember { mutableStateOf(false) }
                     if (showLists) {
@@ -848,21 +848,19 @@ fun FavoritesCreatorOptionsSheet(
                                 id = models.id,
                                 onAdd = { selectedLists ->
                                     scope.launch {
-                                        selectedLists.forEach { item ->
-                                            listDao.addToList(
-                                                uuid = item.item.uuid,
-                                                id = models.id,
-                                                name = models.name,
-                                                description = models.name,
-                                                type = models.modelType,
-                                                nsfw = false,
-                                                imageUrl = models.imageUrl,
-                                                favoriteType = FavoriteType.Model,
-                                                hash = null,
-                                                creatorName = models.name,
-                                                creatorImage = models.imageUrl
-                                            )
-                                        }
+                                        listRepository.addToMultipleLists(
+                                            selectedLists = selectedLists,
+                                            id = models.id,
+                                            name = models.name,
+                                            description = models.name,
+                                            type = models.modelType,
+                                            nsfw = false,
+                                            imageUrl = models.imageUrl,
+                                            favoriteType = FavoriteType.Model,
+                                            hash = null,
+                                            creatorName = models.name,
+                                            creatorImage = models.imageUrl
+                                        )
                                         listState.hide()
                                     }.invokeOnCompletion { showLists = false }
                                 },
@@ -1046,7 +1044,7 @@ fun FavoritesModelOptionsSheet(
 
             group {
                 add {
-                    val listDao = koinInject<ListDao>()
+                    val listRepository = koinInject<ListRepository>()
                     val listState = rememberModalBottomSheetState(true)
                     var showLists by remember { mutableStateOf(false) }
                     if (showLists) {
@@ -1059,21 +1057,19 @@ fun FavoritesModelOptionsSheet(
                                 id = models.id,
                                 onAdd = { selectedLists ->
                                     scope.launch {
-                                        selectedLists.forEach { item ->
-                                            listDao.addToList(
-                                                uuid = item.item.uuid,
-                                                id = models.id,
-                                                name = models.name,
-                                                description = models.description,
-                                                type = models.type,
-                                                nsfw = models.nsfw,
-                                                imageUrl = models.imageUrl,
-                                                favoriteType = FavoriteType.Model,
-                                                hash = models.hash,
-                                                creatorName = models.creatorName,
-                                                creatorImage = models.creatorImage,
-                                            )
-                                        }
+                                        listRepository.addToMultipleLists(
+                                            selectedLists = selectedLists,
+                                            id = models.id,
+                                            name = models.name,
+                                            description = models.description,
+                                            type = models.type,
+                                            nsfw = models.nsfw,
+                                            imageUrl = models.imageUrl,
+                                            favoriteType = FavoriteType.Model,
+                                            hash = models.hash,
+                                            creatorName = models.creatorName,
+                                            creatorImage = models.creatorImage,
+                                        )
                                         listState.hide()
                                     }.invokeOnCompletion { showLists = false }
                                 },

@@ -47,6 +47,7 @@ interface ListDao {
         """
         SELECT * FROM CustomListItem
         WHERE name LIKE '%' || :query || '%'
+        OR description LIKE '%' || :query || '%'
         OR uuid IN (SELECT uuid FROM CustomListInfo WHERE name LIKE '%' || :query || '%' OR description LIKE '%' || :query || '%')
         ORDER BY useBiometric ASC, time DESC
     """

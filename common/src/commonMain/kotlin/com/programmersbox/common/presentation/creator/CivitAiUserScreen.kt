@@ -50,7 +50,7 @@ import com.programmersbox.common.NetworkConnectionRepository
 import com.programmersbox.common.adaptiveGridCell
 import com.programmersbox.common.db.FavoriteType
 import com.programmersbox.common.db.FavoritesDao
-import com.programmersbox.common.db.ListDao
+import com.programmersbox.common.db.ListRepository
 import com.programmersbox.common.presentation.components.ListChoiceScreen
 import com.programmersbox.common.presentation.components.LoadingImage
 import com.programmersbox.common.presentation.home.createDoubleClickBehaviorAction
@@ -134,7 +134,7 @@ fun CivitAiUserScreen(
     val listState = rememberModalBottomSheetState(true)
 
     if (showLists) {
-        val listDao = koinInject<ListDao>()
+        val listRepository = koinInject<ListRepository>()
         lazyPagingItems[0]?.creator?.let { creator ->
             ModalBottomSheet(
                 onDismissRequest = { showLists = false },
@@ -145,21 +145,19 @@ fun CivitAiUserScreen(
                     username = username,
                     onAdd = { selectedLists ->
                         scope.launch {
-                            selectedLists.forEach { item ->
-                                listDao.addToList(
-                                    uuid = item.item.uuid,
-                                    id = 0,
-                                    name = creator.username.orEmpty(),
-                                    description = null,
-                                    type = "Creator",
-                                    nsfw = false,
-                                    imageUrl = creator.image,
-                                    favoriteType = FavoriteType.Creator,
-                                    hash = null,
-                                    creatorName = creator.username,
-                                    creatorImage = creator.image,
-                                )
-                            }
+                            listRepository.addToMultipleLists(
+                                selectedLists = selectedLists,
+                                id = 0,
+                                name = creator.username.orEmpty(),
+                                description = null,
+                                type = "Creator",
+                                nsfw = false,
+                                imageUrl = creator.image,
+                                favoriteType = FavoriteType.Creator,
+                                hash = null,
+                                creatorName = creator.username,
+                                creatorImage = creator.image,
+                            )
                             listState.hide()
                         }.invokeOnCompletion { showLists = false }
                     },

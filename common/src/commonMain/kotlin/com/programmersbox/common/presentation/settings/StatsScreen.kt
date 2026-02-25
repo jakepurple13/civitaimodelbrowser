@@ -71,7 +71,7 @@ import com.programmersbox.common.db.DataCounts
 import com.programmersbox.common.db.FavoriteRoom
 import com.programmersbox.common.db.FavoriteType
 import com.programmersbox.common.db.FavoritesDao
-import com.programmersbox.common.db.ListDao
+import com.programmersbox.common.db.ListRepository
 import com.programmersbox.common.db.SearchHistoryDao
 import com.programmersbox.resources.Res
 import com.programmersbox.resources.blacklisted
@@ -103,7 +103,7 @@ import org.koin.compose.koinInject
 @Composable
 fun StatsScreen() {
     val favoritesDao = koinInject<FavoritesDao>()
-    val listDao = koinInject<ListDao>()
+    val listRepository = koinInject<ListRepository>()
     val searchHistoryDao = koinInject<SearchHistoryDao>()
 
     val favoritesCount by favoritesDao
@@ -118,7 +118,7 @@ fun StatsScreen() {
     )
 
     val listCount by animateIntAsState(
-        listDao
+        listRepository
             .getAllListsCount()
             .collectAsStateWithLifecycle(0)
             .value
@@ -128,11 +128,11 @@ fun StatsScreen() {
         .getSearchCount()
         .collectAsStateWithLifecycle(0)
 
-    val itemCount by listDao
+    val itemCount by listRepository
         .getTypeCounts()
         .collectAsStateWithLifecycle(DataCounts(0, 0, 0))
 
-    val listItems by listDao
+    val listItems by listRepository
         .getAllLists()
         .collectAsStateWithLifecycle(emptyList())
 

@@ -33,7 +33,7 @@ import kotlinx.serialization.json.Json
         CustomListInfoFts::class,
         FavoriteRoomFts::class,
     ],
-    version = 14,
+    version = 16,
     autoMigrations = [
         AutoMigration(from = 1, to = 2),
         AutoMigration(from = 2, to = 3),
@@ -45,6 +45,8 @@ import kotlinx.serialization.json.Json
         AutoMigration(from = 8, to = 9),
         AutoMigration(from = 9, to = 10),
         AutoMigration(from = 10, to = 11),
+        AutoMigration(from = 14, to = 15),
+        AutoMigration(from = 15, to = 16),
     ]
 )
 
@@ -72,6 +74,7 @@ fun getRoomDatabase(
             MIGRATION_FTS,
             MIGRATION_FAVORITES_FTS,
             MIGRATION_FAVORITES_FTS_2,
+            MIGRATION_FTS_CUSTOM_LIST_ITEM_DESCRIPTION,
         )
         .build()
 }

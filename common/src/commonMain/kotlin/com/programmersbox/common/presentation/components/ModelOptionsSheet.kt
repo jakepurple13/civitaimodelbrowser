@@ -74,7 +74,7 @@ import com.programmersbox.common.db.BlacklistedItemRoom
 import com.programmersbox.common.db.CustomList
 import com.programmersbox.common.db.FavoriteType
 import com.programmersbox.common.db.FavoritesDao
-import com.programmersbox.common.db.ListDao
+import com.programmersbox.common.db.ListRepository
 import com.programmersbox.common.presentation.home.BlacklistHandling
 import com.programmersbox.common.presentation.qrcode.QrCodeType
 import com.programmersbox.common.presentation.qrcode.ShareViaQrCode
@@ -88,7 +88,6 @@ import com.programmersbox.resources.confirm
 import com.programmersbox.resources.create_new_list
 import com.programmersbox.resources.creators
 import com.programmersbox.resources.favorite_model
-import com.programmersbox.resources.list_created
 import com.programmersbox.resources.list_name
 import com.programmersbox.resources.made_by
 import com.programmersbox.resources.nsfw
@@ -125,7 +124,7 @@ fun ModelOptionsSheet(
         val isFavorite by dao
             .getFavoritesByType(FavoriteType.Model, id)
             .collectAsStateWithLifecycle(false)
-        val listDao = koinInject<ListDao>()
+        val listRepository = koinInject<ListRepository>()
         val scope = rememberCoroutineScope()
 
         val sheetState = rememberModalBottomSheetState(
@@ -269,7 +268,7 @@ fun ModelOptionsSheet(
                                 onAdd = { selectedLists ->
                                     scope.launch {
                                         selectedLists.forEach { item ->
-                                            listDao.addToList(
+                                            listRepository.addToList(
                                                 uuid = item.item.uuid,
                                                 id = id,
                                                 name = name.orEmpty(),
@@ -399,9 +398,9 @@ fun ListChoiceScreen(
     navigationIcon: @Composable () -> Unit = { CloseButton() },
     onAdd: (List<CustomList>) -> Unit,
 ) {
-    val dao = koinInject<ListDao>()
+    val listRepository = koinInject<ListRepository>()
     val scope = rememberCoroutineScope()
-    val list by dao
+    val list by listRepository
         .getAllLists()
         .collectAsStateWithLifecycle(emptyList())
     val toaster = koinInject<ToasterState>()
@@ -464,23 +463,37 @@ fun ListChoiceScreen(
             }
             if (showAdd) {
                 var name by remember { mutableStateOf("") }
+                var description by remember { mutableStateOf("") }
                 AlertDialog(
                     onDismissRequest = { showAdd = false },
                     title = { Text(stringResource(Res.string.create_new_list)) },
                     text = {
-                        OutlinedTextField(
-                            value = name,
-                            onValueChange = { name = it },
-                            label = { Text(stringResource(Res.string.list_name)) },
-                            singleLine = true,
-                            modifier = Modifier.fillMaxWidth()
-                        )
+                        Column(
+                            verticalArrangement = Arrangement.spacedBy(8.dp)
+                        ) {
+                            OutlinedTextField(
+                                value = name,
+                                onValueChange = { name = it },
+                                label = { Text(stringResource(Res.string.list_name)) },
+                                singleLine = true,
+                                modifier = Modifier.fillMaxWidth()
+                            )
+                            OutlinedTextField(
+                                value = description,
+                                onValueChange = { description = it },
+                                label = { Text("Description (optional)") },
+                                modifier = Modifier.fillMaxWidth()
+                            )
+                        }
                     },
                     confirmButton = {
                         TextButton(
                             onClick = {
                                 scope.launch {
-                                    dao.create(name)
+                                    listRepository.createList(
+                                        name = name,
+                                        description = description.takeIf { it.isNotBlank() }
+                                    )
                                     showAdd = false
                                 }
                             },
@@ -543,9 +556,9 @@ fun ListChoiceScreen(
     onAdd: (List<CustomList>) -> Unit,
     navigationIcon: @Composable () -> Unit = { CloseButton() },
 ) {
-    val dao = koinInject<ListDao>()
+    val listRepository = koinInject<ListRepository>()
     val scope = rememberCoroutineScope()
-    val list by dao
+    val list by listRepository
         .getAllLists()
         .collectAsStateWithLifecycle(emptyList())
     val toaster = koinInject<ToasterState>()
@@ -608,23 +621,38 @@ fun ListChoiceScreen(
             }
             if (showAdd) {
                 var name by remember { mutableStateOf("") }
+                var description by remember { mutableStateOf("") }
                 AlertDialog(
                     onDismissRequest = { showAdd = false },
                     title = { Text(stringResource(Res.string.create_new_list)) },
                     text = {
-                        OutlinedTextField(
-                            value = name,
-                            onValueChange = { name = it },
-                            label = { Text(stringResource(Res.string.list_name)) },
-                            singleLine = true,
-                            modifier = Modifier.fillMaxWidth()
-                        )
+                        Column(
+                            verticalArrangement = Arrangement.spacedBy(8.dp)
+                        ) {
+                            OutlinedTextField(
+                                value = name,
+                                onValueChange = { name = it },
+                                label = { Text(stringResource(Res.string.list_name)) },
+                                singleLine = true,
+                                modifier = Modifier.fillMaxWidth()
+                            )
+                            OutlinedTextField(
+                                value = description,
+                                onValueChange = { description = it },
+                                label = { Text("Description (optional)") },
+                                modifier = Modifier.fillMaxWidth()
+                            )
+                        }
                     },
                     confirmButton = {
                         TextButton(
                             onClick = {
                                 scope.launch {
-                                    dao.create(name)
+                                    listRepository.createList(
+                                        name = name,
+                                        description = description.takeIf { it.isNotBlank() },
+                                        showToast = false
+                                    )
                                     showAdd = false
                                 }
                             },
@@ -761,7 +789,7 @@ fun ModelOptionsSheet(
         val isFavorite by dao
             .getFavoritesByType(FavoriteType.Model, models.id)
             .collectAsStateWithLifecycle(false)
-        val listDao = koinInject<ListDao>()
+        val listRepository = koinInject<ListRepository>()
         val scope = rememberCoroutineScope()
         var showDialog by remember { mutableStateOf(false) }
 
@@ -966,7 +994,7 @@ fun ModelOptionsSheet(
                                 onAdd = { selectedLists ->
                                     scope.launch {
                                         selectedLists.forEach { item ->
-                                            listDao.addToList(
+                                            listRepository.addToList(
                                                 uuid = item.item.uuid,
                                                 id = models.id,
                                                 name = models.name,

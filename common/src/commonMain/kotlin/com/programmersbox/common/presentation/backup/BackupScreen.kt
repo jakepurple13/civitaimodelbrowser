@@ -21,6 +21,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.programmersbox.common.BackButton
+import io.github.vinceglb.filekit.dialogs.FileKitDialogSettings
 import io.github.vinceglb.filekit.dialogs.compose.rememberFileSaverLauncher
 import org.koin.compose.viewmodel.koinViewModel
 
@@ -29,7 +30,9 @@ import org.koin.compose.viewmodel.koinViewModel
 fun BackupScreen(
     viewModel: BackupViewModel = koinViewModel(),
 ) {
-    val backupFile = rememberFileSaverLauncher {
+    val backupFile = rememberFileSaverLauncher(
+        dialogSettings = FileKitDialogSettings.createDefault()
+    ) {
         it?.let { platformFile -> viewModel.backup(platformFile) }
     }
 

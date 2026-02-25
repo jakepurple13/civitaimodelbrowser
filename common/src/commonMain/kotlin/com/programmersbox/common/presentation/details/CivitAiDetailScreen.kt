@@ -98,12 +98,10 @@ import com.programmersbox.common.NetworkConnectionRepository
 import com.programmersbox.common.adaptiveGridCell
 import com.programmersbox.common.db.FavoriteType
 import com.programmersbox.common.db.FavoritesDao
-import com.programmersbox.common.db.ListDao
+import com.programmersbox.common.db.ListRepository
 import com.programmersbox.common.presentation.components.ImageSheet
 import com.programmersbox.common.presentation.components.ListChoiceScreen
 import com.programmersbox.common.presentation.components.LoadingImage
-import com.programmersbox.common.presentation.components.ToastType
-import com.programmersbox.common.presentation.components.ToasterState
 import com.programmersbox.common.presentation.home.BlacklistHandling
 import com.programmersbox.common.presentation.qrcode.QrCodeType
 import com.programmersbox.common.presentation.qrcode.ShareViaQrCode
@@ -634,20 +632,19 @@ private fun HorizontalToolbarContent(
     val listState = rememberModalBottomSheetState(true)
 
     if (showLists) {
-        val listDao = koinInject<ListDao>()
+        val listRepository = koinInject<ListRepository>()
         val models = model.models
         ModalBottomSheet(
             onDismissRequest = { showLists = false },
             containerColor = MaterialTheme.colorScheme.surface,
             sheetState = listState
         ) {
-            val toaster = koinInject<ToasterState>()
             ListChoiceScreen(
                 id = models.id,
-                onClick = { item ->
+                onAdd = { selectedLists ->
                     scope.launch {
-                        listDao.addToList(
-                            uuid = item.item.uuid,
+                        listRepository.addToMultipleLists(
+                            selectedLists = selectedLists,
                             id = models.id,
                             name = models.name,
                             description = models.description,
@@ -659,7 +656,6 @@ private fun HorizontalToolbarContent(
                             creatorName = models.creator?.username,
                             creatorImage = models.creator?.image,
                         )
-                        toaster.show("Added to ${item.item.name}", type = ToastType.Success)
                         listState.hide()
                     }.invokeOnCompletion { showLists = false }
                 },
@@ -752,20 +748,19 @@ private fun BottomBarContent(
     val listState = rememberModalBottomSheetState(true)
 
     if (showLists) {
-        val listDao = koinInject<ListDao>()
+        val listRepository = koinInject<ListRepository>()
         val models = model.models
         ModalBottomSheet(
             onDismissRequest = { showLists = false },
             containerColor = MaterialTheme.colorScheme.surface,
             sheetState = listState
         ) {
-            val toaster = koinInject<ToasterState>()
             ListChoiceScreen(
                 id = models.id,
-                onClick = { item ->
+                onAdd = { selectedLists ->
                     scope.launch {
-                        listDao.addToList(
-                            uuid = item.item.uuid,
+                        listRepository.addToMultipleLists(
+                            selectedLists = selectedLists,
                             id = models.id,
                             name = models.name,
                             description = models.description,
@@ -777,7 +772,6 @@ private fun BottomBarContent(
                             creatorName = models.creator?.username,
                             creatorImage = models.creator?.image,
                         )
-                        toaster.show("Added to ${item.item.name}", type = ToastType.Success)
                         listState.hide()
                     }.invokeOnCompletion { showLists = false }
                 },

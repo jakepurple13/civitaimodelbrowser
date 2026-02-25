@@ -50,11 +50,9 @@ import com.programmersbox.common.NetworkConnectionRepository
 import com.programmersbox.common.adaptiveGridCell
 import com.programmersbox.common.db.FavoriteType
 import com.programmersbox.common.db.FavoritesDao
-import com.programmersbox.common.db.ListDao
+import com.programmersbox.common.db.ListRepository
 import com.programmersbox.common.presentation.components.ListChoiceScreen
 import com.programmersbox.common.presentation.components.LoadingImage
-import com.programmersbox.common.presentation.components.ToastType
-import com.programmersbox.common.presentation.components.ToasterState
 import com.programmersbox.common.presentation.home.createDoubleClickBehaviorAction
 import com.programmersbox.common.presentation.home.modelItems
 import com.programmersbox.common.presentation.qrcode.QrCodeType
@@ -136,20 +134,19 @@ fun CivitAiUserScreen(
     val listState = rememberModalBottomSheetState(true)
 
     if (showLists) {
-        val listDao = koinInject<ListDao>()
+        val listRepository = koinInject<ListRepository>()
         lazyPagingItems[0]?.creator?.let { creator ->
             ModalBottomSheet(
                 onDismissRequest = { showLists = false },
                 containerColor = MaterialTheme.colorScheme.surface,
                 sheetState = listState
             ) {
-                val toaster = koinInject<ToasterState>()
                 ListChoiceScreen(
                     username = username,
-                    onClick = { item ->
+                    onAdd = { selectedLists ->
                         scope.launch {
-                            listDao.addToList(
-                                uuid = item.item.uuid,
+                            listRepository.addToMultipleLists(
+                                selectedLists = selectedLists,
                                 id = 0,
                                 name = creator.username.orEmpty(),
                                 description = null,
@@ -161,7 +158,6 @@ fun CivitAiUserScreen(
                                 creatorName = creator.username,
                                 creatorImage = creator.image,
                             )
-                            toaster.show("Added to ${item.item.name}", type = ToastType.Success)
                             listState.hide()
                         }.invokeOnCompletion { showLists = false }
                     },

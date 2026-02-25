@@ -93,7 +93,7 @@ import com.programmersbox.common.adaptiveGridCell
 import com.programmersbox.common.db.CustomList
 import com.programmersbox.common.db.CustomListInfo
 import com.programmersbox.common.db.FavoriteType
-import com.programmersbox.common.db.ListDao
+import com.programmersbox.common.db.ListRepository
 import com.programmersbox.common.db.toImageHash
 import com.programmersbox.common.presentation.components.HideScreen
 import com.programmersbox.common.presentation.components.ImageSheet
@@ -221,6 +221,7 @@ fun ListDetailScreen(
                     viewModel.setCoverImage(url, hash)
                 },
                 shouldShowMedia = shouldShowMedia,
+                setDescription = viewModel::setDescription,
             )
         }
     }
@@ -424,10 +425,12 @@ private fun InfoSheet(
     onRemoveItemsAction: () -> Unit,
     setNewCoverImage: (String?, String?) -> Unit,
     shouldShowMedia: Boolean,
+    setDescription: (String?) -> Unit,
 ) {
     val scope = rememberCoroutineScope()
 
     var currentName by remember { mutableStateOf(customItem.item.name) }
+    var currentDescription by remember { mutableStateOf(customItem.item.description ?: "") }
 
     var showAdd by remember { mutableStateOf(false) }
 
@@ -440,6 +443,7 @@ private fun InfoSheet(
                 TextButton(
                     onClick = {
                         rename(currentName)
+                        setDescription(currentDescription.takeIf { it.isNotBlank() })
                         showAdd = false
                     }
                 ) { Text(stringResource(Res.string.confirm)) }
@@ -514,9 +518,21 @@ private fun InfoSheet(
                 trailingIcon = {
                     IconButton(
                         onClick = { showAdd = true },
-                        enabled = currentName != customItem.item.name
+                        enabled = currentName != customItem.item.name || currentDescription != (customItem.item.description
+                            ?: "")
                     ) { Icon(Icons.Default.Check, null) }
                 },
+                modifier = Modifier
+                    .padding(horizontal = 16.dp)
+                    .fillMaxWidth()
+            )
+            OutlinedTextField(
+                currentDescription,
+                onValueChange = { currentDescription = it },
+                shape = MaterialTheme.shapes.large,
+                label = { Text("Description") },
+                minLines = 2,
+                maxLines = 5,
                 modifier = Modifier
                     .padding(horizontal = 16.dp)
                     .fillMaxWidth()
@@ -753,7 +769,7 @@ private fun RemoveItemsSheet(
     blurStrength: Dp,
     shouldShowMedia: Boolean,
     onDismiss: () -> Unit,
-    listRepository: ListDao = koinInject(),
+    listRepository: ListRepository = koinInject(),
 ) {
     val itemsToDelete = remember { mutableStateListOf<CustomListInfo>() }
     var showPopup by remember { mutableStateOf(false) }

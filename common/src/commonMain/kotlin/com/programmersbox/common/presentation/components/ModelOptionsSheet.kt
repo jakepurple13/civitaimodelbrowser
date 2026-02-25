@@ -1,12 +1,17 @@
 package com.programmersbox.common.presentation.components
 
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.FlowRow
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.layout.MutableIntervalList
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
@@ -24,6 +29,7 @@ import androidx.compose.material.icons.filled.Preview
 import androidx.compose.material.icons.filled.Share
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.AssistChipDefaults
+import androidx.compose.material3.Checkbox
 import androidx.compose.material3.ElevatedAssistChip
 import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.ElevatedFilterChip
@@ -31,6 +37,7 @@ import androidx.compose.material3.ElevatedSuggestionChip
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.FilterChipDefaults
+import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.ListItem
@@ -39,6 +46,7 @@ import androidx.compose.material3.ListItemShapes
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SegmentedListItem
 import androidx.compose.material3.SuggestionChipDefaults
 import androidx.compose.material3.Text
@@ -66,7 +74,7 @@ import com.programmersbox.common.db.BlacklistedItemRoom
 import com.programmersbox.common.db.CustomList
 import com.programmersbox.common.db.FavoriteType
 import com.programmersbox.common.db.FavoritesDao
-import com.programmersbox.common.db.ListDao
+import com.programmersbox.common.db.ListRepository
 import com.programmersbox.common.presentation.home.BlacklistHandling
 import com.programmersbox.common.presentation.qrcode.QrCodeType
 import com.programmersbox.common.presentation.qrcode.ShareViaQrCode
@@ -80,7 +88,6 @@ import com.programmersbox.resources.confirm
 import com.programmersbox.resources.create_new_list
 import com.programmersbox.resources.creators
 import com.programmersbox.resources.favorite_model
-import com.programmersbox.resources.list_created
 import com.programmersbox.resources.list_name
 import com.programmersbox.resources.made_by
 import com.programmersbox.resources.nsfw
@@ -117,7 +124,7 @@ fun ModelOptionsSheet(
         val isFavorite by dao
             .getFavoritesByType(FavoriteType.Model, id)
             .collectAsStateWithLifecycle(false)
-        val listDao = koinInject<ListDao>()
+        val listRepository = koinInject<ListRepository>()
         val scope = rememberCoroutineScope()
 
         val sheetState = rememberModalBottomSheetState(
@@ -256,28 +263,25 @@ fun ModelOptionsSheet(
                             containerColor = MaterialTheme.colorScheme.surface,
                             sheetState = listState
                         ) {
-                            val toaster = koinInject<ToasterState>()
                             ListChoiceScreen(
                                 id = id,
-                                onClick = { item ->
+                                onAdd = { selectedLists ->
                                     scope.launch {
-                                        listDao.addToList(
-                                            uuid = item.item.uuid,
-                                            id = id,
-                                            name = name.orEmpty(),
-                                            description = description,
-                                            type = type.orEmpty(),
-                                            nsfw = nsfw,
-                                            imageUrl = imageUrl,
-                                            favoriteType = FavoriteType.Model,
-                                            hash = hash,
-                                            creatorName = creatorName,
-                                            creatorImage = creatorImage,
-                                        )
-                                        toaster.show(
-                                            getString(Res.string.added_to, item.item.name),
-                                            type = ToastType.Success
-                                        )
+                                        selectedLists.forEach { item ->
+                                            listRepository.addToList(
+                                                uuid = item.item.uuid,
+                                                id = id,
+                                                name = name.orEmpty(),
+                                                description = description,
+                                                type = type.orEmpty(),
+                                                nsfw = nsfw,
+                                                imageUrl = imageUrl,
+                                                favoriteType = FavoriteType.Model,
+                                                hash = hash,
+                                                creatorName = creatorName,
+                                                creatorImage = creatorImage,
+                                            )
+                                        }
                                         listState.hide()
                                     }.invokeOnCompletion { showLists = false }
                                 },
@@ -387,44 +391,86 @@ fun ModelOptionsSheet(
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun ListChoiceScreen(
     id: Long,
     navigationIcon: @Composable () -> Unit = { CloseButton() },
-    onClick: (CustomList) -> Unit,
+    onAdd: (List<CustomList>) -> Unit,
 ) {
-    val dao = koinInject<ListDao>()
+    val listRepository = koinInject<ListRepository>()
     val scope = rememberCoroutineScope()
-    val list by dao
+    val list by listRepository
         .getAllLists()
         .collectAsStateWithLifecycle(emptyList())
-    ListBottomScreen(
-        title = stringResource(Res.string.choose_a_list),
-        list = list,
-        navigationIcon = navigationIcon,
-        onClick = onClick,
-        lazyListContent = {
-            item {
-                var showAdd by remember { mutableStateOf(false) }
-                ElevatedCard(
-                    onClick = { showAdd = !showAdd }
-                ) {
-                    ListItem(
-                        headlineContent = {
-                            Text(
-                                stringResource(Res.string.create_new_list),
-                                style = MaterialTheme.typography.titleLarge
-                            )
-                        },
-                        trailingContent = { Icon(Icons.Default.Add, null) }
-                    )
+    val toaster = koinInject<ToasterState>()
+
+    var selectedLists by remember { mutableStateOf<Set<CustomList>>(emptySet()) }
+
+    Scaffold(
+        topBar = {
+            TopAppBar(
+                title = { Text(stringResource(Res.string.choose_a_list)) },
+                navigationIcon = navigationIcon,
+                actions = {
+                    if (list.isNotEmpty()) {
+                        Text("(${selectedLists.size}/${list.size})")
+                    }
                 }
-                if (showAdd) {
-                    var name by remember { mutableStateOf("") }
-                    AlertDialog(
-                        onDismissRequest = { showAdd = false },
-                        title = { Text(stringResource(Res.string.create_new_list)) },
-                        text = {
+            )
+        },
+        floatingActionButton = {
+            if (selectedLists.isNotEmpty()) {
+                FloatingActionButton(
+                    onClick = {
+                        scope.launch {
+                            val message = if (selectedLists.size == 1) {
+                                getString(Res.string.added_to, selectedLists.first().item.name)
+                            } else {
+                                "Added to lists"
+                            }
+                            onAdd(selectedLists.toList())
+                            toaster.show(message, type = ToastType.Success)
+                        }
+                    }
+                ) {
+                    Icon(Icons.Default.Check, null)
+                }
+            }
+        }
+    ) { paddingValues ->
+        Column(
+            modifier = Modifier
+                .padding(paddingValues)
+                .navigationBarsPadding()
+        ) {
+            var showAdd by remember { mutableStateOf(false) }
+            ElevatedCard(
+                onClick = { showAdd = !showAdd },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp, vertical = 8.dp)
+            ) {
+                ListItem(
+                    headlineContent = {
+                        Text(
+                            stringResource(Res.string.create_new_list),
+                            style = MaterialTheme.typography.titleLarge
+                        )
+                    },
+                    trailingContent = { Icon(Icons.Default.Add, null) }
+                )
+            }
+            if (showAdd) {
+                var name by remember { mutableStateOf("") }
+                var description by remember { mutableStateOf("") }
+                AlertDialog(
+                    onDismissRequest = { showAdd = false },
+                    title = { Text(stringResource(Res.string.create_new_list)) },
+                    text = {
+                        Column(
+                            verticalArrangement = Arrangement.spacedBy(8.dp)
+                        ) {
                             OutlinedTextField(
                                 value = name,
                                 onValueChange = { name = it },
@@ -432,77 +478,157 @@ fun ListChoiceScreen(
                                 singleLine = true,
                                 modifier = Modifier.fillMaxWidth()
                             )
-                        },
-                        confirmButton = {
-                            TextButton(
-                                onClick = {
-                                    scope.launch {
-                                        dao.create(name)
-                                        showAdd = false
-                                    }
-                                },
-                                enabled = name.isNotEmpty()
-                            ) { Text(stringResource(Res.string.confirm)) }
-                        },
-                        dismissButton = {
-                            TextButton(
-                                onClick = { showAdd = false }
-                            ) { Text(stringResource(Res.string.cancel)) }
+                            OutlinedTextField(
+                                value = description,
+                                onValueChange = { description = it },
+                                label = { Text("Description (optional)") },
+                                modifier = Modifier.fillMaxWidth()
+                            )
                         }
-                    )
+                    },
+                    confirmButton = {
+                        TextButton(
+                            onClick = {
+                                scope.launch {
+                                    listRepository.createList(
+                                        name = name,
+                                        description = description.takeIf { it.isNotBlank() }
+                                    )
+                                    showAdd = false
+                                }
+                            },
+                            enabled = name.isNotEmpty()
+                        ) { Text(stringResource(Res.string.confirm)) }
+                    },
+                    dismissButton = {
+                        TextButton(
+                            onClick = { showAdd = false }
+                        ) { Text(stringResource(Res.string.cancel)) }
+                    }
+                )
+            }
+
+            LazyColumn(
+                verticalArrangement = Arrangement.spacedBy(2.dp),
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                items(list, key = { it.item.uuid }) { item ->
+                    val isSelected = item in selectedLists
+                    val isInList = item.list.find { l -> l.id == id } != null
+                    ListItem(
+                        leadingContent = {
+                            Checkbox(
+                                checked = isSelected,
+                                onCheckedChange = null
+                            )
+                        },
+                        trailingContent = {
+                            Row(
+                                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Text("(${item.list.size})")
+                                if (isInList) {
+                                    Icon(Icons.Default.Check, null)
+                                }
+                            }
+                        },
+                        enabled = !isInList,
+                        checked = isSelected,
+                        onCheckedChange = {
+                            selectedLists = if (it) {
+                                selectedLists + item
+                            } else {
+                                selectedLists - item
+                            }
+                        },
+                    ) { Text(item.item.name) }
                 }
             }
-        },
-        itemContent = {
-            ListBottomSheetItemModel(
-                primaryText = it.item.name,
-                trailingText = "(${it.list.size})",
-                icon = it.list.find { l -> l.id == id }?.let { Icons.Default.Check }
-            )
         }
-    )
+    }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ListChoiceScreen(
     username: String,
-    onClick: (CustomList) -> Unit,
+    onAdd: (List<CustomList>) -> Unit,
     navigationIcon: @Composable () -> Unit = { CloseButton() },
 ) {
-    val dao = koinInject<ListDao>()
+    val listRepository = koinInject<ListRepository>()
     val scope = rememberCoroutineScope()
-    val list by dao
+    val list by listRepository
         .getAllLists()
         .collectAsStateWithLifecycle(emptyList())
+    val toaster = koinInject<ToasterState>()
 
-    ListBottomScreen(
-        title = stringResource(Res.string.choose_a_list),
-        list = list,
-        navigationIcon = navigationIcon,
-        onClick = onClick,
-        lazyListContent = {
-            item {
-                var showAdd by remember { mutableStateOf(false) }
-                ElevatedCard(
-                    onClick = { showAdd = !showAdd }
-                ) {
-                    ListItem(
-                        headlineContent = {
-                            Text(
-                                stringResource(Res.string.create_new_list),
-                                style = MaterialTheme.typography.titleLarge
-                            )
-                        },
-                        trailingContent = { Icon(Icons.Default.Add, null) }
-                    )
+    var selectedLists by remember { mutableStateOf<Set<CustomList>>(emptySet()) }
+
+    Scaffold(
+        topBar = {
+            TopAppBar(
+                title = { Text(stringResource(Res.string.choose_a_list)) },
+                navigationIcon = navigationIcon,
+                actions = {
+                    if (list.isNotEmpty()) {
+                        Text("(${selectedLists.size}/${list.size})")
+                    }
                 }
-                if (showAdd) {
-                    val toaster = koinInject<ToasterState>()
-                    var name by remember { mutableStateOf("") }
-                    AlertDialog(
-                        onDismissRequest = { showAdd = false },
-                        title = { Text(stringResource(Res.string.create_new_list)) },
-                        text = {
+            )
+        },
+        floatingActionButton = {
+            if (selectedLists.isNotEmpty()) {
+                FloatingActionButton(
+                    onClick = {
+                        scope.launch {
+                            val message = if (selectedLists.size == 1) {
+                                "Added to ${selectedLists.first().item.name}"
+                            } else {
+                                "Added to lists"
+                            }
+                            onAdd(selectedLists.toList())
+                            toaster.show(message, type = ToastType.Success)
+                        }
+                    }
+                ) {
+                    Icon(Icons.Default.Check, null)
+                }
+            }
+        }
+    ) { paddingValues ->
+        Column(
+            modifier = Modifier
+                .padding(paddingValues)
+                .navigationBarsPadding()
+        ) {
+            var showAdd by remember { mutableStateOf(false) }
+            ElevatedCard(
+                onClick = { showAdd = !showAdd },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp, vertical = 8.dp)
+            ) {
+                ListItem(
+                    headlineContent = {
+                        Text(
+                            stringResource(Res.string.create_new_list),
+                            style = MaterialTheme.typography.titleLarge
+                        )
+                    },
+                    trailingContent = { Icon(Icons.Default.Add, null) }
+                )
+            }
+            if (showAdd) {
+                var name by remember { mutableStateOf("") }
+                var description by remember { mutableStateOf("") }
+                AlertDialog(
+                    onDismissRequest = { showAdd = false },
+                    title = { Text(stringResource(Res.string.create_new_list)) },
+                    text = {
+                        Column(
+                            verticalArrangement = Arrangement.spacedBy(8.dp)
+                        ) {
                             OutlinedTextField(
                                 value = name,
                                 onValueChange = { name = it },
@@ -510,39 +636,75 @@ fun ListChoiceScreen(
                                 singleLine = true,
                                 modifier = Modifier.fillMaxWidth()
                             )
+                            OutlinedTextField(
+                                value = description,
+                                onValueChange = { description = it },
+                                label = { Text("Description (optional)") },
+                                modifier = Modifier.fillMaxWidth()
+                            )
+                        }
+                    },
+                    confirmButton = {
+                        TextButton(
+                            onClick = {
+                                scope.launch {
+                                    listRepository.createList(
+                                        name = name,
+                                        description = description.takeIf { it.isNotBlank() },
+                                        showToast = false
+                                    )
+                                    showAdd = false
+                                }
+                            },
+                            enabled = name.isNotEmpty()
+                        ) { Text(stringResource(Res.string.confirm)) }
+                    },
+                    dismissButton = {
+                        TextButton(
+                            onClick = { showAdd = false }
+                        ) { Text(stringResource(Res.string.cancel)) }
+                    }
+                )
+            }
+
+            LazyColumn(
+                verticalArrangement = Arrangement.spacedBy(2.dp),
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                items(list, key = { it.item.uuid }) { item ->
+                    val isSelected = item in selectedLists
+                    val isInList = item.list.find { l -> l.name == username } != null
+                    ListItem(
+                        modifier = Modifier.clickable {
+                            selectedLists = if (isSelected) {
+                                selectedLists - item
+                            } else {
+                                selectedLists + item
+                            }
                         },
-                        confirmButton = {
-                            TextButton(
-                                onClick = {
-                                    scope.launch {
-                                        dao.create(name)
-                                        toaster.show(
-                                            getString(Res.string.list_created),
-                                            type = ToastType.Success
-                                        )
-                                        showAdd = false
-                                    }
-                                },
-                                enabled = name.isNotEmpty()
-                            ) { Text(stringResource(Res.string.confirm)) }
+                        leadingContent = {
+                            Checkbox(
+                                checked = isSelected,
+                                onCheckedChange = null
+                            )
                         },
-                        dismissButton = {
-                            TextButton(
-                                onClick = { showAdd = false }
-                            ) { Text(stringResource(Res.string.cancel)) }
+                        headlineContent = { Text(item.item.name) },
+                        trailingContent = {
+                            Row(
+                                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Text("(${item.list.size})")
+                                if (isInList) {
+                                    Icon(Icons.Default.Check, null)
+                                }
+                            }
                         }
                     )
                 }
             }
-        },
-        itemContent = {
-            ListBottomSheetItemModel(
-                primaryText = it.item.name,
-                trailingText = "(${it.list.size})",
-                icon = it.list.find { l -> l.name == username }?.let { Icons.Default.Check }
-            )
         }
-    )
+    }
 }
 
 sealed class ModelOptionsType {
@@ -627,7 +789,7 @@ fun ModelOptionsSheet(
         val isFavorite by dao
             .getFavoritesByType(FavoriteType.Model, models.id)
             .collectAsStateWithLifecycle(false)
-        val listDao = koinInject<ListDao>()
+        val listRepository = koinInject<ListRepository>()
         val scope = rememberCoroutineScope()
         var showDialog by remember { mutableStateOf(false) }
 
@@ -827,28 +989,25 @@ fun ModelOptionsSheet(
                             containerColor = MaterialTheme.colorScheme.surface,
                             sheetState = listState
                         ) {
-                            val toaster = koinInject<ToasterState>()
                             ListChoiceScreen(
                                 id = models.id,
-                                onClick = { item ->
+                                onAdd = { selectedLists ->
                                     scope.launch {
-                                        listDao.addToList(
-                                            uuid = item.item.uuid,
-                                            id = models.id,
-                                            name = models.name,
-                                            description = models.description,
-                                            type = models.type.name,
-                                            nsfw = models.nsfw,
-                                            imageUrl = modelImage?.url,
-                                            favoriteType = FavoriteType.Model,
-                                            hash = modelImage?.hash,
-                                            creatorName = models.creator?.username,
-                                            creatorImage = models.creator?.image,
-                                        )
-                                        toaster.show(
-                                            getString(Res.string.added_to, item.item.name),
-                                            type = ToastType.Success
-                                        )
+                                        selectedLists.forEach { item ->
+                                            listRepository.addToList(
+                                                uuid = item.item.uuid,
+                                                id = models.id,
+                                                name = models.name,
+                                                description = models.description,
+                                                type = models.type.name,
+                                                nsfw = models.nsfw,
+                                                imageUrl = modelImage?.url,
+                                                favoriteType = FavoriteType.Model,
+                                                hash = modelImage?.hash,
+                                                creatorName = models.creator?.username,
+                                                creatorImage = models.creator?.image,
+                                            )
+                                        }
                                         listState.hide()
                                     }.invokeOnCompletion { showLists = false }
                                 },

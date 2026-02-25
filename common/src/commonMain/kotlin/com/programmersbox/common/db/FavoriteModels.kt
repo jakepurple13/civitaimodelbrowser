@@ -133,6 +133,8 @@ data class CustomListItem(
     val uuid: String,
     @ColumnInfo(name = "name")
     val name: String,
+    @ColumnInfo(name = "description")
+    val description: String? = null,
     @ColumnInfo(name = "time")
     val time: Long = Clock.System.now().toEpochMilliseconds(),
     val coverImage: String?,

@@ -89,7 +89,7 @@ import com.programmersbox.common.adaptiveGridCell
 import com.programmersbox.common.db.FavoriteModel
 import com.programmersbox.common.db.FavoriteType
 import com.programmersbox.common.db.FavoritesDao
-import com.programmersbox.common.db.ListDao
+import com.programmersbox.common.db.ListRepository
 import com.programmersbox.common.isScrollingUp
 import com.programmersbox.common.presentation.components.CivitBottomBar
 import com.programmersbox.common.presentation.components.CivitRail
@@ -98,15 +98,12 @@ import com.programmersbox.common.presentation.components.ListChoiceScreen
 import com.programmersbox.common.presentation.components.LoadingImage
 import com.programmersbox.common.presentation.components.ModelCard
 import com.programmersbox.common.presentation.components.ModelOptionsType
-import com.programmersbox.common.presentation.components.ToastType
-import com.programmersbox.common.presentation.components.ToasterState
 import com.programmersbox.common.presentation.components.rememberModelOptionsScope
 import com.programmersbox.common.presentation.home.CardContent
 import com.programmersbox.common.presentation.qrcode.QrCodeType
 import com.programmersbox.common.presentation.qrcode.ShareViaQrCode
 import com.programmersbox.resources.Res
 import com.programmersbox.resources.add_to_list
-import com.programmersbox.resources.added_to
 import com.programmersbox.resources.cfg_scale_with_param
 import com.programmersbox.resources.clip_skip_with_param
 import com.programmersbox.resources.model_with_param
@@ -129,7 +126,6 @@ import dev.chrisbanes.haze.hazeEffect
 import dev.chrisbanes.haze.hazeSource
 import dev.chrisbanes.haze.rememberHazeState
 import kotlinx.coroutines.launch
-import org.jetbrains.compose.resources.getString
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.koinInject
 import org.koin.compose.viewmodel.koinViewModel
@@ -839,11 +835,10 @@ fun FavoritesCreatorOptionsSheet(
                 }
 
                 add {
-                    val listDao = koinInject<ListDao>()
+                    val listRepository = koinInject<ListRepository>()
                     val listState = rememberModalBottomSheetState(true)
                     var showLists by remember { mutableStateOf(false) }
                     if (showLists) {
-                        val toaster = koinInject<ToasterState>()
                         ModalBottomSheet(
                             onDismissRequest = { showLists = false },
                             containerColor = MaterialTheme.colorScheme.surface,
@@ -851,10 +846,10 @@ fun FavoritesCreatorOptionsSheet(
                         ) {
                             ListChoiceScreen(
                                 id = models.id,
-                                onClick = { item ->
+                                onAdd = { selectedLists ->
                                     scope.launch {
-                                        listDao.addToList(
-                                            uuid = item.item.uuid,
+                                        listRepository.addToMultipleLists(
+                                            selectedLists = selectedLists,
                                             id = models.id,
                                             name = models.name,
                                             description = models.name,
@@ -865,10 +860,6 @@ fun FavoritesCreatorOptionsSheet(
                                             hash = null,
                                             creatorName = models.name,
                                             creatorImage = models.imageUrl
-                                        )
-                                        toaster.show(
-                                            getString(Res.string.added_to, item.item.name),
-                                            type = ToastType.Success
                                         )
                                         listState.hide()
                                     }.invokeOnCompletion { showLists = false }
@@ -1053,7 +1044,7 @@ fun FavoritesModelOptionsSheet(
 
             group {
                 add {
-                    val listDao = koinInject<ListDao>()
+                    val listRepository = koinInject<ListRepository>()
                     val listState = rememberModalBottomSheetState(true)
                     var showLists by remember { mutableStateOf(false) }
                     if (showLists) {
@@ -1064,10 +1055,10 @@ fun FavoritesModelOptionsSheet(
                         ) {
                             ListChoiceScreen(
                                 id = models.id,
-                                onClick = { item ->
+                                onAdd = { selectedLists ->
                                     scope.launch {
-                                        listDao.addToList(
-                                            uuid = item.item.uuid,
+                                        listRepository.addToMultipleLists(
+                                            selectedLists = selectedLists,
                                             id = models.id,
                                             name = models.name,
                                             description = models.description,

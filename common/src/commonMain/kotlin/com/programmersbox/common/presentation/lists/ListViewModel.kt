@@ -9,7 +9,7 @@ import androidx.compose.runtime.snapshotFlow
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.programmersbox.common.db.CustomList
-import com.programmersbox.common.db.ListDao
+import com.programmersbox.common.db.ListRepository
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.flatMapLatest
@@ -18,7 +18,7 @@ import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 
 class ListViewModel(
-    val listDao: ListDao,
+    val listRepository: ListRepository,
 ) : ViewModel() {
 
     var list by mutableStateOf<List<CustomList>>(emptyList())
@@ -28,7 +28,7 @@ class ListViewModel(
     private val searchLists = mutableStateListOf<CustomList>()
 
     init {
-        listDao
+        listRepository
             .getAllLists()
             .onEach { list = it }
             .launchIn(viewModelScope)
@@ -42,7 +42,7 @@ class ListViewModel(
                 if (it.second != SearchType.SQL) {
                     flowOf(emptyList())
                 } else {
-                    listDao.searchListsWithFts(it.first)
+                    listRepository.searchListsWithFts(it.first)
                 }
             }
             .onEach {

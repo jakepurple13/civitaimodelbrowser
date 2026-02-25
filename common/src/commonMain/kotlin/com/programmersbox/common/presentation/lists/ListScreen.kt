@@ -22,6 +22,7 @@ import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.BottomAppBarDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.ListItem
@@ -131,23 +132,37 @@ fun ListScreen(
                     var showAdd by remember { mutableStateOf(false) }
                     if (showAdd) {
                         var name by remember { mutableStateOf("") }
+                        var description by remember { mutableStateOf("") }
                         AlertDialog(
                             onDismissRequest = { showAdd = false },
                             title = { Text(stringResource(Res.string.create_new_list)) },
                             text = {
-                                OutlinedTextField(
-                                    value = name,
-                                    onValueChange = { name = it },
-                                    label = { Text(stringResource(Res.string.list_name)) },
-                                    singleLine = true,
-                                    modifier = Modifier.fillMaxWidth()
-                                )
+                                Column(
+                                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                                ) {
+                                    OutlinedTextField(
+                                        value = name,
+                                        onValueChange = { name = it },
+                                        label = { Text(stringResource(Res.string.list_name)) },
+                                        singleLine = true,
+                                        modifier = Modifier.fillMaxWidth()
+                                    )
+                                    OutlinedTextField(
+                                        value = description,
+                                        onValueChange = { description = it },
+                                        label = { Text("Description (optional)") },
+                                        modifier = Modifier.fillMaxWidth()
+                                    )
+                                }
                             },
                             confirmButton = {
                                 TextButton(
                                     onClick = {
                                         scope.launch {
-                                            viewModel.listDao.create(name)
+                                            viewModel.listRepository.createList(
+                                                name = name,
+                                                description = description.takeIf { it.isNotBlank() }
+                                            )
                                             showAdd = false
                                         }
                                     },
@@ -370,6 +385,10 @@ private fun ListCard(
         },
         supportingContent = {
             Column {
+                list.item.description?.let {
+                    Text(it)
+                    HorizontalDivider()
+                }
                 list.list.take(3).forEach { info ->
                     Text(info.name, maxLines = 1, overflow = TextOverflow.Ellipsis)
                 }

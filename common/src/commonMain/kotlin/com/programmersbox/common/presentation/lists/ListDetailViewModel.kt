@@ -10,13 +10,13 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.programmersbox.common.db.CustomList
 import com.programmersbox.common.db.CustomListInfo
-import com.programmersbox.common.db.ListDao
+import com.programmersbox.common.db.ListRepository
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 
 class ListDetailViewModel(
-    private val listDao: ListDao,
+    private val listRepository: ListRepository,
     uuid: String,
 ) : ViewModel() {
     var customList by mutableStateOf<CustomList?>(null)
@@ -33,7 +33,7 @@ class ListDetailViewModel(
     }
 
     init {
-        listDao
+        listRepository
             .getCustomListItemFlow(uuid)
             .onEach {
                 customList = it
@@ -44,30 +44,37 @@ class ListDetailViewModel(
     }
 
     suspend fun removeItems(items: List<CustomListInfo>): Result<Boolean> = runCatching {
-        items.forEach { item -> listDao.removeItem(item) }
-        customList?.item?.let { listDao.updateFullList(it) }
+        items.forEach { item -> listRepository.removeItem(item) }
+        customList?.item?.let { listRepository.updateFullList(it) }
         true
     }
 
     fun rename(newName: String) {
         viewModelScope.launch {
-            customList?.item?.copy(name = newName)?.let { listDao.updateFullList(it) }
+            customList?.item?.copy(name = newName)?.let { listRepository.updateFullList(it) }
+        }
+    }
+
+    fun setDescription(newDescription: String?) {
+        viewModelScope.launch {
+            customList?.item?.copy(description = newDescription)
+                ?.let { listRepository.updateFullList(it) }
         }
     }
 
     fun setBiometric(useBiometric: Boolean) {
         viewModelScope.launch {
-            customList?.item?.uuid?.let { listDao.updateBiometric(it, useBiometric) }
+            customList?.item?.uuid?.let { listRepository.updateBiometric(it, useBiometric) }
         }
     }
 
     fun deleteAll() {
-        viewModelScope.launch { customList?.let { item -> listDao.removeList(item) } }
+        viewModelScope.launch { customList?.let { item -> listRepository.removeList(item) } }
     }
 
     fun setCoverImage(url: String?, hash: String?) {
         viewModelScope.launch {
-            customList?.item?.uuid?.let { listDao.updateCoverImage(it, url, hash) }
+            customList?.item?.uuid?.let { listRepository.updateCoverImage(it, url, hash) }
         }
     }
 }

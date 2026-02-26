@@ -11,6 +11,7 @@ import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.basicMarquee
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -19,7 +20,6 @@ import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -30,7 +30,6 @@ import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.PlaylistAdd
@@ -55,8 +54,8 @@ import androidx.compose.material3.ElevatedAssistChip
 import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
-import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.FabPosition
+import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.FloatingToolbarDefaults
 import androidx.compose.material3.FloatingToolbarDefaults.floatingToolbarVerticalNestedScroll
@@ -349,80 +348,64 @@ fun CivitAiDetailScreen(
                 LazyVerticalGrid(
                     columns = adaptiveGridCell(),
                     contentPadding = paddingValues,
-                    verticalArrangement = Arrangement.spacedBy(8.dp),
-                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    verticalArrangement = Arrangement.spacedBy(12.dp),
+                    horizontalArrangement = Arrangement.spacedBy(12.dp),
                     modifier = Modifier
                         .hazeSource(state = hazeState)
                         .fillMaxSize()
-                        .padding(horizontal = 8.dp)
+                        .padding(horizontal = 12.dp)
                 ) {
-                    item(
-                        span = { GridItemSpan(maxLineSpan) },
-                        contentType = "header"
-                    ) {
-                        Surface(
-                            tonalElevation = 2.dp,
-                            shape = MaterialTheme.shapes.medium,
-                            modifier = Modifier.animateContentSize()
-                        ) {
-                            ListItem(
-                                overlineContent = {
-                                    Text(
-                                        model.models.type.name,
-                                        style = MaterialTheme.typography.labelLarge,
-                                        color = MaterialTheme.colorScheme.primary
-                                    )
-                                },
-                                headlineContent = {
-                                    Text(
-                                        model.models.name,
-                                        style = MaterialTheme.typography.headlineSmall
-                                    )
-                                },
-                                trailingContent = {
-                                    if (model.models.nsfw) {
-                                        ElevatedAssistChip(
-                                            label = { Text("NSFW") },
-                                            onClick = {},
-                                            colors = AssistChipDefaults.elevatedAssistChipColors(
-                                                disabledLabelColor = MaterialTheme.colorScheme.error,
-                                                disabledContainerColor = MaterialTheme.colorScheme.surface
-                                            ),
-                                            border = BorderStroke(
-                                                1.dp,
-                                                MaterialTheme.colorScheme.error,
-                                            ),
-                                            enabled = false,
-                                        )
-                                    }
-                                },
-                                colors = ListItemDefaults.colors(
-                                    containerColor = Color.Transparent
-                                )
-                            )
-                        }
-                    }
-
                     if (model.models.tags.isNotEmpty()) {
                         item(
                             span = { GridItemSpan(maxLineSpan) },
                             contentType = "tags"
                         ) {
-                            FlowRow(
-                                horizontalArrangement = Arrangement.spacedBy(8.dp),
-                                verticalArrangement = Arrangement.spacedBy(4.dp),
-                                modifier = Modifier.padding(horizontal = 8.dp)
+                            Surface(
+                                tonalElevation = 1.dp,
+                                shape = MaterialTheme.shapes.medium,
                             ) {
-                                model.models.tags.forEach { tag ->
-                                    SuggestionChip(
-                                        onClick = {},
-                                        label = {
-                                            Text(
-                                                tag,
-                                                style = MaterialTheme.typography.labelMedium
+                                Column(
+                                    modifier = Modifier.padding(12.dp)
+                                ) {
+                                    Text(
+                                        "Tags",
+                                        style = MaterialTheme.typography.labelMedium,
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                        modifier = Modifier.padding(bottom = 8.dp)
+                                    )
+                                    FlowRow(
+                                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                                        verticalArrangement = Arrangement.spacedBy(4.dp),
+                                    ) {
+                                        model.models.tags.forEach { tag ->
+                                            SuggestionChip(
+                                                onClick = {},
+                                                label = {
+                                                    Text(
+                                                        tag,
+                                                        style = MaterialTheme.typography.labelMedium
+                                                    )
+                                                }
                                             )
                                         }
-                                    )
+
+                                        if (model.models.nsfw) {
+                                            ElevatedAssistChip(
+                                                label = { Text("NSFW") },
+                                                onClick = {},
+                                                colors = AssistChipDefaults.elevatedAssistChipColors(
+                                                    disabledLabelColor = MaterialTheme.colorScheme.error,
+                                                    disabledContainerColor = MaterialTheme.colorScheme.surface
+                                                ),
+                                                border = BorderStroke(
+                                                    1.dp,
+                                                    MaterialTheme.colorScheme.error,
+                                                ),
+                                                enabled = false,
+                                            )
+                                        }
+
+                                    }
                                 }
                             }
                         }
@@ -432,29 +415,47 @@ fun CivitAiDetailScreen(
                         span = { GridItemSpan(maxLineSpan) },
                         contentType = "description"
                     ) {
-                        Column(
-                            modifier = Modifier
-                                .animateContentSize()
-                                .toggleable(
-                                    value = showFullDescription,
-                                    onValueChange = { showFullDescription = it }
-                                )
-                                .padding(horizontal = 16.dp, vertical = 8.dp)
+                        Surface(
+                            tonalElevation = 1.dp,
+                            shape = MaterialTheme.shapes.medium,
                         ) {
-                            Text(
-                                model.models.parsedDescription(),
-                                style = MaterialTheme.typography.bodyMedium,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                maxLines = if (showFullDescription) Int.MAX_VALUE else 3,
-                                overflow = TextOverflow.Ellipsis
-                            )
-                            Text(
-                                if (showFullDescription) "Show less" else "Show more",
-                                style = MaterialTheme.typography.labelMedium,
-                                color = MaterialTheme.colorScheme.primary,
-                                modifier = Modifier.padding(top = 4.dp)
-                            )
+                            Column(
+                                modifier = Modifier
+                                    .animateContentSize()
+                                    .clickable { showFullDescription = !showFullDescription }
+                                    .padding(12.dp)
+                            ) {
+                                Text(
+                                    "Description",
+                                    style = MaterialTheme.typography.labelMedium,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                    modifier = Modifier.padding(bottom = 8.dp)
+                                )
+                                Text(
+                                    model.models.parsedDescription(),
+                                    style = MaterialTheme.typography.bodyMedium.copy(
+                                        lineHeight = 20.sp
+                                    ),
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                    maxLines = if (showFullDescription) Int.MAX_VALUE else 3,
+                                    overflow = TextOverflow.Ellipsis
+                                )
+                                Text(
+                                    if (showFullDescription) "Show less" else "Show more",
+                                    style = MaterialTheme.typography.labelMedium,
+                                    fontWeight = FontWeight.Medium,
+                                    color = MaterialTheme.colorScheme.primary,
+                                    modifier = Modifier.padding(top = 4.dp)
+                                )
+                            }
                         }
+                    }
+
+                    item(
+                        span = { GridItemSpan(maxLineSpan) },
+                        contentType = "version_spacer"
+                    ) {
+                        Spacer(Modifier.height(8.dp))
                     }
 
                     model.models.modelVersions.forEach { version ->
@@ -467,7 +468,7 @@ fun CivitAiDetailScreen(
                                 shape = MaterialTheme.shapes.medium,
                                 modifier = Modifier
                                     .fillMaxWidth()
-                                    .padding(vertical = 2.dp)
+                                    .padding(vertical = 4.dp)
                             ) {
                                 ListItem(
                                     headlineContent = {
@@ -530,6 +531,7 @@ fun CivitAiDetailScreen(
                                             modifier = Modifier.padding(
                                                 start = 16.dp,
                                                 end = 16.dp,
+                                                top = 8.dp,
                                                 bottom = 12.dp
                                             )
                                         )
@@ -617,7 +619,9 @@ fun CivitAiDetailScreen(
                             Icons.Default.Error,
                             null,
                             tint = MaterialTheme.colorScheme.error,
-                            modifier = Modifier.size(96.dp)
+                            modifier = Modifier
+                                .size(72.dp)
+                                .padding(bottom = 8.dp)
                         )
                         Text(
                             "Something went wrong",
@@ -627,7 +631,8 @@ fun CivitAiDetailScreen(
                             Text(
                                 it,
                                 style = MaterialTheme.typography.bodySmall,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                textAlign = TextAlign.Center
                             )
                         }
                         FilledTonalButton(
@@ -639,20 +644,31 @@ fun CivitAiDetailScreen(
         }
 
         DetailViewState.Loading -> {
-            Surface {
-                Column(
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    verticalArrangement = Arrangement.spacedBy(16.dp),
-                    modifier = Modifier.fillMaxSize(),
-                ) {
-                    Spacer(Modifier.weight(1f))
-                    CircularWavyProgressIndicator()
-                    Text(
-                        "Loading…",
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
+            Scaffold(
+                topBar = {
+                    CenterAlignedTopAppBar(
+                        title = { Text("Loading…") },
+                        navigationIcon = { BackButton() }
                     )
-                    Spacer(Modifier.weight(1f))
+                }
+            ) { padding ->
+                Box(
+                    contentAlignment = Alignment.Center,
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(padding)
+                ) {
+                    Column(
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.spacedBy(16.dp),
+                    ) {
+                        CircularWavyProgressIndicator()
+                        Text(
+                            "Loading…",
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
                 }
             }
         }
@@ -673,6 +689,7 @@ private fun ImageCard(
 ) {
     Surface(
         tonalElevation = 4.dp,
+        shadowElevation = 2.dp,
         shape = MaterialTheme.shapes.medium,
         border = when {
             isFavorite -> BorderStroke(2.dp, MaterialTheme.colorScheme.primary)
@@ -734,19 +751,21 @@ private fun ImageCard(
                                 .align(Alignment.BottomCenter)
                                 .fillMaxWidth()
                                 .background(
-                                    MaterialTheme.colorScheme.surface.copy(alpha = 0.7f)
+                                    MaterialTheme.colorScheme.scrim.copy(alpha = 0.5f)
                                 )
-                                .padding(vertical = 6.dp)
+                                .padding(vertical = 6.dp, horizontal = 8.dp)
                         ) {
                             Icon(
                                 Icons.Default.PlayArrow,
                                 contentDescription = "Play video",
+                                tint = MaterialTheme.colorScheme.inverseOnSurface,
                                 modifier = Modifier.size(20.dp)
                             )
                             Spacer(Modifier.width(4.dp))
                             Text(
                                 "Play Video",
-                                style = MaterialTheme.typography.labelMedium,
+                                style = MaterialTheme.typography.labelLarge,
+                                color = MaterialTheme.colorScheme.inverseOnSurface,
                             )
                         }
                     }
@@ -756,13 +775,15 @@ private fun ImageCard(
                         name = images.url,
                         hash = images.hash,
                         isNsfw = images.nsfw.canNotShow(),
-                        modifier = Modifier.then(
-                            if (!showNsfw && images.nsfw.canNotShow()) {
-                                Modifier.blur(nsfwBlurStrength.dp)
-                            } else {
-                                Modifier
-                            }
-                        )
+                        modifier = Modifier
+                            .clip(MaterialTheme.shapes.medium)
+                            .then(
+                                if (!showNsfw && images.nsfw.canNotShow()) {
+                                    Modifier.blur(nsfwBlurStrength.dp)
+                                } else {
+                                    Modifier
+                                }
+                            )
                     )
                 }
             }
@@ -1031,7 +1052,7 @@ private fun MetadataRow(
             style = MaterialTheme.typography.labelMedium,
             fontWeight = FontWeight.Bold,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
-            modifier = Modifier.width(80.dp)
+            modifier = Modifier.widthIn(min = 72.dp)
         )
         Text(
             text = value,

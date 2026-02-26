@@ -137,7 +137,7 @@ private fun Module.home() {
 @OptIn(KoinExperimentalAPI::class, ExperimentalMaterial3AdaptiveApi::class)
 private fun Module.customList() {
     navigation<Screen.CustomList>(
-        metadata = ListDetailSceneStrategy.listPane()
+        metadata = ListDetailSceneStrategy.listPane("customList")
     ) {
         val backStack = koinInject<NavigationHandler>().backStack
         ListScreen(
@@ -145,7 +145,7 @@ private fun Module.customList() {
         )
     }
     navigation<Screen.CustomListDetail>(
-        metadata = ListDetailSceneStrategy.detailPane()
+        metadata = ListDetailSceneStrategy.detailPane("customList")
     ) {
         val backStack = koinInject<NavigationHandler>().backStack
         ListDetailScreen(
@@ -187,7 +187,7 @@ private fun Module.details() {
     }
 
     navigation<Screen.User>(
-        metadata = SupportingPaneSceneStrategy.extraPane(sceneKey = "detail")
+        metadata = SupportingPaneSceneStrategy.supportingPane(sceneKey = "detail")
     ) {
         val backStack = koinInject<NavigationHandler>().backStack
         CivitAiUserScreen(

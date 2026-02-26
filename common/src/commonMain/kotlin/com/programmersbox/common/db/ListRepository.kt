@@ -86,6 +86,11 @@ class ListRepository(
             )
         )
         listDao.updateList(item.item.copy(time = Clock.System.now().toEpochMilliseconds()))
+
+        toasterState.show(
+            getString(Res.string.added_to, item.item.name),
+            type = ToastType.Success
+        )
         return true
     }
 
@@ -117,12 +122,6 @@ class ListRepository(
                 creatorImage = creatorImage,
             )
         }
-        val message = if (selectedLists.size == 1) {
-            getString(Res.string.added_to, selectedLists.first().item.name)
-        } else {
-            "Added to lists"
-        }
-        toasterState.show(message, type = ToastType.Success)
     }
 
     suspend fun removeItem(listItem: CustomListInfo) = listDao.removeItem(listItem)

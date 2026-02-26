@@ -80,7 +80,6 @@ import com.programmersbox.common.presentation.qrcode.QrCodeType
 import com.programmersbox.common.presentation.qrcode.ShareViaQrCode
 import com.programmersbox.resources.Res
 import com.programmersbox.resources.add_to_list
-import com.programmersbox.resources.added_to
 import com.programmersbox.resources.blacklist
 import com.programmersbox.resources.cancel
 import com.programmersbox.resources.choose_a_list
@@ -98,7 +97,6 @@ import com.programmersbox.resources.unblacklist
 import com.programmersbox.resources.unfavorite_model
 import com.programmersbox.resources.view_creators_models
 import kotlinx.coroutines.launch
-import org.jetbrains.compose.resources.getString
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.koinInject
 
@@ -403,7 +401,6 @@ fun ListChoiceScreen(
     val list by listRepository
         .getAllLists()
         .collectAsStateWithLifecycle(emptyList())
-    val toaster = koinInject<ToasterState>()
 
     var selectedLists by remember { mutableStateOf<Set<CustomList>>(emptySet()) }
 
@@ -422,17 +419,7 @@ fun ListChoiceScreen(
         floatingActionButton = {
             if (selectedLists.isNotEmpty()) {
                 FloatingActionButton(
-                    onClick = {
-                        scope.launch {
-                            val message = if (selectedLists.size == 1) {
-                                getString(Res.string.added_to, selectedLists.first().item.name)
-                            } else {
-                                "Added to lists"
-                            }
-                            onAdd(selectedLists.toList())
-                            toaster.show(message, type = ToastType.Success)
-                        }
-                    }
+                    onClick = { onAdd(selectedLists.toList()) }
                 ) {
                     Icon(Icons.Default.Check, null)
                 }
@@ -561,7 +548,6 @@ fun ListChoiceScreen(
     val list by listRepository
         .getAllLists()
         .collectAsStateWithLifecycle(emptyList())
-    val toaster = koinInject<ToasterState>()
 
     var selectedLists by remember { mutableStateOf<Set<CustomList>>(emptySet()) }
 
@@ -580,17 +566,7 @@ fun ListChoiceScreen(
         floatingActionButton = {
             if (selectedLists.isNotEmpty()) {
                 FloatingActionButton(
-                    onClick = {
-                        scope.launch {
-                            val message = if (selectedLists.size == 1) {
-                                "Added to ${selectedLists.first().item.name}"
-                            } else {
-                                "Added to lists"
-                            }
-                            onAdd(selectedLists.toList())
-                            toaster.show(message, type = ToastType.Success)
-                        }
-                    }
+                    onClick = { onAdd(selectedLists.toList()) }
                 ) {
                     Icon(Icons.Default.Check, null)
                 }

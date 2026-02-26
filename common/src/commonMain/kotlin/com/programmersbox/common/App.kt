@@ -1,6 +1,8 @@
 package com.programmersbox.common
 
+import androidx.compose.animation.ExperimentalSharedTransitionApi
 import androidx.compose.animation.SharedTransitionLayout
+import androidx.compose.animation.SharedTransitionScope
 import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.animation.togetherWith
@@ -31,7 +33,7 @@ import kotlinx.serialization.Serializable
 import org.koin.compose.koinInject
 import org.koin.compose.navigation3.koinEntryProvider
 
-@OptIn(ExperimentalMaterial3AdaptiveApi::class)
+@OptIn(ExperimentalMaterial3AdaptiveApi::class, ExperimentalSharedTransitionApi::class)
 @Composable
 internal fun App(
     onShareClick: (String) -> Unit,
@@ -62,6 +64,7 @@ internal fun App(
         },
     ) {
         SharedTransitionLayout {
+            CompositionLocalProvider(LocalSharedTransitionScope provides this) {
 
             val listDetailSceneStrategy = rememberListDetailSceneStrategy<Any>(
                 backNavigationBehavior = BackNavigationBehavior.PopLatest
@@ -101,6 +104,7 @@ internal fun App(
                 )
             }
         }
+        }
     }
 }
 
@@ -117,6 +121,9 @@ private fun SetupNetworkListener() {
         onDispose { networkConnectionRepository.stop() }
     }
 }
+
+@OptIn(ExperimentalSharedTransitionApi::class)
+val LocalSharedTransitionScope = staticCompositionLocalOf<SharedTransitionScope?> { null }
 
 val LocalActions = staticCompositionLocalOf<Actions> { error("Nothing") }
 

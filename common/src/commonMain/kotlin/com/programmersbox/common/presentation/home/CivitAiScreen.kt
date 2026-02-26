@@ -1,6 +1,7 @@
 package com.programmersbox.common.presentation.home
 
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.ExperimentalSharedTransitionApi
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInHorizontally
@@ -85,6 +86,8 @@ import androidx.paging.compose.LazyPagingItems
 import androidx.paging.compose.collectAsLazyPagingItems
 import androidx.paging.compose.itemContentType
 import chaintech.videoplayer.ui.preview.VideoPreviewComposable
+import androidx.navigation3.ui.LocalNavAnimatedContentScope
+import com.programmersbox.common.LocalSharedTransitionScope
 import com.programmersbox.common.CivitSort
 import com.programmersbox.common.ComposableUtils
 import com.programmersbox.common.DataStore
@@ -326,6 +329,7 @@ fun LazyGridScope.modelItems(
                     blacklisted.none { b -> b.imageUrl == url }
                 },
                 useNewCardLook = useNewCardLook,
+                modelId = models.id.toString(),
                 modifier = Modifier.animateItem()
             )
         }
@@ -382,6 +386,7 @@ private fun ModelItem(
     checkIfImageUrlIsBlacklisted: (String) -> Boolean,
     useNewCardLook: Boolean,
     modifier: Modifier = Modifier,
+    modelId: String? = null,
 ) {
     val imageModel = remember {
         models.modelVersions.firstNotNullOfOrNull { mv ->
@@ -405,6 +410,7 @@ private fun ModelItem(
             shouldShowMedia = shouldShowMedia,
             blurHash = imageModel?.hash,
             creatorImage = models.creator?.image,
+            modelId = modelId,
             modifier = modifier
         )
     } else {
@@ -423,6 +429,7 @@ private fun ModelItem(
             shouldShowMedia = shouldShowMedia,
             blurHash = imageModel?.hash,
             creatorImage = models.creator?.image,
+            modelId = modelId,
             modifier = modifier.size(
                 width = ComposableUtils.IMAGE_WIDTH,
                 height = ComposableUtils.IMAGE_HEIGHT
@@ -431,7 +438,7 @@ private fun ModelItem(
     }
 }
 
-@OptIn(ExperimentalFoundationApi::class)
+@OptIn(ExperimentalFoundationApi::class, ExperimentalSharedTransitionApi::class)
 @Composable
 fun CoverCard(
     imageUrl: String,
@@ -444,12 +451,25 @@ fun CoverCard(
     isBlacklisted: Boolean,
     shouldShowMedia: Boolean,
     modifier: Modifier = Modifier,
+    modelId: String? = null,
     blurHash: String? = null,
     creatorImage: String? = null,
     onLongClick: () -> Unit = {},
     onClick: () -> Unit = {},
     onDoubleClick: (() -> Unit)? = null,
 ) {
+    val sharedTransitionScope = LocalSharedTransitionScope.current
+    val animatedVisibilityScope = LocalNavAnimatedContentScope.current
+    val sharedModifier = if (modelId != null && sharedTransitionScope != null && animatedVisibilityScope != null) {
+        with(sharedTransitionScope) {
+            Modifier.sharedBounds(
+                sharedContentState = rememberSharedContentState(key = "model_image_$modelId"),
+                animatedVisibilityScope = animatedVisibilityScope,
+            )
+        }
+    } else {
+        Modifier
+    }
     Surface(
         tonalElevation = 4.dp,
         shape = MaterialTheme.shapes.medium,
@@ -458,6 +478,7 @@ fun CoverCard(
         else
             null,
         modifier = modifier
+            .then(sharedModifier)
             .clip(MaterialTheme.shapes.medium)
             .combinedClickable(
                 onLongClick = onLongClick,

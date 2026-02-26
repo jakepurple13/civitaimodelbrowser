@@ -32,6 +32,8 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import chaintech.videoplayer.ui.preview.VideoPreviewComposable
+import androidx.navigation3.ui.LocalNavAnimatedContentScope
+import com.programmersbox.common.LocalSharedTransitionScope
 import com.programmersbox.common.ModelImage
 
 @OptIn(ExperimentalSharedTransitionApi::class)
@@ -47,16 +49,30 @@ fun ModelCard(
     isBlacklisted: Boolean,
     shouldShowMedia: Boolean,
     modifier: Modifier = Modifier,
+    modelId: String? = null,
     blurHash: String? = null,
     creatorImage: String? = null,
     onLongClick: () -> Unit = {},
     onClick: () -> Unit = {},
     onDoubleClick: (() -> Unit)? = null,
 ) {
+    val sharedTransitionScope = LocalSharedTransitionScope.current
+    val animatedVisibilityScope = LocalNavAnimatedContentScope.current
+    val sharedModifier = if (modelId != null && sharedTransitionScope != null && animatedVisibilityScope != null) {
+        with(sharedTransitionScope) {
+            Modifier.sharedBounds(
+                sharedContentState = rememberSharedContentState(key = "model_image_$modelId"),
+                animatedVisibilityScope = animatedVisibilityScope,
+            )
+        }
+    } else {
+        Modifier
+    }
     OutlinedCard(
         shape = MaterialTheme.shapes.medium,
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
         modifier = modifier
+            .then(sharedModifier)
             .fillMaxWidth()
             .clip(MaterialTheme.shapes.medium)
             .combinedClickable(

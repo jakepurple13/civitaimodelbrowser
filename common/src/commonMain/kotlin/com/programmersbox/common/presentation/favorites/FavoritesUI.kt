@@ -1,6 +1,7 @@
 package com.programmersbox.common.presentation.favorites
 
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.ExperimentalSharedTransitionApi
 import androidx.compose.animation.core.animateIntAsState
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -78,6 +79,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.compose.dropUnlessResumed
+import androidx.navigation3.ui.LocalNavAnimatedContentScope
+import com.programmersbox.common.LocalSharedTransitionScope
 import com.programmersbox.common.BackButton
 import com.programmersbox.common.ComposableUtils
 import com.programmersbox.common.CustomScrollBar
@@ -548,6 +551,7 @@ fun FavoritesUI(
                             blurHash = model.hash,
                             shouldShowMedia = shouldShowMedia,
                             useNewCardLook = useNewCardLook,
+                            modelId = model.id.toString(),
                             modifier = Modifier.animateItem()
                         )
                     }
@@ -663,6 +667,7 @@ private fun ModelItem(
     shouldShowMedia: Boolean,
     useNewCardLook: Boolean,
     modifier: Modifier = Modifier,
+    modelId: String? = null,
 ) {
     if (useNewCardLook) {
         ModelCard(
@@ -677,6 +682,7 @@ private fun ModelItem(
             onLongClick = onLongClick,
             blurHash = blurHash,
             shouldShowMedia = shouldShowMedia,
+            modelId = modelId,
             modifier = modifier,
             isFavorite = false,
             isBlacklisted = false,
@@ -694,6 +700,7 @@ private fun ModelItem(
             onLongClick = onLongClick,
             blurHash = blurHash,
             shouldShowMedia = shouldShowMedia,
+            modelId = modelId,
             modifier = modifier.size(
                 width = ComposableUtils.IMAGE_WIDTH,
                 height = ComposableUtils.IMAGE_HEIGHT
@@ -702,6 +709,7 @@ private fun ModelItem(
     }
 }
 
+@OptIn(ExperimentalSharedTransitionApi::class)
 @Composable
 fun CoverCard(
     imageUrl: String,
@@ -713,14 +721,27 @@ fun CoverCard(
     blurHash: String?,
     shouldShowMedia: Boolean,
     modifier: Modifier = Modifier,
+    modelId: String? = null,
     creatorImage: String? = null,
     onClick: () -> Unit = {},
 ) {
+    val sharedTransitionScope = LocalSharedTransitionScope.current
+    val animatedVisibilityScope = LocalNavAnimatedContentScope.current
+    val sharedModifier = if (modelId != null && sharedTransitionScope != null && animatedVisibilityScope != null) {
+        with(sharedTransitionScope) {
+            Modifier.sharedBounds(
+                sharedContentState = rememberSharedContentState(key = "model_image_$modelId"),
+                animatedVisibilityScope = animatedVisibilityScope,
+            )
+        }
+    } else {
+        Modifier
+    }
     Surface(
         onClick = onClick,
         tonalElevation = 4.dp,
         shape = MaterialTheme.shapes.medium,
-        modifier = modifier
+        modifier = modifier.then(sharedModifier)
     ) {
         CardContent(
             imageUrl = imageUrl,
@@ -736,6 +757,7 @@ fun CoverCard(
     }
 }
 
+@OptIn(ExperimentalSharedTransitionApi::class)
 @Composable
 fun CoverCard(
     imageUrl: String,
@@ -747,14 +769,28 @@ fun CoverCard(
     blurHash: String?,
     shouldShowMedia: Boolean,
     modifier: Modifier = Modifier,
+    modelId: String? = null,
     creatorImage: String? = null,
     onClick: () -> Unit = {},
     onLongClick: () -> Unit = {},
 ) {
+    val sharedTransitionScope = LocalSharedTransitionScope.current
+    val animatedVisibilityScope = LocalNavAnimatedContentScope.current
+    val sharedModifier = if (modelId != null && sharedTransitionScope != null && animatedVisibilityScope != null) {
+        with(sharedTransitionScope) {
+            Modifier.sharedBounds(
+                sharedContentState = rememberSharedContentState(key = "model_image_$modelId"),
+                animatedVisibilityScope = animatedVisibilityScope,
+            )
+        }
+    } else {
+        Modifier
+    }
     Surface(
         tonalElevation = 4.dp,
         shape = MaterialTheme.shapes.medium,
         modifier = modifier
+            .then(sharedModifier)
             .clip(MaterialTheme.shapes.medium)
             .combinedClickable(
                 onLongClick = onLongClick,

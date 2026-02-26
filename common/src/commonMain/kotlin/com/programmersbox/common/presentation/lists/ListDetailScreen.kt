@@ -354,6 +354,7 @@ fun ListDetailScreen(
                     FavoriteType.Creator -> {}
                 }
 
+                val itemModelId = if (item.favoriteType == FavoriteType.Model) item.id.toString() else null
                 if (useNewCardLook) {
                     ModelCard(
                         imageUrl = item.imageUrl.orEmpty(),
@@ -375,6 +376,7 @@ fun ListDetailScreen(
                         onLongClick = { sheetDetails = true },
                         isFavorite = false,
                         isBlacklisted = false,
+                        modelId = itemModelId,
                         modifier = Modifier.animateItem()
                     )
                 } else {
@@ -396,6 +398,7 @@ fun ListDetailScreen(
                         },
                         shouldShowMedia = shouldShowMedia,
                         onLongClick = { sheetDetails = true },
+                        modelId = itemModelId,
                         modifier = Modifier
                             .size(
                                 width = ComposableUtils.IMAGE_WIDTH,

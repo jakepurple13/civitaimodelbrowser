@@ -1,6 +1,7 @@
 package com.programmersbox.common.presentation.details
 
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.ExperimentalSharedTransitionApi
 import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.expandVertically
@@ -101,6 +102,8 @@ import androidx.compose.ui.zIndex
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.compose.dropUnlessResumed
 import chaintech.videoplayer.ui.preview.VideoPreviewComposable
+import androidx.navigation3.ui.LocalNavAnimatedContentScope
+import com.programmersbox.common.LocalSharedTransitionScope
 import com.programmersbox.common.BackButton
 import com.programmersbox.common.ComposableUtils
 import com.programmersbox.common.ContextMenu
@@ -130,7 +133,8 @@ import org.koin.compose.viewmodel.koinViewModel
 
 @OptIn(
     ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class,
-    ExperimentalMaterial3ExpressiveApi::class, ExperimentalLayoutApi::class
+    ExperimentalMaterial3ExpressiveApi::class, ExperimentalLayoutApi::class,
+    ExperimentalSharedTransitionApi::class
 )
 @Composable
 fun CivitAiDetailScreen(
@@ -254,6 +258,19 @@ fun CivitAiDetailScreen(
 
             var showFullDescription by remember { mutableStateOf(false) }
 
+            val sharedTransitionScope = LocalSharedTransitionScope.current
+            val animatedVisibilityScope = LocalNavAnimatedContentScope.current
+            val detailSharedModifier = if (id != null && sharedTransitionScope != null && animatedVisibilityScope != null) {
+                with(sharedTransitionScope) {
+                    Modifier.sharedBounds(
+                        sharedContentState = rememberSharedContentState(key = "model_image_$id"),
+                        animatedVisibilityScope = animatedVisibilityScope,
+                    )
+                }
+            } else {
+                Modifier
+            }
+
             Scaffold(
                 topBar = {
                     TopAppBar(
@@ -339,7 +356,7 @@ fun CivitAiDetailScreen(
                     }
                 },
                 floatingActionButtonPosition = FabPosition.End,
-                modifier = Modifier.floatingToolbarVerticalNestedScroll(
+                modifier = detailSharedModifier.floatingToolbarVerticalNestedScroll(
                     expanded = toolBarExpanded,
                     onExpand = { toolBarExpanded = true },
                     onCollapse = { toolBarExpanded = false }

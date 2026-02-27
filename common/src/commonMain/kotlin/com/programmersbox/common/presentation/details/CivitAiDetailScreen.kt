@@ -22,7 +22,6 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -353,7 +352,6 @@ fun CivitAiDetailScreen(
                     modifier = Modifier
                         .hazeSource(state = hazeState)
                         .fillMaxSize()
-                        .padding(horizontal = 12.dp)
                 ) {
                     if (model.models.tags.isNotEmpty()) {
                         item(
@@ -449,13 +447,6 @@ fun CivitAiDetailScreen(
                                 )
                             }
                         }
-                    }
-
-                    item(
-                        span = { GridItemSpan(maxLineSpan) },
-                        contentType = "version_spacer"
-                    ) {
-                        Spacer(Modifier.height(8.dp))
                     }
 
                     model.models.modelVersions.forEach { version ->
@@ -750,22 +741,20 @@ private fun ImageCard(
                             modifier = Modifier
                                 .align(Alignment.BottomCenter)
                                 .fillMaxWidth()
-                                .background(
-                                    MaterialTheme.colorScheme.scrim.copy(alpha = 0.5f)
-                                )
+                                .background(Color.Black.copy(alpha = 0.5f))
                                 .padding(vertical = 6.dp, horizontal = 8.dp)
                         ) {
                             Icon(
                                 Icons.Default.PlayArrow,
                                 contentDescription = "Play video",
-                                tint = MaterialTheme.colorScheme.inverseOnSurface,
+                                tint = Color.White,
                                 modifier = Modifier.size(20.dp)
                             )
                             Spacer(Modifier.width(4.dp))
                             Text(
                                 "Play Video",
                                 style = MaterialTheme.typography.labelLarge,
-                                color = MaterialTheme.colorScheme.inverseOnSurface,
+                                color = Color.White
                             )
                         }
                     }

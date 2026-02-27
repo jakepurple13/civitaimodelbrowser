@@ -80,6 +80,7 @@ import io.github.vinceglb.filekit.dialogs.compose.util.toImageBitmap
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.IO
 import kotlinx.coroutines.launch
+import io.ktor.http.encodeURLParameter
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 import org.jetbrains.compose.resources.painterResource
@@ -104,6 +105,12 @@ enum class QrCodeType {
     Model,
     User,
     Image
+}
+
+fun QrCodeInfo.toDeepLinkUrl(): String = when (qrCodeType) {
+    QrCodeType.Model -> "civitai-browser://model/$id"
+    QrCodeType.User -> "civitai-browser://user/$username"
+    QrCodeType.Image -> "civitai-browser://image/$id?name=${title.encodeURLParameter()}"
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -148,7 +155,7 @@ fun ShareViaQrCode(
     val qrCodeRepository = koinInject<QrCodeRepository>()
     val logoPainter = painterResource(Res.drawable.civitai_logo)
     val painter = rememberQrCodePainter(
-        remember { Json.encodeToString(qrCodeInfo) }
+        remember { qrCodeInfo.toDeepLinkUrl() }
     ) {
         logo {
             painter = logoPainter

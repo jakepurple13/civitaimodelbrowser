@@ -1,5 +1,6 @@
 import SwiftUI
 import FirebaseCore
+import common
 
 class AppDelegate: NSObject, UIApplicationDelegate {
   func application(_ application: UIApplication,
@@ -18,6 +19,9 @@ struct iOSApp: App {
     var body: some Scene {
         WindowGroup {
             ContentView()
+                .onOpenURL { url in
+                    MainViewControllerKt.handleDeepLink(url: url.absoluteString)
+                }
         }
     }
 }

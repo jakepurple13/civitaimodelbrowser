@@ -34,6 +34,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
@@ -77,11 +78,11 @@ import io.github.alexzhirkevich.qrose.rememberQrCodePainter
 import io.github.vinceglb.filekit.dialogs.FileKitType
 import io.github.vinceglb.filekit.dialogs.compose.rememberFilePickerLauncher
 import io.github.vinceglb.filekit.dialogs.compose.util.toImageBitmap
+import io.ktor.http.decodeURLPart
+import io.ktor.http.encodeURLParameter
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.IO
 import kotlinx.coroutines.launch
-import io.ktor.http.decodeURLPart
-import io.ktor.http.encodeURLParameter
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 import org.jetbrains.compose.resources.painterResource
@@ -217,10 +218,17 @@ fun ShareViaQrCode(
         onClose()
     }
 
+    var showApplicationLevelOpen by remember { mutableStateOf(false) }
+
     val qrCodeRepository = koinInject<QrCodeRepository>()
     val logoPainter = painterResource(Res.drawable.civitai_logo)
     val painter = rememberQrCodePainter(
-        remember { qrCodeInfo.toDeepLinkUrl() }
+        remember(showApplicationLevelOpen) {
+            if (showApplicationLevelOpen)
+                qrCodeInfo.toDeepLinkUrl()
+            else
+                Json.encodeToString(qrCodeInfo)
+        }
     ) {
         logo {
             painter = logoPainter
@@ -276,6 +284,18 @@ fun ShareViaQrCode(
                         )
                     }
                 }
+                ListItem(
+                    checked = showApplicationLevelOpen,
+                    onCheckedChange = { showApplicationLevelOpen = !showApplicationLevelOpen },
+                    content = { Text("Show Application Level Open") },
+                    supportingContent = { Text("Use the phones qr code scanner to open the app over the built in one.") },
+                    trailingContent = {
+                        Switch(
+                            checked = showApplicationLevelOpen,
+                            onCheckedChange = null
+                        )
+                    }
+                )
                 FilledTonalButton(
                     onClick = {
                         scope.launch {

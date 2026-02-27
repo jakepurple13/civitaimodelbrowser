@@ -3,6 +3,7 @@ package com.programmersbox.civitaimodelbrowser
 import android.app.Activity
 import android.content.Context
 import android.content.Intent
+import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -20,9 +21,12 @@ import androidx.compose.material3.dynamicLightColorScheme
 import androidx.compose.material3.expressiveLightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalContext
@@ -54,8 +58,11 @@ import io.kamel.image.config.resourcesFetcher
 import org.koin.compose.koinInject
 
 class MainActivity : FragmentActivity() {
+    private var deepLinkUri by mutableStateOf<Uri?>(null)
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        deepLinkUri = intent?.data
         WindowCompat.setDecorFitsSystemWindows(window, false)
         enableEdgeToEdge()
         setContent {
@@ -78,6 +85,14 @@ class MainActivity : FragmentActivity() {
                 val toaster = koinInject<ToasterState>()
                 val defaultUriHandler = LocalUriHandler.current
                 val navHandler = koinInject<NavigationHandler>()
+
+                // Handle deep link navigation
+                LaunchedEffect(deepLinkUri) {
+                    val uri = deepLinkUri ?: return@LaunchedEffect
+                    deepLinkUri = null
+                    handleDeepLink(uri, navHandler)
+                }
+
                 val customUriHandler = remember {
                     customTabsUriHandler(
                         onFailure = { defaultUriHandler.openUri(it) },
@@ -109,6 +124,30 @@ class MainActivity : FragmentActivity() {
                     richColors = true
                 )
             }
+        }
+    }
+
+    override fun onNewIntent(intent: Intent) {
+        super.onNewIntent(intent)
+        deepLinkUri = intent.data
+    }
+}
+
+private fun handleDeepLink(uri: Uri, navHandler: NavigationHandler) {
+    if (uri.scheme != "civitai-browser") return
+    when (uri.host) {
+        "model" -> {
+            val modelId = uri.pathSegments.firstOrNull() ?: return
+            navHandler.backStack.add(Screen.Detail(modelId))
+        }
+        "user" -> {
+            val username = uri.pathSegments.firstOrNull() ?: return
+            navHandler.backStack.add(Screen.User(username))
+        }
+        "image" -> {
+            val modelId = uri.pathSegments.firstOrNull() ?: return
+            val modelName = uri.getQueryParameter("name").orEmpty()
+            navHandler.backStack.add(Screen.DetailsImage(modelId, modelName))
         }
     }
 }

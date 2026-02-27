@@ -16,6 +16,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.window.ComposeUIViewController
+import io.ktor.http.decodeURLPart
 import com.materialkolor.PaletteStyle
 import com.materialkolor.dynamicColorScheme
 import com.materialkolor.dynamiccolor.ColorSpec
@@ -173,7 +174,9 @@ fun handleDeepLink(url: String) {
         "model" -> Screen.Detail(id)
         "user" -> Screen.User(id)
         "image" -> {
-            val name = queryParams["name"] ?: ""
+            val name = queryParams["name"]?.let {
+                runCatching { it.decodeURLPart() }.getOrDefault(it)
+            }.orEmpty()
             Screen.DetailsImage(id, name)
         }
         else -> return

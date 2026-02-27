@@ -80,6 +80,7 @@ import io.github.vinceglb.filekit.dialogs.compose.util.toImageBitmap
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.IO
 import kotlinx.coroutines.launch
+import io.ktor.http.decodeURLPart
 import io.ktor.http.encodeURLParameter
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
@@ -111,6 +112,70 @@ fun QrCodeInfo.toDeepLinkUrl(): String = when (qrCodeType) {
     QrCodeType.Model -> "civitai-browser://model/$id"
     QrCodeType.User -> "civitai-browser://user/$username"
     QrCodeType.Image -> "civitai-browser://image/$id?name=${title.encodeURLParameter()}"
+}
+
+fun parseDeepLinkToQrCodeInfo(url: String): QrCodeInfo? {
+    if (!url.startsWith("civitai-browser://")) return null
+
+    val afterScheme = url.removePrefix("civitai-browser://")
+    val queryIndex = afterScheme.indexOf('?')
+    val pathPart = if (queryIndex >= 0) afterScheme.substring(0, queryIndex) else afterScheme
+    val queryString = if (queryIndex >= 0) afterScheme.substring(queryIndex + 1) else ""
+
+    val queryParams = queryString
+        .split("&")
+        .filter { it.contains("=") }
+        .associate {
+            val eqIndex = it.indexOf('=')
+            it.substring(0, eqIndex) to it.substring(eqIndex + 1)
+        }
+
+    val segments = pathPart.split("/").filter { it.isNotEmpty() }
+    if (segments.size < 2) return null
+
+    val host = segments[0]
+    val id = segments[1]
+
+    return when (host) {
+        "model" -> QrCodeInfo(
+            title = "",
+            url = "",
+            imageUrl = "",
+            id = id,
+            username = null,
+            qrCodeType = QrCodeType.Model
+        )
+
+        "user" -> QrCodeInfo(
+            title = "",
+            url = "",
+            imageUrl = "",
+            id = null,
+            username = id,
+            qrCodeType = QrCodeType.User
+        )
+
+        "image" -> {
+            val name = queryParams["name"]?.let {
+                runCatching { it.decodeURLPart() }.getOrDefault(it)
+            }.orEmpty()
+            QrCodeInfo(
+                title = name,
+                url = "",
+                imageUrl = "",
+                id = id,
+                username = null,
+                qrCodeType = QrCodeType.Image
+            )
+        }
+
+        else -> null
+    }
+}
+
+private fun parseScannedQrCode(scan: String): QrCodeInfo? {
+    return parseDeepLinkToQrCodeInfo(scan)
+        ?: runCatching { Json.decodeFromString<QrCodeInfo>(scan) }.getOrNull()
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -299,12 +364,10 @@ fun ScanQrCode(
                     var torchState by remember { mutableStateOf(false) }
                     ScannerWithPermissions(
                         onScanned = { scan ->
-                            runCatching { Json.decodeFromString<QrCodeInfo>(scan) }
-                                .onSuccess {
-                                    viewModel.qrCodeInfo = it
-                                    scope.launch { sheetState.expand() }
-                                }
-                                .onFailure { it.printStackTrace() }
+                            parseScannedQrCode(scan)?.let {
+                                viewModel.qrCodeInfo = it
+                                scope.launch { sheetState.expand() }
+                            }
 
                             false
                         },
@@ -438,7 +501,11 @@ class QrCodeScannerViewModel(
     fun scanQrCodeFromImage(bitmap: ImageBitmap) {
         viewModelScope.launch(Dispatchers.IO) {
             qrCodeRepository.getInfoFromQRCode(bitmap)
-                .mapCatching { Json.decodeFromString<QrCodeInfo>(it.first()) }
+                .mapCatching { texts ->
+                    val raw = texts.first()
+                    parseScannedQrCode(raw)
+                        ?: throw IllegalArgumentException("Unrecognized QR code format")
+                }
                 .onSuccess { qrCodeInfo = it }
                 .onFailure { it.printStackTrace() }
         }

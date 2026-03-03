@@ -3,10 +3,6 @@ package com.programmersbox.common.presentation.details
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.core.animateFloatAsState
-import androidx.compose.animation.expandVertically
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
-import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
@@ -107,6 +103,7 @@ import com.programmersbox.common.DataStore
 import com.programmersbox.common.ModelImage
 import com.programmersbox.common.NetworkConnectionRepository
 import com.programmersbox.common.adaptiveGridCell
+import com.programmersbox.common.db.BlacklistedItemRoom
 import com.programmersbox.common.db.FavoriteType
 import com.programmersbox.common.db.FavoritesDao
 import com.programmersbox.common.db.ListRepository
@@ -353,6 +350,22 @@ fun CivitAiDetailScreen(
                         .hazeSource(state = hazeState)
                         .fillMaxSize()
                 ) {
+                    item(
+                        span = { GridItemSpan(maxLineSpan) },
+                        contentType = "title"
+                    ) {
+                        Surface(
+                            tonalElevation = 1.dp,
+                            shape = MaterialTheme.shapes.medium,
+                        ) {
+                            Text(
+                                model.models.name,
+                                style = MaterialTheme.typography.titleLarge,
+                                modifier = Modifier.padding(12.dp)
+                            )
+                        }
+                    }
+
                     if (model.models.tags.isNotEmpty()) {
                         item(
                             span = { GridItemSpan(maxLineSpan) },
@@ -531,54 +544,22 @@ fun CivitAiDetailScreen(
                             }
                         }
 
-                        items(
-                            version.images,
-                            contentType = { "image" },
-                            key = { it.url + it.id }
-                        ) { images ->
-                            AnimatedVisibility(
-                                viewModel.showMoreInfo[version.id] == true,
-                                enter = fadeIn() + expandVertically(),
-                                exit = fadeOut() + shrinkVertically()
-                            ) {
-                                var showDialog by remember { mutableStateOf(false) }
-
-                                BlacklistHandling(
+                        if (viewModel.showMoreInfo[version.id] == true) {
+                            items(
+                                version.images,
+                                contentType = { "image" },
+                                key = { it.url + it.id }
+                            ) { images ->
+                                ItemCard(
+                                    images = images,
+                                    showNsfw = showNsfw,
+                                    nsfwBlurStrength = nsfwBlurStrength,
+                                    shouldShowMedia = shouldShowMedia,
                                     blacklisted = blacklisted,
-                                    modelId = images.id?.toLongOrNull() ?: 0L,
-                                    name = images.url,
-                                    nsfw = images.nsfw.canNotShow(),
-                                    imageUrl = images.url,
-                                    showDialog = showDialog,
-                                    onDialogDismiss = { showDialog = false }
+                                    dao = dao,
+                                    onClick = { sheetDetails = it },
+                                    modifier = Modifier.animateItem()
                                 )
-
-                                val isBlacklisted by dao
-                                    .getBlacklistedByImageUrl(images.url)
-                                    .collectAsStateWithLifecycle(false)
-
-                                ContextMenu(
-                                    isBlacklisted = isBlacklisted,
-                                    blacklistItems = blacklisted,
-                                    modelId = images.id?.toLongOrNull() ?: 0L,
-                                    name = images.url,
-                                    nsfw = images.nsfw.canNotShow(),
-                                    imageUrl = images.url,
-                                ) {
-                                    ImageCard(
-                                        images = images,
-                                        showNsfw = showNsfw,
-                                        nsfwBlurStrength = nsfwBlurStrength,
-                                        isFavorite = dao
-                                            .getFavoritesImages(FavoriteType.Image, images.url)
-                                            .collectAsStateWithLifecycle(false)
-                                            .value,
-                                        isBlacklisted = isBlacklisted,
-                                        shouldShowMedia = shouldShowMedia,
-                                        onClick = { sheetDetails = images },
-                                        onLongClick = { showDialog = true }
-                                    )
-                                }
                             }
                         }
                     }
@@ -677,6 +658,7 @@ private fun ImageCard(
     shouldShowMedia: Boolean,
     onClick: () -> Unit,
     onLongClick: () -> Unit,
+    modifier: Modifier = Modifier,
 ) {
     Surface(
         tonalElevation = 4.dp,
@@ -687,7 +669,7 @@ private fun ImageCard(
             images.nsfw.canNotShow() -> BorderStroke(2.dp, MaterialTheme.colorScheme.error)
             else -> null
         },
-        modifier = Modifier
+        modifier = modifier
             .size(
                 width = ComposableUtils.IMAGE_WIDTH,
                 height = ComposableUtils.IMAGE_HEIGHT
@@ -1046,6 +1028,58 @@ private fun MetadataRow(
         Text(
             text = value,
             style = MaterialTheme.typography.bodyMedium,
+        )
+    }
+}
+
+@Composable
+private fun ItemCard(
+    images: ModelImage,
+    showNsfw: Boolean,
+    nsfwBlurStrength: Float,
+    shouldShowMedia: Boolean,
+    blacklisted: List<BlacklistedItemRoom>,
+    dao: FavoritesDao,
+    onClick: (ModelImage) -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    var showDialog by remember { mutableStateOf(false) }
+
+    BlacklistHandling(
+        blacklisted = blacklisted,
+        modelId = images.id?.toLongOrNull() ?: 0L,
+        name = images.url,
+        nsfw = images.nsfw.canNotShow(),
+        imageUrl = images.url,
+        showDialog = showDialog,
+        onDialogDismiss = { showDialog = false }
+    )
+
+    val isBlacklisted by dao
+        .getBlacklistedByImageUrl(images.url)
+        .collectAsStateWithLifecycle(false)
+
+    ContextMenu(
+        isBlacklisted = isBlacklisted,
+        blacklistItems = blacklisted,
+        modelId = images.id?.toLongOrNull() ?: 0L,
+        name = images.url,
+        nsfw = images.nsfw.canNotShow(),
+        imageUrl = images.url,
+    ) {
+        ImageCard(
+            images = images,
+            showNsfw = showNsfw,
+            nsfwBlurStrength = nsfwBlurStrength,
+            isFavorite = dao
+                .getFavoritesImages(FavoriteType.Image, images.url)
+                .collectAsStateWithLifecycle(false)
+                .value,
+            isBlacklisted = isBlacklisted,
+            shouldShowMedia = shouldShowMedia,
+            onClick = { onClick(images) },
+            onLongClick = { showDialog = true },
+            modifier = modifier
         )
     }
 }

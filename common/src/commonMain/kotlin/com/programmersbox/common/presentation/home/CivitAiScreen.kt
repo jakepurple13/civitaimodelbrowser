@@ -105,7 +105,6 @@ import com.programmersbox.common.presentation.components.CivitRail
 import com.programmersbox.common.presentation.components.LoadingImage
 import com.programmersbox.common.presentation.components.ModelCard
 import com.programmersbox.common.presentation.components.ModelOptionsSheet
-import com.programmersbox.common.presentation.components.thumbnailUrl
 import com.programmersbox.common.showRefreshButton
 import dev.chrisbanes.haze.HazeProgressive
 import dev.chrisbanes.haze.LocalHazeStyle
@@ -391,7 +390,7 @@ private fun ModelItem(
 
     if (useNewCardLook) {
         ModelCard(
-            imageUrl = remember { imageModel?.thumbnailUrl().orEmpty() },
+            imageUrl = remember { imageModel?.url.orEmpty() },
             name = models.name,
             type = models.type.name,
             isNsfw = models.nsfw || imageModel?.nsfw?.canNotShow() == true,

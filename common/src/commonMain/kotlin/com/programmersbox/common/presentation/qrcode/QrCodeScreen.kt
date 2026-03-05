@@ -429,9 +429,9 @@ fun ScanQrCode(
                             .padding(8.dp)
                     ) {
                         DiagonalWipeIcon(
-                            isWiped = torchState,
-                            baseIcon = Icons.Default.FlashOff,
-                            wipedIcon = Icons.Default.FlashOn,
+                            isWiped = !torchState,
+                            wipedIcon = Icons.Default.FlashOff,
+                            baseIcon = Icons.Default.FlashOn,
                             modifier = Modifier.size(24.dp)
                         )
                     }

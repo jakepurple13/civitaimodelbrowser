@@ -63,6 +63,7 @@ import com.programmersbox.common.HazeBlur
 import com.programmersbox.common.ThemeMode
 import com.programmersbox.common.presentation.components.DiagonalWipeIcon
 import com.programmersbox.common.presentation.components.DiagonalWipeIconDefaults
+import com.programmersbox.common.presentation.components.WipeDirection
 import com.programmersbox.resources.Res
 import com.programmersbox.resources.behavior_settings
 import com.programmersbox.resources.blur_type
@@ -138,6 +139,9 @@ fun BehaviorSettings(
                         isWiped = showBlur,
                         wipedIcon = Icons.Default.BlurOn,
                         baseIcon = Icons.Default.BlurOff,
+                        motion = DiagonalWipeIconDefaults.expressive(
+                            WipeDirection.BottomRightToTopLeft
+                        ),
                         modifier = Modifier.size(24.dp)
                     )
                 },

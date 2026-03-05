@@ -58,7 +58,9 @@ import androidx.navigation3.runtime.NavKey
 import com.programmersbox.common.ComposableUtils
 import com.programmersbox.common.Screen
 import com.programmersbox.common.presentation.components.DiagonalWipeIcon
+import com.programmersbox.common.presentation.components.DiagonalWipeIconDefaults
 import com.programmersbox.common.presentation.components.LoadingImage
+import com.programmersbox.common.presentation.components.WipeDirection
 import com.programmersbox.resources.Res
 import com.programmersbox.resources.camera_required_message
 import com.programmersbox.resources.civitai_logo
@@ -429,9 +431,12 @@ fun ScanQrCode(
                             .padding(8.dp)
                     ) {
                         DiagonalWipeIcon(
-                            isWiped = !torchState,
-                            wipedIcon = Icons.Default.FlashOff,
-                            baseIcon = Icons.Default.FlashOn,
+                            isWiped = torchState,
+                            baseIcon = Icons.Default.FlashOff,
+                            wipedIcon = Icons.Default.FlashOn,
+                            motion = DiagonalWipeIconDefaults.expressive(
+                                WipeDirection.BottomRightToTopLeft
+                            ),
                             modifier = Modifier.size(24.dp)
                         )
                     }

@@ -46,6 +46,8 @@ import com.programmersbox.common.BackButton
 import com.programmersbox.common.DataStore
 import com.programmersbox.common.LocalWindowClassSize
 import com.programmersbox.common.presentation.components.DiagonalWipeIcon
+import com.programmersbox.common.presentation.components.DiagonalWipeIconDefaults
+import com.programmersbox.common.presentation.components.WipeDirection
 import com.programmersbox.resources.Res
 import com.programmersbox.resources.civitai_logo
 import com.programmersbox.resources.default_is_6
@@ -129,6 +131,9 @@ fun NsfwSettings(
                         isWiped = showNsfw,
                         wipedIcon = Icons.Default.Visibility,
                         baseIcon = Icons.Default.VisibilityOff,
+                        motion = DiagonalWipeIconDefaults.expressive(
+                            WipeDirection.BottomRightToTopLeft
+                        ),
                         modifier = Modifier.size(24.dp)
                     )
                 },

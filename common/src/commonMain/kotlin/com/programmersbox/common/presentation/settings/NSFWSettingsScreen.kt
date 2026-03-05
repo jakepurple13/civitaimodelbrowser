@@ -45,6 +45,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.programmersbox.common.BackButton
 import com.programmersbox.common.DataStore
 import com.programmersbox.common.LocalWindowClassSize
+import com.programmersbox.common.presentation.components.DiagonalWipeIcon
 import com.programmersbox.resources.Res
 import com.programmersbox.resources.civitai_logo
 import com.programmersbox.resources.default_is_6
@@ -124,12 +125,11 @@ fun NsfwSettings(
                     )
                 },
                 leadingContent = {
-                    Icon(
-                        if (showNsfw)
-                            Icons.Default.Visibility
-                        else
-                            Icons.Default.VisibilityOff,
-                        null
+                    DiagonalWipeIcon(
+                        isWiped = showNsfw,
+                        wipedIcon = Icons.Default.Visibility,
+                        baseIcon = Icons.Default.VisibilityOff,
+                        modifier = Modifier.size(24.dp)
                     )
                 },
                 checked = showNsfw,

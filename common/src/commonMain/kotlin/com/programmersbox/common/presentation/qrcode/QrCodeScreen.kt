@@ -28,7 +28,6 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.FilledTonalIconButton
-import androidx.compose.material3.Icon
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
@@ -58,6 +57,7 @@ import androidx.lifecycle.viewModelScope
 import androidx.navigation3.runtime.NavKey
 import com.programmersbox.common.ComposableUtils
 import com.programmersbox.common.Screen
+import com.programmersbox.common.presentation.components.DiagonalWipeIcon
 import com.programmersbox.common.presentation.components.LoadingImage
 import com.programmersbox.resources.Res
 import com.programmersbox.resources.camera_required_message
@@ -428,12 +428,11 @@ fun ScanQrCode(
                             .align(Alignment.TopEnd)
                             .padding(8.dp)
                     ) {
-                        Icon(
-                            if (torchState)
-                                Icons.Default.FlashOn
-                            else
-                                Icons.Default.FlashOff,
-                            null
+                        DiagonalWipeIcon(
+                            isWiped = torchState,
+                            baseIcon = Icons.Default.FlashOff,
+                            wipedIcon = Icons.Default.FlashOn,
+                            modifier = Modifier.size(24.dp)
                         )
                     }
                 }

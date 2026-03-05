@@ -107,6 +107,7 @@ import com.programmersbox.common.db.BlacklistedItemRoom
 import com.programmersbox.common.db.FavoriteType
 import com.programmersbox.common.db.FavoritesDao
 import com.programmersbox.common.db.ListRepository
+import com.programmersbox.common.presentation.components.DiagonalWipeIcon
 import com.programmersbox.common.presentation.components.ImageSheet
 import com.programmersbox.common.presentation.components.ListChoiceScreen
 import com.programmersbox.common.presentation.components.LoadingImage
@@ -879,12 +880,11 @@ private fun HorizontalToolbarContent(
                     }
                 },
                 icon = {
-                    Icon(
-                        if (isFavorite)
-                            Icons.Default.Favorite
-                        else
-                            Icons.Default.FavoriteBorder,
-                        null
+                    DiagonalWipeIcon(
+                        isWiped = isFavorite,
+                        wipedIcon = Icons.Default.Favorite,
+                        baseIcon = Icons.Default.FavoriteBorder,
+                        modifier = Modifier.size(24.dp)
                     )
                 },
                 label = if (isFavorite) "Unfavorite" else "Favorite"
@@ -960,9 +960,11 @@ private fun BottomBarContent(
                     }
                 }
             ) {
-                Icon(
-                    if (isFavorite) Icons.Default.Favorite else Icons.Default.FavoriteBorder,
-                    null
+                DiagonalWipeIcon(
+                    isWiped = isFavorite,
+                    wipedIcon = Icons.Default.Favorite,
+                    baseIcon = Icons.Default.FavoriteBorder,
+                    modifier = Modifier.size(24.dp)
                 )
             }
         },

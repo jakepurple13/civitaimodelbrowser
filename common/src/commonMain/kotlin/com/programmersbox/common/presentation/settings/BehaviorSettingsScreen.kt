@@ -61,6 +61,8 @@ import com.programmersbox.common.DataStore
 import com.programmersbox.common.DoubleClickBehavior
 import com.programmersbox.common.HazeBlur
 import com.programmersbox.common.ThemeMode
+import com.programmersbox.common.presentation.components.DiagonalWipeIcon
+import com.programmersbox.common.presentation.components.DiagonalWipeIconDefaults
 import com.programmersbox.resources.Res
 import com.programmersbox.resources.behavior_settings
 import com.programmersbox.resources.blur_type
@@ -132,9 +134,11 @@ fun BehaviorSettings(
         ) {
             SegmentedListItem(
                 leadingContent = {
-                    Icon(
-                        if (showBlur) Icons.Default.BlurOn else Icons.Default.BlurOff,
-                        null
+                    DiagonalWipeIcon(
+                        isWiped = showBlur,
+                        wipedIcon = Icons.Default.BlurOn,
+                        baseIcon = Icons.Default.BlurOff,
+                        modifier = Modifier.size(24.dp)
                     )
                 },
                 content = { Text(stringResource(Res.string.show_blur)) },
@@ -161,12 +165,12 @@ fun BehaviorSettings(
                 ) {
                     SegmentedListItem(
                         leadingContent = {
-                            Icon(
-                                if (useProgressive)
-                                    Icons.Default.BlurCircular
-                                else
-                                    Icons.Default.BlurLinear,
-                                null
+                            DiagonalWipeIcon(
+                                isWiped = useProgressive,
+                                wipedIcon = Icons.Default.BlurCircular,
+                                baseIcon = Icons.Default.BlurLinear,
+                                motion = DiagonalWipeIconDefaults.expressive(),
+                                modifier = Modifier.size(24.dp)
                             )
                         },
                         content = { Text(stringResource(Res.string.use_progressive_blur)) },

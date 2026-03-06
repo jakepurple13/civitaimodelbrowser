@@ -97,7 +97,6 @@ private fun Module.home() {
     navigation<Screen.Favorites> {
         val backStack = koinInject<NavigationHandler>().backStack
         FavoritesUI(
-            viewModel = koinViewModel(),
             onNavigateToDetail = { id -> backStack.add(Screen.Detail(id.toString())) },
             onNavigateToUser = { username -> backStack.add(Screen.User(username)) }
         )
@@ -107,7 +106,6 @@ private fun Module.home() {
     ) {
         val backStack = koinInject<NavigationHandler>().backStack
         ScanQrCode(
-            viewModel = koinViewModel(),
             onBack = { backStack.removeLastOrNull() },
             onNavigate = { navKey ->
                 backStack.removeAll { it == Screen.QrCode }

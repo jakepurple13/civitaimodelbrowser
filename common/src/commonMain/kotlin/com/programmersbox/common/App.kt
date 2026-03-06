@@ -63,11 +63,11 @@ internal fun App(
     ) {
         SharedTransitionLayout {
 
-            val listDetailSceneStrategy = rememberListDetailSceneStrategy<Any>(
+            val listDetailSceneStrategy = rememberListDetailSceneStrategy<NavKey>(
                 backNavigationBehavior = BackNavigationBehavior.PopLatest
             )
 
-            val supportingPaneSceneStrategy = rememberSupportingPaneSceneStrategy<Any>(
+            val supportingPaneSceneStrategy = rememberSupportingPaneSceneStrategy<NavKey>(
                 backNavigationBehavior = BackNavigationBehavior.PopLatest
             )
 

@@ -3,6 +3,7 @@ import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 plugins {
     id("org.jetbrains.compose")
     alias(libs.plugins.android.application)
+    alias(libs.plugins.androidx.baselineprofile)
     alias(libs.plugins.compose.compiler)
     alias(libs.plugins.easylauncher)
 }
@@ -12,6 +13,10 @@ if (file("google-services.json").exists()) {
     apply(plugin = libs.plugins.google.gms.google.services.get().pluginId)
     apply(plugin = libs.plugins.google.firebase.crashlytics.get().pluginId)
     apply(plugin = libs.plugins.google.firebase.performance.get().pluginId)
+}
+
+baselineProfile {
+    saveInSrc = true
 }
 
 group = "com.programmersbox"
@@ -37,6 +42,13 @@ android {
     buildTypes {
         debug {
             applicationIdSuffix = ".debug"
+        }
+
+        create("benchmark") {
+            initWith(getByName("release"))
+            signingConfig = signingConfigs.getByName("debug")
+            isDebuggable = false
+            matchingFallbacks += listOf("release")
         }
 
         create("beta") {
@@ -78,10 +90,12 @@ kotlin {
 }
 
 dependencies {
+    baselineProfile(project(":benchmark"))
     implementation(project(":common"))
     implementation(libs.androidx.activity.compose)
     implementation(libs.androidx.browser)
     implementation(libs.androidx.material)
+    implementation(libs.androidx.profileinstaller)
     implementation(project.dependencies.platform(libs.koin.bom))
     implementation(libs.koin.core)
     debugImplementation(libs.debugoverlay)

@@ -15,12 +15,12 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Explicit
 import androidx.compose.material.icons.filled.NoAdultContent
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
-import androidx.compose.material3.Icon
 import androidx.compose.material3.LargeTopAppBar
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.ListItemDefaults
@@ -82,7 +82,9 @@ fun NsfwSettingsScreen() {
     ) { padding ->
         NsfwSettings(
             dataStore = dataStore,
-            modifier = Modifier.padding(padding)
+            modifier = Modifier
+                .padding(padding)
+                .padding(horizontal = 16.dp)
         )
     }
 }
@@ -113,7 +115,17 @@ fun NsfwSettings(
             },
             checked = includeNsfwEnabled,
             onCheckedChange = { scope.launch { includeNsfw.update(it) } },
-            leadingContent = { Icon(Icons.Default.NoAdultContent, null) },
+            leadingContent = {
+                DiagonalWipeIcon(
+                    isWiped = includeNsfwEnabled,
+                    wipedIcon = Icons.Default.Explicit,
+                    baseIcon = Icons.Default.NoAdultContent,
+                    motion = DiagonalWipeIconDefaults.expressive(
+                        WipeDirection.BottomRightToTopLeft
+                    ),
+                    modifier = Modifier.size(24.dp)
+                )
+            },
             colors = ListItemDefaults.colors(containerColor = MaterialTheme.colorScheme.surfaceContainer)
         )
 

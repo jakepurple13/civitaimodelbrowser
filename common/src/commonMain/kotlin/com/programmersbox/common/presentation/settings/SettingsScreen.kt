@@ -101,6 +101,7 @@ fun SettingsScreen(
                 .verticalScroll(rememberScrollState())
                 .fillMaxSize()
                 .padding(padding)
+                .padding(horizontal = 16.dp)
         ) {
             NormalSettings(
                 onNavigateToQrCode = dropUnlessResumed(block = onNavigateToQrCode),

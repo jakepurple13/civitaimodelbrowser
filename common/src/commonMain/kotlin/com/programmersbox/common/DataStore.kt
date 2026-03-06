@@ -1,6 +1,7 @@
 package com.programmersbox.common
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.Stable
 import androidx.compose.runtime.getValue
@@ -27,7 +28,7 @@ import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 import okio.Path.Companion.toPath
 
-
+@Immutable
 class DataStore private constructor(
     producePath: () -> String = { "androidx.preferences_pb" },
 ) {

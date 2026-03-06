@@ -57,10 +57,10 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.unit.Dp
@@ -442,7 +442,7 @@ private fun DeepDive(
     dataCounts: DataCounts,
     title: String,
     modifier: Modifier = Modifier,
-    extraContent: (@Composable () -> Unit)? = null,
+    extraContent: @Composable () -> Unit = {},
 ) {
     OutlinedCard(
         border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline),
@@ -514,7 +514,7 @@ private fun DeepDive(
             )
         }
 
-        extraContent?.invoke()
+        extraContent()
     }
 }
 
@@ -651,12 +651,13 @@ private fun ListsSummaryCard(
                 }
             },
             trailingContent = {
+                val rotation by animateFloatAsState(if (expanded) 180f else 0f)
                 Icon(
                     Icons.Default.KeyboardArrowDown,
                     contentDescription = null,
-                    modifier = Modifier.rotate(
-                        animateFloatAsState(if (expanded) 180f else 0f).value
-                    )
+                    modifier = Modifier.graphicsLayer {
+                        rotationZ = rotation
+                    }
                 )
             },
             colors = ListItemDefaults.colors(containerColor = Color.Transparent),

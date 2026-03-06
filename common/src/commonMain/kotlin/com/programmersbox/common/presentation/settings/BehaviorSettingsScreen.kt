@@ -23,7 +23,11 @@ import androidx.compose.material.icons.filled.Brightness4
 import androidx.compose.material.icons.filled.Brightness7
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.CreditCard
+import androidx.compose.material.icons.filled.CreditCardOff
+import androidx.compose.material.icons.filled.DarkMode
 import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.material.icons.filled.FavoriteBorder
+import androidx.compose.material.icons.filled.SettingsSystemDaydream
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -104,7 +108,9 @@ fun BehaviorSettingsScreen() {
     ) { padding ->
         BehaviorSettings(
             dataStore = dataStore,
-            modifier = Modifier.padding(padding)
+            modifier = Modifier
+                .padding(padding)
+                .padding(horizontal = 16.dp)
         )
     }
 }
@@ -307,7 +313,16 @@ fun BehaviorSettings(
             }
 
             SegmentedListItem(
-                leadingContent = { Icon(Icons.Default.Brightness4, null) },
+                leadingContent = {
+                    Icon(
+                        when (themeMode) {
+                            ThemeMode.System -> Icons.Default.SettingsSystemDaydream
+                            ThemeMode.Light -> Icons.Default.Brightness4
+                            ThemeMode.Dark -> Icons.Default.DarkMode
+                        },
+                        null
+                    )
+                },
                 content = { Text(stringResource(Res.string.theme_mode)) },
                 supportingContent = { Text(themeMode.name) },
                 trailingContent = { Icon(Icons.Default.ArrowDropDown, null) },
@@ -317,7 +332,15 @@ fun BehaviorSettings(
             )
 
             SegmentedListItem(
-                leadingContent = { Icon(Icons.Default.Brightness7, null) },
+                leadingContent = {
+                    DiagonalWipeIcon(
+                        isWiped = isAmoled,
+                        wipedIcon = Icons.Default.Brightness7,
+                        baseIcon = Icons.Default.Brightness4,
+                        motion = DiagonalWipeIconDefaults.expressive(),
+                        modifier = Modifier.size(24.dp)
+                    )
+                },
                 content = { Text(stringResource(Res.string.use_amoled_mode)) },
                 trailingContent = { Switch(checked = isAmoled, onCheckedChange = null) },
                 colors = colors,
@@ -331,7 +354,15 @@ fun BehaviorSettings(
             verticalArrangement = Arrangement.spacedBy(ListItemDefaults.SegmentedGap)
         ) {
             SegmentedListItem(
-                leadingContent = { Icon(Icons.Default.Favorite, null) },
+                leadingContent = {
+                    DiagonalWipeIcon(
+                        isWiped = showFavorites,
+                        wipedIcon = Icons.Default.Favorite,
+                        baseIcon = Icons.Default.FavoriteBorder,
+                        motion = DiagonalWipeIconDefaults.expressive(),
+                        modifier = Modifier.size(24.dp)
+                    )
+                },
                 content = { Text("Show Favorites") },
                 supportingContent = { Text("Show favorites in the list") },
                 trailingContent = {
@@ -349,7 +380,18 @@ fun BehaviorSettings(
             var showNewCardLook by dataStore.rememberUseNewCardLook()
 
             SegmentedListItem(
-                leadingContent = { Icon(Icons.Default.CreditCard, null) },
+                leadingContent = {
+                    Icon(Icons.Default.CreditCard, null)
+                    DiagonalWipeIcon(
+                        isWiped = showNewCardLook,
+                        wipedIcon = Icons.Default.CreditCard,
+                        baseIcon = Icons.Default.CreditCardOff,
+                        motion = DiagonalWipeIconDefaults.expressive(
+                            WipeDirection.BottomRightToTopLeft
+                        ),
+                        modifier = Modifier.size(24.dp)
+                    )
+                },
                 content = { Text("Use new card look?") },
                 supportingContent = { Text("Use the new card look") },
                 trailingContent = {

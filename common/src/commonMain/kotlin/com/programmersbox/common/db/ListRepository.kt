@@ -5,7 +5,10 @@ import com.programmersbox.common.presentation.components.ToasterState
 import com.programmersbox.resources.Res
 import com.programmersbox.resources.added_to
 import com.programmersbox.resources.list_created
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.IO
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.withContext
 import org.jetbrains.compose.resources.getString
 import kotlin.time.Clock
 import kotlin.time.ExperimentalTime
@@ -30,7 +33,7 @@ class ListRepository(
         description: String? = null,
         coverImage: String? = null,
         showToast: Boolean = true,
-    ): String {
+    ): String = withContext(Dispatchers.IO) {
         val uuid = Uuid.random().toString()
         val listItem = CustomListItem(
             uuid = uuid,
@@ -45,7 +48,7 @@ class ListRepository(
                 type = ToastType.Success
             )
         }
-        return uuid
+        uuid
     }
 
     @OptIn(ExperimentalTime::class)
@@ -64,9 +67,9 @@ class ListRepository(
         creatorImage: String? = null,
         modelId: Long = id,
         dateAdded: Long = Clock.System.now().toEpochMilliseconds(),
-    ): Boolean {
+    ): Boolean = withContext(Dispatchers.IO) {
         val item = listDao.getCustomListItem(uuid)
-        if (item.list.any { it.id == id }) return false
+        if (item.list.any { it.id == id }) return@withContext false
         listDao.addItem(
             CustomListInfo(
                 uuid = uuid,
@@ -91,7 +94,7 @@ class ListRepository(
             getString(Res.string.added_to, item.item.name),
             type = ToastType.Success
         )
-        return true
+        true
     }
 
     suspend fun addToMultipleLists(
@@ -106,7 +109,7 @@ class ListRepository(
         hash: String? = null,
         creatorName: String? = null,
         creatorImage: String? = null,
-    ) {
+    ) = withContext(Dispatchers.IO) {
         selectedLists.forEach { item ->
             addToList(
                 uuid = item.item.uuid,
@@ -124,24 +127,29 @@ class ListRepository(
         }
     }
 
-    suspend fun removeItem(listItem: CustomListInfo) = listDao.removeItem(listItem)
+    suspend fun removeItem(listItem: CustomListInfo) = withContext(Dispatchers.IO) {
+        listDao.removeItem(listItem)
+    }
 
-    suspend fun removeList(item: CustomList) {
+    suspend fun removeList(item: CustomList) = withContext(Dispatchers.IO) {
         item.list.forEach { listDao.removeItem(it) }
         listDao.removeList(item.item)
     }
 
-    suspend fun updateList(listItem: CustomListItem) = listDao.updateList(listItem)
+    suspend fun updateList(listItem: CustomListItem) = withContext(Dispatchers.IO) {
+        listDao.updateList(listItem)
+    }
 
-    suspend fun updateFullList(item: CustomListItem) {
+    suspend fun updateFullList(item: CustomListItem) = withContext(Dispatchers.IO) {
         listDao.updateList(item.copy(time = Clock.System.now().toEpochMilliseconds()))
     }
 
-    suspend fun updateCoverImage(uuid: String, coverImage: String?, hash: String? = null) {
-        listDao.updateCoverImage(uuid, coverImage, hash)
-    }
+    suspend fun updateCoverImage(uuid: String, coverImage: String?, hash: String? = null) =
+        withContext(Dispatchers.IO) {
+            listDao.updateCoverImage(uuid, coverImage, hash)
+        }
 
-    suspend fun updateBiometric(uuid: String, useBiometric: Boolean) {
+    suspend fun updateBiometric(uuid: String, useBiometric: Boolean) = withContext(Dispatchers.IO) {
         listDao.updateBiometric(uuid, useBiometric)
     }
 

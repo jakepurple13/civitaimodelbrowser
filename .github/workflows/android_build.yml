@@ -320,7 +320,6 @@ jobs:
           emulator-boot-timeout: 900
           emulator-options: -no-window -gpu swiftshader_indirect -no-snapshot-save -noaudio -no-boot-anim -camera-back none
           script: |
-            set -eo pipefail
             mkdir -p benchmark/build/outputs/ci-artifacts
 
             adb wait-for-device

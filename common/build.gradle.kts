@@ -124,6 +124,8 @@ kotlin {
             implementation(libs.multiplatform.markdown.renderer.m3)
 
             implementation(libs.chroma.dial)
+
+            implementation(libs.backdrop)
         }
 
         commonTest.dependencies {

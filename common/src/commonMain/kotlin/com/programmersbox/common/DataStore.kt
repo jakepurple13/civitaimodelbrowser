@@ -15,6 +15,7 @@ import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.floatPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.programmersbox.common.presentation.components.BlurKind
 import dev.chrisbanes.haze.HazeStyle
 import dev.chrisbanes.haze.materials.CupertinoMaterials
 import dev.chrisbanes.haze.materials.HazeMaterials
@@ -146,6 +147,14 @@ class DataStore private constructor(
     fun rememberUseNewCardLook(): MutableState<Boolean> = rememberPreference(
         key = booleanPreferencesKey("use_new_card_look"),
         defaultValue = true,
+    )
+
+    @Composable
+    fun rememberBlurKind(): MutableState<BlurKind> = rememberPreferenceType(
+        key = stringPreferencesKey("blur_kind"),
+        defaultValue = BlurKind.Haze,
+        mapToValue = { json.decodeFromString<BlurKind>(it) },
+        mapToString = { json.encodeToString(it) }
     )
 
     open class DataStoreType<T>(

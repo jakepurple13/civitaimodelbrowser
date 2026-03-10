@@ -25,6 +25,7 @@ import androidx.compose.foundation.lazy.grid.LazyGridScope
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Sort
 import androidx.compose.material.icons.filled.ArrowUpward
@@ -72,6 +73,7 @@ import androidx.compose.ui.draw.blur
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.style.TextAlign
@@ -85,6 +87,13 @@ import androidx.paging.compose.LazyPagingItems
 import androidx.paging.compose.collectAsLazyPagingItems
 import androidx.paging.compose.itemContentType
 import chaintech.videoplayer.ui.preview.VideoPreviewComposable
+import com.kyant.backdrop.Backdrop
+import com.kyant.backdrop.backdrops.layerBackdrop
+import com.kyant.backdrop.backdrops.rememberLayerBackdrop
+import com.kyant.backdrop.drawBackdrop
+import com.kyant.backdrop.effects.blur
+import com.kyant.backdrop.effects.lens
+import com.kyant.backdrop.effects.vibrancy
 import com.programmersbox.common.CivitSort
 import com.programmersbox.common.ComposableUtils
 import com.programmersbox.common.DataStore
@@ -105,8 +114,14 @@ import com.programmersbox.common.presentation.components.CivitRail
 import com.programmersbox.common.presentation.components.LoadingImage
 import com.programmersbox.common.presentation.components.ModelCard
 import com.programmersbox.common.presentation.components.ModelOptionsSheet
+import com.programmersbox.common.presentation.components.rememberBlurKindState
+import com.programmersbox.common.presentation.components.setBlurKind
+import com.programmersbox.common.presentation.components.setBlurKindSource
 import com.programmersbox.common.showRefreshButton
+import dev.chrisbanes.haze.HazeEffectScope
 import dev.chrisbanes.haze.HazeProgressive
+import dev.chrisbanes.haze.HazeState
+import dev.chrisbanes.haze.HazeStyle
 import dev.chrisbanes.haze.LocalHazeStyle
 import dev.chrisbanes.haze.hazeEffect
 import dev.chrisbanes.haze.hazeSource
@@ -146,19 +161,14 @@ fun CivitAiScreen(
     val blacklisted by db
         .getBlacklisted()
         .collectAsStateWithLifecycle(emptyList())
-    val showBlur by dataStore.rememberShowBlur()
-    val useProgressive by dataStore.rememberUseProgressive()
     val showNsfw by dataStore.showNsfw()
     val blurStrength by dataStore.hideNsfwStrength()
     val useNewCardLook by dataStore.rememberUseNewCardLook()
     val lazyPagingItems = viewModel.pager.collectAsLazyPagingItems()
 
-    val hazeState = rememberHazeState(showBlur)
     val scope = rememberCoroutineScope()
     val lazyGridState = rememberLazyGridState()
     val pullToRefreshState = rememberPullToRefreshState()
-
-    val hazeStyle = LocalHazeStyle.current
 
     val bottomBarScrollBehavior = BottomAppBarDefaults.exitAlwaysScrollBehavior()
 
@@ -174,10 +184,12 @@ fun CivitAiScreen(
         }
     }
 
+    val blurKindState = rememberBlurKindState()
+
     WindowedScaffold(
         topBar = {
             CivitTopBar(
-                showBlur = showBlur,
+                showBlur = blurKindState.showBlur,
                 onNavigateToSearch = onNavigateToSearch,
                 onNavigateToQrCode = onNavigateToQrCode,
                 onNavigateToImages = onNavigateToImages,
@@ -185,8 +197,8 @@ fun CivitAiScreen(
                 sort = viewModel.sort,
                 onSortChange = { viewModel.sort = it },
                 onRefresh = lazyPagingItems::refresh,
-                modifier = Modifier.hazeEffect(hazeState, hazeStyle) {
-                    progressive = if (useProgressive)
+                modifier = Modifier.setBlurKind(blurKindState) {
+                    progressive = if (blurKindState.hazeState.useProgressive)
                         HazeProgressive.verticalGradient(
                             startIntensity = 1f,
                             endIntensity = 0f,
@@ -200,10 +212,10 @@ fun CivitAiScreen(
         rail = { CivitRail() },
         bottomBar = {
             CivitBottomBar(
-                showBlur = showBlur,
+                showBlur = blurKindState.showBlur,
                 bottomBarScrollBehavior = bottomBarScrollBehavior,
-                modifier = Modifier.hazeEffect(hazeState, hazeStyle) {
-                    progressive = if (useProgressive)
+                modifier = Modifier.setBlurKind(blurKindState) {
+                    progressive = if (blurKindState.hazeState.useProgressive)
                         HazeProgressive.verticalGradient(
                             startIntensity = 0f,
                             endIntensity = 1f,
@@ -251,7 +263,7 @@ fun CivitAiScreen(
                 verticalArrangement = Arrangement.spacedBy(4.dp),
                 horizontalArrangement = Arrangement.spacedBy(4.dp),
                 modifier = Modifier
-                    .hazeSource(state = hazeState)
+                    .setBlurKindSource(blurKindState)
                     .fillMaxSize()
             ) {
                 modelItems(

@@ -59,12 +59,11 @@ import com.programmersbox.common.adaptiveGridCell
 import com.programmersbox.common.db.FavoritesDao
 import com.programmersbox.common.presentation.components.ImageSheet
 import com.programmersbox.common.presentation.components.LoadingImage
+import com.programmersbox.common.presentation.components.rememberBlurKindState
+import com.programmersbox.common.presentation.components.setBlurKind
+import com.programmersbox.common.presentation.components.setBlurKindSource
 import com.programmersbox.common.presentation.home.BlacklistHandling
 import dev.chrisbanes.haze.HazeProgressive
-import dev.chrisbanes.haze.LocalHazeStyle
-import dev.chrisbanes.haze.hazeEffect
-import dev.chrisbanes.haze.hazeSource
-import dev.chrisbanes.haze.rememberHazeState
 import org.koin.compose.koinInject
 import org.koin.compose.viewmodel.koinViewModel
 
@@ -80,13 +79,10 @@ fun CivitAiModelImagesScreen(
     val dataStore = koinInject<DataStore>()
     val showNsfw by dataStore.showNsfw()
     val nsfwBlurStrength by dataStore.hideNsfwStrength()
-    val showBlur by dataStore.rememberShowBlur()
-    val useProgressive by dataStore.rememberUseProgressive()
     val uriHandler = LocalUriHandler.current
     val lazyPagingItems = viewModel.pager.collectAsLazyPagingItems()
 
-    val hazeState = rememberHazeState(showBlur)
-    val hazeStyle = LocalHazeStyle.current
+    val blurKindState = rememberBlurKindState()
 
     val favoriteList by viewModel
         .favoriteList
@@ -143,10 +139,12 @@ fun CivitAiModelImagesScreen(
                 },
                 navigationIcon = { BackButton() },
                 actions = { Text("(${lazyPagingItems.itemCount})") },
-                colors = if (showBlur) TopAppBarDefaults.topAppBarColors(containerColor = Color.Transparent)
+                colors = if (blurKindState.showBlur) TopAppBarDefaults.topAppBarColors(
+                    containerColor = Color.Transparent
+                )
                 else TopAppBarDefaults.topAppBarColors(),
-                modifier = Modifier.hazeEffect(hazeState, hazeStyle) {
-                    progressive = if (useProgressive)
+                modifier = Modifier.setBlurKind(blurKindState) {
+                    progressive = if (blurKindState.hazeState.useProgressive)
                         HazeProgressive.verticalGradient(
                             startIntensity = 1f,
                             endIntensity = 0f,
@@ -164,7 +162,7 @@ fun CivitAiModelImagesScreen(
             verticalArrangement = Arrangement.spacedBy(4.dp),
             horizontalArrangement = Arrangement.spacedBy(4.dp),
             modifier = Modifier
-                .hazeSource(state = hazeState)
+                .setBlurKindSource(blurKindState)
                 .fillMaxSize()
         ) {
             items(

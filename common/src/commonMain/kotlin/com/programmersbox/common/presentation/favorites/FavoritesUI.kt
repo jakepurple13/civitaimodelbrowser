@@ -98,7 +98,10 @@ import com.programmersbox.common.presentation.components.ListChoiceScreen
 import com.programmersbox.common.presentation.components.LoadingImage
 import com.programmersbox.common.presentation.components.ModelCard
 import com.programmersbox.common.presentation.components.ModelOptionsType
+import com.programmersbox.common.presentation.components.rememberBlurKindState
 import com.programmersbox.common.presentation.components.rememberModelOptionsScope
+import com.programmersbox.common.presentation.components.setBlurKind
+import com.programmersbox.common.presentation.components.setBlurKindSource
 import com.programmersbox.common.presentation.home.CardContent
 import com.programmersbox.common.presentation.qrcode.QrCodeType
 import com.programmersbox.common.presentation.qrcode.ShareViaQrCode
@@ -121,10 +124,6 @@ import com.programmersbox.resources.unfavorite
 import com.programmersbox.resources.view_creators_models
 import com.programmersbox.resources.view_model
 import dev.chrisbanes.haze.HazeProgressive
-import dev.chrisbanes.haze.LocalHazeStyle
-import dev.chrisbanes.haze.hazeEffect
-import dev.chrisbanes.haze.hazeSource
-import dev.chrisbanes.haze.rememberHazeState
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.koinInject
@@ -151,15 +150,12 @@ fun FavoritesUI(
     val showNsfw by dataStore.showNsfw()
     val blurStrength by dataStore.hideNsfwStrength()
     var reverseFavorites by dataStore.rememberReverseFavorites()
-    val showBlur by dataStore.rememberShowBlur()
-    val useProgressive by dataStore.rememberUseProgressive()
     val useNewCardLook by dataStore.rememberUseNewCardLook()
     val lazyGridState = rememberLazyGridState()
 
     var showSortedByDialog by remember { mutableStateOf(false) }
 
-    val hazeState = rememberHazeState(showBlur)
-    val hazeStyle = LocalHazeStyle.current
+    val blurKindState = rememberBlurKindState()
 
     val typeList by viewModel
         .typeList
@@ -178,11 +174,11 @@ fun FavoritesUI(
     WindowedScaffold(
         topBar = {
             Surface(
-                color = if (showBlur) Color.Transparent else MaterialTheme.colorScheme.surface
+                color = if (blurKindState.showBlur) Color.Transparent else MaterialTheme.colorScheme.surface
             ) {
                 Column(
-                    modifier = Modifier.hazeEffect(hazeState, hazeStyle) {
-                        progressive = if (useProgressive)
+                    modifier = Modifier.setBlurKind(blurKindState) {
+                        progressive = if (blurKindState.hazeState.useProgressive)
                             HazeProgressive.verticalGradient(
                                 startIntensity = 1f,
                                 endIntensity = 0f,
@@ -194,12 +190,12 @@ fun FavoritesUI(
                 ) {
                     val appBarWithSearchColors = SearchBarDefaults.appBarWithSearchColors(
                         searchBarColors = SearchBarDefaults.colors(
-                            containerColor = if (showBlur)
+                            containerColor = if (blurKindState.showBlur)
                                 Color.Transparent
                             else
                                 MaterialTheme.colorScheme.surfaceContainerHigh
                         ),
-                        appBarContainerColor = if (showBlur)
+                        appBarContainerColor = if (blurKindState.showBlur)
                             Color.Transparent
                         else
                             MaterialTheme.colorScheme.surface
@@ -335,10 +331,10 @@ fun FavoritesUI(
         rail = { CivitRail() },
         bottomBar = {
             CivitBottomBar(
-                showBlur = showBlur,
+                showBlur = blurKindState.showBlur,
                 bottomBarScrollBehavior = bottomBarScrollBehavior,
-                modifier = Modifier.hazeEffect(hazeState, hazeStyle) {
-                    progressive = if (useProgressive)
+                modifier = Modifier.setBlurKind(blurKindState) {
+                    progressive = if (blurKindState.hazeState.useProgressive)
                         HazeProgressive.verticalGradient(
                             startIntensity = 0f,
                             endIntensity = 1f,
@@ -361,7 +357,7 @@ fun FavoritesUI(
             contentPadding = padding,
             modifier = Modifier
                 .padding(4.dp)
-                .hazeSource(state = hazeState)
+                .setBlurKindSource(blurKindState)
                 .fillMaxSize()
         ) {
             items(

@@ -1,6 +1,7 @@
 [versions]
 appVersion = "4.7.3"
 alarmee = "2.6.0"
+backdrop = "2.0.0-alpha03"
 biometricauth = "1.1.0"
 biometricVersion = "1.4.0-alpha05"
 blurhashVersion = "0.0-4-ALPHA"
@@ -90,6 +91,7 @@ androidx-browser = { module = "androidx.browser:browser", version.ref = "browser
 androidx-core = { module = "androidx.core:core-ktx", version = "1.17.0" }
 androidx-activity-compose = "androidx.activity:activity-compose:1.12.4"
 androidx-work-runtime-ktx = { module = "androidx.work:work-runtime-ktx", version.ref = "workRuntimeKtx" }
+backdrop = { module = "io.github.kyant0:backdrop", version.ref = "backdrop" }
 biometricauth = { module = "io.github.zaval:biometricauth", version.ref = "biometricauth" }
 chroma-dial = { module = "com.sinasamaki:chroma-dial", version.ref = "chromaDial" }
 compose-multiplatform-media-player = { module = "network.chaintech:compose-multiplatform-media-player", version.ref = "composeMultiplatformMediaPlayerVersion" }

@@ -100,6 +100,9 @@ import com.programmersbox.common.presentation.components.ImageSheet
 import com.programmersbox.common.presentation.components.LoadingImage
 import com.programmersbox.common.presentation.components.ModelCard
 import com.programmersbox.common.presentation.components.ModelOptionsSheet
+import com.programmersbox.common.presentation.components.rememberBlurKindState
+import com.programmersbox.common.presentation.components.setBlurKind
+import com.programmersbox.common.presentation.components.setBlurKindSource
 import com.programmersbox.common.presentation.favorites.CoverCard
 import com.programmersbox.resources.Res
 import com.programmersbox.resources.cancel
@@ -146,14 +149,11 @@ fun ListDetailScreen(
     val connectionRepository = koinInject<NetworkConnectionRepository>()
     val shouldShowMedia by remember { derivedStateOf { connectionRepository.shouldShowMedia } }
     val dataStore = koinInject<DataStore>()
-    val showBlur by dataStore.rememberShowBlur()
     val showNsfw by dataStore.showNsfw()
     val blurStrength by dataStore.hideNsfwStrength()
     val useNewCardLook by dataStore.rememberUseNewCardLook()
 
-    val useProgressive by dataStore.rememberUseProgressive()
-    val hazeState = rememberHazeState(showBlur)
-    val hazeStyle = LocalHazeStyle.current
+    val blurKindState = rememberBlurKindState()
 
     val list = viewModel.customList
 
@@ -232,12 +232,12 @@ fun ListDetailScreen(
         topBar = {
             val appBarWithSearchColors = SearchBarDefaults.appBarWithSearchColors(
                 searchBarColors = SearchBarDefaults.colors(
-                    containerColor = if (showBlur)
+                    containerColor = if (blurKindState.showBlur)
                         Color.Transparent
                     else
                         MaterialTheme.colorScheme.surfaceContainerHigh
                 ),
-                appBarContainerColor = if (showBlur)
+                appBarContainerColor = if (blurKindState.showBlur)
                     Color.Transparent
                 else
                     MaterialTheme.colorScheme.surface
@@ -279,8 +279,8 @@ fun ListDetailScreen(
                     ) { Icon(Icons.Default.Info, null) }
                 },
                 colors = appBarWithSearchColors,
-                modifier = Modifier.hazeEffect(hazeState) {
-                    progressive = if (useProgressive)
+                modifier = Modifier.setBlurKind(blurKindState) {
+                    progressive = if (blurKindState.hazeState.useProgressive)
                         HazeProgressive.verticalGradient(
                             startIntensity = 1f,
                             endIntensity = 0f,
@@ -288,7 +288,6 @@ fun ListDetailScreen(
                         )
                     else
                         null
-                    style = hazeStyle
                 }
             )
         }
@@ -300,7 +299,7 @@ fun ListDetailScreen(
             columns = adaptiveGridCell(minCount = 3),
             modifier = Modifier
                 .fillMaxSize()
-                .hazeSource(state = hazeState)
+                .setBlurKindSource(blurKindState)
         ) {
             items(viewModel.searchedList) { item ->
                 var sheetDetails by remember { mutableStateOf(false) }

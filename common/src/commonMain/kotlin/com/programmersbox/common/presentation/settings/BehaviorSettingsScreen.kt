@@ -25,6 +25,7 @@ import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.CreditCard
 import androidx.compose.material.icons.filled.CreditCardOff
 import androidx.compose.material.icons.filled.DarkMode
+import androidx.compose.material.icons.filled.Deblur
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material.icons.filled.SettingsSystemDaydream
@@ -65,12 +66,14 @@ import com.programmersbox.common.DataStore
 import com.programmersbox.common.DoubleClickBehavior
 import com.programmersbox.common.HazeBlur
 import com.programmersbox.common.ThemeMode
+import com.programmersbox.common.presentation.components.BlurKind
 import com.programmersbox.common.presentation.components.DiagonalWipeIcon
 import com.programmersbox.common.presentation.components.DiagonalWipeIconDefaults
 import com.programmersbox.common.presentation.components.WipeDirection
 import com.programmersbox.resources.Res
 import com.programmersbox.resources.behavior_settings
 import com.programmersbox.resources.blur_type
+import com.programmersbox.resources.cancel
 import com.programmersbox.resources.civitai_logo
 import com.programmersbox.resources.confirm
 import com.programmersbox.resources.double_click_behavior
@@ -170,9 +173,57 @@ fun BehaviorSettings(
             AnimatedVisibility(showBlur) {
                 var showBlurOptions by remember { mutableStateOf(false) }
 
+                var blurKind by dataStore.rememberBlurKind()
+                var showBlurKindDialog by remember { mutableStateOf(false) }
+
+                if (showBlurKindDialog) {
+                    AlertDialog(
+                        onDismissRequest = { showBlurKindDialog = false },
+                        title = { Text("Choose Blur Kind") },
+                        text = {
+                            Column(
+                                verticalArrangement = Arrangement.spacedBy(16.dp)
+                            ) {
+                                BlurKind.entries.forEach {
+                                    ListItem(
+                                        content = { Text(it.name) },
+                                        onClick = { blurKind = it },
+                                        trailingContent = {
+                                            RadioButton(
+                                                selected = it == blurKind,
+                                                onClick = null
+                                            )
+                                        }
+                                    )
+                                }
+                            }
+                        },
+                        confirmButton = {
+                            TextButton(
+                                onClick = { showBlurKindDialog = false }
+                            ) { Text(stringResource(Res.string.confirm)) }
+                        },
+                        dismissButton = {
+                            TextButton(
+                                onClick = { showBlurKindDialog = false }
+                            ) { Text(stringResource(Res.string.cancel)) }
+                        }
+                    )
+                }
+
                 Column(
                     verticalArrangement = Arrangement.spacedBy(ListItemDefaults.SegmentedGap)
                 ) {
+                    SegmentedListItem(
+                        leadingContent = { Icon(Icons.Default.Deblur, null) },
+                        content = { Text("Blur Kind") },
+                        supportingContent = { Text("Choose the kind of blur to use.\nCurrently selected ${blurKind.name}") },
+                        trailingContent = { Icon(Icons.Default.ArrowDropDown, null) },
+                        colors = colors,
+                        onClick = { showBlurKindDialog = true },
+                        shapes = ListItemDefaults.segmentedShapes(1, 4)
+                    )
+
                     SegmentedListItem(
                         leadingContent = {
                             DiagonalWipeIcon(
@@ -194,7 +245,7 @@ fun BehaviorSettings(
                         checked = useProgressive,
                         onCheckedChange = { useProgressive = it },
                         colors = colors,
-                        shapes = ListItemDefaults.segmentedShapes(1, 3)
+                        shapes = ListItemDefaults.segmentedShapes(2, 4)
                     )
 
                     SegmentedListItem(
@@ -204,7 +255,7 @@ fun BehaviorSettings(
                         checked = showBlurOptions,
                         onCheckedChange = { showBlurOptions = it },
                         colors = colors,
-                        shapes = ListItemDefaults.segmentedShapes(2, 3)
+                        shapes = ListItemDefaults.segmentedShapes(3, 4)
                     )
 
                     AnimatedVisibility(showBlurOptions) {

@@ -94,7 +94,7 @@ class BlurKindLiquidState(
 
 fun Modifier.setBlurKind(
     blurKindState: BlurKindState,
-    hazeScope: HazeEffectScope.() -> Unit
+    hazeScope: HazeEffectScope.() -> Unit = {}
 ) = setBlurKind(
     blurKind = blurKindState.blurKind,
     hazeState = blurKindState.hazeState.hazeState,

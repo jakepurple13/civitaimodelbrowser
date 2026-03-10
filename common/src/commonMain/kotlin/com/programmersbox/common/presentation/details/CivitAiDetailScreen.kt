@@ -107,20 +107,18 @@ import com.programmersbox.common.db.BlacklistedItemRoom
 import com.programmersbox.common.db.FavoriteType
 import com.programmersbox.common.db.FavoritesDao
 import com.programmersbox.common.db.ListRepository
+import com.programmersbox.common.presentation.components.BlurKindState
 import com.programmersbox.common.presentation.components.DiagonalWipeIcon
 import com.programmersbox.common.presentation.components.ImageSheet
 import com.programmersbox.common.presentation.components.ListChoiceScreen
 import com.programmersbox.common.presentation.components.LoadingImage
+import com.programmersbox.common.presentation.components.rememberBlurKindState
+import com.programmersbox.common.presentation.components.setBlurKind
+import com.programmersbox.common.presentation.components.setBlurKindSource
 import com.programmersbox.common.presentation.home.BlacklistHandling
 import com.programmersbox.common.presentation.qrcode.QrCodeType
 import com.programmersbox.common.presentation.qrcode.ShareViaQrCode
 import dev.chrisbanes.haze.HazeProgressive
-import dev.chrisbanes.haze.HazeState
-import dev.chrisbanes.haze.HazeStyle
-import dev.chrisbanes.haze.LocalHazeStyle
-import dev.chrisbanes.haze.hazeEffect
-import dev.chrisbanes.haze.hazeSource
-import dev.chrisbanes.haze.rememberHazeState
 import kotlinx.coroutines.launch
 import org.koin.compose.koinInject
 import org.koin.compose.viewmodel.koinViewModel
@@ -140,16 +138,13 @@ fun CivitAiDetailScreen(
     val shouldShowMedia by remember { derivedStateOf { connectionRepository.shouldShowMedia } }
     val dao = koinInject<FavoritesDao>()
     val dataStore = koinInject<DataStore>()
-    val showBlur by dataStore.rememberShowBlur()
     val showNsfw by dataStore.showNsfw()
-    val useProgressive by dataStore.rememberUseProgressive()
     val nsfwBlurStrength by dataStore.hideNsfwStrength()
     val useToolbar by dataStore.rememberUseToolbar()
 
     val blacklisted by dao.getBlacklisted().collectAsStateWithLifecycle(emptyList())
 
-    val hazeState = rememberHazeState(showBlur)
-    val hazeStyle = LocalHazeStyle.current
+    val blurKindState = rememberBlurKindState()
 
     when (val model = viewModel.models) {
         is DetailViewState.Content -> {
@@ -287,12 +282,12 @@ fun CivitAiDetailScreen(
                                 }
                             }
                         },
-                        colors = if (showBlur)
+                        colors = if (blurKindState.showBlur)
                             TopAppBarDefaults.topAppBarColors(containerColor = Color.Transparent)
                         else
                             TopAppBarDefaults.topAppBarColors(),
-                        modifier = Modifier.hazeEffect(hazeState, hazeStyle) {
-                            progressive = if (useProgressive)
+                        modifier = Modifier.setBlurKind(blurKindState) {
+                            progressive = if (blurKindState.hazeState.useProgressive)
                                 HazeProgressive.verticalGradient(
                                     startIntensity = 1f,
                                     endIntensity = 0f,
@@ -310,13 +305,10 @@ fun CivitAiDetailScreen(
                             isFavorite = isFavorite,
                             addToFavorites = viewModel::addToFavorites,
                             removeFromFavorites = viewModel::removeFromFavorites,
-                            showBlur = showBlur,
-                            hazeState = hazeState,
-                            hazeStyle = hazeStyle,
                             onNavigateToDetailImages = onNavigateToDetailImages,
                             onShowQrCode = { showQrCode = true },
                             model = model,
-                            useProgressive = useProgressive
+                            blurKindState = blurKindState,
                         )
                     }
                 },
@@ -348,7 +340,7 @@ fun CivitAiDetailScreen(
                     verticalArrangement = Arrangement.spacedBy(12.dp),
                     horizontalArrangement = Arrangement.spacedBy(12.dp),
                     modifier = Modifier
-                        .hazeSource(state = hazeState)
+                        .setBlurKindSource(blurKindState)
                         .fillMaxSize()
                 ) {
                     item(
@@ -900,13 +892,10 @@ private fun BottomBarContent(
     isFavorite: Boolean,
     removeFromFavorites: () -> Unit,
     addToFavorites: () -> Unit,
-    showBlur: Boolean,
-    useProgressive: Boolean,
-    hazeState: HazeState,
-    hazeStyle: HazeStyle,
     onNavigateToDetailImages: (Long, String) -> Unit,
     onShowQrCode: () -> Unit,
     model: DetailViewState.Content,
+    blurKindState: BlurKindState
 ) {
     val scope = rememberCoroutineScope()
     var showLists by remember { mutableStateOf(false) }
@@ -994,9 +983,9 @@ private fun BottomBarContent(
                 label = { Text("Images") },
             )
         },
-        containerColor = if (showBlur) Color.Transparent else BottomAppBarDefaults.containerColor,
-        modifier = Modifier.hazeEffect(hazeState, hazeStyle) {
-            progressive = if (useProgressive)
+        containerColor = if (blurKindState.showBlur) Color.Transparent else BottomAppBarDefaults.containerColor,
+        modifier = Modifier.setBlurKind(blurKindState) {
+            progressive = if (blurKindState.hazeState.useProgressive)
                 HazeProgressive.verticalGradient(
                     startIntensity = 0f,
                     endIntensity = 1f,

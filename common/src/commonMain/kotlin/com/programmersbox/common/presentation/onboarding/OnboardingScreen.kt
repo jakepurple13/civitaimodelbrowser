@@ -28,6 +28,7 @@ import com.programmersbox.common.DataStore
 import com.programmersbox.common.presentation.onboarding.topics.FinishContent
 import com.programmersbox.common.presentation.onboarding.topics.WelcomeContent
 import com.programmersbox.common.presentation.settings.BehaviorSettings
+import com.programmersbox.common.presentation.settings.BlurSettings
 import com.programmersbox.common.presentation.settings.NsfwSettings
 import com.programmersbox.resources.Res
 import com.programmersbox.resources.back
@@ -58,6 +59,7 @@ fun OnboardingScreen(
         item { WelcomeContent() }
         item { NsfwOnboarding(dataStore) }
         item { BehaviorOnboarding(dataStore) }
+        item { BlurOnboarding(dataStore) }
         item { FinishContent() }
     }
     val pagerState = rememberPagerState { onboardingScope.size }
@@ -163,5 +165,14 @@ private fun BehaviorOnboarding(dataStore: DataStore) {
         modifier = Modifier.fillMaxSize()
     ) {
         BehaviorSettings(dataStore)
+    }
+}
+
+@Composable
+private fun BlurOnboarding(dataStore: DataStore) {
+    Column(
+        modifier = Modifier.fillMaxSize()
+    ) {
+        BlurSettings(dataStore = dataStore)
     }
 }

@@ -27,6 +27,7 @@ import com.programmersbox.common.presentation.components.ToasterState
 import com.programmersbox.common.presentation.qrcode.QrCodeRepository
 import com.programmersbox.common.presentation.settings.AboutScreen
 import com.programmersbox.common.presentation.settings.BehaviorSettingsScreen
+import com.programmersbox.common.presentation.settings.BlurSettingsScreen
 import com.programmersbox.common.presentation.settings.NsfwSettingsScreen
 import com.programmersbox.common.presentation.settings.StatsScreen
 import com.programmersbox.desktop.BuildKonfig
@@ -34,6 +35,7 @@ import com.programmersbox.desktop.resources.DesktopResources
 import com.programmersbox.desktop.resources.new_about_window
 import com.programmersbox.desktop.resources.new_backup_window
 import com.programmersbox.desktop.resources.new_behavior_settings_window
+import com.programmersbox.desktop.resources.new_blur_settings_window
 import com.programmersbox.desktop.resources.new_nsfw_settings_window
 import com.programmersbox.desktop.resources.new_restore_window
 import com.programmersbox.desktop.resources.new_stats_window
@@ -190,6 +192,10 @@ fun main() {
                                         stringResource(DesktopResources.string.new_behavior_settings_window),
                                         onClick = { appState.openNewWindow(Screen.Settings.Behavior) }
                                     )
+                                    Item(
+                                        stringResource(DesktopResources.string.new_blur_settings_window),
+                                        onClick = { appState.openNewWindow(Screen.Settings.Behavior.Blur) }
+                                    )
                                 }
                                 Separator()
                                 Item(
@@ -294,7 +300,10 @@ private fun MyWindow(
         Screen.Settings.Restore -> RestoreScreen()
         Screen.Settings.About -> AboutScreen()
         Screen.Settings.Nsfw -> NsfwSettingsScreen()
-        Screen.Settings.Behavior -> BehaviorSettingsScreen()
+        Screen.Settings.Behavior.Blur -> BlurSettingsScreen()
+        Screen.Settings.Behavior -> BehaviorSettingsScreen(
+            onNavigateToBlurSettings = null
+        )
     }
 }
 

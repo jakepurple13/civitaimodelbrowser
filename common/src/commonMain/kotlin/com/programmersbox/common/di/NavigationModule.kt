@@ -31,6 +31,7 @@ import com.programmersbox.common.presentation.onboarding.OnboardingScreen
 import com.programmersbox.common.presentation.qrcode.ScanQrCode
 import com.programmersbox.common.presentation.settings.AboutScreen
 import com.programmersbox.common.presentation.settings.BehaviorSettingsScreen
+import com.programmersbox.common.presentation.settings.BlurSettingsScreen
 import com.programmersbox.common.presentation.settings.NsfwSettingsScreen
 import com.programmersbox.common.presentation.settings.SettingsScreen
 import com.programmersbox.common.presentation.settings.StatsScreen
@@ -227,7 +228,13 @@ private fun Module.settingsNavigation() {
     settingsNavigation<Screen.Settings.Stats> { StatsScreen() }
     settingsNavigation<Screen.Settings.About> { AboutScreen() }
     settingsNavigation<Screen.Settings.Nsfw> { NsfwSettingsScreen() }
-    settingsNavigation<Screen.Settings.Behavior> { BehaviorSettingsScreen() }
+    settingsNavigation<Screen.Settings.Behavior> {
+        val backStack = koinInject<NavigationHandler>().backStack
+        BehaviorSettingsScreen(
+            onNavigateToBlurSettings = { backStack.add(Screen.Settings.Behavior.Blur) }
+        )
+    }
+    settingsNavigation<Screen.Settings.Behavior.Blur> { BlurSettingsScreen() }
 
     platformSettingsNavigation()
 }

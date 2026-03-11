@@ -21,7 +21,6 @@ import com.programmersbox.common.DataStore
 import dev.chrisbanes.haze.HazeEffectScope
 import dev.chrisbanes.haze.HazeState
 import dev.chrisbanes.haze.HazeStyle
-import dev.chrisbanes.haze.LocalHazeStyle
 import dev.chrisbanes.haze.hazeEffect
 import dev.chrisbanes.haze.hazeSource
 import dev.chrisbanes.haze.rememberHazeState
@@ -37,9 +36,10 @@ fun rememberBlurKindState(
     val useProgressive by dataStore.rememberUseProgressive()
 
     val blurKind by dataStore.rememberBlurKind()
+    val blurType by dataStore.rememberBlurType()
 
     val hazeState = rememberHazeState(showBlur)
-    val hazeStyle = LocalHazeStyle.current
+    val hazeStyle = blurType.toHazeStyle()
 
     val backdrop = rememberLayerBackdrop {
         drawRect(backgroundColor)
@@ -118,8 +118,13 @@ fun Modifier.setBlurKind(
         shape = { RoundedCornerShape(1.dp) },
         effects = {
             vibrancy()
-            blur(4f.dp.toPx())
-            lens(16f.dp.toPx(), 32f.dp.toPx())
+            blur(1f.dp.toPx())
+            lens(
+                refractionHeight = 12.dp.toPx(),
+                refractionAmount = 32.dp.toPx(),
+                depthEffect = true,
+                chromaticAberration = true
+            )
         },
         onDrawSurface = { drawRect(backgroundColor.copy(alpha = 0.5f)) }
     )

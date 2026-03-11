@@ -17,6 +17,7 @@ import com.kyant.backdrop.drawBackdrop
 import com.kyant.backdrop.effects.blur
 import com.kyant.backdrop.effects.lens
 import com.kyant.backdrop.effects.vibrancy
+import com.kyant.backdrop.highlight.Highlight
 import com.programmersbox.common.DataStore
 import dev.chrisbanes.haze.HazeEffectScope
 import dev.chrisbanes.haze.HazeState
@@ -126,7 +127,8 @@ fun Modifier.setBlurKind(
                 chromaticAberration = true
             )
         },
-        onDrawSurface = { drawRect(backgroundColor.copy(alpha = 0.5f)) }
+        onDrawSurface = { drawRect(backgroundColor.copy(alpha = 0.5f)) },
+        highlight = { Highlight.Ambient }
     )
 }
 

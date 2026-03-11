@@ -41,6 +41,7 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.FloatingActionButton
+import androidx.compose.material3.FloatingActionButtonDefaults
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -91,6 +92,7 @@ import com.programmersbox.common.db.FavoriteType
 import com.programmersbox.common.db.FavoritesDao
 import com.programmersbox.common.db.ListRepository
 import com.programmersbox.common.isScrollingUp
+import com.programmersbox.common.presentation.components.BlurKind
 import com.programmersbox.common.presentation.components.CivitBottomBar
 import com.programmersbox.common.presentation.components.CivitRail
 import com.programmersbox.common.presentation.components.ImageSheet
@@ -98,6 +100,7 @@ import com.programmersbox.common.presentation.components.ListChoiceScreen
 import com.programmersbox.common.presentation.components.LoadingImage
 import com.programmersbox.common.presentation.components.ModelCard
 import com.programmersbox.common.presentation.components.ModelOptionsType
+import com.programmersbox.common.presentation.components.floatingActionButtonBlurKind
 import com.programmersbox.common.presentation.components.rememberBlurKindState
 import com.programmersbox.common.presentation.components.rememberModelOptionsScope
 import com.programmersbox.common.presentation.components.setBlurKind
@@ -323,8 +326,21 @@ fun FavoritesUI(
                 enter = fadeIn() + slideInHorizontally { it },
                 exit = slideOutHorizontally { it } + fadeOut()
             ) {
+                val shape = FloatingActionButtonDefaults.shape
                 FloatingActionButton(
                     onClick = { scope.launch { lazyGridState.animateScrollToItem(0) } },
+                    containerColor = if (blurKindState.showBlur && blurKindState.blurKind == BlurKind.LiquidGlass)
+                        Color.Transparent
+                    else
+                        FloatingActionButtonDefaults.containerColor,
+                    elevation = if (blurKindState.showBlur && blurKindState.blurKind == BlurKind.LiquidGlass)
+                        FloatingActionButtonDefaults.elevation(0.dp)
+                    else
+                        FloatingActionButtonDefaults.elevation(),
+                    modifier = Modifier.floatingActionButtonBlurKind(
+                        blurKindState = blurKindState,
+                        shape = shape,
+                    )
                 ) { Icon(Icons.Default.ArrowUpward, null) }
             }
         },

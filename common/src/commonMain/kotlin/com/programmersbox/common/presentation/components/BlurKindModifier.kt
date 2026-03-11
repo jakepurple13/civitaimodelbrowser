@@ -8,6 +8,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.unit.dp
 import com.kyant.backdrop.Backdrop
 import com.kyant.backdrop.backdrops.LayerBackdrop
@@ -102,19 +103,21 @@ fun Modifier.setBlurKind(
     hazeStyle = blurKindState.hazeState.hazeStyle,
     backdrop = blurKindState.liquidState.backdrop,
     backgroundColor = blurKindState.liquidState.backgroundColor,
+    showBlur = blurKindState.showBlur,
     hazeScope = hazeScope
 )
 
-fun Modifier.setBlurKind(
+private fun Modifier.setBlurKind(
     blurKind: BlurKind,
     hazeState: HazeState,
     hazeStyle: HazeStyle,
     backdrop: Backdrop,
     backgroundColor: Color,
+    showBlur: Boolean,
     hazeScope: HazeEffectScope.() -> Unit
 ) = when (blurKind) {
-    BlurKind.Haze -> hazeEffect(hazeState, hazeStyle, hazeScope)
-    BlurKind.LiquidGlass -> drawBackdrop(
+    BlurKind.Haze if showBlur -> hazeEffect(hazeState, hazeStyle, hazeScope)
+    BlurKind.LiquidGlass if showBlur -> drawBackdrop(
         backdrop = backdrop,
         shape = { RoundedCornerShape(1.dp) },
         effects = {
@@ -130,14 +133,53 @@ fun Modifier.setBlurKind(
         onDrawSurface = { drawRect(backgroundColor.copy(alpha = 0.5f)) },
         highlight = { Highlight.Ambient }
     )
+
+    else -> this
 }
 
-fun Modifier.setBlurKindSource(blurKindState: BlurKindState) =
-    hazeSource(state = blurKindState.hazeState.hazeState)
-        .layerBackdrop(blurKindState.liquidState.backdrop)
+fun Modifier.setBlurKindSource(blurKindState: BlurKindState) = when (blurKindState.blurKind) {
+    BlurKind.Haze if blurKindState.showBlur -> hazeSource(blurKindState.hazeState.hazeState)
+    BlurKind.LiquidGlass if blurKindState.showBlur -> layerBackdrop(blurKindState.liquidState.backdrop)
+    else -> this
+}
 
 @Serializable
 enum class BlurKind {
     Haze,
     LiquidGlass
+}
+
+fun Modifier.floatingActionButtonBlurKind(
+    blurKindState: BlurKindState,
+    shape: Shape
+) = when (blurKindState.blurKind) {
+    BlurKind.Haze if blurKindState.showBlur -> this
+    BlurKind.LiquidGlass if blurKindState.showBlur -> drawBackdrop(
+        backdrop = blurKindState.liquidState.backdrop,
+        shape = { shape },
+        effects = {
+            vibrancy()
+            blur(1f.dp.toPx())
+            lens(
+                refractionHeight = 16.dp.toPx(),
+                refractionAmount = 38.dp.toPx(),
+                depthEffect = true,
+                chromaticAberration = true
+            )
+        },
+        onDrawSurface = {
+            drawRect(
+                blurKindState
+                    .liquidState
+                    .backgroundColor
+                    .copy(alpha = 0.5f)
+            )
+        },
+        highlight = if (blurKindState.blurKind == BlurKind.LiquidGlass) {
+            { Highlight.Default }
+        } else null,
+        shadow = null
+    )
+
+    else -> this
 }

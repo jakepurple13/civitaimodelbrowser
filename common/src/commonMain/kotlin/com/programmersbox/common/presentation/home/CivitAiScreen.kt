@@ -25,7 +25,6 @@ import androidx.compose.foundation.lazy.grid.LazyGridScope
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Sort
 import androidx.compose.material.icons.filled.ArrowUpward
@@ -45,6 +44,7 @@ import androidx.compose.material3.ElevatedAssistChip
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.FloatingActionButton
+import androidx.compose.material3.FloatingActionButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -73,7 +73,6 @@ import androidx.compose.ui.draw.blur
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.style.TextAlign
@@ -87,13 +86,6 @@ import androidx.paging.compose.LazyPagingItems
 import androidx.paging.compose.collectAsLazyPagingItems
 import androidx.paging.compose.itemContentType
 import chaintech.videoplayer.ui.preview.VideoPreviewComposable
-import com.kyant.backdrop.Backdrop
-import com.kyant.backdrop.backdrops.layerBackdrop
-import com.kyant.backdrop.backdrops.rememberLayerBackdrop
-import com.kyant.backdrop.drawBackdrop
-import com.kyant.backdrop.effects.blur
-import com.kyant.backdrop.effects.lens
-import com.kyant.backdrop.effects.vibrancy
 import com.programmersbox.common.CivitSort
 import com.programmersbox.common.ComposableUtils
 import com.programmersbox.common.DataStore
@@ -109,23 +101,18 @@ import com.programmersbox.common.db.FavoriteType
 import com.programmersbox.common.db.FavoritesDao
 import com.programmersbox.common.isScrollingUp
 import com.programmersbox.common.paging.itemKeyIndexed
+import com.programmersbox.common.presentation.components.BlurKind
 import com.programmersbox.common.presentation.components.CivitBottomBar
 import com.programmersbox.common.presentation.components.CivitRail
 import com.programmersbox.common.presentation.components.LoadingImage
 import com.programmersbox.common.presentation.components.ModelCard
 import com.programmersbox.common.presentation.components.ModelOptionsSheet
+import com.programmersbox.common.presentation.components.floatingActionButtonBlurKind
 import com.programmersbox.common.presentation.components.rememberBlurKindState
 import com.programmersbox.common.presentation.components.setBlurKind
 import com.programmersbox.common.presentation.components.setBlurKindSource
 import com.programmersbox.common.showRefreshButton
-import dev.chrisbanes.haze.HazeEffectScope
 import dev.chrisbanes.haze.HazeProgressive
-import dev.chrisbanes.haze.HazeState
-import dev.chrisbanes.haze.HazeStyle
-import dev.chrisbanes.haze.LocalHazeStyle
-import dev.chrisbanes.haze.hazeEffect
-import dev.chrisbanes.haze.hazeSource
-import dev.chrisbanes.haze.rememberHazeState
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.launch
@@ -232,8 +219,21 @@ fun CivitAiScreen(
                 enter = fadeIn() + slideInHorizontally { it },
                 exit = slideOutHorizontally { it } + fadeOut()
             ) {
+                val shape = FloatingActionButtonDefaults.shape
                 FloatingActionButton(
                     onClick = { scope.launch { lazyGridState.animateScrollToItem(0) } },
+                    containerColor = if (blurKindState.showBlur && blurKindState.blurKind == BlurKind.LiquidGlass)
+                        Color.Transparent
+                    else
+                        FloatingActionButtonDefaults.containerColor,
+                    elevation = if (blurKindState.showBlur && blurKindState.blurKind == BlurKind.LiquidGlass)
+                        FloatingActionButtonDefaults.elevation(0.dp)
+                    else
+                        FloatingActionButtonDefaults.elevation(),
+                    modifier = Modifier.floatingActionButtonBlurKind(
+                        blurKindState = blurKindState,
+                        shape = shape,
+                    )
                 ) { Icon(Icons.Default.ArrowUpward, null) }
             }
         },

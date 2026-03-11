@@ -1,9 +1,9 @@
 package com.programmersbox.common.db
 
-import androidx.room.Entity
-import androidx.room.Fts4
-import androidx.room.RoomDatabase
-import androidx.room.migration.Migration
+import androidx.room3.Entity
+import androidx.room3.Fts4
+import androidx.room3.RoomDatabase
+import androidx.room3.migration.Migration
 import androidx.sqlite.SQLiteConnection
 import androidx.sqlite.execSQL
 
@@ -17,7 +17,7 @@ data class FavoriteRoomFts(
 )
 
 val MIGRATION_FAVORITES_FTS = object : Migration(12, 13) {
-    override fun migrate(connection: SQLiteConnection) {
+    override suspend fun migrate(connection: SQLiteConnection) {
         // 1. Create the FTS table
         // Note: Room generates a specific schema for contentEntity FTS tables.
         // We recreate that schema here.
@@ -44,7 +44,7 @@ val MIGRATION_FAVORITES_FTS = object : Migration(12, 13) {
 }
 
 val MIGRATION_FAVORITES_FTS_2 = object : Migration(13, 14) {
-    override fun migrate(connection: SQLiteConnection) {
+    override suspend fun migrate(connection: SQLiteConnection) {
         // 1. Drop the old FTS table (It's missing the 'type' column)
         connection.execSQL("DROP TABLE IF EXISTS `FavoriteRoomFts`")
 
@@ -95,7 +95,7 @@ data class CustomListInfoFts(
 fun getFtsCallback(): RoomDatabase.Callback {
     return object : RoomDatabase.Callback() {
         // Note: The argument is SQLiteConnection, not SupportSQLiteDatabase
-        override fun onCreate(connection: SQLiteConnection) {
+        override suspend fun onCreate(connection: SQLiteConnection) {
             super.onCreate(connection)
 
             // --- Triggers for CustomListItem ---
@@ -161,7 +161,7 @@ fun getFtsCallback(): RoomDatabase.Callback {
 
 // Replace '1' and '2' with your actual start and end versions
 val MIGRATION_FTS = object : Migration(11, 12) {
-    override fun migrate(connection: SQLiteConnection) {
+    override suspend fun migrate(connection: SQLiteConnection) {
         // 1. Create the FTS Table for Parents
         connection.execSQL(
             """
@@ -252,7 +252,7 @@ val MIGRATION_FTS = object : Migration(11, 12) {
 
 // Migration to add description field to CustomListItemFts
 val MIGRATION_FTS_CUSTOM_LIST_ITEM_DESCRIPTION = object : Migration(15, 16) {
-    override fun migrate(connection: SQLiteConnection) {
+    override suspend fun migrate(connection: SQLiteConnection) {
         // 1. Drop the old FTS table for CustomListItem (missing 'description' column)
         connection.execSQL("DROP TABLE IF EXISTS `CustomListItemFts`")
 

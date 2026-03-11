@@ -8,8 +8,9 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.datastore.core.DataStore
-import androidx.datastore.preferences.core.PreferenceDataStoreFactory
+import androidx.datastore.core.okio.OkioStorage
 import androidx.datastore.preferences.core.Preferences
+import androidx.datastore.preferences.core.PreferencesSerializer
 import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.floatPreferencesKey
@@ -19,6 +20,9 @@ import com.programmersbox.common.presentation.components.BlurKind
 import dev.chrisbanes.haze.HazeStyle
 import dev.chrisbanes.haze.materials.CupertinoMaterials
 import dev.chrisbanes.haze.materials.HazeMaterials
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.IO
+import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.firstOrNull
@@ -27,13 +31,23 @@ import kotlinx.coroutines.flow.mapNotNull
 import kotlinx.coroutines.launch
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
+import okio.FileSystem
 import okio.Path.Companion.toPath
+import okio.SYSTEM
 
 @Immutable
 class DataStore private constructor(
     producePath: () -> String = { "androidx.preferences_pb" },
 ) {
-    val dataStore = PreferenceDataStoreFactory.createWithPath { producePath().toPath() }
+
+    val dataStore = DataStore.Builder(
+        context = Dispatchers.IO + SupervisorJob(),
+        storage = OkioStorage<Preferences>(
+            fileSystem = FileSystem.SYSTEM,
+            serializer = PreferencesSerializer,
+            producePath = { producePath().toPath() }
+        )
+    ).build()
 
     companion object {
         lateinit var dataStore: com.programmersbox.common.DataStore

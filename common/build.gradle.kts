@@ -198,7 +198,7 @@ compose.resources {
     generateResClass = always
 }
 
-room {
+room3 {
     schemaDirectory("$projectDir/schemas")
 }
 

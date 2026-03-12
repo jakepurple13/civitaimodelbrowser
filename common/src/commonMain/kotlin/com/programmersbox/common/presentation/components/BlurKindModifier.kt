@@ -114,80 +114,81 @@ class BlurKindLiquidState(
     val chromaticAberration: Boolean,
 )
 
-fun Modifier.setBlurKind(
-    blurKindState: BlurKindState,
-    liquidGlassShape: () -> Shape = { RoundedCornerShape(1.dp) },
-    hazeScope: HazeEffectScope.() -> Unit = {}
-) = when (blurKindState.blurKind) {
-    BlurKind.Haze if blurKindState.showBlur -> hazeEffect(
-        state = blurKindState.hazeState.hazeState,
-        style = blurKindState.hazeState.hazeStyle,
-        block = hazeScope
-    )
-
-    BlurKind.LiquidGlass if blurKindState.showBlur -> drawBackdrop(
-        backdrop = blurKindState.liquidState.backdrop,
-        shape = liquidGlassShape,
-        effects = {
-            vibrancy()
-            blur(blurKindState.liquidState.blurAmount.dp.toPx())
-            lens(
-                refractionHeight = blurKindState.liquidState.refractionHeight.dp.toPx(),
-                refractionAmount = blurKindState.liquidState.refractionAmount.dp.toPx(),
-                depthEffect = blurKindState.liquidState.depthEffect,
-                chromaticAberration = blurKindState.liquidState.chromaticAberration
-            )
-        },
-        onDrawSurface = { drawRect(blurKindState.liquidState.backgroundColor.copy(alpha = 0.5f)) },
-        highlight = { Highlight.Ambient }
-    )
-
-    else -> this
-}
-
-fun Modifier.setBlurKindSource(blurKindState: BlurKindState) = when (blurKindState.blurKind) {
-    BlurKind.Haze if blurKindState.showBlur -> hazeSource(blurKindState.hazeState.hazeState)
-    BlurKind.LiquidGlass if blurKindState.showBlur -> layerBackdrop(blurKindState.liquidState.backdrop)
-    else -> this
-}
-
 @Serializable
 enum class BlurKind {
     Haze,
     LiquidGlass
 }
 
+fun Modifier.setBlurKind(
+    blurKindState: BlurKindState,
+    liquidGlassShape: () -> Shape = { RoundedCornerShape(1.dp) },
+    hazeScope: HazeEffectScope.() -> Unit = {}
+) = if (blurKindState.showBlur) {
+    when (blurKindState.blurKind) {
+        BlurKind.Haze -> hazeEffect(
+            state = blurKindState.hazeState.hazeState,
+            style = blurKindState.hazeState.hazeStyle,
+            block = hazeScope
+        )
+
+        BlurKind.LiquidGlass -> drawBackdrop(
+            backdrop = blurKindState.liquidState.backdrop,
+            shape = liquidGlassShape,
+            effects = {
+                vibrancy()
+                blur(blurKindState.liquidState.blurAmount.dp.toPx())
+                lens(
+                    refractionHeight = blurKindState.liquidState.refractionHeight.dp.toPx(),
+                    refractionAmount = blurKindState.liquidState.refractionAmount.dp.toPx(),
+                    depthEffect = blurKindState.liquidState.depthEffect,
+                    chromaticAberration = blurKindState.liquidState.chromaticAberration
+                )
+            },
+            onDrawSurface = { drawRect(blurKindState.liquidState.backgroundColor.copy(alpha = 0.5f)) },
+            highlight = { Highlight.Ambient }
+        )
+    }
+} else this
+
+fun Modifier.setBlurKindSource(blurKindState: BlurKindState) = if (blurKindState.showBlur) {
+    when (blurKindState.blurKind) {
+        BlurKind.Haze -> hazeSource(blurKindState.hazeState.hazeState)
+        BlurKind.LiquidGlass -> layerBackdrop(blurKindState.liquidState.backdrop)
+    }
+} else this
+
 fun Modifier.floatingActionButtonBlurKind(
     blurKindState: BlurKindState,
     shape: Shape
-) = when (blurKindState.blurKind) {
-    BlurKind.Haze if blurKindState.showBlur -> this
-    BlurKind.LiquidGlass if blurKindState.showBlur -> drawBackdrop(
-        backdrop = blurKindState.liquidState.backdrop,
-        shape = { shape },
-        effects = {
-            vibrancy()
-            blur(1f.dp.toPx())
-            lens(
-                refractionHeight = 16.dp.toPx(),
-                refractionAmount = 38.dp.toPx(),
-                depthEffect = true,
-                chromaticAberration = true
-            )
-        },
-        onDrawSurface = {
-            drawRect(
-                blurKindState
-                    .liquidState
-                    .backgroundColor
-                    .copy(alpha = 0.5f)
-            )
-        },
-        highlight = if (blurKindState.blurKind == BlurKind.LiquidGlass) {
-            { Highlight.Default }
-        } else null,
-        shadow = null
-    )
-
-    else -> this
-}
+) = if (blurKindState.showBlur) {
+    when (blurKindState.blurKind) {
+        BlurKind.Haze -> this
+        BlurKind.LiquidGlass -> drawBackdrop(
+            backdrop = blurKindState.liquidState.backdrop,
+            shape = { shape },
+            effects = {
+                vibrancy()
+                blur(1f.dp.toPx())
+                lens(
+                    refractionHeight = 16.dp.toPx(),
+                    refractionAmount = 38.dp.toPx(),
+                    depthEffect = true,
+                    chromaticAberration = true
+                )
+            },
+            onDrawSurface = {
+                drawRect(
+                    blurKindState
+                        .liquidState
+                        .backgroundColor
+                        .copy(alpha = 0.5f)
+                )
+            },
+            highlight = if (blurKindState.blurKind == BlurKind.LiquidGlass) {
+                { Highlight.Default }
+            } else null,
+            shadow = null
+        )
+    }
+} else this

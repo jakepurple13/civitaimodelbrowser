@@ -9,8 +9,10 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -29,6 +31,7 @@ import androidx.compose.material.icons.filled.BlurOn
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Deblur
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -37,11 +40,13 @@ import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LargeTopAppBar
 import androidx.compose.material3.ListItem
+import androidx.compose.material3.ListItemColors
 import androidx.compose.material3.ListItemDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SegmentedListItem
+import androidx.compose.material3.Slider
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
@@ -88,6 +93,7 @@ import dev.chrisbanes.haze.rememberHazeState
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.koinInject
+import kotlin.math.roundToInt
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -122,8 +128,6 @@ fun BlurSettings(
         ListItemDefaults.colors(containerColor = MaterialTheme.colorScheme.surfaceContainer)
 
     var showBlur by dataStore.rememberShowBlur()
-    var blurType by dataStore.rememberBlurType()
-    var useProgressive by dataStore.rememberUseProgressive()
 
     Column(
         verticalArrangement = Arrangement.spacedBy(ListItemDefaults.SegmentedGap),
@@ -158,8 +162,6 @@ fun BlurSettings(
         )
 
         AnimatedVisibility(showBlur) {
-            var showBlurOptions by remember { mutableStateOf(false) }
-
             var blurKind by dataStore.rememberBlurKind()
             var showBlurKindDialog by remember { mutableStateOf(false) }
 
@@ -228,106 +230,17 @@ fun BlurSettings(
                     ) {
                         when (target) {
                             BlurKind.Haze -> {
-                                SegmentedListItem(
-                                    leadingContent = {
-                                        DiagonalWipeIcon(
-                                            isWiped = useProgressive,
-                                            wipedIcon = Icons.Default.BlurCircular,
-                                            baseIcon = Icons.Default.BlurLinear,
-                                            motion = DiagonalWipeIconDefaults.expressive(),
-                                            modifier = Modifier.size(24.dp)
-                                        )
-                                    },
-                                    content = { Text(stringResource(Res.string.use_progressive_blur)) },
-                                    supportingContent = { Text(stringResource(Res.string.progressive_blur_description)) },
-                                    trailingContent = {
-                                        Switch(
-                                            checked = useProgressive,
-                                            onCheckedChange = null
-                                        )
-                                    },
-                                    checked = useProgressive,
-                                    onCheckedChange = { useProgressive = it },
+                                HazeOptions(
+                                    dataStore = dataStore,
                                     colors = colors,
-                                    shapes = ListItemDefaults.segmentedShapes(2, 4)
                                 )
-
-                                SegmentedListItem(
-                                    content = { Text(stringResource(Res.string.blur_type)) },
-                                    trailingContent = { Text("${blurType.type.name} ${blurType.level.name}") },
-                                    leadingContent = { Icon(Icons.Default.BlurCircular, null) },
-                                    checked = showBlurOptions,
-                                    onCheckedChange = { showBlurOptions = it },
-                                    colors = colors,
-                                    shapes = ListItemDefaults.segmentedShapes(3, 4)
-                                )
-
-                                AnimatedVisibility(showBlurOptions) {
-                                    LazyVerticalGrid(
-                                        columns = GridCells.Fixed(3),
-                                        userScrollEnabled = true,
-                                        verticalArrangement = Arrangement.spacedBy(4.dp),
-                                        horizontalArrangement = Arrangement.spacedBy(4.dp),
-                                        modifier = Modifier.height(200.dp)
-                                    ) {
-                                        HazeBlur.entries.forEachIndexed { index, blur ->
-                                            items(
-                                                items = blur.levels,
-                                                contentType = { _ -> "blurLevel" },
-                                                key = { "${blur.name}${it.name}" }
-                                            ) { level ->
-                                                Surface(
-                                                    onClick = {
-                                                        blurType = BlurType(blur, level)
-                                                    },
-                                                    shape = MaterialTheme.shapes.large
-                                                ) {
-                                                    Box(
-                                                        modifier = Modifier.size(128.dp)
-                                                    ) {
-                                                        val hazeState = rememberHazeState()
-                                                        Image(
-                                                            painter = painterResource(Res.drawable.civitai_logo),
-                                                            contentDescription = null,
-                                                            contentScale = ContentScale.FillBounds,
-                                                            modifier = Modifier
-                                                                .matchParentSize()
-                                                                .hazeSource(hazeState)
-                                                        )
-
-                                                        MaterialsCard(
-                                                            name = "$blur $level",
-                                                            state = hazeState,
-                                                            shape = MaterialTheme.shapes.large,
-                                                            style = blur.toHazeStyle(level),
-                                                            modifier = Modifier.matchParentSize()
-                                                        )
-
-                                                        if (blurType == BlurType(blur, level)) {
-                                                            Icon(
-                                                                Icons.Default.Check,
-                                                                null,
-                                                                modifier = Modifier
-                                                                    .align(Alignment.Center)
-                                                                    .padding(8.dp)
-                                                            )
-                                                        }
-                                                    }
-                                                }
-                                            }
-
-                                            if (index < HazeBlur.entries.size - 1)
-                                                item(
-                                                    span = { GridItemSpan(maxLineSpan) },
-                                                    contentType = "blurDivider"
-                                                ) { HorizontalDivider() }
-                                        }
-                                    }
-                                }
                             }
 
                             BlurKind.LiquidGlass -> {
-
+                                LiquidGlassOptions(
+                                    dataStore = dataStore,
+                                    colors = colors,
+                                )
                             }
                         }
 
@@ -369,6 +282,112 @@ fun BlurSettings(
     }
 }
 
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
+@Composable
+private fun ColumnScope.HazeOptions(
+    dataStore: DataStore,
+    colors: ListItemColors,
+) {
+    var showBlurOptions by remember { mutableStateOf(false) }
+    var blurType by dataStore.rememberBlurType()
+    var useProgressive by dataStore.rememberUseProgressive()
+
+    SegmentedListItem(
+        leadingContent = {
+            DiagonalWipeIcon(
+                isWiped = useProgressive,
+                wipedIcon = Icons.Default.BlurCircular,
+                baseIcon = Icons.Default.BlurLinear,
+                motion = DiagonalWipeIconDefaults.expressive(),
+                modifier = Modifier.size(24.dp)
+            )
+        },
+        content = { Text(stringResource(Res.string.use_progressive_blur)) },
+        supportingContent = { Text(stringResource(Res.string.progressive_blur_description)) },
+        trailingContent = {
+            Switch(
+                checked = useProgressive,
+                onCheckedChange = null
+            )
+        },
+        checked = useProgressive,
+        onCheckedChange = { useProgressive = it },
+        colors = colors,
+        shapes = ListItemDefaults.segmentedShapes(2, 4)
+    )
+
+    SegmentedListItem(
+        content = { Text(stringResource(Res.string.blur_type)) },
+        trailingContent = { Text("${blurType.type.name} ${blurType.level.name}") },
+        leadingContent = { Icon(Icons.Default.BlurCircular, null) },
+        checked = showBlurOptions,
+        onCheckedChange = { showBlurOptions = it },
+        colors = colors,
+        shapes = ListItemDefaults.segmentedShapes(3, 4)
+    )
+
+    AnimatedVisibility(showBlurOptions) {
+        LazyVerticalGrid(
+            columns = GridCells.Fixed(3),
+            userScrollEnabled = true,
+            verticalArrangement = Arrangement.spacedBy(4.dp),
+            horizontalArrangement = Arrangement.spacedBy(4.dp),
+            modifier = Modifier.height(200.dp)
+        ) {
+            HazeBlur.entries.forEachIndexed { index, blur ->
+                items(
+                    items = blur.levels,
+                    contentType = { _ -> "blurLevel" },
+                    key = { "${blur.name}${it.name}" }
+                ) { level ->
+                    Surface(
+                        onClick = { blurType = BlurType(blur, level) },
+                        shape = MaterialTheme.shapes.large
+                    ) {
+                        Box(
+                            modifier = Modifier.size(128.dp)
+                        ) {
+                            val hazeState = rememberHazeState()
+                            Image(
+                                painter = painterResource(Res.drawable.civitai_logo),
+                                contentDescription = null,
+                                contentScale = ContentScale.FillBounds,
+                                modifier = Modifier
+                                    .matchParentSize()
+                                    .hazeSource(hazeState)
+                            )
+
+                            MaterialsCard(
+                                name = "$blur $level",
+                                state = hazeState,
+                                shape = MaterialTheme.shapes.large,
+                                style = blur.toHazeStyle(level),
+                                modifier = Modifier.matchParentSize()
+                            )
+
+                            if (blurType == BlurType(blur, level)) {
+                                Icon(
+                                    Icons.Default.Check,
+                                    null,
+                                    modifier = Modifier
+                                        .align(Alignment.Center)
+                                        .padding(8.dp)
+                                )
+                            }
+                        }
+                    }
+                }
+
+                if (index < HazeBlur.entries.size - 1)
+                    item(
+                        span = { GridItemSpan(maxLineSpan) },
+                        contentType = "blurDivider"
+                    ) { HorizontalDivider() }
+            }
+        }
+    }
+}
+
 @Composable
 private fun MaterialsCard(
     name: String,
@@ -394,4 +413,95 @@ private fun MaterialsCard(
             Text(name)
         }
     }
+}
+
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
+@Composable
+private fun ColumnScope.LiquidGlassOptions(
+    dataStore: DataStore,
+    colors: ListItemColors,
+) {
+    var blurAmount by dataStore.rememberLiquidGlassBlurAmount()
+    ListItem(
+        headlineContent = { Text("Blur Amount") },
+        overlineContent = { Text("(Default is 1)") },
+        trailingContent = { Text("${blurAmount.roundToInt()}") },
+        leadingContent = { Icon(Icons.Default.BlurCircular, null) },
+        supportingContent = {
+            Slider(
+                value = blurAmount,
+                onValueChange = { blurAmount = it },
+                valueRange = 1f..10f,
+                steps = 10
+            )
+        },
+        colors = colors,
+    )
+
+    var refractionHeight by dataStore.rememberLiquidGlassRefractionHeight()
+    ListItem(
+        headlineContent = { Text("Refraction Height") },
+        overlineContent = { Text("(Default is 12)") },
+        trailingContent = { Text("${refractionHeight.roundToInt()}") },
+        leadingContent = { Icon(Icons.Default.BlurCircular, null) },
+        supportingContent = {
+            Slider(
+                value = refractionHeight,
+                onValueChange = { refractionHeight = it },
+                valueRange = 1f..100f,
+                steps = 100
+            )
+        },
+        colors = colors,
+    )
+
+    var refractionAmount by dataStore.rememberLiquidGlassRefractionAmount()
+    ListItem(
+        headlineContent = { Text("Refraction Amount") },
+        overlineContent = { Text("(Default is 32)") },
+        trailingContent = { Text("${refractionAmount.roundToInt()}") },
+        leadingContent = { Icon(Icons.Default.BlurCircular, null) },
+        supportingContent = {
+            Slider(
+                value = refractionAmount,
+                onValueChange = { refractionAmount = it },
+                valueRange = 1f..100f,
+                steps = 100
+            )
+        },
+        colors = colors,
+    )
+
+    var depthEffect by dataStore.rememberLiquidGlassDepthEffect()
+    ListItem(
+        content = { Text("Depth Effect") },
+        overlineContent = { Text("(Default is true)") },
+        checked = depthEffect,
+        onCheckedChange = { depthEffect = it },
+        trailingContent = { Switch(checked = depthEffect, onCheckedChange = null) },
+        colors = colors,
+    )
+
+    var chromaticAberration by dataStore.rememberLiquidGlassChromaticAberration()
+    ListItem(
+        content = { Text("Chromatic Aberration (Default true)") },
+        overlineContent = { Text("(Default is true)") },
+        checked = chromaticAberration,
+        onCheckedChange = { chromaticAberration = it },
+        trailingContent = { Switch(checked = chromaticAberration, onCheckedChange = null) },
+        colors = colors,
+    )
+
+    Button(
+        onClick = {
+            blurAmount = 1f
+            refractionHeight = 12f
+            refractionAmount = 32f
+            depthEffect = true
+            chromaticAberration = true
+        },
+        modifier = Modifier
+            .fillMaxWidth(.5f)
+            .align(Alignment.CenterHorizontally)
+    ) { Text("Reset") }
 }

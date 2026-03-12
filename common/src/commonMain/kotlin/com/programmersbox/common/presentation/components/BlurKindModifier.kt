@@ -10,7 +10,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.unit.dp
-import com.kyant.backdrop.Backdrop
 import com.kyant.backdrop.backdrops.LayerBackdrop
 import com.kyant.backdrop.backdrops.layerBackdrop
 import com.kyant.backdrop.backdrops.rememberLayerBackdrop
@@ -48,6 +47,12 @@ fun rememberBlurKindState(
         drawContent()
     }
 
+    val liquidGlassBlurAmount by dataStore.rememberLiquidGlassBlurAmount()
+    val liquidGlassRefractionHeight by dataStore.rememberLiquidGlassRefractionHeight()
+    val liquidGlassRefractionAmount by dataStore.rememberLiquidGlassRefractionAmount()
+    val liquidGlassDepthEffect by dataStore.rememberLiquidGlassDepthEffect()
+    val liquidGlassChromaticAberration by dataStore.rememberLiquidGlassChromaticAberration()
+
     return remember(
         blurKind,
         hazeState,
@@ -55,7 +60,12 @@ fun rememberBlurKindState(
         backdrop,
         showBlur,
         useProgressive,
-        backgroundColor
+        backgroundColor,
+        liquidGlassBlurAmount,
+        liquidGlassRefractionHeight,
+        liquidGlassRefractionAmount,
+        liquidGlassDepthEffect,
+        liquidGlassChromaticAberration
     ) {
         BlurKindState(
             blurKind = blurKind,
@@ -67,7 +77,12 @@ fun rememberBlurKindState(
             ),
             liquidState = BlurKindLiquidState(
                 backdrop = backdrop,
-                backgroundColor = backgroundColor
+                backgroundColor = backgroundColor,
+                blurAmount = liquidGlassBlurAmount,
+                refractionHeight = liquidGlassRefractionHeight,
+                refractionAmount = liquidGlassRefractionAmount,
+                depthEffect = liquidGlassDepthEffect,
+                chromaticAberration = liquidGlassChromaticAberration,
             )
         )
     }
@@ -91,46 +106,39 @@ class BlurKindHazeState(
 @Stable
 class BlurKindLiquidState(
     val backdrop: LayerBackdrop,
-    val backgroundColor: Color
+    val backgroundColor: Color,
+    val blurAmount: Float,
+    val refractionHeight: Float,
+    val refractionAmount: Float,
+    val depthEffect: Boolean,
+    val chromaticAberration: Boolean,
 )
 
 fun Modifier.setBlurKind(
     blurKindState: BlurKindState,
+    liquidGlassShape: () -> Shape = { RoundedCornerShape(1.dp) },
     hazeScope: HazeEffectScope.() -> Unit = {}
-) = setBlurKind(
-    blurKind = blurKindState.blurKind,
-    hazeState = blurKindState.hazeState.hazeState,
-    hazeStyle = blurKindState.hazeState.hazeStyle,
-    backdrop = blurKindState.liquidState.backdrop,
-    backgroundColor = blurKindState.liquidState.backgroundColor,
-    showBlur = blurKindState.showBlur,
-    hazeScope = hazeScope
-)
+) = when (blurKindState.blurKind) {
+    BlurKind.Haze if blurKindState.showBlur -> hazeEffect(
+        state = blurKindState.hazeState.hazeState,
+        style = blurKindState.hazeState.hazeStyle,
+        block = hazeScope
+    )
 
-private fun Modifier.setBlurKind(
-    blurKind: BlurKind,
-    hazeState: HazeState,
-    hazeStyle: HazeStyle,
-    backdrop: Backdrop,
-    backgroundColor: Color,
-    showBlur: Boolean,
-    hazeScope: HazeEffectScope.() -> Unit
-) = when (blurKind) {
-    BlurKind.Haze if showBlur -> hazeEffect(hazeState, hazeStyle, hazeScope)
-    BlurKind.LiquidGlass if showBlur -> drawBackdrop(
-        backdrop = backdrop,
-        shape = { RoundedCornerShape(1.dp) },
+    BlurKind.LiquidGlass if blurKindState.showBlur -> drawBackdrop(
+        backdrop = blurKindState.liquidState.backdrop,
+        shape = liquidGlassShape,
         effects = {
             vibrancy()
-            blur(1f.dp.toPx())
+            blur(blurKindState.liquidState.blurAmount.dp.toPx())
             lens(
-                refractionHeight = 12.dp.toPx(),
-                refractionAmount = 32.dp.toPx(),
-                depthEffect = true,
-                chromaticAberration = true
+                refractionHeight = blurKindState.liquidState.refractionHeight.dp.toPx(),
+                refractionAmount = blurKindState.liquidState.refractionAmount.dp.toPx(),
+                depthEffect = blurKindState.liquidState.depthEffect,
+                chromaticAberration = blurKindState.liquidState.chromaticAberration
             )
         },
-        onDrawSurface = { drawRect(backgroundColor.copy(alpha = 0.5f)) },
+        onDrawSurface = { drawRect(blurKindState.liquidState.backgroundColor.copy(alpha = 0.5f)) },
         highlight = { Highlight.Ambient }
     )
 

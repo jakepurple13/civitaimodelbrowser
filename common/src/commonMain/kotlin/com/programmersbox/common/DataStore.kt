@@ -171,6 +171,36 @@ class DataStore private constructor(
         mapToString = { json.encodeToString(it) }
     )
 
+    @Composable
+    fun rememberLiquidGlassBlurAmount(): MutableState<Float> = rememberPreference(
+        key = floatPreferencesKey("liquid_glass_blur_amount"),
+        defaultValue = 1f
+    )
+
+    @Composable
+    fun rememberLiquidGlassRefractionHeight(): MutableState<Float> = rememberPreference(
+        key = floatPreferencesKey("liquid_glass_refraction_height"),
+        defaultValue = 12f
+    )
+
+    @Composable
+    fun rememberLiquidGlassRefractionAmount(): MutableState<Float> = rememberPreference(
+        key = floatPreferencesKey("liquid_glass_refraction_amount"),
+        defaultValue = 32f
+    )
+
+    @Composable
+    fun rememberLiquidGlassDepthEffect(): MutableState<Boolean> = rememberPreference(
+        key = booleanPreferencesKey("liquid_glass_depth_effect"),
+        defaultValue = true
+    )
+
+    @Composable
+    fun rememberLiquidGlassChromaticAberration(): MutableState<Boolean> = rememberPreference(
+        key = booleanPreferencesKey("liquid_glass_chromatic_aberration"),
+        defaultValue = true
+    )
+
     open class DataStoreType<T>(
         val key: Preferences.Key<T>,
         protected val dataStore: DataStore<Preferences>,

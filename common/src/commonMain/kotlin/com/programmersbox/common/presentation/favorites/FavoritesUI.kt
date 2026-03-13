@@ -37,6 +37,7 @@ import androidx.compose.material.icons.filled.Share
 import androidx.compose.material3.AppBarRow
 import androidx.compose.material3.AppBarWithSearch
 import androidx.compose.material3.BottomAppBarDefaults
+import androidx.compose.material3.ExpandedDockedSearchBarWithGap
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.FilterChip
@@ -138,7 +139,7 @@ internal const val CREATOR_FILTER = "Creator"
 @OptIn(
     ExperimentalFoundationApi::class,
     ExperimentalMaterial3Api::class,
-    ExperimentalLayoutApi::class
+    ExperimentalLayoutApi::class, ExperimentalMaterial3ExpressiveApi::class
 )
 @Composable
 fun FavoritesUI(
@@ -205,24 +206,27 @@ fun FavoritesUI(
                     )
 
                     val searchBarState = rememberSearchBarState()
+
+                    val inputField = @Composable {
+                        SearchBarDefaults.InputField(
+                            searchBarState = searchBarState,
+                            textFieldState = viewModel.search,
+                            onSearch = {},
+                            placeholder = { Text(stringResource(Res.string.search_favorites)) },
+                            trailingIcon = {
+                                AnimatedVisibility(viewModel.search.text.isNotEmpty()) {
+                                    IconButton(
+                                        onClick = { viewModel.search.clearText() }
+                                    ) { Icon(Icons.Default.Clear, null) }
+                                }
+                            },
+                            modifier = Modifier.fillMaxWidth()
+                        )
+                    }
+
                     AppBarWithSearch(
                         state = searchBarState,
-                        inputField = {
-                            SearchBarDefaults.InputField(
-                                searchBarState = searchBarState,
-                                textFieldState = viewModel.search,
-                                onSearch = {},
-                                placeholder = { Text(stringResource(Res.string.search_favorites)) },
-                                trailingIcon = {
-                                    AnimatedVisibility(viewModel.search.text.isNotEmpty()) {
-                                        IconButton(
-                                            onClick = { viewModel.search.clearText() }
-                                        ) { Icon(Icons.Default.Clear, null) }
-                                    }
-                                },
-                                modifier = Modifier.fillMaxWidth()
-                            )
-                        },
+                        inputField = inputField,
                         navigationIcon = { BackButton() },
                         actions = {
                             Text("(${animateIntAsState(list.size).value})")
@@ -242,6 +246,12 @@ fun FavoritesUI(
                         },
                         colors = appBarWithSearchColors,
                     )
+
+                    ExpandedDockedSearchBarWithGap(
+                        state = searchBarState,
+                        inputField = inputField,
+                    ) {}
+
                     val lazyListState = rememberLazyListState()
                     LaunchedEffect(typeList) {
                         lazyListState.scrollToItem(0)

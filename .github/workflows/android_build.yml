@@ -70,7 +70,7 @@ jobs:
           wrapper-cache-enabled: true
           dependencies-cache-enabled: true
           configuration-cache-enabled: true
-          arguments: android:bundle
+          arguments: android:bundleRelease
 
       - uses: kevin-david/zipalign-sign-android-release@v2.0.1
         name: Sign app APK

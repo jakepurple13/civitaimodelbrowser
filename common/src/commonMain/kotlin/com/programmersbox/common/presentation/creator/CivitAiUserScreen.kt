@@ -51,6 +51,7 @@ import com.programmersbox.common.adaptiveGridCell
 import com.programmersbox.common.db.FavoriteType
 import com.programmersbox.common.db.FavoritesDao
 import com.programmersbox.common.db.ListRepository
+import com.programmersbox.common.presentation.components.DiagonalWipeIcon
 import com.programmersbox.common.presentation.components.ListChoiceScreen
 import com.programmersbox.common.presentation.components.LoadingImage
 import com.programmersbox.common.presentation.components.rememberBlurKindState
@@ -193,12 +194,11 @@ fun CivitAiUserScreen(
                                         }
                                     },
                                     icon = {
-                                        Icon(
-                                            if (isFavorite)
-                                                Icons.Default.Favorite
-                                            else
-                                                Icons.Default.FavoriteBorder,
-                                            null
+                                        DiagonalWipeIcon(
+                                            isWiped = isFavorite,
+                                            baseIcon = Icons.Default.FavoriteBorder,
+                                            wipedIcon = Icons.Default.Favorite,
+                                            modifier = Modifier.size(24.dp)
                                         )
                                     },
                                     label = "Favorite"

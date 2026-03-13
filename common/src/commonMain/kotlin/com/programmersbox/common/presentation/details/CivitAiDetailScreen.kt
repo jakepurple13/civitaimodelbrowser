@@ -52,6 +52,7 @@ import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.FabPosition
 import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.FloatingActionButton
+import androidx.compose.material3.FloatingActionButtonDefaults
 import androidx.compose.material3.FloatingToolbarDefaults
 import androidx.compose.material3.FloatingToolbarDefaults.floatingToolbarVerticalNestedScroll
 import androidx.compose.material3.HorizontalDivider
@@ -109,11 +110,13 @@ import com.programmersbox.common.db.BlacklistedItemRoom
 import com.programmersbox.common.db.FavoriteType
 import com.programmersbox.common.db.FavoritesDao
 import com.programmersbox.common.db.ListRepository
+import com.programmersbox.common.presentation.components.BlurKind
 import com.programmersbox.common.presentation.components.BlurKindState
 import com.programmersbox.common.presentation.components.DiagonalWipeIcon
 import com.programmersbox.common.presentation.components.ImageSheet
 import com.programmersbox.common.presentation.components.ListChoiceScreen
 import com.programmersbox.common.presentation.components.LoadingImage
+import com.programmersbox.common.presentation.components.floatingActionButtonBlurKind
 import com.programmersbox.common.presentation.components.rememberBlurKindState
 import com.programmersbox.common.presentation.components.setBlurKind
 import com.programmersbox.common.presentation.components.setBlurKindSource
@@ -802,22 +805,12 @@ private fun BottomBarContent(
 
     BottomAppBar(
         floatingActionButton = {
-            FloatingActionButton(
-                onClick = {
-                    if (isFavorite) {
-                        removeFromFavorites()
-                    } else {
-                        addToFavorites()
-                    }
-                }
-            ) {
-                DiagonalWipeIcon(
-                    isWiped = isFavorite,
-                    wipedIcon = Icons.Default.Favorite,
-                    baseIcon = Icons.Default.FavoriteBorder,
-                    modifier = Modifier.size(24.dp)
-                )
-            }
+            DetailFloatingActionButton(
+                isFavorite = isFavorite,
+                addToFavorites = addToFavorites,
+                removeFromFavorites = removeFromFavorites,
+                blurKindState = blurKindState,
+            )
         },
         actions = {
             NavigationBarItem(
@@ -1108,6 +1101,68 @@ private fun Version(
                         top = 8.dp,
                         bottom = 12.dp
                     )
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun DetailFloatingActionButton(
+    isFavorite: Boolean,
+    addToFavorites: () -> Unit,
+    removeFromFavorites: () -> Unit,
+    blurKindState: BlurKindState,
+) {
+    when {
+        blurKindState.showBlur && blurKindState.blurKind == BlurKind.LiquidGlass -> {
+            val shape = FloatingActionButtonDefaults.shape
+            FloatingActionButton(
+                onClick = {
+                    if (isFavorite) {
+                        removeFromFavorites()
+                    } else {
+                        addToFavorites()
+                    }
+                },
+                containerColor = if (blurKindState.showBlur && blurKindState.blurKind == BlurKind.LiquidGlass)
+                    Color.Transparent
+                else
+                    FloatingActionButtonDefaults.containerColor,
+                elevation = if (blurKindState.showBlur && blurKindState.blurKind == BlurKind.LiquidGlass)
+                    FloatingActionButtonDefaults.elevation(0.dp)
+                else
+                    FloatingActionButtonDefaults.elevation(),
+                modifier = Modifier.floatingActionButtonBlurKind(
+                    blurKindState = blurKindState,
+                    shape = shape,
+                    customBlurAmount = blurKindState.liquidState.blurAmount + 2f
+                )
+            ) {
+                DiagonalWipeIcon(
+                    isWiped = isFavorite,
+                    wipedIcon = Icons.Default.Favorite,
+                    baseIcon = Icons.Default.FavoriteBorder,
+                    modifier = Modifier.size(24.dp)
+                )
+            }
+        }
+
+        else -> {
+            FloatingActionButton(
+                onClick = {
+                    if (isFavorite) {
+                        removeFromFavorites()
+                    } else {
+                        addToFavorites()
+                    }
+                },
+            ) {
+                DiagonalWipeIcon(
+                    isWiped = isFavorite,
+                    wipedIcon = Icons.Default.Favorite,
+                    baseIcon = Icons.Default.FavoriteBorder,
+                    modifier = Modifier.size(24.dp)
                 )
             }
         }

@@ -259,7 +259,8 @@ fun Modifier.setBlurKindSource(blurKindState: BlurKindState) = if (blurKindState
  */
 fun Modifier.floatingActionButtonBlurKind(
     blurKindState: BlurKindState,
-    shape: Shape
+    shape: Shape,
+    customBlurAmount: Float = 1f
 ) = if (blurKindState.showBlur) {
     when (blurKindState.blurKind) {
         BlurKind.Haze -> this
@@ -268,7 +269,7 @@ fun Modifier.floatingActionButtonBlurKind(
             shape = { shape },
             effects = {
                 vibrancy()
-                blur(1f.dp.toPx())
+                blur(customBlurAmount.dp.toPx())
                 lens(
                     refractionHeight = 16.dp.toPx(),
                     refractionAmount = 38.dp.toPx(),
@@ -284,9 +285,7 @@ fun Modifier.floatingActionButtonBlurKind(
                         .copy(alpha = 0.5f)
                 )
             },
-            highlight = if (blurKindState.blurKind == BlurKind.LiquidGlass) {
-                { Highlight.Default }
-            } else null,
+            highlight = { Highlight.Plain },
             shadow = null
         )
     }

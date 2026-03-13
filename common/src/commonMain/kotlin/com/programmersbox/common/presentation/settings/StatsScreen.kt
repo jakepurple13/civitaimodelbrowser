@@ -10,7 +10,6 @@ import androidx.compose.animation.core.animateIntAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Canvas
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.FlowRow
@@ -33,6 +32,7 @@ import androidx.compose.material.icons.filled.NoAdultContent
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.ListItem
@@ -304,8 +304,9 @@ private fun NsfwStats(
                 verticalArrangement = Arrangement.spacedBy(16.dp),
                 modifier = Modifier.padding(vertical = 16.dp)
             ) {
-                Row(
-                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                FlowRow(
+                    horizontalArrangement = Arrangement.SpaceEvenly,
+                    verticalArrangement = Arrangement.spacedBy(8.dp),
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(horizontal = 16.dp)
@@ -314,14 +315,12 @@ private fun NsfwStats(
                         title = stringResource(Res.string.favorites),
                         value = favorites.filter { it.nsfw }.size,
                         color = primaryErrorContainer,
-                        modifier = Modifier.weight(1f)
                     )
 
                     GlobalStatItem(
                         title = stringResource(Res.string.blacklisted),
                         value = blacklisted.filter { it.nsfw }.size,
                         color = secondaryErrorContainer,
-                        modifier = Modifier.weight(1f)
                     )
 
                     GlobalStatItem(
@@ -329,7 +328,6 @@ private fun NsfwStats(
                         value = lists.sumOf { it.list.count { item -> item.nsfw } },
                         color = MaterialTheme.colorScheme.tertiaryContainer
                             .blend(MaterialTheme.colorScheme.errorContainer),
-                        modifier = Modifier.weight(1f)
                     )
                 }
 
@@ -595,6 +593,7 @@ private fun GlobalStats(
     }
 }
 
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 private fun ListsSummaryCard(
     listItems: ImmutableList<CustomList>,
@@ -602,53 +601,17 @@ private fun ListsSummaryCard(
 ) {
     var expanded by remember { mutableStateOf(false) }
 
-    val modelTotal = remember(listItems) {
-        listItems.sumOf { it.list.count { item -> item.favoriteType == FavoriteType.Model } }
-    }
-    val imageTotal = remember(listItems) {
-        listItems.sumOf { it.list.count { item -> item.favoriteType == FavoriteType.Image } }
-    }
-    val creatorTotal = remember(listItems) {
-        listItems.sumOf { it.list.count { item -> item.favoriteType == FavoriteType.Creator } }
-    }
-
     OutlinedCard(
         modifier = modifier
             .animateContentSize()
             .padding(horizontal = 16.dp)
     ) {
         ListItem(
-            headlineContent = {
+            content = {
                 Text(
                     "${stringResource(Res.string.lists)} (${listItems.size})",
                     style = MaterialTheme.typography.titleMedium
                 )
-            },
-            supportingContent = {
-                FlowRow(
-                    horizontalArrangement = Arrangement.spacedBy(8.dp),
-                    verticalArrangement = Arrangement.spacedBy(4.dp),
-                    modifier = Modifier.padding(top = 4.dp)
-                ) {
-                    DeepDiveChip(
-                        title = stringResource(Res.string.models),
-                        value = modelTotal,
-                        icon = Icons.Default.ModelTraining,
-                        color = MaterialTheme.colorScheme.primaryContainer
-                    )
-                    DeepDiveChip(
-                        title = stringResource(Res.string.images),
-                        value = imageTotal,
-                        icon = Icons.Default.Image,
-                        color = MaterialTheme.colorScheme.secondaryContainer
-                    )
-                    DeepDiveChip(
-                        title = stringResource(Res.string.creators),
-                        value = creatorTotal,
-                        icon = Icons.Default.Person,
-                        color = MaterialTheme.colorScheme.tertiaryContainer
-                    )
-                }
             },
             trailingContent = {
                 val rotation by animateFloatAsState(if (expanded) 180f else 0f)
@@ -661,7 +624,7 @@ private fun ListsSummaryCard(
                 )
             },
             colors = ListItemDefaults.colors(containerColor = Color.Transparent),
-            modifier = Modifier.clickable { expanded = !expanded }
+            onClick = { expanded = !expanded },
         )
 
         AnimatedVisibility(expanded) {

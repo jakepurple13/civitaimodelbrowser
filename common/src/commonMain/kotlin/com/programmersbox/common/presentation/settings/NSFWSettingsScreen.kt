@@ -228,7 +228,7 @@ fun NsfwSettings(
 
                                 Dial(
                                     degree = animatedDegree,
-                                    onDegreeChanged = { nsfwBlurStrength = it },
+                                    onDegreeChange = { nsfwBlurStrength = it },
                                     startDegrees = 0f,
                                     sweepDegrees = MAX_NSFW_BLUR_STRENGTH,
                                     colors = DialColors.default(

@@ -1,5 +1,7 @@
 package com.programmersbox.common.db
 
+import androidx.compose.runtime.Immutable
+import androidx.compose.runtime.Stable
 import androidx.room3.Dao
 import androidx.room3.Delete
 import androidx.room3.Entity
@@ -32,6 +34,8 @@ interface SearchHistoryDao {
     suspend fun getAllSearchHistory(): List<SearchHistoryItem>
 }
 
+@Stable
+@Immutable
 @Serializable
 @Entity(tableName = "search_history_item")
 data class SearchHistoryItem(

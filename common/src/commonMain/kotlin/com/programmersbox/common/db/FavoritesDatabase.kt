@@ -1,5 +1,7 @@
 package com.programmersbox.common.db
 
+import androidx.compose.runtime.Immutable
+import androidx.compose.runtime.Stable
 import androidx.room3.AutoMigration
 import androidx.room3.ConstructedBy
 import androidx.room3.Dao
@@ -448,6 +450,8 @@ fun ImageMetaDb.toMeta() = ImageMeta(
     negativePrompt = negativePrompt
 )
 
+@Stable
+@Immutable
 data class DataCounts(
     val modelCount: Int,
     val imageCount: Int,

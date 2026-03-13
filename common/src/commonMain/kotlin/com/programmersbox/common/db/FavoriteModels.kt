@@ -2,6 +2,7 @@
 
 package com.programmersbox.common.db
 
+import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.Stable
 import androidx.room3.ColumnInfo
 import androidx.room3.Embedded
@@ -15,6 +16,8 @@ import kotlin.time.ExperimentalTime
 import kotlin.uuid.ExperimentalUuidApi
 import kotlin.uuid.Uuid
 
+@Stable
+@Immutable
 @Entity(tableName = "favorite_table")
 data class FavoriteRoom(
     @PrimaryKey
@@ -33,6 +36,8 @@ data class FavoriteRoom(
     val dateAdded: Long = Clock.System.now().toEpochMilliseconds(),
 )
 
+@Stable
+@Immutable
 @Serializable
 @Entity(tableName = "blacklisted_table")
 data class BlacklistedItemRoom(
@@ -43,6 +48,8 @@ data class BlacklistedItemRoom(
     val imageUrl: String? = null,
 )
 
+@Stable
+@Immutable
 @Serializable
 data class ImageMetaDb(
     val size: String? = null,
@@ -56,6 +63,8 @@ data class ImageMetaDb(
     val negativePrompt: String? = null,
 )
 
+@Stable
+@Immutable
 enum class FavoriteType {
     Model,
     Image,
@@ -63,6 +72,7 @@ enum class FavoriteType {
 }
 
 @Stable
+@Immutable
 @Serializable
 sealed interface FavoriteModel {
     val id: Long
@@ -72,6 +82,7 @@ sealed interface FavoriteModel {
     val dateAdded: Long
 
     @Stable
+    @Immutable
     @Serializable
     data class Model(
         override val id: Long,
@@ -89,6 +100,7 @@ sealed interface FavoriteModel {
     ) : FavoriteModel
 
     @Stable
+    @Immutable
     @Serializable
     data class Image(
         override val id: Long,
@@ -103,6 +115,7 @@ sealed interface FavoriteModel {
     ) : FavoriteModel
 
     @Stable
+    @Immutable
     @Serializable
     data class Creator(
         override val id: Long,
@@ -114,6 +127,7 @@ sealed interface FavoriteModel {
 }
 
 @Stable
+@Immutable
 @Serializable
 data class CustomList(
     @Embedded
@@ -125,6 +139,8 @@ data class CustomList(
     val list: List<CustomListInfo>,
 )
 
+@Stable
+@Immutable
 @Serializable
 @Entity(tableName = "CustomListItem")
 data class CustomListItem(
@@ -143,6 +159,8 @@ data class CustomListItem(
     val useBiometric: Boolean = false
 )
 
+@Stable
+@Immutable
 @Serializable
 @Entity(tableName = "CustomListInfo")
 data class CustomListInfo @OptIn(ExperimentalUuidApi::class) constructor(

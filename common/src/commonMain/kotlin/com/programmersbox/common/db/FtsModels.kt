@@ -1,5 +1,7 @@
 package com.programmersbox.common.db
 
+import androidx.compose.runtime.Immutable
+import androidx.compose.runtime.Stable
 import androidx.room3.Entity
 import androidx.room3.Fts4
 import androidx.room3.RoomDatabase
@@ -7,6 +9,8 @@ import androidx.room3.migration.Migration
 import androidx.sqlite.SQLiteConnection
 import androidx.sqlite.execSQL
 
+@Stable
+@Immutable
 @Entity(tableName = "FavoriteRoomFts")
 @Fts4(contentEntity = FavoriteRoom::class)
 data class FavoriteRoomFts(
@@ -75,6 +79,8 @@ val MIGRATION_FAVORITES_FTS_2 = object : Migration(13, 14) {
 
 
 // Shadow table for the Parent Item
+@Stable
+@Immutable
 @Entity(tableName = "CustomListItemFts")
 @Fts4 // No contentEntity due to String PK
 data class CustomListItemFts(
@@ -84,6 +90,8 @@ data class CustomListItemFts(
 )
 
 // Shadow table for the Child Info
+@Stable
+@Immutable
 @Entity(tableName = "CustomListInfoFts")
 @Fts4
 data class CustomListInfoFts(

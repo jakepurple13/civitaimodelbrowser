@@ -82,9 +82,9 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.compose.dropUnlessResumed
 import com.programmersbox.common.BackButton
 import com.programmersbox.common.ComposableUtils
+import com.programmersbox.common.Consts
 import com.programmersbox.common.CustomScrollBar
 import com.programmersbox.common.DataStore
-import com.programmersbox.common.Network
 import com.programmersbox.common.NetworkConnectionRepository
 import com.programmersbox.common.WindowedScaffold
 import com.programmersbox.common.adaptiveGridCell
@@ -838,7 +838,7 @@ fun FavoritesCreatorOptionsSheet(
                     if (showQrCode) {
                         ShareViaQrCode(
                             title = models.name,
-                            url = "${Network.CIVITAI_MODELS_URL}${models.id}",
+                            url = "${Consts.CIVITAI_MODELS_URL}${models.id}",
                             qrCodeType = QrCodeType.User,
                             id = models.id.toString(),
                             username = models.name,
@@ -1046,7 +1046,7 @@ fun FavoritesModelOptionsSheet(
                 if (showQrCode) {
                     ShareViaQrCode(
                         title = models.name,
-                        url = "${Network.CIVITAI_MODELS_URL}${models.id}",
+                        url = "${Consts.CIVITAI_MODELS_URL}${models.id}",
                         qrCodeType = QrCodeType.Model,
                         id = models.id.toString(),
                         username = "",

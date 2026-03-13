@@ -54,8 +54,6 @@ import androidx.compose.material3.SingleChoiceSegmentedButtonRow
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
-import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.material3.pulltorefresh.PullToRefreshDefaults
 import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
@@ -104,6 +102,7 @@ import com.programmersbox.common.paging.itemKeyIndexed
 import com.programmersbox.common.presentation.components.BlurKind
 import com.programmersbox.common.presentation.components.CivitBottomBar
 import com.programmersbox.common.presentation.components.CivitRail
+import com.programmersbox.common.presentation.components.CivitTopAppBar
 import com.programmersbox.common.presentation.components.LoadingImage
 import com.programmersbox.common.presentation.components.ModelCard
 import com.programmersbox.common.presentation.components.ModelOptionsSheet
@@ -650,23 +649,13 @@ private fun CivitTopBar(
     onSortChange: (CivitSort) -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    val topAppBarColors = TopAppBarDefaults.topAppBarColors(
-        containerColor = if (showBlur)
-            Color.Transparent
-        else
-            MaterialTheme.colorScheme.surface,
-        scrolledContainerColor = if (showBlur)
-            Color.Transparent
-        else
-            MaterialTheme.colorScheme.surface,
-    )
-
     var showSortBy by rememberSaveable { mutableStateOf(false) }
 
     Column(
         modifier = modifier
     ) {
-        TopAppBar(
+        CivitTopAppBar(
+            showBlur = showBlur,
             title = { Text("CivitAI") },
             navigationIcon = {
                 Row {
@@ -707,7 +696,6 @@ private fun CivitTopBar(
                     )
                 }
             },
-            colors = topAppBarColors,
         )
 
         AnimatedVisibility(showSortBy) {

@@ -89,6 +89,7 @@ fun CivitAiUserScreen(
     }
         .value
         .collectAsStateWithLifecycle(emptyList())
+
     val blacklisted by database.getBlacklisted().collectAsStateWithLifecycle(emptyList())
     val scope = rememberCoroutineScope()
 

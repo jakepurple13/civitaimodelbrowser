@@ -1,5 +1,6 @@
 package com.programmersbox.common.presentation.details
 
+import androidx.compose.runtime.Stable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
@@ -108,8 +109,14 @@ class CivitAiDetailViewModel(
     }
 }
 
+@Stable
 sealed class DetailViewState {
+    @Stable
     data object Loading : DetailViewState()
+
+    @Stable
     data class Error(val error: Throwable) : DetailViewState()
+
+    @Stable
     data class Content(val models: Models) : DetailViewState()
 }

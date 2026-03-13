@@ -76,6 +76,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.retain.retain
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -101,6 +102,7 @@ import com.programmersbox.common.ComposableUtils
 import com.programmersbox.common.ContextMenu
 import com.programmersbox.common.DataStore
 import com.programmersbox.common.ModelImage
+import com.programmersbox.common.ModelVersion
 import com.programmersbox.common.NetworkConnectionRepository
 import com.programmersbox.common.adaptiveGridCell
 import com.programmersbox.common.db.BlacklistedItemRoom
@@ -244,8 +246,6 @@ fun CivitAiDetailScreen(
 
             var toolBarExpanded by remember { mutableStateOf(true) }
 
-            var showFullDescription by remember { mutableStateOf(false) }
-
             Scaffold(
                 topBar = {
                     TopAppBar(
@@ -364,54 +364,7 @@ fun CivitAiDetailScreen(
                             span = { GridItemSpan(maxLineSpan) },
                             contentType = "tags"
                         ) {
-                            Surface(
-                                tonalElevation = 1.dp,
-                                shape = MaterialTheme.shapes.medium,
-                            ) {
-                                Column(
-                                    modifier = Modifier.padding(12.dp)
-                                ) {
-                                    Text(
-                                        "Tags",
-                                        style = MaterialTheme.typography.labelMedium,
-                                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                        modifier = Modifier.padding(bottom = 8.dp)
-                                    )
-                                    FlowRow(
-                                        horizontalArrangement = Arrangement.spacedBy(8.dp),
-                                        verticalArrangement = Arrangement.spacedBy(4.dp),
-                                    ) {
-                                        model.models.tags.forEach { tag ->
-                                            SuggestionChip(
-                                                onClick = {},
-                                                label = {
-                                                    Text(
-                                                        tag,
-                                                        style = MaterialTheme.typography.labelMedium
-                                                    )
-                                                }
-                                            )
-                                        }
-
-                                        if (model.models.nsfw) {
-                                            ElevatedAssistChip(
-                                                label = { Text("NSFW") },
-                                                onClick = {},
-                                                colors = AssistChipDefaults.elevatedAssistChipColors(
-                                                    disabledLabelColor = MaterialTheme.colorScheme.error,
-                                                    disabledContainerColor = MaterialTheme.colorScheme.surface
-                                                ),
-                                                border = BorderStroke(
-                                                    1.dp,
-                                                    MaterialTheme.colorScheme.error,
-                                                ),
-                                                enabled = false,
-                                            )
-                                        }
-
-                                    }
-                                }
-                            }
+                            TagList(model)
                         }
                     }
 
@@ -419,40 +372,7 @@ fun CivitAiDetailScreen(
                         span = { GridItemSpan(maxLineSpan) },
                         contentType = "description"
                     ) {
-                        Surface(
-                            tonalElevation = 1.dp,
-                            shape = MaterialTheme.shapes.medium,
-                        ) {
-                            Column(
-                                modifier = Modifier
-                                    .animateContentSize()
-                                    .clickable { showFullDescription = !showFullDescription }
-                                    .padding(12.dp)
-                            ) {
-                                Text(
-                                    "Description",
-                                    style = MaterialTheme.typography.labelMedium,
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                    modifier = Modifier.padding(bottom = 8.dp)
-                                )
-                                Text(
-                                    model.models.parsedDescription(),
-                                    style = MaterialTheme.typography.bodyMedium.copy(
-                                        lineHeight = 20.sp
-                                    ),
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                    maxLines = if (showFullDescription) Int.MAX_VALUE else 3,
-                                    overflow = TextOverflow.Ellipsis
-                                )
-                                Text(
-                                    if (showFullDescription) "Show less" else "Show more",
-                                    style = MaterialTheme.typography.labelMedium,
-                                    fontWeight = FontWeight.Medium,
-                                    color = MaterialTheme.colorScheme.primary,
-                                    modifier = Modifier.padding(top = 4.dp)
-                                )
-                            }
-                        }
+                        Description(model)
                     }
 
                     model.models.modelVersions.forEach { version ->
@@ -460,81 +380,11 @@ fun CivitAiDetailScreen(
                             span = { GridItemSpan(maxLineSpan) },
                             contentType = "version"
                         ) {
-                            ElevatedCard(
-                                onClick = { viewModel.toggleShowMoreInfo(version.id) },
-                                shape = MaterialTheme.shapes.medium,
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(vertical = 4.dp)
-                            ) {
-                                ListItem(
-                                    headlineContent = {
-                                        Text(
-                                            version.name,
-                                            style = MaterialTheme.typography.titleMedium,
-                                            fontWeight = FontWeight.Medium,
-                                        )
-                                    },
-                                    supportingContent = {
-                                        Text(
-                                            "Base: ${version.baseModel}",
-                                            style = MaterialTheme.typography.bodySmall,
-                                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                        )
-                                    },
-                                    leadingContent = {
-                                        version.downloadUrl?.let { downloadUrl ->
-                                            val clipboard = LocalClipboardManager.current
-                                            IconButton(
-                                                onClick = {
-                                                    clipboard.setText(AnnotatedString(downloadUrl))
-                                                }
-                                            ) {
-                                                Icon(
-                                                    Icons.Default.ContentCopy,
-                                                    contentDescription = "Copy download URL",
-                                                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                                                )
-                                            }
-                                        }
-                                    },
-                                    trailingContent = {
-                                        Icon(
-                                            Icons.Filled.ArrowDropDown,
-                                            contentDescription = if (viewModel.showMoreInfo[version.id] == true)
-                                                "Collapse" else "Expand",
-                                            modifier = Modifier.rotate(
-                                                animateFloatAsState(
-                                                    if (viewModel.showMoreInfo[version.id] == true)
-                                                        180f
-                                                    else
-                                                        0f
-                                                ).value
-                                            )
-                                        )
-                                    },
-                                    colors = ListItemDefaults.colors(
-                                        containerColor = MaterialTheme.colorScheme.surfaceContainerLow,
-                                    ),
-                                )
-                                AnimatedVisibility(
-                                    viewModel.showMoreInfo[version.id] == true
-                                ) {
-                                    version.parsedDescription()?.let {
-                                        Text(
-                                            it,
-                                            style = MaterialTheme.typography.bodyMedium,
-                                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                            modifier = Modifier.padding(
-                                                start = 16.dp,
-                                                end = 16.dp,
-                                                top = 8.dp,
-                                                bottom = 12.dp
-                                            )
-                                        )
-                                    }
-                                }
-                            }
+                            Version(
+                                version = version,
+                                showMoreInfo = viewModel.showMoreInfo[version.id] ?: false,
+                                onToggleShowMoreInfo = viewModel::toggleShowMoreInfo
+                            )
                         }
 
                         if (viewModel.showMoreInfo[version.id] == true) {
@@ -561,51 +411,10 @@ fun CivitAiDetailScreen(
         }
 
         is DetailViewState.Error -> {
-            Scaffold(
-                topBar = {
-                    CenterAlignedTopAppBar(
-                        title = { Text("Error") },
-                        navigationIcon = { BackButton() }
-                    )
-                }
-            ) { padding ->
-                Box(
-                    contentAlignment = Alignment.Center,
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(padding)
-                ) {
-                    Column(
-                        horizontalAlignment = Alignment.CenterHorizontally,
-                        verticalArrangement = Arrangement.spacedBy(16.dp),
-                        modifier = Modifier.padding(horizontal = 24.dp)
-                    ) {
-                        Icon(
-                            Icons.Default.Error,
-                            null,
-                            tint = MaterialTheme.colorScheme.error,
-                            modifier = Modifier
-                                .size(72.dp)
-                                .padding(bottom = 8.dp)
-                        )
-                        Text(
-                            "Something went wrong",
-                            style = MaterialTheme.typography.headlineSmall
-                        )
-                        model.error.message?.let {
-                            Text(
-                                it,
-                                style = MaterialTheme.typography.bodySmall,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                textAlign = TextAlign.Center
-                            )
-                        }
-                        FilledTonalButton(
-                            onClick = viewModel::loadData
-                        ) { Text("Try Again") }
-                    }
-                }
-            }
+            ErrorState(
+                model = model,
+                loadData = viewModel::loadData
+            )
         }
 
         DetailViewState.Loading -> {
@@ -635,6 +444,59 @@ fun CivitAiDetailScreen(
                         )
                     }
                 }
+            }
+        }
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun ErrorState(
+    model: DetailViewState.Error,
+    loadData: () -> Unit
+) {
+    Scaffold(
+        topBar = {
+            CenterAlignedTopAppBar(
+                title = { Text("Error") },
+                navigationIcon = { BackButton() }
+            )
+        }
+    ) { padding ->
+        Box(
+            contentAlignment = Alignment.Center,
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(padding)
+        ) {
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.spacedBy(16.dp),
+                modifier = Modifier.padding(horizontal = 24.dp)
+            ) {
+                Icon(
+                    Icons.Default.Error,
+                    null,
+                    tint = MaterialTheme.colorScheme.error,
+                    modifier = Modifier
+                        .size(72.dp)
+                        .padding(bottom = 8.dp)
+                )
+                Text(
+                    "Something went wrong",
+                    style = MaterialTheme.typography.headlineSmall
+                )
+                model.error.message?.let {
+                    Text(
+                        it,
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        textAlign = TextAlign.Center
+                    )
+                }
+                FilledTonalButton(
+                    onClick = loadData
+                ) { Text("Try Again") }
             }
         }
     }
@@ -1072,5 +934,182 @@ private fun ItemCard(
             onLongClick = { showDialog = true },
             modifier = modifier
         )
+    }
+}
+
+@Composable
+private fun TagList(
+    model: DetailViewState.Content
+) {
+    Surface(
+        tonalElevation = 1.dp,
+        shape = MaterialTheme.shapes.medium,
+    ) {
+        Column(
+            modifier = Modifier.padding(12.dp)
+        ) {
+            Text(
+                "Tags",
+                style = MaterialTheme.typography.labelMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.padding(bottom = 8.dp)
+            )
+            FlowRow(
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                verticalArrangement = Arrangement.spacedBy(4.dp),
+            ) {
+                model.models.tags.forEach { tag ->
+                    SuggestionChip(
+                        onClick = {},
+                        label = {
+                            Text(
+                                tag,
+                                style = MaterialTheme.typography.labelMedium
+                            )
+                        }
+                    )
+                }
+
+                if (model.models.nsfw) {
+                    ElevatedAssistChip(
+                        label = { Text("NSFW") },
+                        onClick = {},
+                        colors = AssistChipDefaults.elevatedAssistChipColors(
+                            disabledLabelColor = MaterialTheme.colorScheme.error,
+                            disabledContainerColor = MaterialTheme.colorScheme.surface
+                        ),
+                        border = BorderStroke(
+                            1.dp,
+                            MaterialTheme.colorScheme.error,
+                        ),
+                        enabled = false,
+                    )
+                }
+
+            }
+        }
+    }
+}
+
+@Composable
+private fun Description(
+    model: DetailViewState.Content
+) {
+    var showFullDescription by retain { mutableStateOf(false) }
+
+    Surface(
+        tonalElevation = 1.dp,
+        shape = MaterialTheme.shapes.medium,
+    ) {
+        Column(
+            modifier = Modifier
+                .animateContentSize()
+                .clickable { showFullDescription = !showFullDescription }
+                .padding(12.dp)
+        ) {
+            Text(
+                "Description",
+                style = MaterialTheme.typography.labelMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.padding(bottom = 8.dp)
+            )
+            Text(
+                model.models.parsedDescription(),
+                style = MaterialTheme.typography.bodyMedium.copy(
+                    lineHeight = 20.sp
+                ),
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                maxLines = if (showFullDescription) Int.MAX_VALUE else 3,
+                overflow = TextOverflow.Ellipsis
+            )
+            Text(
+                if (showFullDescription) "Show less" else "Show more",
+                style = MaterialTheme.typography.labelMedium,
+                fontWeight = FontWeight.Medium,
+                color = MaterialTheme.colorScheme.primary,
+                modifier = Modifier.padding(top = 4.dp)
+            )
+        }
+    }
+}
+
+@Composable
+private fun Version(
+    version: ModelVersion,
+    showMoreInfo: Boolean,
+    onToggleShowMoreInfo: (Long) -> Unit,
+) {
+    ElevatedCard(
+        onClick = { onToggleShowMoreInfo(version.id) },
+        shape = MaterialTheme.shapes.medium,
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 4.dp)
+    ) {
+        ListItem(
+            headlineContent = {
+                Text(
+                    version.name,
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.Medium,
+                )
+            },
+            supportingContent = {
+                Text(
+                    "Base: ${version.baseModel}",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+            },
+            leadingContent = {
+                version.downloadUrl?.let { downloadUrl ->
+                    val clipboard = LocalClipboardManager.current
+                    IconButton(
+                        onClick = {
+                            clipboard.setText(AnnotatedString(downloadUrl))
+                        }
+                    ) {
+                        Icon(
+                            Icons.Default.ContentCopy,
+                            contentDescription = "Copy download URL",
+                            tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                        )
+                    }
+                }
+            },
+            trailingContent = {
+                Icon(
+                    Icons.Filled.ArrowDropDown,
+                    contentDescription = if (showMoreInfo)
+                        "Collapse" else "Expand",
+                    modifier = Modifier.rotate(
+                        animateFloatAsState(
+                            if (showMoreInfo)
+                                180f
+                            else
+                                0f
+                        ).value
+                    )
+                )
+            },
+            colors = ListItemDefaults.colors(
+                containerColor = MaterialTheme.colorScheme.surfaceContainerLow,
+            ),
+        )
+        AnimatedVisibility(showMoreInfo) {
+            version.parsedDescription()?.let {
+                Text(
+                    it,
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.padding(
+                        start = 16.dp,
+                        end = 16.dp,
+                        top = 8.dp,
+                        bottom = 12.dp
+                    )
+                )
+            }
+        }
     }
 }

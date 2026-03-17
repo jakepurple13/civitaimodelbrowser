@@ -60,10 +60,23 @@ android {
         targetCompatibility = JavaVersion.VERSION_17
     }
 
+    if(System.getenv("CI") == null) {
+        testOptions.managedDevices.allDevices {
+            create<ManagedVirtualDevice>("pixel6Api34") {
+                device = "Pixel 6"
+                apiLevel = 34
+                systemImageSource = "google"
+            }
+        }
+    }
+
 }
 
 baselineProfile {
-    useConnectedDevices = true
+    if(System.getenv("CI") == null) {
+        managedDevices += "pixel6Api34"
+    }
+    useConnectedDevices = System.getenv("CI") == null
 }
 
 kotlin {

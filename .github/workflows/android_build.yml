@@ -309,6 +309,12 @@ jobs:
           sudo udevadm control --reload-rules
           sudo udevadm trigger --name-match=kvm
 
+      - name: Export Libraries
+        uses: gradle/gradle-build-action@v2
+        with:
+          gradle-version: current
+          arguments: "exportLibraryDefinitions"
+
       - name: Run baseline profile collection on emulator
         uses: reactivecircus/android-emulator-runner@v2
         with:
@@ -333,7 +339,7 @@ jobs:
             cleanup() { adb logcat -d > benchmark/build/outputs/ci-artifacts/emulator-logcat.txt || true; }
             trap cleanup EXIT
             
-            ./gradlew exportLibraryDefinitions :benchmark:collectNonMinifiedBenchmarkBaselineProfile --stacktrace --console=plain
+            ./gradlew :benchmark:collectNonMinifiedBenchmarkBaselineProfile --stacktrace --console=plain
 
       - name: Upload baseline profile diagnostics
         if: always()

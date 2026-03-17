@@ -61,7 +61,7 @@ android {
         targetCompatibility = JavaVersion.VERSION_17
     }
 
-    if(System.getenv("CI") == null) {
+    if(System.getenv("CI") != null) {
         testOptions.managedDevices.allDevices {
             create<ManagedVirtualDevice>("pixel6Api35") {
                 device = "Pixel 6"
@@ -74,7 +74,7 @@ android {
 }
 
 baselineProfile {
-    if(System.getenv("CI") == null) managedDevices += "pixel6Api35"
+    if(System.getenv("CI") != null) managedDevices += "pixel6Api35"
     useConnectedDevices = System.getenv("CI") == null
 }
 

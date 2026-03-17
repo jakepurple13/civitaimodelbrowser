@@ -339,7 +339,7 @@ jobs:
             cleanup() { adb logcat -d > benchmark/build/outputs/ci-artifacts/emulator-logcat.txt || true; }
             trap cleanup EXIT
             
-            ./gradlew :benchmark:collectNonMinifiedBenchmarkBaselineProfile --stacktrace --console=plain
+            ./gradlew :benchmark:collectBenchmarkBetaBaselineProfile --stacktrace --console=plain
 
       - name: Upload baseline profile diagnostics
         if: always()

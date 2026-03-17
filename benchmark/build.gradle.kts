@@ -1,3 +1,4 @@
+import com.android.build.api.dsl.ManagedVirtualDevice
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
 plugins {
@@ -62,9 +63,9 @@ android {
 
     if(System.getenv("CI") == null) {
         testOptions.managedDevices.allDevices {
-            create<ManagedVirtualDevice>("pixel6Api34") {
+            create<ManagedVirtualDevice>("pixel6Api35") {
                 device = "Pixel 6"
-                apiLevel = 34
+                apiLevel = 35
                 systemImageSource = "google"
             }
         }
@@ -73,9 +74,7 @@ android {
 }
 
 baselineProfile {
-    if(System.getenv("CI") == null) {
-        managedDevices += "pixel6Api34"
-    }
+    if(System.getenv("CI") == null) managedDevices += "pixel6Api35"
     useConnectedDevices = System.getenv("CI") == null
 }
 

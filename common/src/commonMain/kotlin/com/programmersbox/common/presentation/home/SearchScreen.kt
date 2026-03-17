@@ -55,6 +55,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.paging.LoadState
 import androidx.paging.compose.collectAsLazyPagingItems
+import com.kyant.backdrop.backdrops.layerBackdrop
 import com.programmersbox.common.BackButton
 import com.programmersbox.common.DataStore
 import com.programmersbox.common.Models
@@ -64,6 +65,9 @@ import com.programmersbox.common.adaptiveGridCell
 import com.programmersbox.common.db.FavoritesDao
 import com.programmersbox.common.db.SearchHistoryItem
 import com.programmersbox.common.presentation.components.CivitRail
+import com.programmersbox.common.presentation.components.rememberBlurKindState
+import com.programmersbox.common.presentation.components.setBlurKind
+import com.programmersbox.common.presentation.components.setBlurKindSource
 import dev.chrisbanes.haze.HazeProgressive
 import dev.chrisbanes.haze.LocalHazeStyle
 import dev.chrisbanes.haze.hazeEffect
@@ -103,12 +107,8 @@ fun SearchScreen(
         .collectAsStateWithLifecycle(emptyList())
 
     val useNewCardLook by dataStore.rememberUseNewCardLook()
-    val showBlur by dataStore.rememberShowBlur()
-    val hazeState = rememberHazeState(showBlur)
-    val useProgressive by dataStore.rememberUseProgressive()
     val showNsfw by dataStore.showNsfw()
     val blurStrength by dataStore.hideNsfwStrength()
-    val hazeStyle = LocalHazeStyle.current
     val scope = rememberCoroutineScope()
 
     val doubleClickBehavior by dataStore.rememberDoubleClickBehavior()
@@ -127,17 +127,19 @@ fun SearchScreen(
         .searchFlow
         .collectAsStateWithLifecycle(persistentListOf())
 
+    val blurKindState = rememberBlurKindState()
+
     WindowedScaffold(
         topBar = {
             SearchAppBar(
                 searchQuery = viewModel.searchQuery,
                 onSearch = viewModel::onSearch,
-                showBlur = showBlur,
+                showBlur = blurKindState.showBlur,
                 searchCount = lazyPagingItems.itemCount,
                 searchHistory = searchList,
                 onRemoveSearchHistory = viewModel::removeSearchHistory,
-                modifier = Modifier.hazeEffect(hazeState) {
-                    progressive = if (useProgressive)
+                modifier = Modifier.setBlurKind(blurKindState) {
+                    progressive = if (blurKindState.hazeState.useProgressive)
                         HazeProgressive.verticalGradient(
                             startIntensity = 1f,
                             endIntensity = 0f,
@@ -145,7 +147,6 @@ fun SearchScreen(
                         )
                     else
                         null
-                    style = hazeStyle
                 }
             )
         },
@@ -158,7 +159,7 @@ fun SearchScreen(
             contentPadding = paddingValues,
             modifier = Modifier
                 .padding(vertical = 4.dp)
-                .hazeSource(state = hazeState)
+                .setBlurKindSource(blurKindState)
                 .fillMaxSize()
         ) {
             modelItems(

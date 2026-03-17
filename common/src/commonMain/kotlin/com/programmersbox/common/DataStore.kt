@@ -8,16 +8,21 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.datastore.core.DataStore
-import androidx.datastore.preferences.core.PreferenceDataStoreFactory
+import androidx.datastore.core.okio.OkioStorage
 import androidx.datastore.preferences.core.Preferences
+import androidx.datastore.preferences.core.PreferencesSerializer
 import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.floatPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.programmersbox.common.presentation.components.BlurKind
 import dev.chrisbanes.haze.HazeStyle
 import dev.chrisbanes.haze.materials.CupertinoMaterials
 import dev.chrisbanes.haze.materials.HazeMaterials
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.IO
+import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.firstOrNull
@@ -26,13 +31,23 @@ import kotlinx.coroutines.flow.mapNotNull
 import kotlinx.coroutines.launch
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
+import okio.FileSystem
 import okio.Path.Companion.toPath
+import okio.SYSTEM
 
 @Immutable
 class DataStore private constructor(
     producePath: () -> String = { "androidx.preferences_pb" },
 ) {
-    val dataStore = PreferenceDataStoreFactory.createWithPath { producePath().toPath() }
+
+    val dataStore = DataStore.Builder(
+        context = Dispatchers.IO + SupervisorJob(),
+        storage = OkioStorage<Preferences>(
+            fileSystem = FileSystem.SYSTEM,
+            serializer = PreferencesSerializer,
+            producePath = { producePath().toPath() }
+        )
+    ).build()
 
     companion object {
         lateinit var dataStore: com.programmersbox.common.DataStore
@@ -146,6 +161,44 @@ class DataStore private constructor(
     fun rememberUseNewCardLook(): MutableState<Boolean> = rememberPreference(
         key = booleanPreferencesKey("use_new_card_look"),
         defaultValue = true,
+    )
+
+    @Composable
+    fun rememberBlurKind(): MutableState<BlurKind> = rememberPreferenceType(
+        key = stringPreferencesKey("blur_kind"),
+        defaultValue = BlurKind.Haze,
+        mapToValue = { json.decodeFromString<BlurKind>(it) },
+        mapToString = { json.encodeToString(it) }
+    )
+
+    @Composable
+    fun rememberLiquidGlassBlurAmount(): MutableState<Float> = rememberPreference(
+        key = floatPreferencesKey("liquid_glass_blur_amount"),
+        defaultValue = 1f
+    )
+
+    @Composable
+    fun rememberLiquidGlassRefractionHeight(): MutableState<Float> = rememberPreference(
+        key = floatPreferencesKey("liquid_glass_refraction_height"),
+        defaultValue = 12f
+    )
+
+    @Composable
+    fun rememberLiquidGlassRefractionAmount(): MutableState<Float> = rememberPreference(
+        key = floatPreferencesKey("liquid_glass_refraction_amount"),
+        defaultValue = 32f
+    )
+
+    @Composable
+    fun rememberLiquidGlassDepthEffect(): MutableState<Boolean> = rememberPreference(
+        key = booleanPreferencesKey("liquid_glass_depth_effect"),
+        defaultValue = true
+    )
+
+    @Composable
+    fun rememberLiquidGlassChromaticAberration(): MutableState<Boolean> = rememberPreference(
+        key = booleanPreferencesKey("liquid_glass_chromatic_aberration"),
+        defaultValue = true
     )
 
     open class DataStoreType<T>(

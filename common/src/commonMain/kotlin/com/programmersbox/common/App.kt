@@ -14,7 +14,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.runtime.staticCompositionLocalOf
@@ -25,7 +24,6 @@ import androidx.navigation3.runtime.rememberSaveableStateHolderNavEntryDecorator
 import androidx.navigation3.scene.DialogSceneStrategy
 import androidx.navigation3.ui.NavDisplay
 import com.programmersbox.common.di.NavigationHandler
-import dev.chrisbanes.haze.LocalHazeStyle
 import kotlinx.coroutines.flow.collect
 import kotlinx.serialization.Serializable
 import org.koin.compose.koinInject
@@ -52,9 +50,7 @@ internal fun App(
             }
     }
 
-    val blurType by koinInject<DataStore>().rememberBlurType()
     CompositionLocalProvider(
-        LocalHazeStyle provides blurType.toHazeStyle(),
         LocalActions provides remember {
             Actions(
                 shareUrl = onShareClick,
@@ -78,9 +74,11 @@ internal fun App(
                         rememberSaveableStateHolderNavEntryDecorator(),
                         rememberViewModelStoreNavEntryDecorator()
                     ),
-                    sceneStrategy = listDetailSceneStrategy
-                            then supportingPaneSceneStrategy
-                            then DialogSceneStrategy(),
+                    sceneStrategies = listOf(
+                        listDetailSceneStrategy,
+                        supportingPaneSceneStrategy,
+                        DialogSceneStrategy()
+                    ),
                     entryProvider = koinEntryProvider(),
                     transitionSpec = {
                         // Slide in from right when navigating forward
@@ -141,7 +139,10 @@ sealed class Screen {
         data object Nsfw : NavKey
 
         @Serializable
-        data object Behavior : NavKey
+        data object Behavior : NavKey {
+            @Serializable
+            data object Blur : NavKey
+        }
 
         @Serializable
         data object Backup : NavKey

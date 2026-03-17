@@ -51,17 +51,17 @@ import com.programmersbox.common.adaptiveGridCell
 import com.programmersbox.common.db.FavoriteType
 import com.programmersbox.common.db.FavoritesDao
 import com.programmersbox.common.db.ListRepository
+import com.programmersbox.common.presentation.components.DiagonalWipeIcon
 import com.programmersbox.common.presentation.components.ListChoiceScreen
 import com.programmersbox.common.presentation.components.LoadingImage
+import com.programmersbox.common.presentation.components.rememberBlurKindState
+import com.programmersbox.common.presentation.components.setBlurKind
+import com.programmersbox.common.presentation.components.setBlurKindSource
 import com.programmersbox.common.presentation.home.createDoubleClickBehaviorAction
 import com.programmersbox.common.presentation.home.modelItems
 import com.programmersbox.common.presentation.qrcode.QrCodeType
 import com.programmersbox.common.presentation.qrcode.ShareViaQrCode
 import dev.chrisbanes.haze.HazeProgressive
-import dev.chrisbanes.haze.LocalHazeStyle
-import dev.chrisbanes.haze.hazeEffect
-import dev.chrisbanes.haze.hazeSource
-import dev.chrisbanes.haze.rememberHazeState
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.launch
 import org.koin.compose.koinInject
@@ -90,9 +90,8 @@ fun CivitAiUserScreen(
     }
         .value
         .collectAsStateWithLifecycle(emptyList())
+
     val blacklisted by database.getBlacklisted().collectAsStateWithLifecycle(emptyList())
-    val showBlur by dataStore.rememberShowBlur()
-    val useProgressive by dataStore.rememberUseProgressive()
     val scope = rememberCoroutineScope()
 
     val doubleClickBehavior by dataStore.rememberDoubleClickBehavior()
@@ -113,8 +112,7 @@ fun CivitAiUserScreen(
         .getFavoritesByType(FavoriteType.Creator, username)
         .collectAsStateWithLifecycle(false)
 
-    val hazeState = rememberHazeState(showBlur)
-    val hazeStyle = LocalHazeStyle.current
+    val blurKindState = rememberBlurKindState()
 
     var showQrCode by remember { mutableStateOf(false) }
 
@@ -196,12 +194,11 @@ fun CivitAiUserScreen(
                                         }
                                     },
                                     icon = {
-                                        Icon(
-                                            if (isFavorite)
-                                                Icons.Default.Favorite
-                                            else
-                                                Icons.Default.FavoriteBorder,
-                                            null
+                                        DiagonalWipeIcon(
+                                            isWiped = isFavorite,
+                                            baseIcon = Icons.Default.FavoriteBorder,
+                                            wipedIcon = Icons.Default.Favorite,
+                                            modifier = Modifier.size(24.dp)
                                         )
                                     },
                                     label = "Favorite"
@@ -229,10 +226,12 @@ fun CivitAiUserScreen(
                         }
                     }
                 },
-                colors = if (showBlur) TopAppBarDefaults.topAppBarColors(containerColor = Color.Transparent)
+                colors = if (blurKindState.showBlur) TopAppBarDefaults.topAppBarColors(
+                    containerColor = Color.Transparent
+                )
                 else TopAppBarDefaults.topAppBarColors(),
-                modifier = Modifier.hazeEffect(hazeState, hazeStyle) {
-                    progressive = if (useProgressive)
+                modifier = Modifier.setBlurKind(blurKindState) {
+                    progressive = if (blurKindState.hazeState.useProgressive)
                         HazeProgressive.verticalGradient(
                             startIntensity = 1f,
                             endIntensity = 0f,
@@ -250,7 +249,7 @@ fun CivitAiUserScreen(
             horizontalArrangement = Arrangement.spacedBy(4.dp),
             contentPadding = padding,
             modifier = Modifier
-                .hazeSource(state = hazeState)
+                .setBlurKindSource(blurKindState)
                 .fillMaxSize()
         ) {
             item(

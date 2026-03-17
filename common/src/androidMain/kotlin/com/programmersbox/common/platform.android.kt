@@ -19,8 +19,8 @@ import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Modifier
 import androidx.core.content.getSystemService
 import androidx.core.net.toUri
-import androidx.room.Room
-import androidx.room.RoomDatabase
+import androidx.room3.Room
+import androidx.room3.RoomDatabase
 import com.programmersbox.common.db.AppDatabase
 import com.programmersbox.common.db.BlacklistedItemRoom
 import com.programmersbox.common.presentation.backup.BackupRestoreHandler

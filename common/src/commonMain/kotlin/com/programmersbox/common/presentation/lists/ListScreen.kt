@@ -68,6 +68,9 @@ import com.programmersbox.common.presentation.components.CivitBottomBar
 import com.programmersbox.common.presentation.components.CivitRail
 import com.programmersbox.common.presentation.components.LoadingImage
 import com.programmersbox.common.presentation.components.rememberBiometricOpening
+import com.programmersbox.common.presentation.components.rememberBlurKindState
+import com.programmersbox.common.presentation.components.setBlurKind
+import com.programmersbox.common.presentation.components.setBlurKindSource
 import com.programmersbox.resources.Res
 import com.programmersbox.resources.authenticate_to_view
 import com.programmersbox.resources.cancel
@@ -110,14 +113,12 @@ fun ListScreen(
         DateTimeFormatHandle(createDateTimeFormatItem(true))
     }
     val dataStore = koinInject<DataStore>()
-    val showBlur by dataStore.rememberShowBlur()
-    val useProgressive by dataStore.rememberUseProgressive()
     val showNsfw by dataStore.showNsfw()
     val blurStrength by dataStore.hideNsfwStrength()
 
     val scope = rememberCoroutineScope()
-    val hazeState = rememberHazeState(showBlur)
-    val hazeStyle = LocalHazeStyle.current
+
+    val blurKindState = rememberBlurKindState()
 
     val bottomBarScrollBehavior = BottomAppBarDefaults.exitAlwaysScrollBehavior()
 
@@ -181,10 +182,12 @@ fun ListScreen(
                         onClick = { showAdd = !showAdd }
                     ) { Icon(Icons.Default.Add, null) }
                 },
-                colors = if (showBlur) TopAppBarDefaults.topAppBarColors(containerColor = Color.Transparent)
+                colors = if (blurKindState.showBlur) TopAppBarDefaults.topAppBarColors(
+                    containerColor = Color.Transparent
+                )
                 else TopAppBarDefaults.topAppBarColors(),
-                modifier = Modifier.hazeEffect(hazeState, hazeStyle) {
-                    progressive = if (useProgressive)
+                modifier = Modifier.setBlurKind(blurKindState) {
+                    progressive = if (blurKindState.hazeState.useProgressive)
                         HazeProgressive.verticalGradient(
                             startIntensity = 1f,
                             endIntensity = 0f,
@@ -198,10 +201,10 @@ fun ListScreen(
         rail = { CivitRail() },
         bottomBar = {
             CivitBottomBar(
-                showBlur = showBlur,
+                showBlur = blurKindState.showBlur,
                 bottomBarScrollBehavior = bottomBarScrollBehavior,
-                modifier = Modifier.hazeEffect(hazeState) {
-                    progressive = if (useProgressive)
+                modifier = Modifier.setBlurKind(blurKindState) {
+                    progressive = if (blurKindState.hazeState.useProgressive)
                         HazeProgressive.verticalGradient(
                             startIntensity = 0f,
                             endIntensity = 1f,
@@ -209,7 +212,6 @@ fun ListScreen(
                         )
                     else
                         null
-                    style = hazeStyle
                 }
             )
         },
@@ -220,8 +222,8 @@ fun ListScreen(
             verticalArrangement = Arrangement.spacedBy(4.dp),
             modifier = Modifier
                 .fillMaxSize()
+                .setBlurKindSource(blurKindState)
                 .padding(bottom = 16.dp)
-                .hazeSource(state = hazeState)
         ) {
             item(
                 contentType = "search"

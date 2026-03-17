@@ -23,9 +23,9 @@
 }
 
 # Room
--keep class * extends androidx.room.RoomDatabase
--keep class * extends androidx.room.Entity
--keep class * extends androidx.room.Dao
+-keep class * extends androidx.room3.RoomDatabase
+-keep class * extends androidx.room3.Entity
+-keep class * extends androidx.room3.Dao
 
 # Compose
 -keep class androidx.compose.runtime.** { *; }

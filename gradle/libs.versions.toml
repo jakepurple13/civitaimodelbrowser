@@ -1,51 +1,52 @@
 [versions]
-appVersion = "4.7.3"
+appVersion = "5.0.0"
 alarmee = "2.6.0"
+backdrop = "2.0.0-alpha03"
 biometricauth = "1.1.0"
 biometricVersion = "1.4.0-alpha05"
 blurhashVersion = "0.0-4-ALPHA"
 browser = "1.9.0"
-chromaDial = "1.0.0-Alpha4"
+chromaDial = "1.0.0-Alpha6"
 composeMultiplatformMediaPlayerVersion = "1.0.53"
-composewebview = "1.0.0-alpha-12"
+composewebview = "1.0.0-beta-01"
 debugoverlay = "2.1.0"
 gitlive = "2.4.0"
 haze = "1.7.2"
 kmpIo = "0.3.0"
-kotlin-version = "2.3.10"
-agp-version = "9.1.0-rc01"
+kotlin-version = "2.3.20"
+agp-version = "9.1.0"
+compose-version = "1.11.0-alpha04"
 androidx-benchmark = "1.5.0-alpha02"
 androidx-profileinstaller = "1.4.1"
-compose-version = "1.11.0-alpha03"
 kotlinMultiplatformAppdirsVersion = "2.0.0"
 kotlinNativeZxing = "3.0.2"
 kotlinxCollectionsImmutableVersion = "0.4.0"
 ksoup = "0.2.6"
 ktor-version = "3.4.1"
 kotlinx-datetime = "0.7.1"
-datastore-version = "1.3.0-alpha06"
-ktorMonitorLogging = "1.10.0"
-material3Version = "1.11.0-alpha03"
-lifecycleViewmodelCompose = "2.10.0-beta01"
+datastore-version = "1.3.0-alpha07"
+ktorMonitorLogging = "1.10.1"
+material3Version = "1.11.0-alpha04"
+lifecycleViewmodelCompose = "2.11.0-alpha01"
 materialKolorVersion = "5.0.0-alpha07"
 multiplatformMarkdownRenderer = "0.39.2"
-okio = "3.16.4"
-paging-version = "3.4.1"
+okio = "3.17.0"
+paging-version = "3.5.0-alpha01"
 kamel-image = "1.0.9"
 kotlinx-coroutines-core = "1.10.2"
 androidx-material = "1.13.0"
 
 ksp = "2.3.6"
-androidx-room = "2.8.4"
+androidx-room = "3.0.0-alpha01"
 permissions = "0.20.1"
 sqlite = "2.6.2"
 
-cmp-nav3 = "1.1.0-alpha03"
-cmp-navevent = "1.0.1"
-cmpLifecycle = "2.10.0-beta01"
-cmp-nav3-material3 = "1.3.0-alpha05"
+cmp-nav3 = "1.1.0-alpha04"
+cmp-navevent = "1.1.0-alpha01"
+cmpLifecycle = "2.11.0-alpha01"
+cmp-nav3-material3 = "1.3.0-alpha06"
 
-koin = "4.2.0-RC1"
+koin = "4.2.0-RC2"
 
 filekit = "0.13.0"
 
@@ -77,7 +78,7 @@ android-test = { id = "com.android.test", version.ref = "agp-version" }
 kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin-version" }
 compose-compiler = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin-version" }
 ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
-room = { id = "androidx.room", version.ref = "androidx-room" }
+room = { id = "androidx.room3", version.ref = "androidx-room" }
 aboutLibraries = { id = "com.mikepenz.aboutlibraries.plugin", version.ref = "aboutLibraries" }
 easylauncher = { id = "com.starter.easylauncher", version.ref = "easylauncher" }
 androidx-baselineprofile = { id = "androidx.baselineprofile", version.ref = "androidx-benchmark" }
@@ -92,10 +93,11 @@ androidx-benchmark-macro-junit4 = { module = "androidx.benchmark:benchmark-macro
 androidx-biometric = { module = "androidx.biometric:biometric", version.ref = "biometricVersion" }
 androidx-biometric-compose = { module = "androidx.biometric:biometric-compose", version.ref = "biometricVersion" }
 androidx-browser = { module = "androidx.browser:browser", version.ref = "browser" }
-androidx-core = { module = "androidx.core:core-ktx", version = "1.17.0" }
 androidx-profileinstaller = { module = "androidx.profileinstaller:profileinstaller", version.ref = "androidx-profileinstaller" }
-androidx-activity-compose = "androidx.activity:activity-compose:1.12.4"
+androidx-core = { module = "androidx.core:core-ktx", version = "1.18.0" }
+androidx-activity-compose = "androidx.activity:activity-compose:1.13.0"
 androidx-work-runtime-ktx = { module = "androidx.work:work-runtime-ktx", version.ref = "workRuntimeKtx" }
+backdrop = { module = "io.github.kyant0:backdrop", version.ref = "backdrop" }
 biometricauth = { module = "io.github.zaval:biometricauth", version.ref = "biometricauth" }
 chroma-dial = { module = "com.sinasamaki:chroma-dial", version.ref = "chromaDial" }
 compose-multiplatform-media-player = { module = "network.chaintech:compose-multiplatform-media-player", version.ref = "composeMultiplatformMediaPlayerVersion" }
@@ -121,8 +123,8 @@ material-kolor = { module = "com.materialkolor:material-kolor", version.ref = "m
 material3 = { module = "org.jetbrains.compose.material3:material3", version.ref = "material3Version" }
 lifecycle-viewmodel-compose = { module = "org.jetbrains.androidx.lifecycle:lifecycle-viewmodel-compose", version.ref = "lifecycleViewmodelCompose" }
 lifecycle-runtime-compose = { group = "org.jetbrains.androidx.lifecycle", name = "lifecycle-runtime-compose", version.ref = "lifecycleViewmodelCompose" }
-androidx-room-compiler = { group = "androidx.room", name = "room-compiler", version.ref = "androidx-room" }
-androidx-room-runtime = { group = "androidx.room", name = "room-runtime", version.ref = "androidx-room" }
+androidx-room-compiler = { group = "androidx.room3", name = "room3-compiler", version.ref = "androidx-room" }
+androidx-room-runtime = { group = "androidx.room3", name = "room3-runtime", version.ref = "androidx-room" }
 multiplatform-markdown-renderer-m3 = { module = "com.mikepenz:multiplatform-markdown-renderer-m3", version.ref = "multiplatformMarkdownRenderer" }
 multiplatform-markdown-renderer = { module = "com.mikepenz:multiplatform-markdown-renderer", version.ref = "multiplatformMarkdownRenderer" }
 okio = { module = "com.squareup.okio:okio", version.ref = "okio" }

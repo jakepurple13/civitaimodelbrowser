@@ -1,11 +1,13 @@
 package com.programmersbox.common
 
+import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.Stable
 import com.fleeksoft.ksoup.Ksoup
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @Stable
+@Immutable
 @Serializable
 data class CivitAi(
     val items: List<Models>,
@@ -13,6 +15,7 @@ data class CivitAi(
 )
 
 @Stable
+@Immutable
 @Serializable
 data class Models(
     val id: Long,
@@ -31,12 +34,14 @@ data class Models(
 }
 
 @Stable
+@Immutable
 @Serializable
 data class Creator(
     val username: String? = null,
     val image: String? = null,
 )
 
+@Immutable
 @Serializable
 enum class ModelType {
     Checkpoint,
@@ -50,6 +55,7 @@ enum class ModelType {
 }
 
 @Stable
+@Immutable
 @Serializable
 data class ModelVersion(
     val id: Long,
@@ -68,6 +74,7 @@ data class ModelVersion(
 }
 
 @Stable
+@Immutable
 @Serializable
 data class ModelImage(
     val id: String? = "",
@@ -80,6 +87,7 @@ data class ModelImage(
 )
 
 @Stable
+@Immutable
 @Serializable
 data class CivitAiCustomImages(
     val items: List<CustomModelImage>,
@@ -87,6 +95,7 @@ data class CivitAiCustomImages(
 )
 
 @Stable
+@Immutable
 @Serializable
 data class CustomModelImage(
     val id: String? = "",
@@ -100,6 +109,7 @@ data class CustomModelImage(
     val hash: String? = null,
 )
 
+@Immutable
 @Serializable
 enum class NsfwLevel {
     None,
@@ -113,6 +123,7 @@ enum class NsfwLevel {
 }
 
 @Stable
+@Immutable
 @Serializable
 data class ImageMeta(
     @SerialName("Size")
@@ -130,6 +141,7 @@ data class ImageMeta(
 )
 
 @Stable
+@Immutable
 @Serializable
 data class PageData(
     val totalItems: Long? = null,

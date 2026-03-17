@@ -1,11 +1,13 @@
 package com.programmersbox.common.presentation.details
 
+import androidx.compose.runtime.Stable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.programmersbox.common.Consts
 import com.programmersbox.common.ModelImage
 import com.programmersbox.common.Models
 import com.programmersbox.common.Network
@@ -23,7 +25,7 @@ class CivitAiDetailViewModel(
     private val id: String?,
     private val database: FavoritesDao,
 ) : ViewModel() {
-    val modelUrl = "${Network.CIVITAI_MODELS_URL}$id"
+    val modelUrl = "${Consts.CIVITAI_MODELS_URL}$id"
     var models by mutableStateOf<DetailViewState>(DetailViewState.Loading)
     val showMoreInfo = mutableStateMapOf<Long, Boolean>()
 
@@ -108,8 +110,14 @@ class CivitAiDetailViewModel(
     }
 }
 
+@Stable
 sealed class DetailViewState {
+    @Stable
     data object Loading : DetailViewState()
+
+    @Stable
     data class Error(val error: Throwable) : DetailViewState()
+
+    @Stable
     data class Content(val models: Models) : DetailViewState()
 }

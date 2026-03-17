@@ -21,6 +21,15 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
 import com.programmersbox.common.CloseButton
 
+/**
+ * Represents a model for an item in a bottom sheet list, containing various text and icon attributes.
+ *
+ * @property primaryText The main text to be displayed for the item. This value is mandatory.
+ * @property overlineText An optional text to be displayed above the primary text, typically in a smaller font.
+ * @property secondaryText An optional text to be displayed below the primary text, providing additional details.
+ * @property icon An optional graphical icon to be displayed alongside the text in the item.
+ * @property trailingText An optional text to be displayed at the trailing end of the item, typically used for annotations or counts.
+ */
 class ListBottomSheetItemModel(
     val primaryText: String,
     val overlineText: String? = null,

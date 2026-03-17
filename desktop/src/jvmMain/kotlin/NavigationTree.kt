@@ -141,6 +141,7 @@ fun createNavigationGraph(): NavNode {
     val blacklisted = NavNode(Screen.Settings.Blacklisted)
     val nsfw = NavNode(Screen.Settings.Nsfw)
     val behavior = NavNode(Screen.Settings.Behavior)
+    val blur = NavNode(Screen.Settings.Behavior.Blur)
     val backup = NavNode(Screen.Settings.Backup)
     val restore = NavNode(Screen.Settings.Restore)
     val stats = NavNode(Screen.Settings.Stats)
@@ -155,6 +156,8 @@ fun createNavigationGraph(): NavNode {
     val webView = NavNode(Screen.WebView("Test"))
     val onboarding = NavNode(Screen.Onboarding)
     val detailsImage = NavNode(Screen.DetailsImage("Test", "Test"))
+
+    behavior.add(blur)
 
     settings.add(nsfw)
     settings.add(behavior)

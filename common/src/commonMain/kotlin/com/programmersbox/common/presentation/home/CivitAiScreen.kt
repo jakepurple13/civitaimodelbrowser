@@ -44,6 +44,7 @@ import androidx.compose.material3.ElevatedAssistChip
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.FloatingActionButton
+import androidx.compose.material3.FloatingActionButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -53,8 +54,6 @@ import androidx.compose.material3.SingleChoiceSegmentedButtonRow
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
-import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.material3.pulltorefresh.PullToRefreshDefaults
 import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
@@ -100,17 +99,19 @@ import com.programmersbox.common.db.FavoriteType
 import com.programmersbox.common.db.FavoritesDao
 import com.programmersbox.common.isScrollingUp
 import com.programmersbox.common.paging.itemKeyIndexed
+import com.programmersbox.common.presentation.components.BlurKind
 import com.programmersbox.common.presentation.components.CivitBottomBar
 import com.programmersbox.common.presentation.components.CivitRail
+import com.programmersbox.common.presentation.components.CivitTopAppBar
 import com.programmersbox.common.presentation.components.LoadingImage
 import com.programmersbox.common.presentation.components.ModelCard
 import com.programmersbox.common.presentation.components.ModelOptionsSheet
+import com.programmersbox.common.presentation.components.floatingActionButtonBlurKind
+import com.programmersbox.common.presentation.components.rememberBlurKindState
+import com.programmersbox.common.presentation.components.setBlurKind
+import com.programmersbox.common.presentation.components.setBlurKindSource
 import com.programmersbox.common.showRefreshButton
 import dev.chrisbanes.haze.HazeProgressive
-import dev.chrisbanes.haze.LocalHazeStyle
-import dev.chrisbanes.haze.hazeEffect
-import dev.chrisbanes.haze.hazeSource
-import dev.chrisbanes.haze.rememberHazeState
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.launch
@@ -146,19 +147,14 @@ fun CivitAiScreen(
     val blacklisted by db
         .getBlacklisted()
         .collectAsStateWithLifecycle(emptyList())
-    val showBlur by dataStore.rememberShowBlur()
-    val useProgressive by dataStore.rememberUseProgressive()
     val showNsfw by dataStore.showNsfw()
     val blurStrength by dataStore.hideNsfwStrength()
     val useNewCardLook by dataStore.rememberUseNewCardLook()
     val lazyPagingItems = viewModel.pager.collectAsLazyPagingItems()
 
-    val hazeState = rememberHazeState(showBlur)
     val scope = rememberCoroutineScope()
     val lazyGridState = rememberLazyGridState()
     val pullToRefreshState = rememberPullToRefreshState()
-
-    val hazeStyle = LocalHazeStyle.current
 
     val bottomBarScrollBehavior = BottomAppBarDefaults.exitAlwaysScrollBehavior()
 
@@ -174,10 +170,12 @@ fun CivitAiScreen(
         }
     }
 
+    val blurKindState = rememberBlurKindState()
+
     WindowedScaffold(
         topBar = {
             CivitTopBar(
-                showBlur = showBlur,
+                showBlur = blurKindState.showBlur,
                 onNavigateToSearch = onNavigateToSearch,
                 onNavigateToQrCode = onNavigateToQrCode,
                 onNavigateToImages = onNavigateToImages,
@@ -185,8 +183,8 @@ fun CivitAiScreen(
                 sort = viewModel.sort,
                 onSortChange = { viewModel.sort = it },
                 onRefresh = lazyPagingItems::refresh,
-                modifier = Modifier.hazeEffect(hazeState, hazeStyle) {
-                    progressive = if (useProgressive)
+                modifier = Modifier.setBlurKind(blurKindState) {
+                    progressive = if (blurKindState.hazeState.useProgressive)
                         HazeProgressive.verticalGradient(
                             startIntensity = 1f,
                             endIntensity = 0f,
@@ -200,10 +198,10 @@ fun CivitAiScreen(
         rail = { CivitRail() },
         bottomBar = {
             CivitBottomBar(
-                showBlur = showBlur,
+                showBlur = blurKindState.showBlur,
                 bottomBarScrollBehavior = bottomBarScrollBehavior,
-                modifier = Modifier.hazeEffect(hazeState, hazeStyle) {
-                    progressive = if (useProgressive)
+                modifier = Modifier.setBlurKind(blurKindState) {
+                    progressive = if (blurKindState.hazeState.useProgressive)
                         HazeProgressive.verticalGradient(
                             startIntensity = 0f,
                             endIntensity = 1f,
@@ -220,8 +218,21 @@ fun CivitAiScreen(
                 enter = fadeIn() + slideInHorizontally { it },
                 exit = slideOutHorizontally { it } + fadeOut()
             ) {
+                val shape = FloatingActionButtonDefaults.shape
                 FloatingActionButton(
                     onClick = { scope.launch { lazyGridState.animateScrollToItem(0) } },
+                    containerColor = if (blurKindState.showBlur && blurKindState.blurKind == BlurKind.LiquidGlass)
+                        Color.Transparent
+                    else
+                        FloatingActionButtonDefaults.containerColor,
+                    elevation = if (blurKindState.showBlur && blurKindState.blurKind == BlurKind.LiquidGlass)
+                        FloatingActionButtonDefaults.elevation(0.dp)
+                    else
+                        FloatingActionButtonDefaults.elevation(),
+                    modifier = Modifier.floatingActionButtonBlurKind(
+                        blurKindState = blurKindState,
+                        shape = shape,
+                    )
                 ) { Icon(Icons.Default.ArrowUpward, null) }
             }
         },
@@ -251,7 +262,7 @@ fun CivitAiScreen(
                 verticalArrangement = Arrangement.spacedBy(4.dp),
                 horizontalArrangement = Arrangement.spacedBy(4.dp),
                 modifier = Modifier
-                    .hazeSource(state = hazeState)
+                    .setBlurKindSource(blurKindState)
                     .fillMaxSize()
             ) {
                 modelItems(
@@ -638,23 +649,13 @@ private fun CivitTopBar(
     onSortChange: (CivitSort) -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    val topAppBarColors = TopAppBarDefaults.topAppBarColors(
-        containerColor = if (showBlur)
-            Color.Transparent
-        else
-            MaterialTheme.colorScheme.surface,
-        scrolledContainerColor = if (showBlur)
-            Color.Transparent
-        else
-            MaterialTheme.colorScheme.surface,
-    )
-
     var showSortBy by rememberSaveable { mutableStateOf(false) }
 
     Column(
         modifier = modifier
     ) {
-        TopAppBar(
+        CivitTopAppBar(
+            showBlur = showBlur,
             title = { Text("CivitAI") },
             navigationIcon = {
                 Row {
@@ -695,7 +696,6 @@ private fun CivitTopBar(
                     )
                 }
             },
-            colors = topAppBarColors,
         )
 
         AnimatedVisibility(showSortBy) {

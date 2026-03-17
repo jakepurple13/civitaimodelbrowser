@@ -29,7 +29,7 @@ android {
         applicationId = "com.programmersbox.civitaimodelbrowser"
         minSdk = 28
         targetSdk = 36
-        versionCode = 15
+        versionCode = 16
         versionName = libs.versions.appVersion.get()
     }
     compileOptions {
@@ -42,6 +42,7 @@ android {
     buildTypes {
         debug {
             applicationIdSuffix = ".debug"
+            versionNameSuffix = "-debug"
         }
 
         create("benchmark") {
@@ -55,6 +56,7 @@ android {
             initWith(getByName("debug"))
             matchingFallbacks.add("debug")
             isDebuggable = false
+            versionNameSuffix = "-beta"
         }
 
         create("betaMinified") {
@@ -66,6 +68,7 @@ android {
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
+            versionNameSuffix = "-betaMinified"
         }
 
         getByName("release") {

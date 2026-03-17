@@ -13,7 +13,6 @@ import io.ktor.http.contentType
 import io.ktor.http.encodeURLQueryComponent
 import io.ktor.serialization.kotlinx.json.json
 import kotlinx.serialization.json.Json
-import org.koin.core.component.KoinComponent
 
 const val PAGE_LIMIT = 20
 
@@ -21,12 +20,9 @@ interface KtorPluginProvider {
     fun install(config: HttpClientConfig<*>)
 }
 
-class Network : KoinComponent {
-    companion object {
-        private const val URL = "https://civitai.com/api/v1/"
-        const val CIVITAI_MODELS_URL = "https://civitai.com/models/"
-    }
-
+class Network(
+    vararg plugins: KtorPluginProvider,
+) {
     private val json: Json = Json {
         isLenient = true
         ignoreUnknownKeys = true
@@ -36,13 +32,13 @@ class Network : KoinComponent {
 
     val client: HttpClient by lazy {
         HttpClient {
-            getKoin().getAll<KtorPluginProvider>().forEach { it.install(this) }
+            plugins.forEach { it.install(this) }
             install(ContentNegotiation) { json(json) }
             install(HttpTimeout) {
                 requestTimeoutMillis = 10000
             }
             defaultRequest {
-                url(URL)
+                url(Consts.URL)
                 bearerAuth(BuildKonfig.API_KEY) //Token goes here!
                 contentType(ContentType.Application.Json)
             }

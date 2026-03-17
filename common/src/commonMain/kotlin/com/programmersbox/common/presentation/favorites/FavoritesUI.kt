@@ -37,10 +37,12 @@ import androidx.compose.material.icons.filled.Share
 import androidx.compose.material3.AppBarRow
 import androidx.compose.material3.AppBarWithSearch
 import androidx.compose.material3.BottomAppBarDefaults
+import androidx.compose.material3.ExpandedDockedSearchBarWithGap
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.FloatingActionButton
+import androidx.compose.material3.FloatingActionButtonDefaults
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -80,9 +82,9 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.compose.dropUnlessResumed
 import com.programmersbox.common.BackButton
 import com.programmersbox.common.ComposableUtils
+import com.programmersbox.common.Consts
 import com.programmersbox.common.CustomScrollBar
 import com.programmersbox.common.DataStore
-import com.programmersbox.common.Network
 import com.programmersbox.common.NetworkConnectionRepository
 import com.programmersbox.common.WindowedScaffold
 import com.programmersbox.common.adaptiveGridCell
@@ -91,6 +93,7 @@ import com.programmersbox.common.db.FavoriteType
 import com.programmersbox.common.db.FavoritesDao
 import com.programmersbox.common.db.ListRepository
 import com.programmersbox.common.isScrollingUp
+import com.programmersbox.common.presentation.components.BlurKind
 import com.programmersbox.common.presentation.components.CivitBottomBar
 import com.programmersbox.common.presentation.components.CivitRail
 import com.programmersbox.common.presentation.components.ImageSheet
@@ -98,7 +101,11 @@ import com.programmersbox.common.presentation.components.ListChoiceScreen
 import com.programmersbox.common.presentation.components.LoadingImage
 import com.programmersbox.common.presentation.components.ModelCard
 import com.programmersbox.common.presentation.components.ModelOptionsType
+import com.programmersbox.common.presentation.components.floatingActionButtonBlurKind
+import com.programmersbox.common.presentation.components.rememberBlurKindState
 import com.programmersbox.common.presentation.components.rememberModelOptionsScope
+import com.programmersbox.common.presentation.components.setBlurKind
+import com.programmersbox.common.presentation.components.setBlurKindSource
 import com.programmersbox.common.presentation.home.CardContent
 import com.programmersbox.common.presentation.qrcode.QrCodeType
 import com.programmersbox.common.presentation.qrcode.ShareViaQrCode
@@ -121,10 +128,6 @@ import com.programmersbox.resources.unfavorite
 import com.programmersbox.resources.view_creators_models
 import com.programmersbox.resources.view_model
 import dev.chrisbanes.haze.HazeProgressive
-import dev.chrisbanes.haze.LocalHazeStyle
-import dev.chrisbanes.haze.hazeEffect
-import dev.chrisbanes.haze.hazeSource
-import dev.chrisbanes.haze.rememberHazeState
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.koinInject
@@ -136,7 +139,7 @@ internal const val CREATOR_FILTER = "Creator"
 @OptIn(
     ExperimentalFoundationApi::class,
     ExperimentalMaterial3Api::class,
-    ExperimentalLayoutApi::class
+    ExperimentalLayoutApi::class, ExperimentalMaterial3ExpressiveApi::class
 )
 @Composable
 fun FavoritesUI(
@@ -151,15 +154,12 @@ fun FavoritesUI(
     val showNsfw by dataStore.showNsfw()
     val blurStrength by dataStore.hideNsfwStrength()
     var reverseFavorites by dataStore.rememberReverseFavorites()
-    val showBlur by dataStore.rememberShowBlur()
-    val useProgressive by dataStore.rememberUseProgressive()
     val useNewCardLook by dataStore.rememberUseNewCardLook()
     val lazyGridState = rememberLazyGridState()
 
     var showSortedByDialog by remember { mutableStateOf(false) }
 
-    val hazeState = rememberHazeState(showBlur)
-    val hazeStyle = LocalHazeStyle.current
+    val blurKindState = rememberBlurKindState()
 
     val typeList by viewModel
         .typeList
@@ -178,11 +178,11 @@ fun FavoritesUI(
     WindowedScaffold(
         topBar = {
             Surface(
-                color = if (showBlur) Color.Transparent else MaterialTheme.colorScheme.surface
+                color = if (blurKindState.showBlur) Color.Transparent else MaterialTheme.colorScheme.surface
             ) {
                 Column(
-                    modifier = Modifier.hazeEffect(hazeState, hazeStyle) {
-                        progressive = if (useProgressive)
+                    modifier = Modifier.setBlurKind(blurKindState) {
+                        progressive = if (blurKindState.hazeState.useProgressive)
                             HazeProgressive.verticalGradient(
                                 startIntensity = 1f,
                                 endIntensity = 0f,
@@ -194,36 +194,39 @@ fun FavoritesUI(
                 ) {
                     val appBarWithSearchColors = SearchBarDefaults.appBarWithSearchColors(
                         searchBarColors = SearchBarDefaults.colors(
-                            containerColor = if (showBlur)
+                            containerColor = if (blurKindState.showBlur)
                                 Color.Transparent
                             else
                                 MaterialTheme.colorScheme.surfaceContainerHigh
                         ),
-                        appBarContainerColor = if (showBlur)
+                        appBarContainerColor = if (blurKindState.showBlur)
                             Color.Transparent
                         else
                             MaterialTheme.colorScheme.surface
                     )
 
                     val searchBarState = rememberSearchBarState()
+
+                    val inputField = @Composable {
+                        SearchBarDefaults.InputField(
+                            searchBarState = searchBarState,
+                            textFieldState = viewModel.search,
+                            onSearch = {},
+                            placeholder = { Text(stringResource(Res.string.search_favorites)) },
+                            trailingIcon = {
+                                AnimatedVisibility(viewModel.search.text.isNotEmpty()) {
+                                    IconButton(
+                                        onClick = { viewModel.search.clearText() }
+                                    ) { Icon(Icons.Default.Clear, null) }
+                                }
+                            },
+                            modifier = Modifier.fillMaxWidth()
+                        )
+                    }
+
                     AppBarWithSearch(
                         state = searchBarState,
-                        inputField = {
-                            SearchBarDefaults.InputField(
-                                searchBarState = searchBarState,
-                                textFieldState = viewModel.search,
-                                onSearch = {},
-                                placeholder = { Text(stringResource(Res.string.search_favorites)) },
-                                trailingIcon = {
-                                    AnimatedVisibility(viewModel.search.text.isNotEmpty()) {
-                                        IconButton(
-                                            onClick = { viewModel.search.clearText() }
-                                        ) { Icon(Icons.Default.Clear, null) }
-                                    }
-                                },
-                                modifier = Modifier.fillMaxWidth()
-                            )
-                        },
+                        inputField = inputField,
                         navigationIcon = { BackButton() },
                         actions = {
                             Text("(${animateIntAsState(list.size).value})")
@@ -243,6 +246,12 @@ fun FavoritesUI(
                         },
                         colors = appBarWithSearchColors,
                     )
+
+                    ExpandedDockedSearchBarWithGap(
+                        state = searchBarState,
+                        inputField = inputField,
+                    ) {}
+
                     val lazyListState = rememberLazyListState()
                     LaunchedEffect(typeList) {
                         lazyListState.scrollToItem(0)
@@ -327,18 +336,31 @@ fun FavoritesUI(
                 enter = fadeIn() + slideInHorizontally { it },
                 exit = slideOutHorizontally { it } + fadeOut()
             ) {
+                val shape = FloatingActionButtonDefaults.shape
                 FloatingActionButton(
                     onClick = { scope.launch { lazyGridState.animateScrollToItem(0) } },
+                    containerColor = if (blurKindState.showBlur && blurKindState.blurKind == BlurKind.LiquidGlass)
+                        Color.Transparent
+                    else
+                        FloatingActionButtonDefaults.containerColor,
+                    elevation = if (blurKindState.showBlur && blurKindState.blurKind == BlurKind.LiquidGlass)
+                        FloatingActionButtonDefaults.elevation(0.dp)
+                    else
+                        FloatingActionButtonDefaults.elevation(),
+                    modifier = Modifier.floatingActionButtonBlurKind(
+                        blurKindState = blurKindState,
+                        shape = shape,
+                    )
                 ) { Icon(Icons.Default.ArrowUpward, null) }
             }
         },
         rail = { CivitRail() },
         bottomBar = {
             CivitBottomBar(
-                showBlur = showBlur,
+                showBlur = blurKindState.showBlur,
                 bottomBarScrollBehavior = bottomBarScrollBehavior,
-                modifier = Modifier.hazeEffect(hazeState, hazeStyle) {
-                    progressive = if (useProgressive)
+                modifier = Modifier.setBlurKind(blurKindState) {
+                    progressive = if (blurKindState.hazeState.useProgressive)
                         HazeProgressive.verticalGradient(
                             startIntensity = 0f,
                             endIntensity = 1f,
@@ -361,7 +383,7 @@ fun FavoritesUI(
             contentPadding = padding,
             modifier = Modifier
                 .padding(4.dp)
-                .hazeSource(state = hazeState)
+                .setBlurKindSource(blurKindState)
                 .fillMaxSize()
         ) {
             items(
@@ -816,7 +838,7 @@ fun FavoritesCreatorOptionsSheet(
                     if (showQrCode) {
                         ShareViaQrCode(
                             title = models.name,
-                            url = "${Network.CIVITAI_MODELS_URL}${models.id}",
+                            url = "${Consts.CIVITAI_MODELS_URL}${models.id}",
                             qrCodeType = QrCodeType.User,
                             id = models.id.toString(),
                             username = models.name,
@@ -1024,7 +1046,7 @@ fun FavoritesModelOptionsSheet(
                 if (showQrCode) {
                     ShareViaQrCode(
                         title = models.name,
-                        url = "${Network.CIVITAI_MODELS_URL}${models.id}",
+                        url = "${Consts.CIVITAI_MODELS_URL}${models.id}",
                         qrCodeType = QrCodeType.Model,
                         id = models.id.toString(),
                         username = "",

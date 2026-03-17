@@ -124,6 +124,8 @@ kotlin {
             implementation(libs.multiplatform.markdown.renderer.m3)
 
             implementation(libs.chroma.dial)
+
+            implementation(libs.backdrop)
         }
 
         commonTest.dependencies {
@@ -196,7 +198,7 @@ compose.resources {
     generateResClass = always
 }
 
-room {
+room3 {
     schemaDirectory("$projectDir/schemas")
 }
 

@@ -16,6 +16,8 @@ kmpIo = "0.3.0"
 kotlin-version = "2.3.20"
 agp-version = "9.1.0"
 compose-version = "1.11.0-alpha04"
+androidx-benchmark = "1.5.0-alpha02"
+androidx-profileinstaller = "1.4.1"
 kotlinMultiplatformAppdirsVersion = "2.0.0"
 kotlinNativeZxing = "3.0.2"
 kotlinxCollectionsImmutableVersion = "0.4.0"
@@ -72,12 +74,14 @@ material3WindowSizeClassVersion = "1.9.0"
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp-version" }
 android-library = { id = "com.android.library", version.ref = "agp-version" }
+android-test = { id = "com.android.test", version.ref = "agp-version" }
 kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin-version" }
 compose-compiler = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin-version" }
 ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
 room = { id = "androidx.room3", version.ref = "androidx-room" }
 aboutLibraries = { id = "com.mikepenz.aboutlibraries.plugin", version.ref = "aboutLibraries" }
 easylauncher = { id = "com.starter.easylauncher", version.ref = "easylauncher" }
+androidx-baselineprofile = { id = "androidx.baselineprofile", version.ref = "androidx-benchmark" }
 google-gms-google-services = { id = "com.google.gms.google-services", version.ref = "googleGmsGoogleServices" }
 google-firebase-crashlytics = { id = "com.google.firebase.crashlytics", version.ref = "googleFirebaseCrashlytics" }
 google-firebase-performance = { id = "com.google.firebase.firebase-perf", version.ref = "googlePerformancePlugin" }
@@ -85,9 +89,11 @@ google-firebase-performance = { id = "com.google.firebase.firebase-perf", versio
 [libraries]
 alarmee = { module = "io.github.tweener:alarmee", version.ref = "alarmee" }
 androidx-appcompat = { module = "androidx.appcompat:appcompat", version = "1.7.1" }
+androidx-benchmark-macro-junit4 = { module = "androidx.benchmark:benchmark-macro-junit4", version.ref = "androidx-benchmark" }
 androidx-biometric = { module = "androidx.biometric:biometric", version.ref = "biometricVersion" }
 androidx-biometric-compose = { module = "androidx.biometric:biometric-compose", version.ref = "biometricVersion" }
 androidx-browser = { module = "androidx.browser:browser", version.ref = "browser" }
+androidx-profileinstaller = { module = "androidx.profileinstaller:profileinstaller", version.ref = "androidx-profileinstaller" }
 androidx-core = { module = "androidx.core:core-ktx", version = "1.18.0" }
 androidx-activity-compose = "androidx.activity:activity-compose:1.13.0"
 androidx-work-runtime-ktx = { module = "androidx.work:work-runtime-ktx", version.ref = "workRuntimeKtx" }

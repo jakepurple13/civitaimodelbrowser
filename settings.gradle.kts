@@ -39,5 +39,6 @@ plugins {
 rootProject.name = "civitaimodelbrowser"
 
 include(":android")
+include(":benchmark")
 include(":desktop")
 include(":common")

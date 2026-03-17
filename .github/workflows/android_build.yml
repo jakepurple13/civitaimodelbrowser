@@ -321,20 +321,18 @@ jobs:
           emulator-options: -no-window -gpu swiftshader_indirect -no-snapshot-save -noaudio -no-boot-anim -camera-back none
           script: |
             mkdir -p benchmark/build/outputs/ci-artifacts
-
             adb wait-for-device
-            until [ "$(adb shell getprop sys.boot_completed | tr -d '\r')" = "1" ]; do
-              sleep 5
-            done
-
+            
+            # Flattened loop
+            until [ "$(adb shell getprop sys.boot_completed | tr -d '\r')" = "1" ]; do sleep 5; done
+            
             adb devices -l | tee benchmark/build/outputs/ci-artifacts/adb-devices.txt
             adb shell getprop | tee benchmark/build/outputs/ci-artifacts/emulator-getprop.txt
-
-            cleanup() {
-              adb logcat -d > benchmark/build/outputs/ci-artifacts/emulator-logcat.txt || true
-            }
+            
+            # Flattened function (note the required semicolon before the closing brace)
+            cleanup() { adb logcat -d > benchmark/build/outputs/ci-artifacts/emulator-logcat.txt || true; }
             trap cleanup EXIT
-
+            
             ./gradlew exportLibraryDefinitions :benchmark:collectNonMinifiedBenchmarkBaselineProfile --stacktrace --console=plain
 
       - name: Upload baseline profile diagnostics

@@ -10,8 +10,10 @@ chromaDial = "1.0.0-Alpha6"
 composeMultiplatformMediaPlayerVersion = "1.0.53"
 composewebview = "1.0.0-beta-01"
 debugoverlay = "2.1.0"
+ffmpegPlatform = "8.0.1-1.5.13"
 gitlive = "2.4.0"
 haze = "1.7.2"
+javacv = "1.5.13"
 kmpIo = "0.3.0"
 kotlin-version = "2.3.20"
 agp-version = "9.1.0"
@@ -101,11 +103,13 @@ datastore-core = { module = "androidx.datastore:datastore-core", version.ref = "
 datastore-preferences = { module = "androidx.datastore:datastore-preferences-core", version.ref = "datastore-version" }
 datastore-core-okio = { group = "androidx.datastore", name = "datastore-core-okio", version.ref = "datastore-version" }
 debugoverlay = { module = "com.ms-square:debugoverlay", version.ref = "debugoverlay" }
+ffmpeg-platform = { module = "org.bytedeco:ffmpeg-platform", version.ref = "ffmpegPlatform" }
 gitlive-firebase-crashlytics = { module = "dev.gitlive:firebase-crashlytics", version.ref = "gitlive" }
 gitlive-firebase-analytics = { module = "dev.gitlive:firebase-analytics", version.ref = "gitlive" }
 gitlive-firebase-perf = { module = "dev.gitlive:firebase-perf", version.ref = "gitlive" }
 haze = { module = "dev.chrisbanes.haze:haze", version.ref = "haze" }
 haze-materials = { module = "dev.chrisbanes.haze:haze-materials", version.ref = "haze" }
+javacv = { module = "org.bytedeco:javacv", version.ref = "javacv" }
 kmp-io = { module = "io.github.skolson:kmp-io", version.ref = "kmpIo" }
 kotlin-multiplatform-appdirs = { module = "ca.gosyer:kotlin-multiplatform-appdirs", version.ref = "kotlinMultiplatformAppdirsVersion" }
 kotlin-native-zxing = { module = "io.github.zxing-cpp:kotlin-native", version.ref = "kotlinNativeZxing" }

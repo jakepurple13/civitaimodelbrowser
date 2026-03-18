@@ -1,6 +1,7 @@
 package com.programmersbox.common.presentation.components.videoloader
 
 import androidx.compose.ui.graphics.toComposeImageBitmap
+import ca.gosyer.appdirs.AppDirs
 import io.github.vinceglb.filekit.dialogs.compose.util.encodeToByteArray
 import kotlinx.coroutines.CancellationException
 import okio.Path
@@ -10,9 +11,11 @@ import org.bytedeco.javacv.Java2DFrameConverter
 import java.io.File
 import java.net.URL
 
-internal class JvmVideoThumbnailCacheDirectoryProvider : VideoThumbnailCacheDirectoryProvider {
+internal class JvmVideoThumbnailCacheDirectoryProvider(
+    private val appDirs: AppDirs
+) : VideoThumbnailCacheDirectoryProvider {
     override fun cacheDirectory(): Path {
-        val root = File(System.getProperty("user.home"), ".civitaimodelbrowser/cache")
+        val root = File(appDirs.getUserDataDir(), ".civitaimodelbrowser/cache")
         if (!root.exists()) root.mkdirs()
         return root.absolutePath.toPath()
     }

@@ -93,7 +93,7 @@ actual fun createPlatformModule(): Module = module {
     singleOf(::DataStoreHandler)
     singleOf(::BackupRestoreHandler)
 
-    single<VideoThumbnailCacheDirectoryProvider> { JvmVideoThumbnailCacheDirectoryProvider() }
+    single<VideoThumbnailCacheDirectoryProvider> { JvmVideoThumbnailCacheDirectoryProvider(get()) }
     single<VideoThumbnailPlatformExtractor> { JvmVideoThumbnailPlatformExtractor() }
 }
 

@@ -24,6 +24,8 @@ import androidx.navigation3.runtime.rememberSaveableStateHolderNavEntryDecorator
 import androidx.navigation3.scene.DialogSceneStrategy
 import androidx.navigation3.ui.NavDisplay
 import com.programmersbox.common.di.NavigationHandler
+import com.programmersbox.common.presentation.components.videoloader.LocalVideoThumbnailFrameLoader
+import com.programmersbox.common.presentation.components.videoloader.VideoThumbnailFrameLoader
 import kotlinx.coroutines.flow.collect
 import kotlinx.serialization.Serializable
 import org.koin.compose.koinInject
@@ -37,6 +39,7 @@ internal fun App(
     SetupNetworkListener()
 
     val backStack = koinInject<NavigationHandler>().backStack
+    val videoThumbnailFrameLoader = koinInject<VideoThumbnailFrameLoader>()
 
     LaunchedEffect(Unit) {
         snapshotFlow { backStack.toList() }
@@ -56,6 +59,7 @@ internal fun App(
                 shareUrl = onShareClick,
             )
         },
+        LocalVideoThumbnailFrameLoader provides videoThumbnailFrameLoader,
     ) {
         SharedTransitionLayout {
 

@@ -41,13 +41,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.blur
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.paging.compose.collectAsLazyPagingItems
 import androidx.paging.compose.itemContentType
-import chaintech.videoplayer.ui.preview.VideoPreviewComposable
 import com.programmersbox.common.BackButton
 import com.programmersbox.common.ComposableUtils
 import com.programmersbox.common.CustomModelImage
@@ -62,6 +60,7 @@ import com.programmersbox.common.presentation.components.MultipleImageSheet
 import com.programmersbox.common.presentation.components.rememberBlurKindState
 import com.programmersbox.common.presentation.components.setBlurKind
 import com.programmersbox.common.presentation.components.setBlurKindSource
+import com.programmersbox.common.presentation.components.videoloader.VideoThumbnailLoader
 import com.programmersbox.common.presentation.home.BlacklistHandling
 import com.programmersbox.resources.Res
 import com.programmersbox.resources.cfg_scale_with_param
@@ -359,10 +358,9 @@ private fun ImageCard(
                                     }
                                 )
                         ) {
-                            VideoPreviewComposable(
-                                url = images.url,
-                                frameCount = 5,
-                                contentScale = ContentScale.Crop
+                            VideoThumbnailLoader(
+                                videoUrl = images.url,
+                                modifier = Modifier.fillMaxSize(),
                             )
                             Row(
                                 verticalAlignment = Alignment.Bottom,

@@ -103,6 +103,7 @@ import com.programmersbox.common.presentation.components.ModelOptionsSheet
 import com.programmersbox.common.presentation.components.rememberBlurKindState
 import com.programmersbox.common.presentation.components.setBlurKind
 import com.programmersbox.common.presentation.components.setBlurKindSource
+import com.programmersbox.common.presentation.components.videoloader.VideoThumbnailLoader
 import com.programmersbox.common.presentation.favorites.CoverCard
 import com.programmersbox.resources.Res
 import com.programmersbox.resources.cancel
@@ -130,10 +131,6 @@ import com.programmersbox.resources.use_biometrics_to_view
 import com.programmersbox.resources.view_model
 import com.programmersbox.resources.yes
 import dev.chrisbanes.haze.HazeProgressive
-import dev.chrisbanes.haze.LocalHazeStyle
-import dev.chrisbanes.haze.hazeEffect
-import dev.chrisbanes.haze.hazeSource
-import dev.chrisbanes.haze.rememberHazeState
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.koinInject
@@ -729,9 +726,8 @@ fun ImageLoad(
                 .background(Color.Black)
                 .then(modifier)
         ) {
-            VideoPreviewComposable(
-                url = url,
-                frameCount = 5,
+            VideoThumbnailLoader(
+                videoUrl = url,
                 contentScale = ContentScale.Crop,
             )
             Row(

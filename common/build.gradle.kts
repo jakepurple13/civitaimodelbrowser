@@ -162,6 +162,9 @@ kotlin {
             api(libs.zxing.core)
             implementation(libs.connectivity.http)
             implementation(libs.connectivity.compose.http)
+
+            implementation(libs.javacv)
+            implementation(libs.ffmpeg.platform)
         }
 
         iosMain.dependencies {

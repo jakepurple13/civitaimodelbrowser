@@ -56,7 +56,6 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.dropUnlessResumed
-import chaintech.videoplayer.ui.preview.VideoPreviewComposable
 import com.programmersbox.common.BackButton
 import com.programmersbox.common.ComposableUtils
 import com.programmersbox.common.DataStore
@@ -71,6 +70,7 @@ import com.programmersbox.common.presentation.components.rememberBiometricOpenin
 import com.programmersbox.common.presentation.components.rememberBlurKindState
 import com.programmersbox.common.presentation.components.setBlurKind
 import com.programmersbox.common.presentation.components.setBlurKindSource
+import com.programmersbox.common.presentation.components.videoloader.VideoThumbnailLoader
 import com.programmersbox.resources.Res
 import com.programmersbox.resources.authenticate_to_view
 import com.programmersbox.resources.cancel
@@ -82,10 +82,6 @@ import com.programmersbox.resources.last_updated
 import com.programmersbox.resources.list_name
 import com.programmersbox.resources.search_lists
 import dev.chrisbanes.haze.HazeProgressive
-import dev.chrisbanes.haze.LocalHazeStyle
-import dev.chrisbanes.haze.hazeEffect
-import dev.chrisbanes.haze.hazeSource
-import dev.chrisbanes.haze.rememberHazeState
 import kotlinx.coroutines.launch
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.LocalDateTime
@@ -346,9 +342,8 @@ private fun ListCard(
                             .background(Color.Black)
                             .then(imageModifier)
                     ) {
-                        VideoPreviewComposable(
-                            url = imageHashing.url,
-                            frameCount = 5,
+                        VideoThumbnailLoader(
+                            videoUrl = imageHashing.url,
                             contentScale = ContentScale.Crop,
                         )
                         Row(

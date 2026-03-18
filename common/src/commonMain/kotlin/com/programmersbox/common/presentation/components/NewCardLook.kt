@@ -31,8 +31,8 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import chaintech.videoplayer.ui.preview.VideoPreviewComposable
 import com.programmersbox.common.ModelImage
+import com.programmersbox.common.presentation.components.videoloader.VideoThumbnailLoader
 
 @OptIn(ExperimentalSharedTransitionApi::class)
 @Composable
@@ -151,10 +151,9 @@ private fun ModelCardContent(
                             }
                         ),
                 ) {
-                    VideoPreviewComposable(
-                        url = imageUrl,
-                        frameCount = 5,
-                        contentScale = ContentScale.Crop
+                    VideoThumbnailLoader(
+                        videoUrl = imageUrl,
+                        contentScale = ContentScale.Crop,
                     )
                     Row(
                         verticalAlignment = Alignment.Bottom,

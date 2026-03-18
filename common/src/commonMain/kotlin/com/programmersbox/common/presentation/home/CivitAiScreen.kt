@@ -110,6 +110,7 @@ import com.programmersbox.common.presentation.components.floatingActionButtonBlu
 import com.programmersbox.common.presentation.components.rememberBlurKindState
 import com.programmersbox.common.presentation.components.setBlurKind
 import com.programmersbox.common.presentation.components.setBlurKindSource
+import com.programmersbox.common.presentation.components.videoloader.VideoThumbnailLoader
 import com.programmersbox.common.showRefreshButton
 import dev.chrisbanes.haze.HazeProgressive
 import kotlinx.coroutines.CoroutineScope
@@ -529,10 +530,9 @@ fun CardContent(
                             }
                         ),
                 ) {
-                    VideoPreviewComposable(
-                        url = imageUrl,
-                        frameCount = 5,
-                        contentScale = ContentScale.Crop
+                    VideoThumbnailLoader(
+                        videoUrl = imageUrl,
+                        contentScale = ContentScale.Crop,
                     )
                     Row(
                         verticalAlignment = Alignment.Bottom,

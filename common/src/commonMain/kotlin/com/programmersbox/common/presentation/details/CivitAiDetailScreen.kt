@@ -120,6 +120,7 @@ import com.programmersbox.common.presentation.components.floatingActionButtonBlu
 import com.programmersbox.common.presentation.components.rememberBlurKindState
 import com.programmersbox.common.presentation.components.setBlurKind
 import com.programmersbox.common.presentation.components.setBlurKindSource
+import com.programmersbox.common.presentation.components.videoloader.VideoThumbnailLoader
 import com.programmersbox.common.presentation.home.BlacklistHandling
 import com.programmersbox.common.presentation.qrcode.QrCodeType
 import com.programmersbox.common.presentation.qrcode.ShareViaQrCode
@@ -569,10 +570,9 @@ private fun ImageCard(
                                 }
                             )
                     ) {
-                        VideoPreviewComposable(
-                            url = images.url,
-                            frameCount = 5,
-                            contentScale = ContentScale.Crop
+                        VideoThumbnailLoader(
+                            videoUrl = images.url,
+                            contentScale = ContentScale.Crop,
                         )
                         // Play indicator overlay at bottom
                         Row(

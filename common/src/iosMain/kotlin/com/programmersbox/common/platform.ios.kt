@@ -16,6 +16,10 @@ import com.programmersbox.common.db.BlacklistedItemRoom
 import com.programmersbox.common.presentation.backup.BackupRestoreHandler
 import com.programmersbox.common.presentation.components.ToastType
 import com.programmersbox.common.presentation.components.ToasterState
+import com.programmersbox.common.presentation.components.videoloader.IosVideoThumbnailCacheDirectoryProvider
+import com.programmersbox.common.presentation.components.videoloader.IosVideoThumbnailPlatformExtractor
+import com.programmersbox.common.presentation.components.videoloader.VideoThumbnailCacheDirectoryProvider
+import com.programmersbox.common.presentation.components.videoloader.VideoThumbnailPlatformExtractor
 import com.tweener.alarmee.configuration.AlarmeeIosPlatformConfiguration
 import com.tweener.alarmee.createAlarmeeService
 import com.tweener.alarmee.model.Alarmee
@@ -68,6 +72,9 @@ actual fun createPlatformModule(): Module = module {
     singleOf(::DownloadHandler)
     singleOf(::BackupRestoreHandler)
     singleOf(::NotificationHandler)
+
+    single<VideoThumbnailCacheDirectoryProvider> { IosVideoThumbnailCacheDirectoryProvider() }
+    single<VideoThumbnailPlatformExtractor> { IosVideoThumbnailPlatformExtractor() }
 }
 
 actual class DownloadHandler(

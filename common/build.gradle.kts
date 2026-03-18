@@ -27,7 +27,7 @@ kotlin {
         freeCompilerArgs.add("-Xexplicit-backing-fields")
     }
 
-    androidLibrary {
+    android {
         compileSdk = 36
         minSdk = 28
         namespace = "com.programmersbox.common"

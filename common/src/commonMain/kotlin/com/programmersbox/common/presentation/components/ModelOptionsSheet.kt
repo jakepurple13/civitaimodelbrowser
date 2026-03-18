@@ -717,8 +717,7 @@ interface ModelOptionsScope {
 private fun ModelOptionsScopeImpl(
     content: ModelOptionsScope.() -> Unit = {},
 ): ModelOptionsScope {
-    val intervals: MutableIntervalList<ModelOptionsType> =
-        remember { MutableIntervalList() }
+    val intervals: MutableIntervalList<ModelOptionsType> = remember { MutableIntervalList() }
 
     return remember(content) {
         object : ModelOptionsScope {

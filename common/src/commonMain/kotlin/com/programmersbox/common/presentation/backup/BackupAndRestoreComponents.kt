@@ -44,11 +44,11 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.state.ToggleableState
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import chaintech.videoplayer.ui.preview.VideoPreviewComposable
 import com.programmersbox.common.ComposableUtils
 import com.programmersbox.common.db.CustomList
 import com.programmersbox.common.db.toImageHash
 import com.programmersbox.common.presentation.components.LoadingImage
+import com.programmersbox.common.presentation.components.videoloader.VideoThumbnailLoader
 
 @Composable
 fun BackupAndRestoreList(
@@ -390,9 +390,8 @@ private fun ListItemToAdd(
                         .background(Color.Black)
                         .then(imageModifier)
                 ) {
-                    VideoPreviewComposable(
-                        url = imageHashing.url,
-                        frameCount = 5,
+                    VideoThumbnailLoader(
+                        videoUrl = imageHashing.url,
                         contentScale = ContentScale.Crop,
                     )
                     Row(

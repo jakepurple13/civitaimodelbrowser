@@ -505,7 +505,8 @@ fun ListChoiceScreen(
                         leadingContent = {
                             Checkbox(
                                 checked = isSelected,
-                                onCheckedChange = null
+                                onCheckedChange = null,
+                                enabled = !isInList,
                             )
                         },
                         trailingContent = {
@@ -656,7 +657,8 @@ fun ListChoiceScreen(
                         leadingContent = {
                             Checkbox(
                                 checked = isSelected,
-                                onCheckedChange = null
+                                onCheckedChange = null,
+                                enabled = !isInList,
                             )
                         },
                         content = { Text(item.item.name) },

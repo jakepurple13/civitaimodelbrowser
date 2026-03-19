@@ -13,17 +13,17 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.PlaylistAdd
 import androidx.compose.material.icons.filled.Close
-import androidx.compose.material.icons.filled.Favorite
-import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material.icons.filled.SearchOff
 import androidx.compose.material.icons.filled.Share
-import androidx.compose.material3.AppBarRow
+import androidx.compose.material3.BottomAppBar
+import androidx.compose.material3.BottomAppBarDefaults
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
+import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
@@ -51,12 +51,12 @@ import com.programmersbox.common.adaptiveGridCell
 import com.programmersbox.common.db.FavoriteType
 import com.programmersbox.common.db.FavoritesDao
 import com.programmersbox.common.db.ListRepository
-import com.programmersbox.common.presentation.components.DiagonalWipeIcon
 import com.programmersbox.common.presentation.components.ListChoiceScreen
 import com.programmersbox.common.presentation.components.LoadingImage
 import com.programmersbox.common.presentation.components.rememberBlurKindState
 import com.programmersbox.common.presentation.components.setBlurKind
 import com.programmersbox.common.presentation.components.setBlurKindSource
+import com.programmersbox.common.presentation.details.DetailFloatingActionButton
 import com.programmersbox.common.presentation.home.createDoubleClickBehaviorAction
 import com.programmersbox.common.presentation.home.modelItems
 import com.programmersbox.common.presentation.qrcode.QrCodeType
@@ -182,41 +182,6 @@ fun CivitAiUserScreen(
                 actions = {
                     if (lazyPagingItems.itemSnapshotList.isNotEmpty()) {
                         lazyPagingItems[0]?.creator?.let { creator ->
-                            AppBarRow(
-                                maxItemCount = 2
-                            ) {
-                                clickableItem(
-                                    onClick = {
-                                        if (favorites.any { it.name == viewModel.username }) {
-                                            viewModel.removeToFavorites(creator)
-                                        } else {
-                                            viewModel.addToFavorites(creator)
-                                        }
-                                    },
-                                    icon = {
-                                        DiagonalWipeIcon(
-                                            isWiped = isFavorite,
-                                            baseIcon = Icons.Default.FavoriteBorder,
-                                            wipedIcon = Icons.Default.Favorite,
-                                            modifier = Modifier.size(24.dp)
-                                        )
-                                    },
-                                    label = "Favorite"
-                                )
-
-                                clickableItem(
-                                    onClick = { showLists = true },
-                                    icon = { Icon(Icons.AutoMirrored.Filled.PlaylistAdd, null) },
-                                    label = "Lists"
-                                )
-
-                                clickableItem(
-                                    onClick = { showQrCode = true },
-                                    icon = { Icon(Icons.Default.Share, null) },
-                                    label = "Share"
-                                )
-                            }
-
                             LoadingImage(
                                 creator.image.orEmpty(),
                                 modifier = Modifier
@@ -242,6 +207,51 @@ fun CivitAiUserScreen(
                 }
             )
         },
+        bottomBar = {
+            if (lazyPagingItems.itemSnapshotList.isNotEmpty()) {
+                val creator = lazyPagingItems[0]?.creator
+                BottomAppBar(
+                    floatingActionButton = {
+                        DetailFloatingActionButton(
+                            isFavorite = isFavorite,
+                            addToFavorites = {
+                                creator?.let { viewModel.addToFavorites(it) }
+                            },
+                            removeFromFavorites = {
+                                creator?.let { viewModel.removeToFavorites(it) }
+                            },
+                            blurKindState = blurKindState,
+                        )
+                    },
+                    actions = {
+                        NavigationBarItem(
+                            selected = false,
+                            onClick = { showQrCode = true },
+                            icon = { Icon(Icons.Default.Share, null) },
+                            label = { Text("Share") },
+                        )
+
+                        NavigationBarItem(
+                            selected = false,
+                            onClick = { showLists = true },
+                            icon = { Icon(Icons.AutoMirrored.Filled.PlaylistAdd, null) },
+                            label = { Text("List") },
+                        )
+                    },
+                    containerColor = if (blurKindState.showBlur) Color.Transparent else BottomAppBarDefaults.containerColor,
+                    modifier = Modifier.setBlurKind(blurKindState) {
+                        progressive = if (blurKindState.hazeState.useProgressive)
+                            HazeProgressive.verticalGradient(
+                                startIntensity = 0f,
+                                endIntensity = 1f,
+                                preferPerformance = true
+                            )
+                        else
+                            null
+                    }
+                )
+            }
+        }
     ) { padding ->
         LazyVerticalGrid(
             columns = adaptiveGridCell(),

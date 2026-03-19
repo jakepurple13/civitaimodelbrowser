@@ -97,7 +97,6 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.zIndex
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.compose.dropUnlessResumed
-import chaintech.videoplayer.ui.preview.VideoPreviewComposable
 import com.programmersbox.common.BackButton
 import com.programmersbox.common.ComposableUtils
 import com.programmersbox.common.ContextMenu
@@ -1108,7 +1107,7 @@ private fun Version(
 }
 
 @Composable
-private fun DetailFloatingActionButton(
+fun DetailFloatingActionButton(
     isFavorite: Boolean,
     addToFavorites: () -> Unit,
     removeFromFavorites: () -> Unit,

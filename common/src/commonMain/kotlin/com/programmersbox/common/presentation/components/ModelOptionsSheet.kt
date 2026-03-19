@@ -1,7 +1,6 @@
 package com.programmersbox.common.presentation.components
 
 import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.FlowRow
@@ -536,7 +535,7 @@ fun ListChoiceScreen(
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun ListChoiceScreen(
     username: String,
@@ -649,22 +648,18 @@ fun ListChoiceScreen(
             ) {
                 items(list, key = { it.item.uuid }) { item ->
                     val isSelected = item in selectedLists
-                    val isInList = item.list.find { l -> l.name == username } != null
+                    val isInList = item
+                        .list
+                        .find { l -> l.name == username } != null
                     ListItem(
-                        modifier = Modifier.clickable {
-                            selectedLists = if (isSelected) {
-                                selectedLists - item
-                            } else {
-                                selectedLists + item
-                            }
-                        },
+                        enabled = !isInList,
                         leadingContent = {
                             Checkbox(
                                 checked = isSelected,
                                 onCheckedChange = null
                             )
                         },
-                        headlineContent = { Text(item.item.name) },
+                        content = { Text(item.item.name) },
                         trailingContent = {
                             Row(
                                 horizontalArrangement = Arrangement.spacedBy(8.dp),
@@ -675,7 +670,15 @@ fun ListChoiceScreen(
                                     Icon(Icons.Default.Check, null)
                                 }
                             }
-                        }
+                        },
+                        checked = isSelected,
+                        onCheckedChange = {
+                            selectedLists = if (it) {
+                                selectedLists + item
+                            } else {
+                                selectedLists - item
+                            }
+                        },
                     )
                 }
             }

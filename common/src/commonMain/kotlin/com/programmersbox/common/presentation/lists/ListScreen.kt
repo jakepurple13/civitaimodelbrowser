@@ -38,7 +38,6 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Stable
-import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -59,7 +58,6 @@ import androidx.lifecycle.compose.dropUnlessResumed
 import com.programmersbox.common.BackButton
 import com.programmersbox.common.ComposableUtils
 import com.programmersbox.common.DataStore
-import com.programmersbox.common.NetworkConnectionRepository
 import com.programmersbox.common.WindowedScaffold
 import com.programmersbox.common.db.CustomList
 import com.programmersbox.common.db.toImageHash
@@ -103,8 +101,6 @@ fun ListScreen(
     onNavigateToDetail: (String) -> Unit,
     viewModel: ListViewModel = koinViewModel(),
 ) {
-    val connectionRepository = koinInject<NetworkConnectionRepository>()
-    val shouldShowMedia by remember { derivedStateOf { connectionRepository.shouldShowMedia } }
     val dataTimeFormatter = remember {
         DateTimeFormatHandle(createDateTimeFormatItem(true))
     }
@@ -296,7 +292,6 @@ fun ListScreen(
                     dateTimeFormatter = dataTimeFormatter,
                     showNsfw = showNsfw,
                     blurStrength = blurStrength.dp,
-                    shouldShowMedia = shouldShowMedia,
                     onClick = dropUnlessResumed {
                         if (list.item.useBiometric) {
                             biometricOpen.authenticate(customListItem = list.item)
@@ -318,7 +313,6 @@ private fun ListCard(
     dateTimeFormatter: DateTimeFormatHandle,
     showNsfw: Boolean,
     blurStrength: Dp,
-    shouldShowMedia: Boolean,
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -335,7 +329,7 @@ private fun ListCard(
                     .size(ComposableUtils.IMAGE_WIDTH / 3, ComposableUtils.IMAGE_HEIGHT / 3)
                     .clip(MaterialTheme.shapes.medium)
 
-                if (imageHashing?.url?.endsWith("mp4") == true && shouldShowMedia) {
+                if (imageHashing?.url?.endsWith("mp4") == true) {
                     Box(
                         contentAlignment = Alignment.Center,
                         modifier = Modifier

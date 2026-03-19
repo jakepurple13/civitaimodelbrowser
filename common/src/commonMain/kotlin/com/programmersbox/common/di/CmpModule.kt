@@ -15,6 +15,7 @@ import com.programmersbox.common.presentation.components.videoloader.VideoThumbn
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import org.koin.core.module.dsl.singleOf
+import org.koin.dsl.bind
 import org.koin.dsl.module
 
 @OptIn(ExperimentalMaterial3AdaptiveApi::class)
@@ -27,9 +28,9 @@ fun cmpModules() = module {
     single { get<AppDatabase>().getSearchHistoryDao() }
     single { ToasterState(CoroutineScope(Dispatchers.Main)) }
 
-    single<VideoThumbnailUrlResolver> { KtorVideoThumbnailUrlResolver(get()) }
+    singleOf(::KtorVideoThumbnailUrlResolver) bind VideoThumbnailUrlResolver::class
+    singleOf(::DefaultVideoThumbnailFrameLoader) bind VideoThumbnailFrameLoader::class
     single { VideoThumbnailDiskCache(get()) }
-    single<VideoThumbnailFrameLoader> { DefaultVideoThumbnailFrameLoader(get(), get(), get()) }
 
     includes(
         viewModelModule(),

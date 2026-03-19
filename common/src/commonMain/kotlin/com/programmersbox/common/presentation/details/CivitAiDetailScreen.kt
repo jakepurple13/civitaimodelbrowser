@@ -72,7 +72,6 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -103,7 +102,6 @@ import com.programmersbox.common.ContextMenu
 import com.programmersbox.common.DataStore
 import com.programmersbox.common.ModelImage
 import com.programmersbox.common.ModelVersion
-import com.programmersbox.common.NetworkConnectionRepository
 import com.programmersbox.common.adaptiveGridCell
 import com.programmersbox.common.db.BlacklistedItemRoom
 import com.programmersbox.common.db.FavoriteType
@@ -139,8 +137,6 @@ fun CivitAiDetailScreen(
     onNavigateToDetailImages: (Long, String) -> Unit,
     viewModel: CivitAiDetailViewModel = koinViewModel(),
 ) {
-    val connectionRepository = koinInject<NetworkConnectionRepository>()
-    val shouldShowMedia by remember { derivedStateOf { connectionRepository.shouldShowMedia } }
     val dao = koinInject<FavoritesDao>()
     val dataStore = koinInject<DataStore>()
     val showNsfw by dataStore.showNsfw()
@@ -400,7 +396,6 @@ fun CivitAiDetailScreen(
                                     images = images,
                                     showNsfw = showNsfw,
                                     nsfwBlurStrength = nsfwBlurStrength,
-                                    shouldShowMedia = shouldShowMedia,
                                     blacklisted = blacklisted,
                                     dao = dao,
                                     onClick = { sheetDetails = it },
@@ -513,7 +508,6 @@ private fun ImageCard(
     isFavorite: Boolean,
     isBlacklisted: Boolean,
     nsfwBlurStrength: Float,
-    shouldShowMedia: Boolean,
     onClick: () -> Unit,
     onLongClick: () -> Unit,
     modifier: Modifier = Modifier,
@@ -556,7 +550,7 @@ private fun ImageCard(
                     )
                 }
             } else {
-                if (images.url.endsWith("mp4") && shouldShowMedia) {
+                if (images.url.endsWith("mp4")) {
                     Box(
                         contentAlignment = Alignment.Center,
                         modifier = Modifier
@@ -882,7 +876,6 @@ private fun ItemCard(
     images: ModelImage,
     showNsfw: Boolean,
     nsfwBlurStrength: Float,
-    shouldShowMedia: Boolean,
     blacklisted: List<BlacklistedItemRoom>,
     dao: FavoritesDao,
     onClick: (ModelImage) -> Unit,
@@ -921,7 +914,6 @@ private fun ItemCard(
                 .collectAsStateWithLifecycle(false)
                 .value,
             isBlacklisted = isBlacklisted,
-            shouldShowMedia = shouldShowMedia,
             onClick = { onClick(images) },
             onLongClick = { showDialog = true },
             modifier = modifier

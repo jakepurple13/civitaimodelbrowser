@@ -31,7 +31,6 @@ import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -50,7 +49,6 @@ import com.programmersbox.common.BackButton
 import com.programmersbox.common.ComposableUtils
 import com.programmersbox.common.CustomModelImage
 import com.programmersbox.common.DataStore
-import com.programmersbox.common.NetworkConnectionRepository
 import com.programmersbox.common.adaptiveGridCell
 import com.programmersbox.common.db.FavoritesDao
 import com.programmersbox.common.paging.itemKeyIndexed
@@ -84,8 +82,6 @@ fun CivitAiImagesScreen(
     onNavigateToUser: (String) -> Unit,
     viewModel: CivitAiImagesViewModel = koinViewModel(),
 ) {
-    val connectionRepository = koinInject<NetworkConnectionRepository>()
-    val shouldShowMedia by remember { derivedStateOf { connectionRepository.shouldShowMedia } }
     val database = koinInject<FavoritesDao>()
     val dataStore = koinInject<DataStore>()
     val showNsfw by dataStore.showNsfw()
@@ -258,7 +254,6 @@ fun CivitAiImagesScreen(
                             showNsfw = showNsfw,
                             nsfwBlurStrength = nsfwBlurStrength,
                             onClick = { sheetDetailsMultiple = models.second },
-                            shouldShowMedia = shouldShowMedia,
                             onLongClick = {}
                         )
                     } else {
@@ -281,7 +276,6 @@ fun CivitAiImagesScreen(
                             nsfwBlurStrength = nsfwBlurStrength,
                             isFavorite = favoriteList.any { f -> f.imageUrl == modelInfo.url },
                             isBlacklisted = blacklisted.any { it.imageUrl == modelInfo.url },
-                            shouldShowMedia = shouldShowMedia,
                             onClick = {
                                 if (modelInfo.height < 2000 || modelInfo.width < 2000) {
                                     sheetDetails = modelInfo
@@ -306,7 +300,6 @@ private fun ImageCard(
     isFavorite: Boolean,
     isBlacklisted: Boolean,
     nsfwBlurStrength: Float,
-    shouldShowMedia: Boolean,
     onClick: () -> Unit,
     onLongClick: () -> Unit,
 ) {
@@ -344,7 +337,7 @@ private fun ImageCard(
                             .matchParentSize()
                     )
                 } else {
-                    if (images.url.endsWith("mp4") && shouldShowMedia) {
+                    if (images.url.endsWith("mp4")) {
                         Box(
                             contentAlignment = Alignment.Center,
                             modifier = Modifier
@@ -415,7 +408,6 @@ private fun ImageCard2(
     images: List<CustomModelImage>,
     showNsfw: Boolean,
     nsfwBlurStrength: Float,
-    shouldShowMedia: Boolean,
     onClick: () -> Unit,
     onLongClick: () -> Unit,
 ) {
@@ -449,7 +441,7 @@ private fun ImageCard2(
                             .weight(1f, true)
                     ) {
                         chunk.forEach { image ->
-                            if (image.url.endsWith("mp4") && shouldShowMedia) {
+                            if (image.url.endsWith("mp4")) {
                                 Box(
                                     contentAlignment = Alignment.Center,
                                     modifier = Modifier

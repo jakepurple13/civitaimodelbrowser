@@ -55,11 +55,9 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.paging.LoadState
 import androidx.paging.compose.collectAsLazyPagingItems
-import com.kyant.backdrop.backdrops.layerBackdrop
 import com.programmersbox.common.BackButton
 import com.programmersbox.common.DataStore
 import com.programmersbox.common.Models
-import com.programmersbox.common.NetworkConnectionRepository
 import com.programmersbox.common.WindowedScaffold
 import com.programmersbox.common.adaptiveGridCell
 import com.programmersbox.common.db.FavoritesDao
@@ -69,10 +67,6 @@ import com.programmersbox.common.presentation.components.rememberBlurKindState
 import com.programmersbox.common.presentation.components.setBlurKind
 import com.programmersbox.common.presentation.components.setBlurKindSource
 import dev.chrisbanes.haze.HazeProgressive
-import dev.chrisbanes.haze.LocalHazeStyle
-import dev.chrisbanes.haze.hazeEffect
-import dev.chrisbanes.haze.hazeSource
-import dev.chrisbanes.haze.rememberHazeState
 import kotlinx.collections.immutable.PersistentList
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.coroutines.flow.flowOf
@@ -88,8 +82,6 @@ fun SearchScreen(
     viewModel: CivitAiSearchViewModel = koinViewModel(),
 ) {
     val lazyPagingItems = viewModel.pager.collectAsLazyPagingItems()
-    val connectionRepository = koinInject<NetworkConnectionRepository>()
-    val shouldShowMedia by remember { derivedStateOf { connectionRepository.shouldShowMedia } }
     val db = koinInject<FavoritesDao>()
     val dataStore = koinInject<DataStore>()
     val showFavorites by dataStore.rememberShowFavorites()
@@ -169,7 +161,6 @@ fun SearchScreen(
                 blurStrength = blurStrength,
                 database = database,
                 blacklisted = blacklisted,
-                shouldShowMedia = shouldShowMedia,
                 onNavigateToUser = onNavigateToUser,
                 onNavigateToDetailImages = onNavigateToDetailImages,
                 onDoubleClick = doubleClickBehaviorAction,

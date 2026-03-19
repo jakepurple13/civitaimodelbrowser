@@ -12,7 +12,6 @@ import androidx.compose.material3.adaptive.navigation3.rememberListDetailSceneSt
 import androidx.compose.material3.adaptive.navigation3.rememberSupportingPaneSceneStrategy
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
-import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.snapshotFlow
@@ -26,7 +25,6 @@ import androidx.navigation3.ui.NavDisplay
 import com.programmersbox.common.di.NavigationHandler
 import com.programmersbox.common.presentation.components.videoloader.LocalVideoThumbnailFrameLoader
 import com.programmersbox.common.presentation.components.videoloader.VideoThumbnailFrameLoader
-import kotlinx.coroutines.flow.collect
 import kotlinx.serialization.Serializable
 import org.koin.compose.koinInject
 import org.koin.compose.navigation3.koinEntryProvider
@@ -36,8 +34,6 @@ import org.koin.compose.navigation3.koinEntryProvider
 internal fun App(
     onShareClick: (String) -> Unit,
 ) {
-    SetupNetworkListener()
-
     val backStack = koinInject<NavigationHandler>().backStack
     val videoThumbnailFrameLoader = koinInject<VideoThumbnailFrameLoader>()
 
@@ -103,20 +99,6 @@ internal fun App(
                 )
             }
         }
-    }
-}
-
-@Composable
-private fun SetupNetworkListener() {
-    val networkConnectionRepository = koinInject<NetworkConnectionRepository>()
-    LaunchedEffect(Unit) {
-        networkConnectionRepository
-            .connectivityFlow()
-            .collect()
-    }
-    DisposableEffect(Unit) {
-        networkConnectionRepository.start()
-        onDispose { networkConnectionRepository.stop() }
     }
 }
 

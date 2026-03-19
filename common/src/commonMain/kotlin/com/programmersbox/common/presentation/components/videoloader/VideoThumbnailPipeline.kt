@@ -1,6 +1,8 @@
 package com.programmersbox.common.presentation.components.videoloader
 
 import com.programmersbox.common.Network
+import com.programmersbox.common.NetworkConnectionRepository
+import dev.jordond.connectivity.Connectivity
 import io.ktor.client.request.prepareGet
 import io.ktor.http.isSuccess
 import kotlinx.coroutines.CancellationException
@@ -83,12 +85,24 @@ internal class DefaultVideoThumbnailFrameLoader(
     private val urlResolver: VideoThumbnailUrlResolver,
     private val diskCache: VideoThumbnailDiskCache,
     private val extractor: VideoThumbnailPlatformExtractor,
+    private val networkConnectionRepository: NetworkConnectionRepository
 ) : VideoThumbnailFrameLoader {
 
     override suspend fun load(request: VideoThumbnailRequest): Result<VideoThumbnailResult> {
         diskCache.get(request)
             .getOrNull()
             ?.let { return Result.success(it) }
+
+        val shouldPullFromNetwork = when (
+            val status = networkConnectionRepository.connectivity.status()
+        ) {
+            is Connectivity.Status.Connected -> !status.isMetered
+            Connectivity.Status.Disconnected -> false
+        }
+
+        if (!shouldPullFromNetwork) {
+            return Result.failure(VideoThumbnailLoadException("No internet connection"))
+        }
 
         val resolvedUrl = urlResolver.resolve(request.videoUrl)
             .getOrElse {

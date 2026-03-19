@@ -89,7 +89,6 @@ import com.programmersbox.common.DataStore
 import com.programmersbox.common.DoubleClickBehavior
 import com.programmersbox.common.ModelType
 import com.programmersbox.common.Models
-import com.programmersbox.common.NetworkConnectionRepository
 import com.programmersbox.common.WindowedScaffold
 import com.programmersbox.common.adaptiveGridCell
 import com.programmersbox.common.db.BlacklistedItemRoom
@@ -130,8 +129,6 @@ fun CivitAiScreen(
     onNavigateToSearch: () -> Unit,
     viewModel: CivitAiViewModel = koinViewModel(),
 ) {
-    val connectionRepository = koinInject<NetworkConnectionRepository>()
-    val shouldShowMedia by remember { derivedStateOf { connectionRepository.shouldShowMedia } }
     val db = koinInject<FavoritesDao>()
     val dataStore = koinInject<DataStore>()
     val showFavorites by dataStore.rememberShowFavorites()
@@ -272,7 +269,6 @@ fun CivitAiScreen(
                     blurStrength = blurStrength,
                     database = database,
                     blacklisted = blacklisted,
-                    shouldShowMedia = shouldShowMedia,
                     onNavigateToUser = onNavigateToUser,
                     onNavigateToDetailImages = onNavigateToDetailImages,
                     onDoubleClick = doubleClickBehaviorAction,
@@ -294,7 +290,6 @@ fun LazyGridScope.modelItems(
     blurStrength: Float,
     database: List<FavoriteModel>,
     blacklisted: List<BlacklistedItemRoom>,
-    shouldShowMedia: Boolean,
     useNewCardLook: Boolean,
     onNavigateToUser: ((String) -> Unit)? = null,
     onNavigateToDetailImages: ((Long, String) -> Unit)? = null,
@@ -327,7 +322,6 @@ fun LazyGridScope.modelItems(
                 onDoubleClick = onDoubleClick?.let { action -> { action(models) } },
                 showNsfw = showNsfw,
                 blurStrength = blurStrength.dp,
-                shouldShowMedia = shouldShowMedia,
                 isFavorite = database
                     .filterIsInstance<FavoriteModel.Model>()
                     .any { m -> m.id == models.id },
@@ -388,7 +382,6 @@ private fun ModelItem(
     onDoubleClick: (() -> Unit)?,
     isFavorite: Boolean,
     isBlacklisted: Boolean,
-    shouldShowMedia: Boolean,
     checkIfImageUrlIsBlacklisted: (String) -> Boolean,
     useNewCardLook: Boolean,
     modifier: Modifier = Modifier,
@@ -412,7 +405,6 @@ private fun ModelItem(
             isBlacklisted = isBlacklisted,
             onLongClick = onLongClick,
             onDoubleClick = onDoubleClick,
-            shouldShowMedia = shouldShowMedia,
             blurHash = imageModel?.hash,
             creatorImage = models.creator?.image,
             modifier = modifier
@@ -430,7 +422,6 @@ private fun ModelItem(
             isBlacklisted = isBlacklisted,
             onLongClick = onLongClick,
             onDoubleClick = onDoubleClick,
-            shouldShowMedia = shouldShowMedia,
             blurHash = imageModel?.hash,
             creatorImage = models.creator?.image,
             modifier = modifier.size(
@@ -452,7 +443,6 @@ fun CoverCard(
     blurStrength: Dp,
     isFavorite: Boolean,
     isBlacklisted: Boolean,
-    shouldShowMedia: Boolean,
     modifier: Modifier = Modifier,
     blurHash: String? = null,
     creatorImage: String? = null,
@@ -484,7 +474,6 @@ fun CoverCard(
             showNsfw = showNsfw,
             blurStrength = blurStrength,
             blurHash = blurHash,
-            shouldShowMedia = shouldShowMedia,
             creatorImage = creatorImage,
         )
     }
@@ -500,7 +489,6 @@ fun CardContent(
     isNsfw: Boolean,
     showNsfw: Boolean,
     blurStrength: Dp,
-    shouldShowMedia: Boolean,
     isBlacklisted: Boolean = false,
     blurHash: String? = null,
 ) {
@@ -515,7 +503,7 @@ fun CardContent(
                     .matchParentSize()
             )
         } else {
-            if (imageUrl.endsWith("mp4") && shouldShowMedia) {
+            if (imageUrl.endsWith("mp4")) {
                 Box(
                     contentAlignment = Alignment.Center,
                     modifier = Modifier

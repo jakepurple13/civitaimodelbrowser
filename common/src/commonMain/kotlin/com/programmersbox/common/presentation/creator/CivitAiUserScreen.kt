@@ -46,7 +46,6 @@ import androidx.paging.compose.collectAsLazyPagingItems
 import com.programmersbox.common.BackButton
 import com.programmersbox.common.DataStore
 import com.programmersbox.common.Models
-import com.programmersbox.common.NetworkConnectionRepository
 import com.programmersbox.common.adaptiveGridCell
 import com.programmersbox.common.db.FavoriteType
 import com.programmersbox.common.db.FavoritesDao
@@ -74,8 +73,6 @@ fun CivitAiUserScreen(
     onNavigateToDetail: (String) -> Unit,
     viewModel: CivitAiUserViewModel = koinViewModel(),
 ) {
-    val connectionRepository = koinInject<NetworkConnectionRepository>()
-    val shouldShowMedia by remember { derivedStateOf { connectionRepository.shouldShowMedia } }
     val dataStore = koinInject<DataStore>()
     val showNsfw by dataStore.showNsfw()
     val blurStrength by dataStore.hideNsfwStrength()
@@ -297,7 +294,6 @@ fun CivitAiUserScreen(
                     blurStrength = blurStrength,
                     database = favorites,
                     blacklisted = blacklisted,
-                    shouldShowMedia = shouldShowMedia,
                     onDoubleClick = doubleClickBehaviorAction,
                     useNewCardLook = useNewCardLook,
                 )

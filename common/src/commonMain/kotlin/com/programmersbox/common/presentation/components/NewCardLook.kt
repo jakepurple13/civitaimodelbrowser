@@ -45,7 +45,6 @@ fun ModelCard(
     blurStrength: Dp,
     isFavorite: Boolean,
     isBlacklisted: Boolean,
-    shouldShowMedia: Boolean,
     modifier: Modifier = Modifier,
     blurHash: String? = null,
     creatorImage: String? = null,
@@ -76,7 +75,6 @@ fun ModelCard(
                 showNsfw = showNsfw,
                 blurStrength = blurStrength,
                 isBlacklisted = isBlacklisted,
-                shouldShowMedia = shouldShowMedia,
                 blurHash = blurHash,
             )
 
@@ -125,7 +123,6 @@ private fun ModelCardContent(
     showNsfw: Boolean,
     blurStrength: Dp,
     isBlacklisted: Boolean,
-    shouldShowMedia: Boolean,
     blurHash: String? = null,
 ) {
     Column {
@@ -136,7 +133,7 @@ private fun ModelCardContent(
                     .background(Color.Black)
             )
         } else {
-            if (imageUrl.endsWith("mp4") && shouldShowMedia) {
+            if (imageUrl.endsWith("mp4")) {
                 Box(
                     contentAlignment = Alignment.Center,
                     modifier = Modifier

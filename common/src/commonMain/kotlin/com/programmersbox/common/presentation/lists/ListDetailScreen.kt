@@ -65,7 +65,6 @@ import androidx.compose.material3.TextButton
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.material3.rememberSearchBarState
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
@@ -87,7 +86,6 @@ import androidx.lifecycle.compose.dropUnlessResumed
 import com.programmersbox.common.BackButton
 import com.programmersbox.common.ComposableUtils
 import com.programmersbox.common.DataStore
-import com.programmersbox.common.NetworkConnectionRepository
 import com.programmersbox.common.adaptiveGridCell
 import com.programmersbox.common.db.CustomList
 import com.programmersbox.common.db.CustomListInfo
@@ -142,8 +140,6 @@ fun ListDetailScreen(
     onNavigateToUser: (String) -> Unit,
     viewModel: ListDetailViewModel = koinViewModel(),
 ) {
-    val connectionRepository = koinInject<NetworkConnectionRepository>()
-    val shouldShowMedia by remember { derivedStateOf { connectionRepository.shouldShowMedia } }
     val dataStore = koinInject<DataStore>()
     val showNsfw by dataStore.showNsfw()
     val blurStrength by dataStore.hideNsfwStrength()
@@ -172,7 +168,6 @@ fun ListDetailScreen(
                     showNsfw = showNsfw,
                     blurStrength = blurStrength.dp,
                     onDismiss = { showRemoveItems = false },
-                    shouldShowMedia = shouldShowMedia,
                 )
             }
         }
@@ -216,7 +211,6 @@ fun ListDetailScreen(
                 setNewCoverImage = { url, hash ->
                     viewModel.setCoverImage(url, hash)
                 },
-                shouldShowMedia = shouldShowMedia,
                 setDescription = viewModel::setDescription,
             )
         }
@@ -366,7 +360,6 @@ fun ListDetailScreen(
                                 FavoriteType.Creator -> onNavigateToUser(item.name)
                             }
                         },
-                        shouldShowMedia = shouldShowMedia,
                         onLongClick = { sheetDetails = true },
                         isFavorite = false,
                         isBlacklisted = false,
@@ -389,7 +382,6 @@ fun ListDetailScreen(
                                 FavoriteType.Creator -> onNavigateToUser(item.name)
                             }
                         },
-                        shouldShowMedia = shouldShowMedia,
                         onLongClick = { sheetDetails = true },
                         modifier = Modifier
                             .size(
@@ -419,7 +411,6 @@ private fun InfoSheet(
     onDeleteListAction: () -> Unit,
     onRemoveItemsAction: () -> Unit,
     setNewCoverImage: (String?, String?) -> Unit,
-    shouldShowMedia: Boolean,
     setDescription: (String?) -> Unit,
 ) {
     val scope = rememberCoroutineScope()
@@ -481,7 +472,6 @@ private fun InfoSheet(
                             name = item.name,
                             showNsfw = showNsfw,
                             blurStrength = blurStrength,
-                            shouldShowMedia = shouldShowMedia,
                             modifier = Modifier
                                 .size(
                                     width = ComposableUtils.IMAGE_WIDTH,
@@ -714,10 +704,9 @@ fun ImageLoad(
     name: String,
     showNsfw: Boolean,
     blurStrength: Dp,
-    shouldShowMedia: Boolean,
     modifier: Modifier = Modifier,
 ) {
-    if (url?.endsWith("mp4") == true && shouldShowMedia) {
+    if (url?.endsWith("mp4") == true) {
         Box(
             contentAlignment = Alignment.Center,
             modifier = Modifier
@@ -760,7 +749,6 @@ private fun RemoveItemsSheet(
     customList: CustomList,
     showNsfw: Boolean,
     blurStrength: Dp,
-    shouldShowMedia: Boolean,
     onDismiss: () -> Unit,
     listRepository: ListRepository = koinInject(),
 ) {
@@ -878,7 +866,6 @@ private fun RemoveItemsSheet(
                         name = item.name,
                         showNsfw = showNsfw,
                         blurStrength = blurStrength,
-                        shouldShowMedia = shouldShowMedia,
                         modifier = Modifier
                             .size(
                                 width = ComposableUtils.IMAGE_WIDTH,

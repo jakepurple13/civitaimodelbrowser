@@ -84,7 +84,6 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.dropUnlessResumed
-import chaintech.videoplayer.ui.preview.VideoPreviewComposable
 import com.programmersbox.common.BackButton
 import com.programmersbox.common.ComposableUtils
 import com.programmersbox.common.DataStore
@@ -570,9 +569,8 @@ private fun InfoSheet(
                                             .background(Color.Black)
                                             .then(imageModifier)
                                     ) {
-                                        VideoPreviewComposable(
-                                            url = imageHashing.url,
-                                            frameCount = 5,
+                                        VideoThumbnailLoader(
+                                            videoUrl = imageHashing.url,
                                             contentScale = ContentScale.Crop,
                                         )
                                         Row(

@@ -48,7 +48,6 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.paging.compose.collectAsLazyPagingItems
 import androidx.paging.compose.itemContentType
 import androidx.paging.compose.itemKey
-import chaintech.videoplayer.ui.preview.VideoPreviewComposable
 import com.programmersbox.common.BackButton
 import com.programmersbox.common.ComposableUtils
 import com.programmersbox.common.ContextMenu
@@ -62,6 +61,7 @@ import com.programmersbox.common.presentation.components.LoadingImage
 import com.programmersbox.common.presentation.components.rememberBlurKindState
 import com.programmersbox.common.presentation.components.setBlurKind
 import com.programmersbox.common.presentation.components.setBlurKindSource
+import com.programmersbox.common.presentation.components.videoloader.VideoThumbnailLoader
 import com.programmersbox.common.presentation.home.BlacklistHandling
 import dev.chrisbanes.haze.HazeProgressive
 import org.koin.compose.koinInject
@@ -266,10 +266,9 @@ private fun ImageCard(
                                 .background(Color.Black)
                                 .matchParentSize()
                         ) {
-                            VideoPreviewComposable(
-                                url = images.url,
-                                frameCount = 5,
-                                contentScale = ContentScale.Crop
+                            VideoThumbnailLoader(
+                                videoUrl = images.url,
+                                contentScale = ContentScale.Crop,
                             )
                             Row(
                                 verticalAlignment = Alignment.Bottom,

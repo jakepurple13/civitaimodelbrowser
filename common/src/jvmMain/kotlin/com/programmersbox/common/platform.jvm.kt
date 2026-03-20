@@ -30,11 +30,6 @@ import ca.gosyer.appdirs.AppDirs
 import com.programmersbox.common.db.AppDatabase
 import com.programmersbox.common.db.BlacklistedItemRoom
 import com.programmersbox.common.db.FavoritesDao
-import com.programmersbox.common.presentation.backup.BackupRestoreHandler
-import com.programmersbox.common.presentation.components.videoloader.JvmVideoThumbnailCacheDirectoryProvider
-import com.programmersbox.common.presentation.components.videoloader.JvmVideoThumbnailPlatformExtractor
-import com.programmersbox.common.presentation.components.videoloader.VideoThumbnailCacheDirectoryProvider
-import com.programmersbox.common.presentation.components.videoloader.VideoThumbnailPlatformExtractor
 import io.ktor.client.call.body
 import io.ktor.client.plugins.onDownload
 import io.ktor.client.request.get
@@ -44,9 +39,6 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import org.koin.compose.koinInject
-import org.koin.core.module.Module
-import org.koin.core.module.dsl.singleOf
-import org.koin.dsl.module
 import java.io.File
 
 actual class DownloadHandler(
@@ -86,15 +78,6 @@ actual class DownloadHandler(
             )
         }
     }
-}
-
-actual fun createPlatformModule(): Module = module {
-    singleOf(::DownloadHandler)
-    singleOf(::DataStoreHandler)
-    singleOf(::BackupRestoreHandler)
-
-    single<VideoThumbnailCacheDirectoryProvider> { JvmVideoThumbnailCacheDirectoryProvider(get()) }
-    single<VideoThumbnailPlatformExtractor> { JvmVideoThumbnailPlatformExtractor() }
 }
 
 class DataStoreHandler(

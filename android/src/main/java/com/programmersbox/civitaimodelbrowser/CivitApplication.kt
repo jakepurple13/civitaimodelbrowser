@@ -5,8 +5,8 @@ import android.util.Log
 import androidx.work.Configuration
 import com.programmersbox.common.ApplicationInfo
 import com.programmersbox.common.RestoreWorker
-import com.programmersbox.common.createPlatformModule
 import com.programmersbox.common.di.cmpModules
+import com.programmersbox.common.di.createPlatformModule
 import com.programmersbox.common.getDatabaseBuilder
 import com.programmersbox.common.presentation.backup.ApplicationIcon
 import com.programmersbox.common.presentation.backup.Zipper

@@ -23,14 +23,6 @@ import androidx.room3.Room
 import androidx.room3.RoomDatabase
 import com.programmersbox.common.db.AppDatabase
 import com.programmersbox.common.db.BlacklistedItemRoom
-import com.programmersbox.common.presentation.backup.BackupRestoreHandler
-import com.programmersbox.common.presentation.components.videoloader.AndroidVideoThumbnailCacheDirectoryProvider
-import com.programmersbox.common.presentation.components.videoloader.AndroidVideoThumbnailPlatformExtractor
-import com.programmersbox.common.presentation.components.videoloader.VideoThumbnailCacheDirectoryProvider
-import com.programmersbox.common.presentation.components.videoloader.VideoThumbnailPlatformExtractor
-import org.koin.core.module.Module
-import org.koin.core.module.dsl.singleOf
-import org.koin.dsl.module
 
 actual class DownloadHandler(
     context: Context,
@@ -50,15 +42,6 @@ actual class DownloadHandler(
 
         downloadManager?.enqueue(request)
     }
-}
-
-actual fun createPlatformModule(): Module = module {
-    singleOf(::DownloadHandler)
-    single { getDatabaseBuilder(get()) }
-    singleOf(::BackupRestoreHandler)
-
-    single<VideoThumbnailCacheDirectoryProvider> { AndroidVideoThumbnailCacheDirectoryProvider(get()) }
-    single<VideoThumbnailPlatformExtractor> { AndroidVideoThumbnailPlatformExtractor() }
 }
 
 public actual fun getPlatformName(): String {

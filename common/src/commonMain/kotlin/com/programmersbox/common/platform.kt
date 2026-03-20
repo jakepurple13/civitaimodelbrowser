@@ -8,7 +8,6 @@ import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import com.programmersbox.common.db.BlacklistedItemRoom
-import org.koin.core.module.Module
 import kotlin.jvm.JvmInline
 
 public expect fun getPlatformName(): String
@@ -65,8 +64,6 @@ internal class ContextMenuScopeImpl : ContextMenuScope {
 expect class DownloadHandler {
     fun download(url: String, name: String)
 }
-
-expect fun createPlatformModule(): Module
 
 @JvmInline
 value class ApplicationInfo(

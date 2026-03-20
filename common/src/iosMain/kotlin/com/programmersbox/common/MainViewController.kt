@@ -16,16 +16,18 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.window.ComposeUIViewController
-import io.ktor.http.decodeURLPart
 import com.materialkolor.PaletteStyle
 import com.materialkolor.dynamicColorScheme
 import com.materialkolor.dynamiccolor.ColorSpec
 import com.materialkolor.ktx.animateColorScheme
+import com.programmersbox.common.di.NavigationHandler
 import com.programmersbox.common.di.cmpModules
+import com.programmersbox.common.di.createPlatformModule
 import com.programmersbox.common.presentation.backup.Zipper
 import com.programmersbox.common.presentation.components.Toaster
 import com.programmersbox.common.presentation.components.ToasterState
 import com.programmersbox.common.presentation.qrcode.QrCodeRepository
+import io.ktor.http.decodeURLPart
 import kotlinx.cinterop.ExperimentalForeignApi
 import org.koin.compose.KoinApplication
 import org.koin.compose.koinInject
@@ -33,7 +35,6 @@ import org.koin.core.module.dsl.singleOf
 import org.koin.dsl.koinConfiguration
 import org.koin.dsl.module
 import org.koin.mp.KoinPlatform
-import com.programmersbox.common.di.NavigationHandler
 import platform.Foundation.NSDocumentDirectory
 import platform.Foundation.NSFileManager
 import platform.Foundation.NSURL

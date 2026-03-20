@@ -1,6 +1,10 @@
 package com.programmersbox.common.presentation.qrcode
 
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.CircularWavyProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
@@ -10,8 +14,10 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.toAwtImage
+import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Notification
 import androidx.compose.ui.window.TrayState
 import ca.gosyer.appdirs.AppDirs
@@ -19,11 +25,10 @@ import com.google.zxing.BinaryBitmap
 import com.google.zxing.client.j2se.BufferedImageLuminanceSource
 import com.google.zxing.common.HybridBinarizer
 import com.google.zxing.qrcode.QRCodeReader
-import com.kashif.cameraK.compose.CameraPreviewView
+import com.kashif.cameraK.compose.CameraKScreen
 import com.kashif.cameraK.compose.rememberCameraKState
 import com.kashif.cameraK.enums.TorchMode
 import com.kashif.cameraK.state.CameraKEvent
-import com.kashif.cameraK.state.CameraKState
 import com.kashif.qrscannerplugin.rememberQRScannerPlugin
 import io.github.vinceglb.filekit.dialogs.compose.util.encodeToByteArray
 import kotlinx.coroutines.Dispatchers
@@ -152,23 +157,31 @@ actual fun CameraView(
         contentAlignment = Alignment.Center,
         modifier = modifier,
     ) {
-        when (val state = cameraState) {
-            is CameraKState.Ready -> {
-                val controller = state.controller
-
-                LaunchedEffect(torchState) {
-                    controller.setTorchMode(if (torchState) TorchMode.ON else TorchMode.OFF)
+        CameraKScreen(
+            cameraState = cameraState,
+            loadingContent = {
+                Box(
+                    contentAlignment = Alignment.Center,
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .background(Color.Black),
+                ) {
+                    Column(
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.spacedBy(16.dp),
+                    ) {
+                        CircularWavyProgressIndicator()
+                        Text(
+                            text = "Initializing Camera...",
+                            color = Color.White,
+                        )
+                    }
                 }
-
-                // Camera preview
-                CameraPreviewView(
-                    controller = controller,
-                    modifier = Modifier.matchParentSize()
-                )
             }
-
-            is CameraKState.Error -> Text("Error: ${state.message}")
-            CameraKState.Initializing -> CircularWavyProgressIndicator()
+        ) { state ->
+            LaunchedEffect(torchState) {
+                state.controller.setTorchMode(if (torchState) TorchMode.ON else TorchMode.OFF)
+            }
         }
     }
 }

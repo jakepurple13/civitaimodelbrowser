@@ -97,7 +97,6 @@ kotlin {
             implementation(libs.koin.viewmodel)
             implementation(libs.koin.nav3)
             api(libs.qrose)
-            api(libs.scanner)
             api(libs.filekit.core)
             api(libs.filekit.dialogs)
             api(libs.filekit.dialogs.compose)
@@ -165,6 +164,9 @@ kotlin {
 
             implementation(libs.javacv)
             implementation(libs.ffmpeg.platform)
+
+            implementation(libs.camerak)
+            implementation(libs.kashif.mehmood.km.qr.scanner.plugin)
         }
 
         iosMain.dependencies {
@@ -183,8 +185,15 @@ kotlin {
             implementation(libs.alarmee)
         }
 
-        //val desktopTest by getting
+        val deviceMain by creating {
+            dependsOn(commonMain.get())
+            androidMain.get().dependsOn(this)
+            iosMain.get().dependsOn(this)
 
+            dependencies {
+                api(libs.scanner)
+            }
+        }
     }
 }
 

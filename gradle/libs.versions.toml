@@ -6,6 +6,7 @@ biometricauth = "1.1.0"
 biometricVersion = "1.4.0-alpha05"
 blurhashVersion = "0.0-4-ALPHA"
 browser = "1.9.0"
+camerak = "0.4"
 chromaDial = "1.0.0-Alpha6"
 composeMultiplatformMediaPlayerVersion = "1.0.53"
 composewebview = "1.0.0-beta-01"
@@ -95,6 +96,7 @@ androidx-activity-compose = "androidx.activity:activity-compose:1.13.0"
 androidx-work-runtime-ktx = { module = "androidx.work:work-runtime-ktx", version.ref = "workRuntimeKtx" }
 backdrop = { module = "io.github.kyant0:backdrop", version.ref = "backdrop" }
 biometricauth = { module = "io.github.zaval:biometricauth", version.ref = "biometricauth" }
+camerak = { module = "io.github.kashif-mehmood-km:camerak", version.ref = "camerak" }
 chroma-dial = { module = "com.sinasamaki:chroma-dial", version.ref = "chromaDial" }
 compose-multiplatform-media-player = { module = "network.chaintech:compose-multiplatform-media-player", version.ref = "composeMultiplatformMediaPlayerVersion" }
 blurhash = { module = "io.github.brys0:blurhash", version.ref = "blurhashVersion" }
@@ -110,6 +112,7 @@ gitlive-firebase-perf = { module = "dev.gitlive:firebase-perf", version.ref = "g
 haze = { module = "dev.chrisbanes.haze:haze", version.ref = "haze" }
 haze-materials = { module = "dev.chrisbanes.haze:haze-materials", version.ref = "haze" }
 javacv = { module = "org.bytedeco:javacv", version.ref = "javacv" }
+kashif-mehmood-km-qr_scanner_plugin = { module = "io.github.kashif-mehmood-km:qr_scanner_plugin", version.ref = "camerak" }
 kmp-io = { module = "io.github.skolson:kmp-io", version.ref = "kmpIo" }
 kotlin-multiplatform-appdirs = { module = "ca.gosyer:kotlin-multiplatform-appdirs", version.ref = "kotlinMultiplatformAppdirsVersion" }
 kotlin-native-zxing = { module = "io.github.zxing-cpp:kotlin-native", version.ref = "kotlinNativeZxing" }

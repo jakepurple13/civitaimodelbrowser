@@ -3,7 +3,6 @@ package com.programmersbox.common.presentation.qrcode
 import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -62,10 +61,8 @@ import com.programmersbox.common.presentation.components.DiagonalWipeIconDefault
 import com.programmersbox.common.presentation.components.LoadingImage
 import com.programmersbox.common.presentation.components.WipeDirection
 import com.programmersbox.resources.Res
-import com.programmersbox.resources.camera_required_message
 import com.programmersbox.resources.civitai_logo
 import com.programmersbox.resources.open
-import com.programmersbox.resources.open_settings
 import com.programmersbox.resources.qr_code
 import com.programmersbox.resources.save
 import com.programmersbox.resources.scan_qr_code_title
@@ -91,9 +88,6 @@ import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.koinInject
 import org.koin.compose.viewmodel.koinViewModel
-import org.publicvalue.multiplatform.qrcode.CameraPosition
-import org.publicvalue.multiplatform.qrcode.CodeType
-import org.publicvalue.multiplatform.qrcode.ScannerWithPermissions
 
 @Serializable
 data class QrCodeInfo(
@@ -384,40 +378,15 @@ fun ScanQrCode(
                         .clip(MaterialTheme.shapes.medium)
                 ) {
                     var torchState by remember { mutableStateOf(false) }
-                    ScannerWithPermissions(
-                        onScanned = { scan ->
+
+                    CameraView(
+                        onScan = { scan ->
                             parseScannedQrCode(scan)?.let {
                                 viewModel.qrCodeInfo = it
                                 scope.launch { sheetState.expand() }
                             }
-
-                            false
                         },
-                        types = listOf(CodeType.QR),
-                        cameraPosition = CameraPosition.BACK,
-                        enableTorch = torchState,
-                        permissionDeniedContent = { permissionState ->
-                            Column(
-                                horizontalAlignment = Alignment.CenterHorizontally,
-                                modifier = Modifier
-                                    .sizeIn(maxWidth = 250.dp, maxHeight = 250.dp)
-                                    .clip(MaterialTheme.shapes.medium)
-                                    .border(
-                                        1.dp,
-                                        MaterialTheme.colorScheme.onSurface,
-                                        MaterialTheme.shapes.medium
-                                    )
-                            ) {
-                                Text(
-                                    text = stringResource(Res.string.camera_required_message),
-                                    textAlign = TextAlign.Center,
-                                    modifier = Modifier.padding(6.dp)
-                                )
-                                ElevatedButton(
-                                    onClick = dropUnlessResumed { permissionState.goToSettings() }
-                                ) { Text(stringResource(Res.string.open_settings)) }
-                            }
-                        },
+                        torchState = torchState,
                         modifier = Modifier
                             .sizeIn(maxWidth = 250.dp, maxHeight = 250.dp)
                             .clip(MaterialTheme.shapes.medium)
@@ -545,3 +514,11 @@ expect class QrCodeRepository {
     suspend fun saveImage(bitmap: ImageBitmap, title: String)
     suspend fun shareUrl(url: String, title: String)
 }
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+expect fun CameraView(
+    onScan: (String) -> Unit,
+    torchState: Boolean,
+    modifier: Modifier = Modifier,
+)

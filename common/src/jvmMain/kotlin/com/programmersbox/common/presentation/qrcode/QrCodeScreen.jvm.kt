@@ -1,5 +1,15 @@
 package com.programmersbox.common.presentation.qrcode
 
+import androidx.compose.foundation.layout.Box
+import androidx.compose.material3.CircularWavyProgressIndicator
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.toAwtImage
 import androidx.compose.ui.window.Notification
@@ -9,8 +19,15 @@ import com.google.zxing.BinaryBitmap
 import com.google.zxing.client.j2se.BufferedImageLuminanceSource
 import com.google.zxing.common.HybridBinarizer
 import com.google.zxing.qrcode.QRCodeReader
+import com.kashif.cameraK.compose.CameraPreviewView
+import com.kashif.cameraK.compose.rememberCameraKState
+import com.kashif.cameraK.enums.TorchMode
+import com.kashif.cameraK.state.CameraKEvent
+import com.kashif.cameraK.state.CameraKState
+import com.kashif.qrscannerplugin.rememberQRScannerPlugin
 import io.github.vinceglb.filekit.dialogs.compose.util.encodeToByteArray
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.awt.Image
 import java.awt.Toolkit
@@ -101,6 +118,57 @@ actual class QrCodeRepository(
                 return image
             }
             throw UnsupportedFlavorException(flavor)
+        }
+    }
+}
+
+@OptIn(markerClass = [ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class])
+@Composable
+actual fun CameraView(
+    onScan: (String) -> Unit,
+    torchState: Boolean,
+    modifier: Modifier
+) {
+    val qrScannerPlugin = rememberQRScannerPlugin()
+    val cameraState by rememberCameraKState(
+        setupPlugins = { stateHolder ->
+            stateHolder.attachPlugin(qrScannerPlugin)
+
+            stateHolder.pluginScope.launch {
+                stateHolder.events.collect { event ->
+                    when (event) {
+                        is CameraKEvent.QRCodeScanned -> {
+                            onScan(event.qrCode)
+                        }
+
+                        else -> {}
+                    }
+                }
+            }
+        }
+    )
+
+    Box(
+        contentAlignment = Alignment.Center,
+        modifier = modifier,
+    ) {
+        when (val state = cameraState) {
+            is CameraKState.Ready -> {
+                val controller = state.controller
+
+                LaunchedEffect(torchState) {
+                    controller.setTorchMode(if (torchState) TorchMode.ON else TorchMode.OFF)
+                }
+
+                // Camera preview
+                CameraPreviewView(
+                    controller = controller,
+                    modifier = Modifier.matchParentSize()
+                )
+            }
+
+            is CameraKState.Error -> Text("Error: ${state.message}")
+            CameraKState.Initializing -> CircularWavyProgressIndicator()
         }
     }
 }

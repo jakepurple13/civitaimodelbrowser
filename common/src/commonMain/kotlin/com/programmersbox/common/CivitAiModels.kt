@@ -5,6 +5,7 @@ import androidx.compose.runtime.Stable
 import com.fleeksoft.ksoup.Ksoup
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
+import kotlin.time.Instant
 
 @Stable
 @Immutable
@@ -61,8 +62,9 @@ data class ModelVersion(
     val id: Long,
     val modelId: Long? = null,
     val name: String,
-    //val createdAt: Instant? = null,
-    //val updatedAt: Instant,
+    val createdAt: Instant? = null,
+    val updatedAt: Instant? = null,
+    val publishedAt: Instant? = null,
     //val trainedWords: List<String>,
     val baseModel: String,
     //val baseModelType: String?,

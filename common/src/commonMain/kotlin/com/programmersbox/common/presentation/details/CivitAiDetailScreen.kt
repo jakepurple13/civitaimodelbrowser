@@ -119,12 +119,16 @@ import com.programmersbox.common.presentation.components.setBlurKind
 import com.programmersbox.common.presentation.components.setBlurKindSource
 import com.programmersbox.common.presentation.components.videoloader.VideoThumbnailLoader
 import com.programmersbox.common.presentation.home.BlacklistHandling
+import com.programmersbox.common.presentation.lists.DateTimeFormatHandle
+import com.programmersbox.common.presentation.lists.createDateTimeFormatItem
+import com.programmersbox.common.presentation.lists.toLocalDateTime
 import com.programmersbox.common.presentation.qrcode.QrCodeType
 import com.programmersbox.common.presentation.qrcode.ShareViaQrCode
 import dev.chrisbanes.haze.HazeProgressive
 import kotlinx.coroutines.launch
 import org.koin.compose.koinInject
 import org.koin.compose.viewmodel.koinViewModel
+import kotlin.time.Instant
 
 @OptIn(
     ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class,
@@ -142,6 +146,10 @@ fun CivitAiDetailScreen(
     val showNsfw by dataStore.showNsfw()
     val nsfwBlurStrength by dataStore.hideNsfwStrength()
     val useToolbar by dataStore.rememberUseToolbar()
+
+    val dataTimeFormatter = remember {
+        DateTimeFormatHandle(createDateTimeFormatItem(true))
+    }
 
     val blacklisted by dao.getBlacklisted().collectAsStateWithLifecycle(emptyList())
 
@@ -382,7 +390,14 @@ fun CivitAiDetailScreen(
                             Version(
                                 version = version,
                                 showMoreInfo = viewModel.showMoreInfo[version.id] ?: false,
-                                onToggleShowMoreInfo = viewModel::toggleShowMoreInfo
+                                onToggleShowMoreInfo = viewModel::toggleShowMoreInfo,
+                                formatTime = {
+                                    dataTimeFormatter.format(
+                                        it
+                                            .toEpochMilliseconds()
+                                            .toLocalDateTime()
+                                    )
+                                }
                             )
                         }
 
@@ -1021,6 +1036,7 @@ private fun Description(
 private fun Version(
     version: ModelVersion,
     showMoreInfo: Boolean,
+    formatTime: (Instant) -> String,
     onToggleShowMoreInfo: (Long) -> Unit,
 ) {
     ElevatedCard(
@@ -1038,12 +1054,42 @@ private fun Version(
                     fontWeight = FontWeight.Medium,
                 )
             },
+            overlineContent = { Text("Base: ${version.baseModel}") },
             supportingContent = {
-                Text(
-                    "Base: ${version.baseModel}",
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                )
+                Column {
+                    version
+                        .createdAt
+                        ?.let(formatTime)
+                        ?.let {
+                            Text(
+                                "Created at: $it",
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            )
+                        }
+
+                    version
+                        .updatedAt
+                        ?.let(formatTime)
+                        ?.let {
+                            Text(
+                                "Updated at: $it",
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            )
+                        }
+
+                    version
+                        .publishedAt
+                        ?.let(formatTime)
+                        ?.let {
+                            Text(
+                                "Published at: $it",
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            )
+                        }
+                }
             },
             leadingContent = {
                 version.downloadUrl?.let { downloadUrl ->

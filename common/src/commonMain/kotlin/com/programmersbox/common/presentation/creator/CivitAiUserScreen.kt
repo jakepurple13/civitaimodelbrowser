@@ -65,6 +65,7 @@ import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.launch
 import org.koin.compose.koinInject
 import org.koin.compose.viewmodel.koinViewModel
+import kotlin.random.Random
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
 @Composable
@@ -142,7 +143,7 @@ fun CivitAiUserScreen(
                         scope.launch {
                             listRepository.addToMultipleLists(
                                 selectedLists = selectedLists,
-                                id = 0,
+                                id = Random.nextLong(),
                                 name = creator.username.orEmpty(),
                                 description = null,
                                 type = "Creator",

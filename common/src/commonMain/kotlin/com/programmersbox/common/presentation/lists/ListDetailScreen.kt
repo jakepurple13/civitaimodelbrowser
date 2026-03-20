@@ -46,7 +46,9 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.CardColors
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CenterAlignedTopAppBar
+import androidx.compose.material3.ExpandedDockedSearchBarWithGap
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -78,7 +80,6 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.platform.LocalWindowInfo
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
@@ -133,7 +134,7 @@ import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.koinInject
 import org.koin.compose.viewmodel.koinViewModel
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun ListDetailScreen(
     onNavigateToDetail: (String) -> Unit,
@@ -233,34 +234,35 @@ fun ListDetailScreen(
                     MaterialTheme.colorScheme.surface
             )
 
+            val inputField = @Composable {
+                SearchBarDefaults.InputField(
+                    searchBarState = searchBarState,
+                    textFieldState = viewModel.search,
+                    onSearch = {},
+                    placeholder = {
+                        Text(
+                            modifier = Modifier.fillMaxWidth(),
+                            text = stringResource(Res.string.search),
+                            textAlign = TextAlign.Center,
+                        )
+                    },
+                    trailingIcon = {
+                        AnimatedVisibility(
+                            viewModel.search.text.isNotEmpty(),
+                            enter = slideInHorizontally { it } + fadeIn(),
+                            exit = slideOutHorizontally { it } + fadeOut()
+                        ) {
+                            IconButton(
+                                onClick = { viewModel.search.clearText() }
+                            ) { Icon(Icons.Default.Clear, null) }
+                        }
+                    },
+                )
+            }
+
             AppBarWithSearch(
                 state = searchBarState,
-                inputField = {
-                    SearchBarDefaults.InputField(
-                        searchBarState = searchBarState,
-                        textFieldState = viewModel.search,
-                        enabled = LocalWindowInfo.current.isWindowFocused,
-                        onSearch = {},
-                        placeholder = {
-                            Text(
-                                modifier = Modifier.fillMaxWidth(),
-                                text = stringResource(Res.string.search),
-                                textAlign = TextAlign.Center,
-                            )
-                        },
-                        trailingIcon = {
-                            AnimatedVisibility(
-                                viewModel.search.text.isNotEmpty(),
-                                enter = slideInHorizontally { it } + fadeIn(),
-                                exit = slideOutHorizontally { it } + fadeOut()
-                            ) {
-                                IconButton(
-                                    onClick = { viewModel.search.clearText() }
-                                ) { Icon(Icons.Default.Clear, null) }
-                            }
-                        },
-                    )
-                },
+                inputField = inputField,
                 navigationIcon = { BackButton() },
                 actions = {
                     Text("(${list?.list?.size ?: 0})")
@@ -280,6 +282,11 @@ fun ListDetailScreen(
                         null
                 }
             )
+
+            ExpandedDockedSearchBarWithGap(
+                state = searchBarState,
+                inputField = inputField,
+            ) {}
         }
     ) { padding ->
         LazyVerticalGrid(

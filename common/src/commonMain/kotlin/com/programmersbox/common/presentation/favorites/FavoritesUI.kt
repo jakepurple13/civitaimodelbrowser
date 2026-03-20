@@ -92,7 +92,6 @@ import com.programmersbox.common.db.FavoriteType
 import com.programmersbox.common.db.FavoritesDao
 import com.programmersbox.common.db.ListRepository
 import com.programmersbox.common.isScrollingUp
-import com.programmersbox.common.presentation.components.BlurKind
 import com.programmersbox.common.presentation.components.CivitBottomBar
 import com.programmersbox.common.presentation.components.CivitRail
 import com.programmersbox.common.presentation.components.ImageSheet
@@ -100,11 +99,12 @@ import com.programmersbox.common.presentation.components.ListChoiceScreen
 import com.programmersbox.common.presentation.components.LoadingImage
 import com.programmersbox.common.presentation.components.ModelCard
 import com.programmersbox.common.presentation.components.ModelOptionsType
-import com.programmersbox.common.presentation.components.floatingActionButtonBlurKind
-import com.programmersbox.common.presentation.components.rememberBlurKindState
+import com.programmersbox.common.presentation.components.blurkind.BlurKind
+import com.programmersbox.common.presentation.components.blurkind.floatingActionButtonBlurKind
+import com.programmersbox.common.presentation.components.blurkind.rememberBlurKindState
+import com.programmersbox.common.presentation.components.blurkind.setBlurKind
+import com.programmersbox.common.presentation.components.blurkind.setBlurKindSource
 import com.programmersbox.common.presentation.components.rememberModelOptionsScope
-import com.programmersbox.common.presentation.components.setBlurKind
-import com.programmersbox.common.presentation.components.setBlurKindSource
 import com.programmersbox.common.presentation.home.CardContent
 import com.programmersbox.common.presentation.qrcode.QrCodeType
 import com.programmersbox.common.presentation.qrcode.ShareViaQrCode

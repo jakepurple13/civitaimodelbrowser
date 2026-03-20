@@ -52,9 +52,9 @@ import com.programmersbox.common.db.FavoritesDao
 import com.programmersbox.common.db.ListRepository
 import com.programmersbox.common.presentation.components.ListChoiceScreen
 import com.programmersbox.common.presentation.components.LoadingImage
-import com.programmersbox.common.presentation.components.rememberBlurKindState
-import com.programmersbox.common.presentation.components.setBlurKind
-import com.programmersbox.common.presentation.components.setBlurKindSource
+import com.programmersbox.common.presentation.components.blurkind.rememberBlurKindState
+import com.programmersbox.common.presentation.components.blurkind.setBlurKind
+import com.programmersbox.common.presentation.components.blurkind.setBlurKindSource
 import com.programmersbox.common.presentation.details.DetailFloatingActionButton
 import com.programmersbox.common.presentation.home.createDoubleClickBehaviorAction
 import com.programmersbox.common.presentation.home.modelItems

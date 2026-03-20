@@ -64,10 +64,10 @@ import com.programmersbox.common.db.toImageHash
 import com.programmersbox.common.presentation.components.CivitBottomBar
 import com.programmersbox.common.presentation.components.CivitRail
 import com.programmersbox.common.presentation.components.LoadingImage
+import com.programmersbox.common.presentation.components.blurkind.rememberBlurKindState
+import com.programmersbox.common.presentation.components.blurkind.setBlurKind
+import com.programmersbox.common.presentation.components.blurkind.setBlurKindSource
 import com.programmersbox.common.presentation.components.rememberBiometricOpening
-import com.programmersbox.common.presentation.components.rememberBlurKindState
-import com.programmersbox.common.presentation.components.setBlurKind
-import com.programmersbox.common.presentation.components.setBlurKindSource
 import com.programmersbox.common.presentation.components.videoloader.VideoThumbnailLoader
 import com.programmersbox.resources.Res
 import com.programmersbox.resources.authenticate_to_view

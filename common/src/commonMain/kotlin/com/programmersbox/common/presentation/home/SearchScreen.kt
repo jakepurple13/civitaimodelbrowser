@@ -63,9 +63,9 @@ import com.programmersbox.common.adaptiveGridCell
 import com.programmersbox.common.db.FavoritesDao
 import com.programmersbox.common.db.SearchHistoryItem
 import com.programmersbox.common.presentation.components.CivitRail
-import com.programmersbox.common.presentation.components.rememberBlurKindState
-import com.programmersbox.common.presentation.components.setBlurKind
-import com.programmersbox.common.presentation.components.setBlurKindSource
+import com.programmersbox.common.presentation.components.blurkind.rememberBlurKindState
+import com.programmersbox.common.presentation.components.blurkind.setBlurKind
+import com.programmersbox.common.presentation.components.blurkind.setBlurKindSource
 import dev.chrisbanes.haze.HazeProgressive
 import kotlinx.collections.immutable.PersistentList
 import kotlinx.collections.immutable.persistentListOf

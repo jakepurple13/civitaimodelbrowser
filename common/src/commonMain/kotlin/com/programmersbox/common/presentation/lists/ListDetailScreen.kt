@@ -98,9 +98,9 @@ import com.programmersbox.common.presentation.components.ImageSheet
 import com.programmersbox.common.presentation.components.LoadingImage
 import com.programmersbox.common.presentation.components.ModelCard
 import com.programmersbox.common.presentation.components.ModelOptionsSheet
-import com.programmersbox.common.presentation.components.rememberBlurKindState
-import com.programmersbox.common.presentation.components.setBlurKind
-import com.programmersbox.common.presentation.components.setBlurKindSource
+import com.programmersbox.common.presentation.components.blurkind.rememberBlurKindState
+import com.programmersbox.common.presentation.components.blurkind.setBlurKind
+import com.programmersbox.common.presentation.components.blurkind.setBlurKindSource
 import com.programmersbox.common.presentation.components.videoloader.VideoThumbnailLoader
 import com.programmersbox.common.presentation.favorites.CoverCard
 import com.programmersbox.resources.Res

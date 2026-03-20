@@ -19,6 +19,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.Stable
 import androidx.compose.runtime.State
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.movableContentOf
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
@@ -53,17 +54,30 @@ fun VideoThumbnailLoader(
     val uiState by rememberVideoThumbnailUiState(
         videoUrl = videoUrl,
     )
-    val previewFrameUris = (uiState as? VideoThumbnailUiState.Success)
-        ?.result
-        ?.previewFrameUris()
-        .orEmpty()
 
     Box(modifier = modifier, contentAlignment = Alignment.Center) {
+        val placeholder = remember {
+            movableContentOf {
+                placeholderContent()
+            }
+        }
+
+        val error = remember {
+            movableContentOf {
+                errorContent()
+            }
+        }
+
         when (val renderModel = uiState.toRenderModel()) {
-            VideoThumbnailRenderModel.Loading -> placeholderContent()
-            is VideoThumbnailRenderModel.Error -> errorContent()
+            VideoThumbnailRenderModel.Loading -> placeholder()
+            is VideoThumbnailRenderModel.Error -> error()
             is VideoThumbnailRenderModel.Success -> {
-                val previewFrameIndex = rememberVideoThumbnailPreviewFrameIndex(previewFrameUris)
+                val previewFrameIndex = rememberVideoThumbnailPreviewFrameIndex(
+                    (uiState as? VideoThumbnailUiState.Success)
+                        ?.result
+                        ?.previewFrameUris()
+                        .orEmpty()
+                )
                 val previewFrameUris = renderModel
                     .result
                     .previewFrameUris()
@@ -71,8 +85,8 @@ fun VideoThumbnailLoader(
 
                 KamelImage(
                     resource = { asyncPainterResource(frameUri) },
-                    onLoading = { placeholderContent() },
-                    onFailure = { errorContent() },
+                    onLoading = { placeholder() },
+                    onFailure = { error() },
                     contentScale = contentScale,
                     contentDescription = null,
                     modifier = Modifier.fillMaxSize(),

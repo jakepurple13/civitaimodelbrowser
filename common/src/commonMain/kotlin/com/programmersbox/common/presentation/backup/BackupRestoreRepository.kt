@@ -4,6 +4,7 @@ import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.byteArrayPreferencesKey
 import androidx.datastore.preferences.core.doublePreferencesKey
 import androidx.datastore.preferences.core.edit
+import androidx.datastore.preferences.core.floatPreferencesKey
 import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.datastore.preferences.core.longPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
@@ -92,30 +93,34 @@ class BackupRepository(
                         .firstOrNull()
                         ?.asMap()!!
                     BackupSettings(
-                        map
+                        stringSettings = map
                             .filter { it.value is String }
                             .mapKeys { it.key.name }
                             .mapValues { it.value.toString() },
-                        map
+                        intSettings = map
                             .filter { it.value is Int }
                             .mapKeys { it.key.name }
                             .mapValues { it.value as Int },
-                        map
+                        longSettings = map
                             .filter { it.value is Long }
                             .mapKeys { it.key.name }
                             .mapValues { it.value as Long },
-                        map
+                        booleanSettings = map
                             .filter { it.value is Boolean }
                             .mapKeys { it.key.name }
                             .mapValues { it.value as Boolean },
-                        map
+                        doubleSettings = map
                             .filter { it.value is Double }
                             .mapKeys { it.key.name }
                             .mapValues { it.value as Double },
-                        map
+                        byteArraySettings = map
                             .filter { it.value is ByteArray }
                             .mapKeys { it.key.name }
                             .mapValues { it.value as ByteArray },
+                        floatSettings = map
+                            .filter { it.value is Float }
+                            .mapKeys { it.key.name }
+                            .mapValues { it.value as Float },
                     )
                 }
                     .getOrNull()
@@ -234,6 +239,9 @@ class BackupRepository(
                                             byteArraySettings.forEach {
                                                 p[byteArrayPreferencesKey(it.key)] = it.value
                                             }
+                                            floatSettings.forEach {
+                                                p[floatPreferencesKey(it.key)] = it.value
+                                            }
                                         }
                                     }
                                 }
@@ -307,5 +315,6 @@ data class BackupSettings(
     val longSettings: Map<String, Long>,
     val booleanSettings: Map<String, Boolean>,
     val doubleSettings: Map<String, Double>,
+    val floatSettings: Map<String, Float>,
     val byteArraySettings: Map<String, ByteArray>,
 )

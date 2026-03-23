@@ -5,6 +5,7 @@ plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.compose.compiler)
     alias(libs.plugins.easylauncher)
+    alias(libs.plugins.hotswan.compiler)
 }
 
 if (file("google-services.json").exists()) {

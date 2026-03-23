@@ -264,7 +264,7 @@ fun CivitAiDetailScreen(
                         },
                         subtitle = {
                             val models = model.models
-                            Text("${models.type} by ${model.models.creator?.username}")
+                            Text("${models.type} by ${models.creator?.username}")
                         },
                         navigationIcon = { BackButton() },
                         actions = {

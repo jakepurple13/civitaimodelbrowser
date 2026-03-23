@@ -138,7 +138,6 @@ actual fun CameraView(
     val cameraState by rememberCameraKState(
         setupPlugins = { stateHolder ->
             stateHolder.attachPlugin(qrScannerPlugin)
-
             stateHolder.pluginScope.launch {
                 stateHolder.events.collect { event ->
                     when (event) {

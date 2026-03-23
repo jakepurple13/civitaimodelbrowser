@@ -84,6 +84,7 @@ easylauncher = { id = "com.starter.easylauncher", version.ref = "easylauncher" }
 google-gms-google-services = { id = "com.google.gms.google-services", version.ref = "googleGmsGoogleServices" }
 google-firebase-crashlytics = { id = "com.google.firebase.crashlytics", version.ref = "googleFirebaseCrashlytics" }
 google-firebase-performance = { id = "com.google.firebase.firebase-perf", version.ref = "googlePerformancePlugin" }
+hotswan-compiler = { id = "com.github.skydoves.compose.hotswan.compiler", version = "1.0.13" }
 
 [libraries]
 alarmee = { module = "io.github.tweener:alarmee", version.ref = "alarmee" }

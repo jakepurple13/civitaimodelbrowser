@@ -2,6 +2,8 @@ package com.programmersbox.common.presentation.qrcode
 
 import android.content.ClipData
 import android.content.ClipboardManager
+import android.content.ContentResolver
+import android.content.ContentValues
 import android.content.Context
 import android.content.Intent
 import android.content.Intent.createChooser
@@ -14,13 +16,14 @@ import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.asAndroidBitmap
 import androidx.core.content.FileProvider
 import androidx.core.content.getSystemService
-import androidx.core.net.toUri
 import com.google.mlkit.vision.barcode.BarcodeScanning
 import com.google.mlkit.vision.common.InputImage
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.coroutines.tasks.await
 import kotlinx.coroutines.withContext
 import java.io.File
+import java.io.OutputStream
 
 actual class QrCodeRepository(
     private val context: Context,
@@ -65,12 +68,68 @@ actual class QrCodeRepository(
     }
 
     private suspend fun Bitmap.saveToDisk(title: String): Uri {
-        return MediaStore.Images.Media.insertImage(
-            context.contentResolver,
-            this,
-            title,
-            "QR Code"
-        ).toUri()
+        return suspendCancellableCoroutine {
+            it.resumeWith(
+                runCatching {
+                    saveImageModernWay(
+                        contentResolver = context.contentResolver,
+                        bitmap = this,
+                        filename = title
+                    )!!
+                }
+            )
+        }
+    }
+
+    fun saveImageModernWay(
+        contentResolver: ContentResolver,
+        bitmap: Bitmap,
+        filename: String
+    ): Uri? {
+        val imageCollection = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            MediaStore.Images.Media.getContentUri(MediaStore.VOLUME_EXTERNAL_PRIMARY)
+        } else {
+            MediaStore.Images.Media.EXTERNAL_CONTENT_URI
+        }
+
+        val contentValues = ContentValues().apply {
+            put(MediaStore.Images.Media.DISPLAY_NAME, filename)
+            put(MediaStore.Images.Media.DESCRIPTION, "Qr Code")
+            put(MediaStore.Images.Media.MIME_TYPE, "image/png")
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                put(MediaStore.MediaColumns.IS_PENDING, 1)
+            }
+        }
+
+        // Insert a new item into the MediaStore
+        val imageUri: Uri? = contentResolver.insert(imageCollection, contentValues)
+
+        try {
+            imageUri?.let { uri ->
+                // Open an output stream and write the bitmap data
+                val outputStream: OutputStream? = contentResolver.openOutputStream(uri)
+                outputStream?.use { stream ->
+                    bitmap.compress(Bitmap.CompressFormat.JPEG, 100, stream)
+                }
+
+                // If on Android Q+, clear the IS_PENDING flag to make the image visible
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                    contentValues.clear()
+                    contentValues.put(MediaStore.MediaColumns.IS_PENDING, 0)
+                    contentResolver.update(uri, contentValues, null, null)
+                }
+                return uri
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
+            // Clean up the entry if an error occurs during writing
+            if (imageUri != null) {
+                contentResolver.delete(imageUri, null, null)
+            }
+            return null
+        }
+
+        return null
     }
 
     // Save bitmap into app-internal storage and return a FileProvider content URI suitable for sharing

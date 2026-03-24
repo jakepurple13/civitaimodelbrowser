@@ -33,9 +33,11 @@
                 <action android:name="android.intent.action.VIEW" />
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
-                <data android:scheme="civitai-browser" android:host="model" />
-                <data android:scheme="civitai-browser" android:host="user" />
-                <data android:scheme="civitai-browser" android:host="image" />
+
+                <data android:scheme="civitai-browser" />
+                <data android:host="model" />
+                <data android:host="user" />
+                <data android:host="image" />
             </intent-filter>
         </activity>
 

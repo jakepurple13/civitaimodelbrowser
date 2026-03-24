@@ -22,7 +22,6 @@ import com.materialkolor.dynamiccolor.ColorSpec
 import com.materialkolor.ktx.animateColorScheme
 import com.programmersbox.common.di.NavigationHandler
 import com.programmersbox.common.di.cmpModules
-import com.programmersbox.common.di.createPlatformModule
 import com.programmersbox.common.presentation.backup.Zipper
 import com.programmersbox.common.presentation.components.Toaster
 import com.programmersbox.common.presentation.components.ToasterState
@@ -47,7 +46,6 @@ fun MainViewController() = ComposeUIViewController {
             declaration = {
                 modules(
                     cmpModules(),
-                    createPlatformModule(),
                     module {
                         factory { ApplicationInfo(BuildKonfig.VERSION_NAME) }
                         single<() -> String> {

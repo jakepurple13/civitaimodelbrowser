@@ -6,7 +6,6 @@ import androidx.work.Configuration
 import com.programmersbox.common.ApplicationInfo
 import com.programmersbox.common.RestoreWorker
 import com.programmersbox.common.di.cmpModules
-import com.programmersbox.common.di.createPlatformModule
 import com.programmersbox.common.getDatabaseBuilder
 import com.programmersbox.common.presentation.backup.ApplicationIcon
 import com.programmersbox.common.presentation.backup.Zipper
@@ -39,7 +38,6 @@ open class CivitApplication : Application(), Configuration.Provider {
                     includeMore()
                 },
                 cmpModules(),
-                createPlatformModule()
             )
             workManagerFactory()
         }

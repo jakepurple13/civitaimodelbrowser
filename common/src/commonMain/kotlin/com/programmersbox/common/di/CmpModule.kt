@@ -35,6 +35,7 @@ fun cmpModules() = module {
     includes(
         viewModelModule(),
         repositoryModule(),
-        navigationModule()
+        navigationModule(),
+        createPlatformModule()
     )
 }

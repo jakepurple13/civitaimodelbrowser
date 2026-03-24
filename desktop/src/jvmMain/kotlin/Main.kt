@@ -17,7 +17,6 @@ import com.programmersbox.common.Screen
 import com.programmersbox.common.UIShow
 import com.programmersbox.common.di.NavigationHandler
 import com.programmersbox.common.di.cmpModules
-import com.programmersbox.common.di.createPlatformModule
 import com.programmersbox.common.getDatabaseBuilder
 import com.programmersbox.common.presentation.backup.BackupScreen
 import com.programmersbox.common.presentation.backup.RestoreScreen
@@ -72,7 +71,6 @@ fun main() {
                 declaration = {
                     modules(
                         cmpModules(),
-                        createPlatformModule(),
                         module {
                             factory { ApplicationInfo(BuildKonfig.VERSION_NAME) }
                             single {

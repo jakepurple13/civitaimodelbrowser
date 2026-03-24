@@ -11,19 +11,15 @@ import androidx.compose.ui.window.Tray
 import androidx.compose.ui.window.TrayState
 import androidx.compose.ui.window.application
 import androidx.navigation3.runtime.NavKey
-import ca.gosyer.appdirs.AppDirs
 import com.programmersbox.common.ApplicationInfo
 import com.programmersbox.common.Screen
 import com.programmersbox.common.UIShow
 import com.programmersbox.common.di.NavigationHandler
 import com.programmersbox.common.di.cmpModules
-import com.programmersbox.common.getDatabaseBuilder
 import com.programmersbox.common.presentation.backup.BackupScreen
 import com.programmersbox.common.presentation.backup.RestoreScreen
-import com.programmersbox.common.presentation.backup.Zipper
 import com.programmersbox.common.presentation.components.Toaster
 import com.programmersbox.common.presentation.components.ToasterState
-import com.programmersbox.common.presentation.qrcode.QrCodeRepository
 import com.programmersbox.common.presentation.settings.AboutScreen
 import com.programmersbox.common.presentation.settings.BehaviorSettingsScreen
 import com.programmersbox.common.presentation.settings.BlurSettingsScreen
@@ -54,14 +50,12 @@ import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.KoinApplication
 import org.koin.compose.koinInject
-import org.koin.core.module.dsl.singleOf
 import org.koin.dsl.koinConfiguration
 import org.koin.dsl.module
 import ro.cosminmihu.ktor.monitor.KtorMonitor
 import ro.cosminmihu.ktor.monitor.KtorMonitorMenuItem
 import java.awt.Toolkit
 import java.awt.datatransfer.StringSelection
-import java.io.File
 
 fun main() {
     System.setProperty("apple.awt.application.appearance", "system")
@@ -73,25 +67,6 @@ fun main() {
                         cmpModules(),
                         module {
                             factory { ApplicationInfo(BuildKonfig.VERSION_NAME) }
-                            single {
-                                AppDirs {
-                                    appName = "CivitAiModelBrowser"
-                                    appAuthor = "jakepurple13"
-                                }
-                            }
-                            single {
-                                {
-                                    File(
-                                        get<AppDirs>().getUserDataDir(),
-                                        "androidx.preferences_pb"
-                                    ).absolutePath
-                                }
-                            }
-                            singleOf(::getDatabaseBuilder)
-                            singleOf(::TrayState)
-                            singleOf(::QrCodeRepository)
-                            singleOf(::Zipper)
-
                             includes(debugModule)
                         }
                     )

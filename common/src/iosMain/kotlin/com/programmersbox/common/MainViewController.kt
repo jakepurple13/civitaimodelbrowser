@@ -22,22 +22,14 @@ import com.materialkolor.dynamiccolor.ColorSpec
 import com.materialkolor.ktx.animateColorScheme
 import com.programmersbox.common.di.NavigationHandler
 import com.programmersbox.common.di.cmpModules
-import com.programmersbox.common.presentation.backup.Zipper
 import com.programmersbox.common.presentation.components.Toaster
 import com.programmersbox.common.presentation.components.ToasterState
-import com.programmersbox.common.presentation.qrcode.QrCodeRepository
 import io.ktor.http.decodeURLPart
 import kotlinx.cinterop.ExperimentalForeignApi
 import org.koin.compose.KoinApplication
 import org.koin.compose.koinInject
-import org.koin.core.module.dsl.singleOf
 import org.koin.dsl.koinConfiguration
-import org.koin.dsl.module
 import org.koin.mp.KoinPlatform
-import platform.Foundation.NSDocumentDirectory
-import platform.Foundation.NSFileManager
-import platform.Foundation.NSURL
-import platform.Foundation.NSUserDomainMask
 
 @OptIn(ExperimentalForeignApi::class, ExperimentalMaterial3WindowSizeClassApi::class)
 fun MainViewController() = ComposeUIViewController {
@@ -45,27 +37,7 @@ fun MainViewController() = ComposeUIViewController {
         configuration = koinConfiguration(
             declaration = {
                 modules(
-                    cmpModules(),
-                    module {
-                        factory { ApplicationInfo(BuildKonfig.VERSION_NAME) }
-                        single<() -> String> {
-                            {
-                                val documentDirectory: NSURL? = NSFileManager
-                                    .defaultManager
-                                    .URLForDirectory(
-                                        directory = NSDocumentDirectory,
-                                        inDomain = NSUserDomainMask,
-                                        appropriateForURL = null,
-                                        create = false,
-                                        error = null,
-                                    )
-                                requireNotNull(documentDirectory).path + "/androidx.preferences_pb"
-                            }
-                        }
-                        single { getDatabaseBuilder() }
-                        singleOf(::QrCodeRepository)
-                        singleOf(::Zipper)
-                    }
+                    cmpModules()
                 )
             }
         )

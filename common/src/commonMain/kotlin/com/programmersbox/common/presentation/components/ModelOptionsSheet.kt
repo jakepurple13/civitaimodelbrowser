@@ -264,21 +264,19 @@ fun ModelOptionsSheet(
                                 id = id,
                                 onAdd = { selectedLists ->
                                     scope.launch {
-                                        selectedLists.forEach { item ->
-                                            listRepository.addToList(
-                                                uuid = item.item.uuid,
-                                                id = id,
-                                                name = name.orEmpty(),
-                                                description = description,
-                                                type = type.orEmpty(),
-                                                nsfw = nsfw,
-                                                imageUrl = imageUrl,
-                                                favoriteType = FavoriteType.Model,
-                                                hash = hash,
-                                                creatorName = creatorName,
-                                                creatorImage = creatorImage,
-                                            )
-                                        }
+                                        listRepository.addToMultipleLists(
+                                            selectedLists = selectedLists,
+                                            id = id,
+                                            name = name.orEmpty(),
+                                            description = description,
+                                            type = type.orEmpty(),
+                                            nsfw = nsfw,
+                                            imageUrl = imageUrl,
+                                            favoriteType = FavoriteType.Model,
+                                            hash = hash,
+                                            creatorName = creatorName,
+                                            creatorImage = creatorImage,
+                                        )
                                         listState.hide()
                                     }.invokeOnCompletion { showLists = false }
                                 },
@@ -973,21 +971,19 @@ fun ModelOptionsSheet(
                                 id = models.id,
                                 onAdd = { selectedLists ->
                                     scope.launch {
-                                        selectedLists.forEach { item ->
-                                            listRepository.addToList(
-                                                uuid = item.item.uuid,
-                                                id = models.id,
-                                                name = models.name,
-                                                description = models.description,
-                                                type = models.type.name,
-                                                nsfw = models.nsfw,
-                                                imageUrl = modelImage?.url,
-                                                favoriteType = FavoriteType.Model,
-                                                hash = modelImage?.hash,
-                                                creatorName = models.creator?.username,
-                                                creatorImage = models.creator?.image,
-                                            )
-                                        }
+                                        listRepository.addToMultipleLists(
+                                            selectedLists = selectedLists,
+                                            id = models.id,
+                                            name = models.name,
+                                            description = models.description,
+                                            type = models.type.name,
+                                            nsfw = models.nsfw,
+                                            imageUrl = modelImage?.url,
+                                            favoriteType = FavoriteType.Model,
+                                            hash = modelImage?.hash,
+                                            creatorName = models.creator?.username,
+                                            creatorImage = models.creator?.image,
+                                        )
                                         listState.hide()
                                     }.invokeOnCompletion { showLists = false }
                                 },

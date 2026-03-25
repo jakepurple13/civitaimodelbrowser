@@ -35,7 +35,7 @@ import kotlinx.serialization.json.Json
         CustomListInfoFts::class,
         FavoriteRoomFts::class,
     ],
-    version = 16,
+    version = 17,
     autoMigrations = [
         AutoMigration(from = 1, to = 2),
         AutoMigration(from = 2, to = 3),
@@ -77,6 +77,7 @@ fun getRoomDatabase(
             MIGRATION_FAVORITES_FTS,
             MIGRATION_FAVORITES_FTS_2,
             MIGRATION_FTS_CUSTOM_LIST_ITEM_DESCRIPTION,
+            MIGRATION_FTS4_TO_FTS5,
         )
         .build()
 }
@@ -239,7 +240,7 @@ interface FavoritesDao {
         includeNsfw: Boolean,
         type: List<String>,
     ) = searchFavorites(
-        query = if (query.isBlank()) "" else "*$query*",
+        query = if (query.isBlank()) "" else "$query*",
         includeNsfw = includeNsfw,
         filterTypes = type,
         filterAllTypes = type.isEmpty(),

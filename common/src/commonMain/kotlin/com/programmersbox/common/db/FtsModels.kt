@@ -3,7 +3,7 @@ package com.programmersbox.common.db
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.Stable
 import androidx.room3.Entity
-import androidx.room3.Fts4
+import androidx.room3.Fts5
 import androidx.room3.RoomDatabase
 import androidx.room3.migration.Migration
 import androidx.sqlite.SQLiteConnection
@@ -12,7 +12,7 @@ import androidx.sqlite.execSQL
 @Stable
 @Immutable
 @Entity(tableName = "FavoriteRoomFts")
-@Fts4(contentEntity = FavoriteRoom::class)
+@Fts5(contentEntity = FavoriteRoom::class)
 data class FavoriteRoomFts(
     val name: String,
     val description: String?,
@@ -82,7 +82,7 @@ val MIGRATION_FAVORITES_FTS_2 = object : Migration(13, 14) {
 @Stable
 @Immutable
 @Entity(tableName = "CustomListItemFts")
-@Fts4 // No contentEntity due to String PK
+@Fts5 // No contentEntity due to String PK
 data class CustomListItemFts(
     val uuid: String, // The ID to link back to the real table
     val name: String,
@@ -93,7 +93,7 @@ data class CustomListItemFts(
 @Stable
 @Immutable
 @Entity(tableName = "CustomListInfoFts")
-@Fts4
+@Fts5
 data class CustomListInfoFts(
     val parentUuid: String, // We need this to find the parent CustomListItem
     val name: String,
@@ -252,6 +252,149 @@ val MIGRATION_FTS = object : Migration(11, 12) {
                 UPDATE CustomListInfoFts 
                 SET name = new.name, description = new.description 
                 WHERE parentUuid = new.uuid AND name = old.name; 
+            END;
+        """
+        )
+    }
+}
+
+// Migration to upgrade all FTS4 tables to FTS5
+val MIGRATION_FTS4_TO_FTS5 = object : Migration(16, 17) {
+    override suspend fun migrate(connection: SQLiteConnection) {
+        // --- FavoriteRoomFts: FTS4 (content table) -> FTS5 ---
+
+        // 1. Drop old FTS4 table
+        connection.execSQL("DROP TABLE IF EXISTS `FavoriteRoomFts`")
+
+        // 2. Recreate as FTS5 content table (content_rowid maps to the PK 'id' on favorite_table)
+        connection.execSQL(
+            """
+            CREATE VIRTUAL TABLE IF NOT EXISTS `FavoriteRoomFts`
+            USING fts5(
+                `name`,
+                `description`,
+                `creatorName`,
+                `type`,
+                content=`favorite_table`,
+                tokenize=`unicode61`
+            )
+        """
+        )
+
+        // 3. Backfill existing data
+        connection.execSQL(
+            """
+            INSERT INTO FavoriteRoomFts(rowid, name, description, creatorName, type)
+            SELECT id, name, description, creatorName, type FROM favorite_table
+        """
+        )
+
+        // --- CustomListItemFts: FTS4 -> FTS5 ---
+
+        // 4. Drop old triggers before dropping the table
+        connection.execSQL("DROP TRIGGER IF EXISTS `insert_item_fts`")
+        connection.execSQL("DROP TRIGGER IF EXISTS `delete_item_fts`")
+        connection.execSQL("DROP TRIGGER IF EXISTS `update_item_fts`")
+
+        // 5. Drop old FTS4 table
+        connection.execSQL("DROP TABLE IF EXISTS `CustomListItemFts`")
+
+        // 6. Recreate as FTS5
+        connection.execSQL(
+            """
+            CREATE VIRTUAL TABLE IF NOT EXISTS `CustomListItemFts`
+            USING fts5(`uuid`, `name`, `description`, tokenize=`unicode61`)
+        """
+        )
+
+        // 7. Backfill
+        connection.execSQL(
+            """
+            INSERT INTO CustomListItemFts(uuid, name, description)
+            SELECT uuid, name, description FROM CustomListItem
+        """
+        )
+
+        // 8. Recreate triggers for CustomListItem
+        connection.execSQL(
+            """
+            CREATE TRIGGER IF NOT EXISTS insert_item_fts AFTER INSERT ON CustomListItem
+            BEGIN
+                INSERT INTO CustomListItemFts(uuid, name, description)
+                VALUES (new.uuid, new.name, new.description);
+            END;
+        """
+        )
+        connection.execSQL(
+            """
+            CREATE TRIGGER IF NOT EXISTS delete_item_fts BEFORE DELETE ON CustomListItem
+            BEGIN
+                DELETE FROM CustomListItemFts WHERE uuid = old.uuid;
+            END;
+        """
+        )
+        connection.execSQL(
+            """
+            CREATE TRIGGER IF NOT EXISTS update_item_fts AFTER UPDATE ON CustomListItem
+            BEGIN
+                UPDATE CustomListItemFts
+                SET name = new.name, description = new.description
+                WHERE uuid = new.uuid;
+            END;
+        """
+        )
+
+        // --- CustomListInfoFts: FTS4 -> FTS5 ---
+
+        // 9. Drop old triggers
+        connection.execSQL("DROP TRIGGER IF EXISTS `insert_info_fts`")
+        connection.execSQL("DROP TRIGGER IF EXISTS `delete_info_fts`")
+        connection.execSQL("DROP TRIGGER IF EXISTS `update_info_fts`")
+
+        // 10. Drop old FTS4 table
+        connection.execSQL("DROP TABLE IF EXISTS `CustomListInfoFts`")
+
+        // 11. Recreate as FTS5
+        connection.execSQL(
+            """
+            CREATE VIRTUAL TABLE IF NOT EXISTS `CustomListInfoFts`
+            USING fts5(`parentUuid`, `name`, `description`, tokenize=`unicode61`)
+        """
+        )
+
+        // 12. Backfill
+        connection.execSQL(
+            """
+            INSERT INTO CustomListInfoFts(parentUuid, name, description)
+            SELECT uuid, name, description FROM CustomListInfo
+        """
+        )
+
+        // 13. Recreate triggers for CustomListInfo
+        connection.execSQL(
+            """
+            CREATE TRIGGER IF NOT EXISTS insert_info_fts AFTER INSERT ON CustomListInfo
+            BEGIN
+                INSERT INTO CustomListInfoFts(parentUuid, name, description)
+                VALUES (new.uuid, new.name, new.description);
+            END;
+        """
+        )
+        connection.execSQL(
+            """
+            CREATE TRIGGER IF NOT EXISTS delete_info_fts BEFORE DELETE ON CustomListInfo
+            BEGIN
+                DELETE FROM CustomListInfoFts WHERE rowid = old.rowid;
+            END;
+        """
+        )
+        connection.execSQL(
+            """
+            CREATE TRIGGER IF NOT EXISTS update_info_fts AFTER UPDATE ON CustomListInfo
+            BEGIN
+                UPDATE CustomListInfoFts
+                SET name = new.name, description = new.description
+                WHERE parentUuid = new.uuid AND name = old.name;
             END;
         """
         )

@@ -165,11 +165,23 @@ interface ListDao {
     SELECT * FROM CustomListItem
     WHERE uuid IN (
         SELECT uuid FROM CustomListItemFts 
-        WHERE CustomListItemFts MATCH :ftsQuery
+        WHERE (
+            :ftsQuery = '' 
+                 OR uuid IN (
+                    SELECT uuid FROM CustomListItemFts 
+                    WHERE CustomListItemFts MATCH :ftsQuery
+             )
+         )
     )
     OR uuid IN (
         SELECT parentUuid FROM CustomListInfoFts 
-        WHERE CustomListInfoFts MATCH :ftsQuery
+        WHERE (
+            :ftsQuery = '' 
+                 OR parentUuid IN (
+                    SELECT parentUuid FROM CustomListInfoFts 
+                    WHERE CustomListInfoFts MATCH :ftsQuery
+             )
+         )
     )
     ORDER BY useBiometric ASC, time DESC
     """
@@ -178,9 +190,12 @@ interface ListDao {
 
     @Ignore
     fun searchListsWithFts(userInput: String): Flow<List<CustomList>> {
-        // If input is "vacation", this becomes "*vacation*"
-        // This tells FTS to look for the word anywhere in the string.
-        val ftsQuery = "*$userInput*"
+        // If input is "vacation", this becomes "vacation*"
+        // This tells FTS to look for the word starting with the input.
+        val ftsQuery = userInput
+            .takeIf { it.isNotBlank() }
+            ?.let { "$it*" }
+            .orEmpty()
 
         return searchCustomListsQuickly(ftsQuery)
     }

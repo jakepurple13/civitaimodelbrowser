@@ -80,6 +80,11 @@ class DataStore private constructor(
         defaultValue = true
     )
 
+    val apiToken = DataStoreType(
+        key = stringPreferencesKey("api_token"),
+        dataStore = dataStore,
+    )
+
     val reverseFavorites = DataStoreTypeNonNull(
         key = booleanPreferencesKey("reverse_favorites"),
         dataStore = dataStore,

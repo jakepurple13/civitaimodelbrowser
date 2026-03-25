@@ -1,9 +1,5 @@
 import com.codingfeline.buildkonfig.compiler.FieldSpec.Type.STRING
-import org.jetbrains.compose.internal.utils.localPropertiesFile
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
-import java.io.FileInputStream
-import java.io.InputStreamReader
-import java.util.Properties
 
 plugins {
     kotlin("multiplatform")
@@ -217,15 +213,6 @@ room3 {
 buildkonfig {
     packageName = "com.programmersbox.common"
     defaultConfigs {
-        val apiKey: String? = getLocalProperty("api_key") as? String
-
-        buildConfigField(
-            type = STRING,
-            name = "API_KEY",
-            value = apiKey ?: "",
-            const = true
-        )
-
         buildConfigField(
             type = STRING,
             name = "VERSION_NAME",
@@ -233,19 +220,6 @@ buildkonfig {
             const = true
         )
     }
-}
-
-fun Project.getLocalProperty(key: String): Any? {
-    val properties = Properties()
-    val localProperties = localPropertiesFile
-    return if (localProperties.isFile) {
-        InputStreamReader(FileInputStream(localProperties), Charsets.UTF_8).use { reader ->
-            properties.load(reader)
-        }
-        properties.getProperty(key)
-    } else if (System.getenv("CI") != null) {
-        System.getProperty("API_KEY")
-    } else error("File from not found")
 }
 
 aboutLibraries {

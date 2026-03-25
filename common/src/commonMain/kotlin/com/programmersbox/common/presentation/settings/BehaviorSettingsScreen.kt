@@ -2,15 +2,19 @@ package com.programmersbox.common.presentation.settings
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.text.input.TextFieldState
+import androidx.compose.foundation.text.input.clearText
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AdsClick
 import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.filled.BlurOn
 import androidx.compose.material.icons.filled.BorderBottom
+import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.CreditCard
 import androidx.compose.material.icons.filled.CreditCardOff
 import androidx.compose.material.icons.filled.Favorite
@@ -22,10 +26,12 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.LargeTopAppBar
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.ListItemDefaults
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedSecureTextField
 import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SegmentedListItem
@@ -37,11 +43,13 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.programmersbox.common.BackButton
 import com.programmersbox.common.DataStore
 import com.programmersbox.common.DoubleClickBehavior
@@ -53,6 +61,7 @@ import com.programmersbox.resources.behavior_settings
 import com.programmersbox.resources.confirm
 import com.programmersbox.resources.double_click_behavior
 import com.programmersbox.resources.use_toolbar
+import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.koinInject
 
@@ -102,6 +111,8 @@ fun BehaviorSettings(
         verticalArrangement = Arrangement.spacedBy(16.dp),
         modifier = modifier.verticalScroll(rememberScrollState())
     ) {
+        ApiKeySetting(dataStore)
+
         var useToolbar by dataStore.rememberUseToolbar()
         var doubleClickBehavior by dataStore.rememberDoubleClickBehavior()
         var showFavorites by dataStore.rememberShowFavorites()
@@ -251,4 +262,44 @@ fun BehaviorSettings(
             )
         }
     }
+}
+
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
+@Composable
+private fun ApiKeySetting(
+    dataStore: DataStore
+) {
+
+    val scope = rememberCoroutineScope()
+    val apiTokenHolder = dataStore.apiToken
+
+    val apiToken by apiTokenHolder
+        .flow
+        .collectAsStateWithLifecycle(null)
+
+    val textFieldState = remember(apiToken) {
+        TextFieldState(initialText = apiToken.orEmpty())
+    }
+
+    OutlinedSecureTextField(
+        state = textFieldState,
+        label = { Text("Api Token") },
+        supportingText = { Text("Get your key at civitai.com/user/account") },
+        leadingIcon = {
+            IconButton(
+                onClick = { textFieldState.clearText() }
+            ) { Icon(Icons.Default.Clear, null) }
+        },
+        trailingIcon = {
+            TextButton(
+                onClick = {
+                    scope.launch {
+                        apiTokenHolder.update(textFieldState.text.toString())
+                    }
+                }
+            ) { Text("Apply") }
+        },
+        shape = ListItemDefaults.segmentedShapes(0, 1).shape,
+        modifier = Modifier.fillMaxWidth()
+    )
 }

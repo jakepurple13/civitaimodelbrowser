@@ -22,7 +22,7 @@ import org.koin.dsl.module
 fun cmpModules() = module {
     singleOf(::getRoomDatabase)
     singleOf(DataStore::getStore)
-    single { Network(*getAll<KtorPluginProvider>().toTypedArray()) }
+    single { Network(get(), *getAll<KtorPluginProvider>().toTypedArray()) }
     single { get<AppDatabase>().getDao() }
     single { get<AppDatabase>().getListDao() }
     single { get<AppDatabase>().getSearchHistoryDao() }

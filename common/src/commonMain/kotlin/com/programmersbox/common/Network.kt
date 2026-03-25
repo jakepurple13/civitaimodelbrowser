@@ -3,6 +3,7 @@ package com.programmersbox.common
 import io.ktor.client.HttpClient
 import io.ktor.client.HttpClientConfig
 import io.ktor.client.call.body
+import io.ktor.client.plugins.HttpRequestRetry
 import io.ktor.client.plugins.HttpTimeout
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.client.plugins.defaultRequest
@@ -12,6 +13,11 @@ import io.ktor.http.ContentType
 import io.ktor.http.contentType
 import io.ktor.http.encodeURLQueryComponent
 import io.ktor.serialization.kotlinx.json.json
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.IO
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
 import kotlinx.serialization.json.Json
 
 const val PAGE_LIMIT = 20
@@ -21,6 +27,7 @@ interface KtorPluginProvider {
 }
 
 class Network(
+    dataStore: DataStore,
     vararg plugins: KtorPluginProvider,
 ) {
     private val json: Json = Json {
@@ -30,6 +37,16 @@ class Network(
         explicitNulls = false
     }
 
+    private var apiToken: String? = null
+
+    init {
+        dataStore
+            .apiToken
+            .flow
+            .onEach { apiToken = it }
+            .launchIn(CoroutineScope(Dispatchers.IO))
+    }
+
     val client: HttpClient by lazy {
         HttpClient {
             plugins.forEach { it.install(this) }
@@ -37,9 +54,16 @@ class Network(
             install(HttpTimeout) {
                 requestTimeoutMillis = 10000
             }
+            install(HttpRequestRetry) {
+                retryOnServerErrors(maxRetries = 2)
+                retryOnException(maxRetries = 2, retryOnTimeout = true)
+                exponentialDelay(baseDelayMs = 1000L)
+            }
             defaultRequest {
                 url(Consts.URL)
-                bearerAuth(BuildKonfig.API_KEY) //Token goes here!
+                apiToken
+                    ?.takeIf { it.isNotBlank() }
+                    ?.let { bearerAuth(it) }
                 contentType(ContentType.Application.Json)
             }
         }

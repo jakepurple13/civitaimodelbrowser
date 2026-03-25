@@ -11,11 +11,8 @@ import androidx.compose.material.icons.filled.AdsClick
 import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.filled.BlurOn
 import androidx.compose.material.icons.filled.BorderBottom
-import androidx.compose.material.icons.filled.Brightness4
-import androidx.compose.material.icons.filled.Brightness7
 import androidx.compose.material.icons.filled.CreditCard
 import androidx.compose.material.icons.filled.CreditCardOff
-import androidx.compose.material.icons.filled.DarkMode
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material.icons.filled.SettingsSystemDaydream
@@ -48,7 +45,6 @@ import androidx.compose.ui.unit.dp
 import com.programmersbox.common.BackButton
 import com.programmersbox.common.DataStore
 import com.programmersbox.common.DoubleClickBehavior
-import com.programmersbox.common.ThemeMode
 import com.programmersbox.common.presentation.components.DiagonalWipeIcon
 import com.programmersbox.common.presentation.components.DiagonalWipeIconDefaults
 import com.programmersbox.common.presentation.components.WipeDirection
@@ -56,8 +52,6 @@ import com.programmersbox.resources.Res
 import com.programmersbox.resources.behavior_settings
 import com.programmersbox.resources.confirm
 import com.programmersbox.resources.double_click_behavior
-import com.programmersbox.resources.theme_mode
-import com.programmersbox.resources.use_amoled_mode
 import com.programmersbox.resources.use_toolbar
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.koinInject
@@ -65,7 +59,8 @@ import org.koin.compose.koinInject
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun BehaviorSettingsScreen(
-    onNavigateToBlurSettings: (() -> Unit)?
+    onNavigateToBlurSettings: (() -> Unit)?,
+    onNavigateToThemeSettings: (() -> Unit)?
 ) {
     val dataStore = koinInject<DataStore>()
 
@@ -84,6 +79,7 @@ fun BehaviorSettingsScreen(
         BehaviorSettings(
             dataStore = dataStore,
             onNavigateToBlurSettings = onNavigateToBlurSettings,
+            onNavigateToThemeSettings = onNavigateToThemeSettings,
             modifier = Modifier
                 .padding(padding)
                 .padding(horizontal = 16.dp)
@@ -96,6 +92,7 @@ fun BehaviorSettingsScreen(
 fun BehaviorSettings(
     dataStore: DataStore,
     onNavigateToBlurSettings: (() -> Unit)? = null,
+    onNavigateToThemeSettings: (() -> Unit)? = null,
     modifier: Modifier = Modifier,
 ) {
     val colors =
@@ -106,111 +103,42 @@ fun BehaviorSettings(
         modifier = modifier.verticalScroll(rememberScrollState())
     ) {
         var useToolbar by dataStore.rememberUseToolbar()
-        var isAmoled by dataStore.rememberIsAmoled()
         var doubleClickBehavior by dataStore.rememberDoubleClickBehavior()
         var showFavorites by dataStore.rememberShowFavorites()
-
-        onNavigateToBlurSettings?.let {
-            SegmentedListItem(
-                content = { Text("Blur Settings") },
-                onClick = it,
-                leadingContent = { Icon(Icons.Default.BlurOn, null) },
-                colors = colors,
-                shapes = ListItemDefaults.segmentedShapes(0, 1),
-            )
-        }
 
         Column(
             verticalArrangement = Arrangement.spacedBy(ListItemDefaults.SegmentedGap)
         ) {
-            SegmentedListItem(
-                leadingContent = { Icon(Icons.Default.BorderBottom, null) },
-                content = { Text(stringResource(Res.string.use_toolbar)) },
-                trailingContent = { Switch(checked = useToolbar, onCheckedChange = null) },
-                colors = colors,
-                shapes = ListItemDefaults.segmentedShapes(0, 3),
-                checked = useToolbar,
-                onCheckedChange = { useToolbar = it },
-            )
-
-            var themeMode by dataStore.rememberThemeMode()
-
-            var showThemeModeDialog by remember { mutableStateOf(false) }
-
-            if (showThemeModeDialog) {
-                AlertDialog(
-                    onDismissRequest = { showThemeModeDialog = false },
-                    title = { Text(stringResource(Res.string.theme_mode)) },
-                    text = {
-                        Column {
-                            ThemeMode.entries.forEach {
-                                Card(
-                                    onClick = { themeMode = it },
-                                    colors = CardDefaults.cardColors(
-                                        containerColor = Color.Transparent
-                                    )
-                                ) {
-                                    ListItem(
-                                        headlineContent = { Text(it.name) },
-                                        trailingContent = {
-                                            RadioButton(
-                                                selected = it == themeMode,
-                                                onClick = null
-                                            )
-                                        },
-                                        colors = ListItemDefaults.colors(
-                                            containerColor = Color.Transparent
-                                        )
-                                    )
-                                }
-                            }
-                        }
-                    },
-                    confirmButton = {
-                        TextButton(
-                            onClick = { showThemeModeDialog = false }
-                        ) { Text(stringResource(Res.string.confirm)) }
-                    }
+            onNavigateToBlurSettings?.let {
+                SegmentedListItem(
+                    content = { Text("Blur Settings") },
+                    onClick = it,
+                    leadingContent = { Icon(Icons.Default.BlurOn, null) },
+                    colors = colors,
+                    shapes = ListItemDefaults.segmentedShapes(0, 2),
                 )
             }
 
-            SegmentedListItem(
-                leadingContent = {
-                    Icon(
-                        when (themeMode) {
-                            ThemeMode.System -> Icons.Default.SettingsSystemDaydream
-                            ThemeMode.Light -> Icons.Default.Brightness4
-                            ThemeMode.Dark -> Icons.Default.DarkMode
-                        },
-                        null
-                    )
-                },
-                content = { Text(stringResource(Res.string.theme_mode)) },
-                supportingContent = { Text(themeMode.name) },
-                trailingContent = { Icon(Icons.Default.ArrowDropDown, null) },
-                colors = colors,
-                shapes = ListItemDefaults.segmentedShapes(1, 3),
-                onClick = { showThemeModeDialog = true }
-            )
-
-            SegmentedListItem(
-                leadingContent = {
-                    DiagonalWipeIcon(
-                        isWiped = isAmoled,
-                        wipedIcon = Icons.Default.Brightness7,
-                        baseIcon = Icons.Default.Brightness4,
-                        motion = DiagonalWipeIconDefaults.expressive(),
-                        modifier = Modifier.size(24.dp)
-                    )
-                },
-                content = { Text(stringResource(Res.string.use_amoled_mode)) },
-                trailingContent = { Switch(checked = isAmoled, onCheckedChange = null) },
-                colors = colors,
-                shapes = ListItemDefaults.segmentedShapes(2, 3),
-                checked = isAmoled,
-                onCheckedChange = { isAmoled = it },
-            )
+            onNavigateToThemeSettings?.let {
+                SegmentedListItem(
+                    content = { Text("Theme Settings") },
+                    onClick = it,
+                    leadingContent = { Icon(Icons.Default.SettingsSystemDaydream, null) },
+                    colors = colors,
+                    shapes = ListItemDefaults.segmentedShapes(1, 2),
+                )
+            }
         }
+
+        SegmentedListItem(
+            leadingContent = { Icon(Icons.Default.BorderBottom, null) },
+            content = { Text(stringResource(Res.string.use_toolbar)) },
+            trailingContent = { Switch(checked = useToolbar, onCheckedChange = null) },
+            colors = colors,
+            shapes = ListItemDefaults.segmentedShapes(0, 1),
+            checked = useToolbar,
+            onCheckedChange = { useToolbar = it },
+        )
 
         Column(
             verticalArrangement = Arrangement.spacedBy(ListItemDefaults.SegmentedGap)

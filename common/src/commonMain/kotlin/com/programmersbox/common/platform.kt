@@ -7,6 +7,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import com.materialkolor.PaletteStyle
+import com.materialkolor.dynamicColorScheme
+import com.materialkolor.dynamiccolor.ColorSpec
 import com.programmersbox.common.db.BlacklistedItemRoom
 import kotlin.jvm.JvmInline
 
@@ -80,3 +83,47 @@ fun isAmoledMode(
     surface = if (isAmoled && isDarkMode) Color.Black else colorScheme.surface,
     onSurface = if (isAmoled && isDarkMode) Color.White else colorScheme.onSurface,
 )
+
+fun buildColorScheme(
+    colorScheme: ColorScheme?,
+    themeColor: ThemeColor,
+    darkTheme: ThemeMode,
+    isAmoled: Boolean,
+    systemDarkTheme: Boolean,
+) = if (colorScheme == null) {
+    val seedColor = if (themeColor == ThemeColor.Dynamic)
+        Color.Cyan
+    else
+        themeColor.seedColor
+
+    when (darkTheme) {
+        ThemeMode.System -> dynamicColorScheme(
+            seedColor = seedColor,
+            isDark = systemDarkTheme,
+            style = PaletteStyle.Expressive,
+            specVersion = ColorSpec.SpecVersion.SPEC_2025
+        )
+
+        ThemeMode.Light -> dynamicColorScheme(
+            seedColor = seedColor,
+            isDark = false,
+            style = PaletteStyle.Expressive,
+            specVersion = ColorSpec.SpecVersion.SPEC_2025
+        )
+
+        ThemeMode.Dark -> dynamicColorScheme(
+            seedColor = seedColor,
+            isDark = true,
+            style = PaletteStyle.Expressive,
+            specVersion = ColorSpec.SpecVersion.SPEC_2025
+        )
+    }
+} else {
+    colorScheme
+}.let { colorScheme ->
+    isAmoledMode(
+        colorScheme = colorScheme,
+        isDarkMode = (systemDarkTheme && darkTheme == ThemeMode.System) || darkTheme == ThemeMode.Dark,
+        isAmoled = isAmoled
+    )
+}

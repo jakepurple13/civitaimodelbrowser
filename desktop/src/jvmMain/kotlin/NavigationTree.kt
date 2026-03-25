@@ -142,6 +142,7 @@ fun createNavigationGraph(): NavNode {
     val nsfw = NavNode(Screen.Settings.Nsfw)
     val behavior = NavNode(Screen.Settings.Behavior)
     val blur = NavNode(Screen.Settings.Behavior.Blur)
+    val theme = NavNode(Screen.Settings.Behavior.Theme)
     val backup = NavNode(Screen.Settings.Backup)
     val restore = NavNode(Screen.Settings.Restore)
     val stats = NavNode(Screen.Settings.Stats)
@@ -158,6 +159,7 @@ fun createNavigationGraph(): NavNode {
     val detailsImage = NavNode(Screen.DetailsImage("Test", "Test"))
 
     behavior.add(blur)
+    behavior.add(theme)
 
     settings.add(nsfw)
     settings.add(behavior)

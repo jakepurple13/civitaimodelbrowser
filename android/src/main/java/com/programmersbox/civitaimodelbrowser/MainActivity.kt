@@ -1,5 +1,7 @@
 package com.programmersbox.civitaimodelbrowser
 
+import android.Manifest
+import android.R
 import android.app.Activity
 import android.content.Context
 import android.content.Intent
@@ -18,7 +20,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.MotionScheme
 import androidx.compose.material3.dynamicDarkColorScheme
 import androidx.compose.material3.dynamicLightColorScheme
-import androidx.compose.material3.expressiveLightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
@@ -36,16 +37,14 @@ import androidx.compose.ui.platform.UriHandler
 import androidx.core.net.toUri
 import androidx.core.view.WindowCompat
 import androidx.fragment.app.FragmentActivity
-import com.materialkolor.PaletteStyle
-import com.materialkolor.dynamicColorScheme
-import com.materialkolor.dynamiccolor.ColorSpec
 import com.materialkolor.ktx.animateColorScheme
 import com.programmersbox.common.DataStore
 import com.programmersbox.common.Screen
+import com.programmersbox.common.ThemeColor
 import com.programmersbox.common.ThemeMode
 import com.programmersbox.common.UIShow
+import com.programmersbox.common.buildColorScheme
 import com.programmersbox.common.di.NavigationHandler
-import com.programmersbox.common.isAmoledMode
 import com.programmersbox.common.presentation.components.Toaster
 import com.programmersbox.common.presentation.components.ToasterState
 import io.kamel.core.config.KamelConfig
@@ -71,16 +70,18 @@ class MainActivity : FragmentActivity() {
             ) { }
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
                 SideEffect {
-                    notificationPermission.launch(android.Manifest.permission.POST_NOTIFICATIONS)
+                    notificationPermission.launch(Manifest.permission.POST_NOTIFICATIONS)
                 }
             }
             val dataStore = koinInject<DataStore>()
 
             val isDarkMode by dataStore.rememberThemeMode()
             val isAmoled by dataStore.rememberIsAmoled()
+            val themeColor by dataStore.rememberThemeColor()
             CustomMaterialTheme(
                 darkTheme = isDarkMode,
-                isAmoled = isAmoled
+                isAmoled = isAmoled,
+                themeColor = themeColor
             ) {
                 val toaster = koinInject<ToasterState>()
                 val defaultUriHandler = LocalUriHandler.current
@@ -140,10 +141,12 @@ private fun handleDeepLink(uri: Uri, navHandler: NavigationHandler) {
             val modelId = uri.pathSegments.firstOrNull() ?: return
             navHandler.backStack.add(Screen.Detail(modelId))
         }
+
         "user" -> {
             val username = uri.pathSegments.firstOrNull() ?: return
             navHandler.backStack.add(Screen.User(username))
         }
+
         "image" -> {
             val modelId = uri.pathSegments.firstOrNull() ?: return
             val modelName = uri.getQueryParameter("name").orEmpty()
@@ -161,8 +164,8 @@ fun Context.customTabsUriHandler(
             CustomTabsIntent.Builder()
                 .setExitAnimations(
                     this@customTabsUriHandler,
-                    android.R.anim.slide_in_left,
-                    android.R.anim.slide_out_right
+                    R.anim.slide_in_left,
+                    R.anim.slide_out_right
                 )
                 .setShareState(CustomTabsIntent.SHARE_STATE_ON)
                 .build()
@@ -189,50 +192,36 @@ private fun customKamelConfig(): KamelConfig {
 fun CustomMaterialTheme(
     darkTheme: ThemeMode,
     isAmoled: Boolean,
+    themeColor: ThemeColor,
     dynamicColor: Boolean = true,
     content: @Composable () -> Unit,
 ) {
     val systemDarkTheme = isSystemInDarkTheme()
     val context = LocalContext.current
-    val colorScheme = remember(darkTheme, systemDarkTheme, dynamicColor, isAmoled) {
-        if (dynamicColor && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-            when (darkTheme) {
-                ThemeMode.System -> if (systemDarkTheme)
-                    dynamicDarkColorScheme(context)
-                else
-                    dynamicLightColorScheme(context)
+    val colorScheme = remember(
+        darkTheme,
+        systemDarkTheme,
+        dynamicColor,
+        isAmoled,
+        themeColor
+    ) {
+        buildColorScheme(
+            colorScheme = if (dynamicColor && themeColor == ThemeColor.Dynamic && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                when (darkTheme) {
+                    ThemeMode.System -> if (systemDarkTheme)
+                        dynamicDarkColorScheme(context)
+                    else
+                        dynamicLightColorScheme(context)
 
-                ThemeMode.Light -> dynamicLightColorScheme(context)
-                ThemeMode.Dark -> dynamicDarkColorScheme(context)
-            }
-        } else {
-            when (darkTheme) {
-                ThemeMode.System -> if (systemDarkTheme)
-                    dynamicColorScheme(
-                        seedColor = Color.Cyan,
-                        isDark = true,
-                        style = PaletteStyle.Expressive,
-                        specVersion = ColorSpec.SpecVersion.SPEC_2025
-                    )
-                else
-                    expressiveLightColorScheme()
-
-                ThemeMode.Dark -> dynamicColorScheme(
-                    seedColor = Color.Cyan,
-                    isDark = true,
-                    style = PaletteStyle.Expressive,
-                    specVersion = ColorSpec.SpecVersion.SPEC_2025
-                )
-
-                ThemeMode.Light -> expressiveLightColorScheme()
-            }
-        }.let { colorScheme ->
-            isAmoledMode(
-                colorScheme = colorScheme,
-                isDarkMode = (systemDarkTheme && darkTheme == ThemeMode.System) || darkTheme == ThemeMode.Dark,
-                isAmoled = isAmoled
-            )
-        }
+                    ThemeMode.Light -> dynamicLightColorScheme(context)
+                    ThemeMode.Dark -> dynamicDarkColorScheme(context)
+                }
+            } else null,
+            themeColor = themeColor,
+            darkTheme = darkTheme,
+            isAmoled = isAmoled,
+            systemDarkTheme = systemDarkTheme,
+        )
     }
 
     val view = LocalView.current

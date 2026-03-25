@@ -25,6 +25,7 @@ import com.programmersbox.common.presentation.settings.BehaviorSettingsScreen
 import com.programmersbox.common.presentation.settings.BlurSettingsScreen
 import com.programmersbox.common.presentation.settings.NsfwSettingsScreen
 import com.programmersbox.common.presentation.settings.StatsScreen
+import com.programmersbox.common.presentation.settings.ThemeSettingsScreen
 import com.programmersbox.desktop.BuildKonfig
 import com.programmersbox.desktop.resources.DesktopResources
 import com.programmersbox.desktop.resources.new_about_window
@@ -34,6 +35,7 @@ import com.programmersbox.desktop.resources.new_blur_settings_window
 import com.programmersbox.desktop.resources.new_nsfw_settings_window
 import com.programmersbox.desktop.resources.new_restore_window
 import com.programmersbox.desktop.resources.new_stats_window
+import com.programmersbox.desktop.resources.new_theme_settings_window
 import com.programmersbox.resources.Res
 import com.programmersbox.resources.blacklisted
 import com.programmersbox.resources.central_app_name
@@ -169,6 +171,10 @@ fun main() {
                                         stringResource(DesktopResources.string.new_blur_settings_window),
                                         onClick = { appState.openNewWindow(Screen.Settings.Behavior.Blur) }
                                     )
+                                    Item(
+                                        stringResource(DesktopResources.string.new_theme_settings_window),
+                                        onClick = { appState.openNewWindow(Screen.Settings.Behavior.Theme) }
+                                    )
                                 }
                                 Separator()
                                 Item(
@@ -274,8 +280,10 @@ private fun MyWindow(
         Screen.Settings.About -> AboutScreen()
         Screen.Settings.Nsfw -> NsfwSettingsScreen()
         Screen.Settings.Behavior.Blur -> BlurSettingsScreen()
+        Screen.Settings.Behavior.Theme -> ThemeSettingsScreen()
         Screen.Settings.Behavior -> BehaviorSettingsScreen(
-            onNavigateToBlurSettings = null
+            onNavigateToBlurSettings = null,
+            onNavigateToThemeSettings = null
         )
     }
 }

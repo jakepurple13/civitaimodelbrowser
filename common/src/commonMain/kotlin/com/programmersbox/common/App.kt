@@ -128,6 +128,9 @@ sealed class Screen {
         data object Behavior : NavKey {
             @Serializable
             data object Blur : NavKey
+
+            @Serializable
+            data object Theme : NavKey
         }
 
         @Serializable

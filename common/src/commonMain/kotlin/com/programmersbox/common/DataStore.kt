@@ -7,6 +7,7 @@ import androidx.compose.runtime.Stable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.ui.graphics.Color
 import androidx.datastore.core.DataStore
 import androidx.datastore.core.okio.OkioStorage
 import androidx.datastore.preferences.core.Preferences
@@ -201,6 +202,14 @@ class DataStore private constructor(
         defaultValue = true
     )
 
+    @Composable
+    fun rememberThemeColor(): MutableState<ThemeColor> = rememberPreferenceType(
+        key = stringPreferencesKey("theme_color"),
+        mapToString = { it.name },
+        mapToValue = { runCatching { ThemeColor.valueOf(it) }.getOrDefault(ThemeColor.Dynamic) },
+        defaultValue = ThemeColor.Dynamic
+    )
+
     open class DataStoreType<T>(
         val key: Preferences.Key<T>,
         protected val dataStore: DataStore<Preferences>,
@@ -363,4 +372,17 @@ enum class DoubleClickBehavior(val visualName: String) {
     DoNothing("Do Nothing"),
     Blacklist("Blacklist/Unblacklist"),
     Favorite("Favorite/Unfavorite")
+}
+
+@Serializable
+enum class ThemeColor(
+    val seedColor: Color,
+) {
+    Dynamic(Color.Transparent),
+    Blue(Color.Blue),
+    Red(Color.Red),
+    Green(Color.Green),
+    Yellow(Color.Yellow),
+    Cyan(Color.Cyan),
+    Magenta(Color.Magenta),
 }

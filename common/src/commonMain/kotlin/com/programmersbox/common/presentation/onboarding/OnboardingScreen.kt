@@ -30,6 +30,7 @@ import com.programmersbox.common.presentation.onboarding.topics.WelcomeContent
 import com.programmersbox.common.presentation.settings.BehaviorSettings
 import com.programmersbox.common.presentation.settings.BlurSettings
 import com.programmersbox.common.presentation.settings.NsfwSettings
+import com.programmersbox.common.presentation.settings.ThemeSettings
 import com.programmersbox.resources.Res
 import com.programmersbox.resources.back
 import com.programmersbox.resources.central_app_name
@@ -57,6 +58,7 @@ fun OnboardingScreen(
     val scope = rememberCoroutineScope()
     val onboardingScope = rememberOnboardingScope {
         item { WelcomeContent() }
+        item { ThemeOnboarding(dataStore) }
         item { NsfwOnboarding(dataStore) }
         item { BehaviorOnboarding(dataStore) }
         item { BlurOnboarding(dataStore) }
@@ -174,5 +176,14 @@ private fun BlurOnboarding(dataStore: DataStore) {
         modifier = Modifier.fillMaxSize()
     ) {
         BlurSettings(dataStore = dataStore)
+    }
+}
+
+@Composable
+private fun ThemeOnboarding(dataStore: DataStore) {
+    Column(
+        modifier = Modifier.fillMaxSize()
+    ) {
+        ThemeSettings(dataStore = dataStore)
     }
 }

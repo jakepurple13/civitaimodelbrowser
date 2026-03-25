@@ -7,18 +7,13 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.MotionScheme
 import androidx.compose.material3.Shapes
 import androidx.compose.material3.Typography
-import androidx.compose.material3.expressiveLightColorScheme
 import androidx.compose.material3.windowsizeclass.ExperimentalMaterial3WindowSizeClassApi
 import androidx.compose.material3.windowsizeclass.calculateWindowSizeClass
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.window.ComposeUIViewController
-import com.materialkolor.PaletteStyle
-import com.materialkolor.dynamicColorScheme
-import com.materialkolor.dynamiccolor.ColorSpec
 import com.materialkolor.ktx.animateColorScheme
 import com.programmersbox.common.di.NavigationHandler
 import com.programmersbox.common.di.cmpModules
@@ -45,9 +40,11 @@ fun MainViewController() = ComposeUIViewController {
         val dataStore = koinInject<DataStore>()
         val isDarkMode by dataStore.rememberThemeMode()
         val isAmoled by dataStore.rememberIsAmoled()
+        val themeColor by dataStore.rememberThemeColor()
         CustomMaterialTheme(
             darkTheme = isDarkMode,
-            isAmoled = isAmoled
+            isAmoled = isAmoled,
+            themeColor = themeColor
         ) {
             CompositionLocalProvider(
                 LocalWindowClassSize provides calculateWindowSizeClass().widthSizeClass
@@ -70,6 +67,7 @@ fun MainViewController() = ComposeUIViewController {
 fun CustomMaterialTheme(
     darkTheme: ThemeMode,
     isAmoled: Boolean,
+    themeColor: ThemeColor,
     shapes: Shapes = MaterialTheme.shapes,
     typography: Typography = MaterialTheme.typography,
     content: @Composable () -> Unit,
@@ -77,33 +75,14 @@ fun CustomMaterialTheme(
     val isDarkMode = isSystemInDarkTheme()
     MaterialExpressiveTheme(
         colorScheme = animateColorScheme(
-            remember(darkTheme, isDarkMode, isAmoled) {
-                when (darkTheme) {
-                    ThemeMode.System -> if (isDarkMode)
-                        dynamicColorScheme(
-                            seedColor = Color.Cyan,
-                            isDark = true,
-                            style = PaletteStyle.Expressive,
-                            specVersion = ColorSpec.SpecVersion.SPEC_2025
-                        )
-                    else
-                        expressiveLightColorScheme()
-
-                    ThemeMode.Dark -> dynamicColorScheme(
-                        seedColor = Color.Cyan,
-                        isDark = true,
-                        style = PaletteStyle.Expressive,
-                        specVersion = ColorSpec.SpecVersion.SPEC_2025
-                    )
-
-                    ThemeMode.Light -> expressiveLightColorScheme()
-                }.let { colorScheme ->
-                    isAmoledMode(
-                        colorScheme = colorScheme,
-                        isDarkMode = (isDarkMode && darkTheme == ThemeMode.System) || darkTheme == ThemeMode.Dark,
-                        isAmoled = isAmoled
-                    )
-                }
+            remember(darkTheme, isDarkMode, isAmoled, themeColor) {
+                buildColorScheme(
+                    colorScheme = null,
+                    darkTheme = darkTheme,
+                    isAmoled = isAmoled,
+                    themeColor = themeColor,
+                    systemDarkTheme = isDarkMode
+                )
             }
         ),
         shapes = shapes,
@@ -150,6 +129,7 @@ fun handleDeepLink(url: String) {
             }.orEmpty()
             Screen.DetailsImage(id, name)
         }
+
         else -> return
     }
 

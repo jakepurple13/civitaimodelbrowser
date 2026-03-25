@@ -6,4 +6,5 @@
     <string name="new_nsfw_settings_window">New Nsfw Settings Window</string>
     <string name="new_behavior_settings_window">New Behavior Settings Window</string>
     <string name="new_blur_settings_window">New Blur Settings Window</string>
+    <string name="new_theme_settings_window">New Theme Settings Window</string>
 </resources>

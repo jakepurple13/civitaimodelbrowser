@@ -5,22 +5,19 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.MotionScheme
 import androidx.compose.material3.Shapes
 import androidx.compose.material3.Typography
-import androidx.compose.material3.expressiveLightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
-import androidx.compose.ui.graphics.Color
-import com.materialkolor.PaletteStyle
-import com.materialkolor.dynamicColorScheme
-import com.materialkolor.dynamiccolor.ColorSpec
 import com.materialkolor.ktx.animateColorScheme
+import com.programmersbox.common.ThemeColor
 import com.programmersbox.common.ThemeMode
-import com.programmersbox.common.isAmoledMode
+import com.programmersbox.common.buildColorScheme
 
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun CustomMaterialTheme(
     darkTheme: ThemeMode,
     isAmoled: Boolean,
+    themeColor: ThemeColor,
     shapes: Shapes = MaterialTheme.shapes,
     typography: Typography = MaterialTheme.typography,
     content: @Composable () -> Unit,
@@ -28,34 +25,14 @@ fun CustomMaterialTheme(
     val isDarkMode = isSystemInDarkTheme()
     MaterialExpressiveTheme(
         colorScheme = animateColorScheme(
-            remember(darkTheme, isDarkMode, isAmoled) {
-                when (darkTheme) {
-                    ThemeMode.System -> if (isDarkMode)
-                        dynamicColorScheme(
-                            seedColor = Color.Cyan,
-                            isDark = true,
-                            style = PaletteStyle.Expressive,
-                            specVersion = ColorSpec.SpecVersion.SPEC_2025
-                        )
-                    else
-                        expressiveLightColorScheme()
-
-                    ThemeMode.Dark -> dynamicColorScheme(
-                        seedColor = Color.Cyan,
-                        isDark = true,
-                        style = PaletteStyle.Expressive,
-                        specVersion = ColorSpec.SpecVersion.SPEC_2025
-                    )
-
-                    ThemeMode.Light -> expressiveLightColorScheme()
-                }
-                    .let { colorScheme ->
-                        isAmoledMode(
-                            colorScheme = colorScheme,
-                            isDarkMode = (isDarkMode && darkTheme == ThemeMode.System) || darkTheme == ThemeMode.Dark,
-                            isAmoled = isAmoled
-                        )
-                    }
+            remember(darkTheme, isDarkMode, isAmoled, themeColor) {
+                buildColorScheme(
+                    colorScheme = null,
+                    darkTheme = darkTheme,
+                    isAmoled = isAmoled,
+                    themeColor = themeColor,
+                    systemDarkTheme = isDarkMode
+                )
             }
         ),
         shapes = shapes,

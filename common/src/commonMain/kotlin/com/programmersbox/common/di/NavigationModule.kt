@@ -35,6 +35,7 @@ import com.programmersbox.common.presentation.settings.BlurSettingsScreen
 import com.programmersbox.common.presentation.settings.NsfwSettingsScreen
 import com.programmersbox.common.presentation.settings.SettingsScreen
 import com.programmersbox.common.presentation.settings.StatsScreen
+import com.programmersbox.common.presentation.settings.ThemeSettingsScreen
 import kotlinx.coroutines.runBlocking
 import org.koin.compose.koinInject
 import org.koin.compose.viewmodel.koinViewModel
@@ -231,10 +232,12 @@ private fun Module.settingsNavigation() {
     settingsNavigation<Screen.Settings.Behavior> {
         val backStack = koinInject<NavigationHandler>().backStack
         BehaviorSettingsScreen(
-            onNavigateToBlurSettings = { backStack.add(Screen.Settings.Behavior.Blur) }
+            onNavigateToBlurSettings = { backStack.add(Screen.Settings.Behavior.Blur) },
+            onNavigateToThemeSettings = { backStack.add(Screen.Settings.Behavior.Theme) }
         )
     }
     settingsNavigation<Screen.Settings.Behavior.Blur> { BlurSettingsScreen() }
+    settingsNavigation<Screen.Settings.Behavior.Theme> { ThemeSettingsScreen() }
 
     platformSettingsNavigation()
 }

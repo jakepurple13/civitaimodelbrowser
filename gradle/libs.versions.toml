@@ -7,7 +7,7 @@ biometricVersion = "1.4.0-alpha05"
 blurhashVersion = "0.0-4-ALPHA"
 browser = "1.9.0"
 camerak = "0.4"
-chromaDial = "1.0.0-Alpha6"
+chromaDial = "1.0.0-Alpha7"
 composeMultiplatformMediaPlayerVersion = "1.0.53"
 composewebview = "1.0.0-beta-01"
 debugoverlay = "2.1.0"
@@ -67,7 +67,7 @@ easylauncher = "6.4.1"
 googleGmsGoogleServices = "4.4.4"
 googleFirebaseCrashlytics = "3.0.6"
 googlePerformancePlugin = "2.0.2"
-firebaseBom = "34.10.0"
+firebaseBom = "34.11.0"
 firebase-cocoapods = "11.8.0"
 
 material3WindowSizeClassVersion = "1.9.0"
@@ -84,7 +84,7 @@ easylauncher = { id = "com.starter.easylauncher", version.ref = "easylauncher" }
 google-gms-google-services = { id = "com.google.gms.google-services", version.ref = "googleGmsGoogleServices" }
 google-firebase-crashlytics = { id = "com.google.firebase.crashlytics", version.ref = "googleFirebaseCrashlytics" }
 google-firebase-performance = { id = "com.google.firebase.firebase-perf", version.ref = "googlePerformancePlugin" }
-hotswan-compiler = { id = "com.github.skydoves.compose.hotswan.compiler", version = "1.0.13" }
+hotswan-compiler = { id = "com.github.skydoves.compose.hotswan.compiler", version = "1.0.15" }
 
 [libraries]
 alarmee = { module = "io.github.tweener:alarmee", version.ref = "alarmee" }

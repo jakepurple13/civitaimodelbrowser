@@ -15,12 +15,15 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.staggeredgrid.LazyVerticalStaggeredGrid
 import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridCells
+import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridItemSpan
 import androidx.compose.foundation.lazy.staggeredgrid.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material3.AssistChipDefaults
+import androidx.compose.material3.CircularWavyProgressIndicator
 import androidx.compose.material3.ElevatedAssistChip
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -63,7 +66,10 @@ import dev.chrisbanes.haze.HazeProgressive
 import org.koin.compose.koinInject
 import org.koin.compose.viewmodel.koinViewModel
 
-@OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
+@OptIn(
+    ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class,
+    ExperimentalMaterial3ExpressiveApi::class
+)
 @Composable
 fun CivitAiModelImagesScreen(
     modelName: String?,
@@ -159,6 +165,54 @@ fun CivitAiModelImagesScreen(
                 .setBlurKindSource(blurKindState)
                 .fillMaxSize()
         ) {
+            when (val state = viewModel.uiState) {
+                is ImageUiState.Error -> {
+                    item(
+                        key = "error",
+                        span = StaggeredGridItemSpan.FullLine,
+                        contentType = "error"
+                    ) {
+                        Column(
+                            horizontalAlignment = Alignment.CenterHorizontally,
+                        ) {
+                            Text("Error loading images")
+                            Text(state.throwable.message ?: "Unknown error")
+                        }
+                    }
+                }
+
+                ImageUiState.Loading -> {
+                    item(
+                        key = "loading",
+                        span = StaggeredGridItemSpan.FullLine,
+                        contentType = "loading"
+                    ) {
+                        Box(
+                            contentAlignment = Alignment.Center,
+                            modifier = Modifier.fillMaxWidth(),
+                        ) {
+                            CircularWavyProgressIndicator()
+                        }
+                    }
+                }
+
+                ImageUiState.Success -> {
+                    if (viewModel.imagesList.isEmpty()) {
+                        item(
+                            key = "empty",
+                            span = StaggeredGridItemSpan.FullLine,
+                            contentType = "empty"
+                        ) {
+                            Column(
+                                horizontalAlignment = Alignment.CenterHorizontally,
+                            ) {
+                                Text("No images found")
+                            }
+                        }
+                    }
+                }
+            }
+
             items(
                 viewModel.imagesList,
                 contentType = { "image" },

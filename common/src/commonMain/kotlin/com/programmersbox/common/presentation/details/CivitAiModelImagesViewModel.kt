@@ -1,6 +1,9 @@
 package com.programmersbox.common.presentation.details
 
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.programmersbox.common.CustomModelImage
@@ -17,6 +20,7 @@ import kotlinx.coroutines.IO
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.map
@@ -32,6 +36,8 @@ class CivitAiModelImagesViewModel(
 ) : ViewModel() {
     val imagesList = mutableStateListOf<CustomModelImage>()
 
+    var uiState: ImageUiState by mutableStateOf(ImageUiState.Loading)
+
     val favoriteList = database
         .getFavoriteModels()
         .map { it.filterIsInstance<FavoriteModel.Image>() }
@@ -41,6 +47,7 @@ class CivitAiModelImagesViewModel(
 
         dataStore.includeNsfw.flow
             .map {
+                uiState = ImageUiState.Loading
                 coroutineScope {
                     if (modelDetailsImage.modelVersions != null) {
                         modelDetailsImage
@@ -72,7 +79,9 @@ class CivitAiModelImagesViewModel(
                 }
             }
             .flowOn(Dispatchers.IO)
+            .catch { uiState = ImageUiState.Error(it) }
             .onEach {
+                uiState = ImageUiState.Success
                 imagesList.clear()
                 imagesList.addAll(it)
             }
@@ -103,4 +112,10 @@ class CivitAiModelImagesViewModel(
             database.removeImage(modelImage.url)
         }
     }
+}
+
+sealed class ImageUiState {
+    data object Loading : ImageUiState()
+    data object Success : ImageUiState()
+    data class Error(val throwable: Throwable) : ImageUiState()
 }

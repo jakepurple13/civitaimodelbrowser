@@ -40,7 +40,11 @@ internal class WindowsBiometricAuthenticator : PlatformBiometricAuthenticator {
         }
 
         val identity = WinBioIdentity.ByReference()
-        winBio.WinBioGetCurrentIdentity(sessionHandle.value, identity)
+        val identityHr = winBio.WinBioGetCurrentIdentity(sessionHandle.value, identity)
+        if (identityHr != WinBio.S_OK) {
+            winBio.WinBioCloseSession(sessionHandle.value)
+            return authenticateWithCredUI(title, subtitle)
+        }
 
         var result: BiometricResult = BiometricResult.Failure
         val callback = object : WinBioVerifyCallback {
@@ -59,13 +63,16 @@ internal class WindowsBiometricAuthenticator : PlatformBiometricAuthenticator {
             }
         }
 
-        winBio.WinBioVerifyWithCallback(
-            sessionHandle.value, identity,
-            WinBio.WINBIO_SUBTYPE_ANY, callback, null
-        )
-        // WinBioWait blocks until the async callback fires — no latch needed.
-        winBio.WinBioWait(sessionHandle.value)
-        winBio.WinBioCloseSession(sessionHandle.value)
+        try {
+            winBio.WinBioVerifyWithCallback(
+                sessionHandle.value, identity,
+                WinBio.WINBIO_SUBTYPE_ANY, callback, null
+            )
+            // WinBioWait blocks until the async callback fires — no latch needed.
+            winBio.WinBioWait(sessionHandle.value)
+        } finally {
+            winBio.WinBioCloseSession(sessionHandle.value)
+        }
 
         return result
     }
@@ -87,6 +94,12 @@ internal class WindowsBiometricAuthenticator : PlatformBiometricAuthenticator {
                 null, 0, outBuffer, outBufferSize, null,
                 CredUI.CREDUIWIN_GENERIC
             )
+            // Free the output buffer allocated by CredUI regardless of outcome
+            try {
+                val bufPtr = outBuffer.value
+                if (bufPtr != null) com.sun.jna.Native.free(com.sun.jna.Pointer.nativeValue(bufPtr))
+            } catch (_: Exception) { /* best-effort cleanup */ }
+
             when (result) {
                 CredUI.ERROR_SUCCESS -> BiometricResult.Success
                 CredUI.ERROR_CANCELLED -> BiometricResult.Failure

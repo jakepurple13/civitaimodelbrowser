@@ -35,7 +35,7 @@ internal class MacOsBiometricAuthenticator : PlatformBiometricAuthenticator {
             ObjCRuntime.LA_POLICY_DEVICE_OWNER_AUTHENTICATION,
             Pointer.NULL
         )
-        if (canEval == Pointer.NULL) {
+        if (com.sun.jna.Pointer.nativeValue(canEval) == 0L) {
             return BiometricResult.Error("LAContext cannot evaluate policy (no biometrics/password enrolled)")
         }
 
@@ -47,7 +47,7 @@ internal class MacOsBiometricAuthenticator : PlatformBiometricAuthenticator {
 
         // Build the Objective-C reply block on the heap.
         // Block layout (64-bit, 32 bytes total):
-        //   offset  0: void *isa           (8 bytes) — _NSConcreteGlobalBlock
+        //   offset  0: void *isa           (8 bytes) — _NSConcreteMallocBlock (heap-allocated block)
         //   offset  8: int32_t flags       (4 bytes) — 0
         //   offset 12: int32_t reserved    (4 bytes) — 0
         //   offset 16: void (*invoke)(…)   (8 bytes) — function pointer
@@ -87,6 +87,10 @@ internal class MacOsBiometricAuthenticator : PlatformBiometricAuthenticator {
         )
 
         val completed = latch.await(30, TimeUnit.SECONDS)
+
+        // Release the LAContext — JNA calls do not benefit from ARC, so we must MRR release manually.
+        val releaseSel = rt.sel_registerName("release")
+        rt.objc_msgSend(context, releaseSel)
 
         // Keep JNA-managed objects alive until after await to prevent premature GC.
         // Reference.reachabilityFence (Java 9+) is the correct idiom for this.

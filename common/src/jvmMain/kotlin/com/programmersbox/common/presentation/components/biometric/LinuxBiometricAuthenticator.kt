@@ -75,7 +75,9 @@ internal class LinuxBiometricAuthenticator : PlatformBiometricAuthenticator {
 
         val pamh = PointerByReference()
         val pointerSize = Native.POINTER_SIZE.toLong()
-        val responseEntrySize = pointerSize + 4L  // char* + int
+        // pam_response is { char *resp (8 bytes) + int resp_retcode (4 bytes) + 4 bytes padding } = 16 bytes.
+        // sizeof(pam_response) == pointerSize * 2 on 64-bit to satisfy pointer alignment.
+        val responseEntrySize = pointerSize * 2  // 16 bytes on 64-bit
 
         val conv = object : PamConvCallback {
             override fun invoke(

@@ -1,29 +1,20 @@
 package com.programmersbox.common.presentation.details
 
+import androidx.compose.runtime.mutableStateListOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import androidx.paging.Pager
-import androidx.paging.PagingConfig
-import androidx.paging.PagingData
-import androidx.paging.cachedIn
 import com.programmersbox.common.CustomModelImage
 import com.programmersbox.common.DataStore
 import com.programmersbox.common.Network
-import com.programmersbox.common.PAGE_LIMIT
 import com.programmersbox.common.db.FavoriteModel
 import com.programmersbox.common.db.FavoriteType
 import com.programmersbox.common.db.FavoritesDao
 import com.programmersbox.common.db.toDb
-import com.programmersbox.common.paging.CivitDetailsImagePagingSource
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.IO
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.flatMapLatest
-import kotlinx.coroutines.flow.flowOn
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 import kotlin.random.Random
 
@@ -33,8 +24,7 @@ class CivitAiModelImagesViewModel(
     network: Network,
     private val database: FavoritesDao,
 ) : ViewModel() {
-    val pager: Flow<PagingData<CustomModelImage>>
-        field = MutableStateFlow(PagingData.empty())
+    val imagesList = mutableStateListOf<CustomModelImage>()
 
     val favoriteList = database
         .getFavoriteModels()
@@ -42,18 +32,33 @@ class CivitAiModelImagesViewModel(
 
     init {
         dataStore.includeNsfw.flow
-            .flatMapLatest {
-                Pager(
-                    PagingConfig(
-                        pageSize = PAGE_LIMIT,
-                        enablePlaceholders = true
-                    ),
-                ) { CivitDetailsImagePagingSource(network, it, modelId) }
-                    .flow
-                    .flowOn(Dispatchers.IO)
-                    .cachedIn(viewModelScope)
+            .map {
+                imagesList.clear()
+                coroutineScope {
+                    val model = network
+                        .fetchModel(modelId ?: return@coroutineScope)
+                        .getOrNull() ?: return@coroutineScope
+
+                    val versions = model
+                        .modelVersions.map { m -> m.id }
+                        .map { version ->
+                            async {
+                                network.fetchAllImagesByModelVersion(
+                                    modelId = version.toString(),
+                                    page = 1,
+                                    perPage = 100,
+                                    includeNsfw = it
+                                )
+                                    .getOrNull()
+                                    ?.items
+                            }
+                        }
+                        .awaitAll()
+                        .filterNotNull()
+
+                    imagesList.addAll(versions.flatten())
+                }
             }
-            .onEach { pager.value = it }
             .launchIn(viewModelScope)
     }
 

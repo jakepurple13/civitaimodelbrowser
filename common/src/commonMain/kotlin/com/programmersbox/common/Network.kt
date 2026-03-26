@@ -137,6 +137,21 @@ class Network(
         }.body<CivitAiCustomImages>()
     }
 
+    suspend fun fetchAllImagesByModelVersion(
+        modelId: String,
+        page: Int,
+        perPage: Int = PAGE_LIMIT,
+        includeNsfw: Boolean = true,
+    ) = runCatching {
+        client.get("images") {
+            parameter("limit", perPage)
+            parameter("page", page)
+            parameter("modelVersionId", modelId)
+            parameter("sort", "Newest")
+            if (!includeNsfw) parameter("nsfw", "None")
+        }.body<CivitAiCustomImages>()
+    }
+
     suspend fun fetchAllImages(
         includeNsfw: Boolean = true,
     ) = runCatching {

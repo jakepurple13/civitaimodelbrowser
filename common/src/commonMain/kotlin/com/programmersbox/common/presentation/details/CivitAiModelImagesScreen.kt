@@ -9,10 +9,13 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.staggeredgrid.LazyVerticalStaggeredGrid
+import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridCells
+import androidx.compose.foundation.lazy.staggeredgrid.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material3.AssistChipDefaults
@@ -44,15 +47,10 @@ import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.paging.compose.collectAsLazyPagingItems
-import androidx.paging.compose.itemContentType
-import androidx.paging.compose.itemKey
 import com.programmersbox.common.BackButton
-import com.programmersbox.common.ComposableUtils
 import com.programmersbox.common.ContextMenu
 import com.programmersbox.common.CustomModelImage
 import com.programmersbox.common.DataStore
-import com.programmersbox.common.adaptiveGridCell
 import com.programmersbox.common.db.FavoritesDao
 import com.programmersbox.common.presentation.components.ImageSheet
 import com.programmersbox.common.presentation.components.LoadingImage
@@ -76,7 +74,6 @@ fun CivitAiModelImagesScreen(
     val showNsfw by dataStore.showNsfw()
     val nsfwBlurStrength by dataStore.hideNsfwStrength()
     val uriHandler = LocalUriHandler.current
-    val lazyPagingItems = viewModel.pager.collectAsLazyPagingItems()
 
     val blurKindState = rememberBlurKindState()
 
@@ -134,7 +131,8 @@ fun CivitAiModelImagesScreen(
                     )
                 },
                 navigationIcon = { BackButton() },
-                actions = { Text("(${lazyPagingItems.itemCount})") },
+                //actions = { Text("(${lazyPagingItems.itemCount})") },
+                actions = { Text("(${viewModel.imagesList.size})") },
                 colors = if (blurKindState.showBlur) TopAppBarDefaults.topAppBarColors(
                     containerColor = Color.Transparent
                 )
@@ -152,59 +150,57 @@ fun CivitAiModelImagesScreen(
             )
         },
     ) { padding ->
-        LazyVerticalGrid(
-            columns = adaptiveGridCell(),
+        LazyVerticalStaggeredGrid(
+            columns = StaggeredGridCells.Fixed(2),
             contentPadding = padding,
-            verticalArrangement = Arrangement.spacedBy(4.dp),
+            verticalItemSpacing = 4.dp,
             horizontalArrangement = Arrangement.spacedBy(4.dp),
             modifier = Modifier
                 .setBlurKindSource(blurKindState)
                 .fillMaxSize()
         ) {
             items(
-                count = lazyPagingItems.itemCount,
-                contentType = lazyPagingItems.itemContentType { "image" },
-                key = lazyPagingItems.itemKey { it.url }
-            ) {
-                lazyPagingItems[it]?.let { models ->
+                viewModel.imagesList,
+                contentType = { "image" },
+                key = { it.url }
+            ) { models ->
 
-                    var showDialog by remember { mutableStateOf(false) }
+                var showDialog by remember { mutableStateOf(false) }
 
-                    BlacklistHandling(
-                        blacklisted = blacklisted,
-                        modelId = models.postId ?: 0L,
-                        name = models.url,
-                        nsfw = models.nsfwLevel.canNotShow(),
-                        imageUrl = models.url,
-                        showDialog = showDialog,
-                        onDialogDismiss = { showDialog = false }
-                    )
+                BlacklistHandling(
+                    blacklisted = blacklisted,
+                    modelId = models.postId ?: 0L,
+                    name = models.url,
+                    nsfw = models.nsfwLevel.canNotShow(),
+                    imageUrl = models.url,
+                    showDialog = showDialog,
+                    onDialogDismiss = { showDialog = false }
+                )
 
-                    ContextMenu(
+                ContextMenu(
+                    isBlacklisted = blacklisted.any { b -> b.imageUrl == models.url },
+                    blacklistItems = blacklisted,
+                    modelId = models.postId ?: 0L,
+                    name = models.url,
+                    nsfw = models.nsfwLevel.canNotShow(),
+                    imageUrl = models.url,
+                ) {
+                    ImageCard(
+                        images = models,
+                        showNsfw = showNsfw,
+                        nsfwBlurStrength = nsfwBlurStrength,
+                        isFavorite = favoriteList.any { f -> f.imageUrl == models.url },
                         isBlacklisted = blacklisted.any { b -> b.imageUrl == models.url },
-                        blacklistItems = blacklisted,
-                        modelId = models.postId ?: 0L,
-                        name = models.url,
-                        nsfw = models.nsfwLevel.canNotShow(),
-                        imageUrl = models.url,
-                    ) {
-                        ImageCard(
-                            images = models,
-                            showNsfw = showNsfw,
-                            nsfwBlurStrength = nsfwBlurStrength,
-                            isFavorite = favoriteList.any { f -> f.imageUrl == models.url },
-                            isBlacklisted = blacklisted.any { b -> b.imageUrl == models.url },
-                            onClick = {
-                                if (models.height < 2000 || models.width < 2000) {
-                                    sheetDetails = models
-                                } else {
-                                    uriHandler.openUri(models.url)
-                                }
-                            },
-                            onLongClick = { showDialog = true },
-                            modifier = Modifier.animateItem()
-                        )
-                    }
+                        onClick = {
+                            if (models.height < 2000 || models.width < 2000) {
+                                sheetDetails = models
+                            } else {
+                                uriHandler.openUri(models.url)
+                            }
+                        },
+                        onLongClick = { showDialog = true },
+                        modifier = Modifier.animateItem()
+                    )
                 }
             }
         }
@@ -233,16 +229,13 @@ private fun ImageCard(
             else -> null
         }?.let { BorderStroke(1.dp, it) },
         modifier = modifier
-            /*.aspectRatio(
+            .fillMaxWidth()
+            .aspectRatio(
                 if (images.width > 0 && images.height > 0) {
                     images.width.toFloat() / images.height.toFloat()
                 } else {
                     1f
                 }
-            )*/
-            .size(
-                width = ComposableUtils.IMAGE_WIDTH,
-                height = ComposableUtils.IMAGE_HEIGHT
             )
             .clip(MaterialTheme.shapes.medium)
             .combinedClickable(

@@ -6,20 +6,26 @@ import androidx.lifecycle.viewModelScope
 import com.programmersbox.common.CustomModelImage
 import com.programmersbox.common.DataStore
 import com.programmersbox.common.Network
+import com.programmersbox.common.Screen
 import com.programmersbox.common.db.FavoriteModel
 import com.programmersbox.common.db.FavoriteType
 import com.programmersbox.common.db.FavoritesDao
 import com.programmersbox.common.db.toDb
+import kotlinx.coroutines.CoroutineStart
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.IO
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 import kotlin.random.Random
 
 class CivitAiModelImagesViewModel(
-    private val modelId: String?,
+    private val modelDetailsImage: Screen.DetailsImage,
     dataStore: DataStore,
     network: Network,
     private val database: FavoritesDao,
@@ -31,18 +37,25 @@ class CivitAiModelImagesViewModel(
         .map { it.filterIsInstance<FavoriteModel.Image>() }
 
     init {
+        val dispatcher = Dispatchers.IO.limitedParallelism(3)
+
         dataStore.includeNsfw.flow
             .map {
-                imagesList.clear()
                 coroutineScope {
-                    val model = network
-                        .fetchModel(modelId ?: return@coroutineScope)
-                        .getOrNull() ?: return@coroutineScope
-
-                    val versions = model
-                        .modelVersions.map { m -> m.id }
+                    if (modelDetailsImage.modelVersions != null) {
+                        modelDetailsImage
+                            .modelVersions
+                            .toList()
+                    } else {
+                        network
+                            .fetchModel(modelDetailsImage.modelId)
+                            .getOrNull()
+                            ?.modelVersions
+                            ?.map { m -> m.id }
+                            ?: return@coroutineScope emptyList()
+                    }
                         .map { version ->
-                            async {
+                            async(dispatcher, start = CoroutineStart.LAZY) {
                                 network.fetchAllImagesByModelVersion(
                                     modelId = version.toString(),
                                     page = 1,
@@ -55,9 +68,13 @@ class CivitAiModelImagesViewModel(
                         }
                         .awaitAll()
                         .filterNotNull()
-
-                    imagesList.addAll(versions.flatten())
+                        .flatten()
                 }
+            }
+            .flowOn(Dispatchers.IO)
+            .onEach {
+                imagesList.clear()
+                imagesList.addAll(it)
             }
             .launchIn(viewModelScope)
     }
@@ -71,9 +88,12 @@ class CivitAiModelImagesViewModel(
                 nsfw = modelImage.nsfwLevel.canNotShow(),
                 imageUrl = modelImage.url,
                 favoriteType = FavoriteType.Image,
-                modelId = modelId?.toLongOrNull() ?: modelImage.id?.toLongOrNull()
-                ?: Random.nextLong(),
-                hash = modelImage.hash
+                hash = modelImage.hash,
+                modelId = modelDetailsImage
+                    .modelId
+                    .toLongOrNull()
+                    ?: modelImage.id?.toLongOrNull()
+                    ?: Random.nextLong()
             )
         }
     }

@@ -166,11 +166,12 @@ private fun Module.details() {
             id = it.modelId,
             viewModel = koinViewModel { parametersOf(it.modelId) },
             onNavigateToUser = { username -> backStack.add(Screen.User(username)) },
-            onNavigateToDetailImages = { id, name ->
+            onNavigateToDetailImages = { id, name, versions ->
                 backStack.add(
                     Screen.DetailsImage(
                         id.toString(),
-                        name
+                        name,
+                        versions
                     )
                 )
             }
@@ -182,7 +183,7 @@ private fun Module.details() {
     ) {
         CivitAiModelImagesScreen(
             modelName = it.modelName,
-            viewModel = koinViewModel { parametersOf(it.modelId) }
+            viewModel = koinViewModel { parametersOf(it) }
         )
     }
 

@@ -153,7 +153,11 @@ sealed class Screen {
     data class User(val username: String) : NavKey
 
     @Serializable
-    data class DetailsImage(val modelId: String, val modelName: String) : NavKey
+    data class DetailsImage(
+        val modelId: String,
+        val modelName: String,
+        val modelVersions: LongArray? = null,
+    ) : NavKey
 
     @Serializable
     data object QrCode : NavKey

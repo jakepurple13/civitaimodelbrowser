@@ -138,7 +138,7 @@ import kotlin.time.Instant
 fun CivitAiDetailScreen(
     id: String?,
     onNavigateToUser: (String) -> Unit,
-    onNavigateToDetailImages: (Long, String) -> Unit,
+    onNavigateToDetailImages: (Long, String, LongArray) -> Unit,
     viewModel: CivitAiDetailViewModel = koinViewModel(),
 ) {
     val dao = koinInject<FavoritesDao>()
@@ -650,7 +650,7 @@ private fun HorizontalToolbarContent(
     isFavorite: Boolean,
     addToFavorites: () -> Unit,
     removeFromFavorites: () -> Unit,
-    onNavigateToDetailImages: (Long, String) -> Unit,
+    onNavigateToDetailImages: (Long, String, LongArray) -> Unit,
     onShowQrCode: () -> Unit,
     model: DetailViewState.Content,
     toolBarExpanded: Boolean,
@@ -730,8 +730,15 @@ private fun HorizontalToolbarContent(
             )
             clickableItem(
                 onClick = {
-                    id?.toLongOrNull()
-                        ?.let { onNavigateToDetailImages(it, model.models.name) }
+                    id
+                        ?.toLongOrNull()
+                        ?.let {
+                            onNavigateToDetailImages(
+                                it,
+                                model.models.name,
+                                model.models.modelVersions.map { it.id }.toLongArray()
+                            )
+                        }
                 },
                 icon = { Icon(Icons.Default.Image, null) },
                 label = "Images"
@@ -765,7 +772,7 @@ private fun BottomBarContent(
     isFavorite: Boolean,
     removeFromFavorites: () -> Unit,
     addToFavorites: () -> Unit,
-    onNavigateToDetailImages: (Long, String) -> Unit,
+    onNavigateToDetailImages: (Long, String, LongArray) -> Unit,
     onShowQrCode: () -> Unit,
     model: DetailViewState.Content,
     blurKindState: BlurKindState
@@ -840,7 +847,13 @@ private fun BottomBarContent(
                 onClick = dropUnlessResumed {
                     id
                         ?.toLongOrNull()
-                        ?.let { onNavigateToDetailImages(it, model.models.name) }
+                        ?.let {
+                            onNavigateToDetailImages(
+                                it,
+                                model.models.name,
+                                model.models.modelVersions.map { it.id }.toLongArray()
+                            )
+                        }
                 },
                 icon = { Icon(Icons.Default.Image, null) },
                 label = { Text("Images") },

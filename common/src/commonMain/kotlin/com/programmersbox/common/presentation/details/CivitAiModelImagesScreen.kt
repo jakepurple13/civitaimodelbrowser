@@ -201,7 +201,8 @@ fun CivitAiModelImagesScreen(
                                     uriHandler.openUri(models.url)
                                 }
                             },
-                            onLongClick = { showDialog = true }
+                            onLongClick = { showDialog = true },
+                            modifier = Modifier.animateItem()
                         )
                     }
                 }
@@ -220,6 +221,7 @@ private fun ImageCard(
     nsfwBlurStrength: Float,
     onClick: () -> Unit,
     onLongClick: () -> Unit,
+    modifier: Modifier = Modifier
 ) {
     Surface(
         tonalElevation = 4.dp,
@@ -230,7 +232,14 @@ private fun ImageCard(
             images.height > 2000 || images.width > 2000 -> MaterialTheme.colorScheme.secondary
             else -> null
         }?.let { BorderStroke(1.dp, it) },
-        modifier = Modifier
+        modifier = modifier
+            /*.aspectRatio(
+                if (images.width > 0 && images.height > 0) {
+                    images.width.toFloat() / images.height.toFloat()
+                } else {
+                    1f
+                }
+            )*/
             .size(
                 width = ComposableUtils.IMAGE_WIDTH,
                 height = ComposableUtils.IMAGE_HEIGHT

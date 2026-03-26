@@ -8,6 +8,10 @@ import com.ms.square.debugoverlay.model.NetworkRequest
 import com.programmersbox.common.KtorPluginProvider
 import io.ktor.client.HttpClientConfig
 import io.ktor.client.plugins.api.createClientPlugin
+import io.ktor.client.plugins.logging.ANDROID
+import io.ktor.client.plugins.logging.LogLevel
+import io.ktor.client.plugins.logging.Logger
+import io.ktor.client.plugins.logging.Logging
 import io.ktor.client.statement.HttpResponse
 import io.ktor.client.statement.bodyAsText
 import io.ktor.client.statement.request
@@ -18,6 +22,7 @@ import io.ktor.util.AttributeKey
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.update
+import org.koin.core.qualifier.named
 import org.koin.dsl.module
 import java.net.HttpURLConnection.HTTP_BAD_GATEWAY
 import java.net.HttpURLConnection.HTTP_BAD_REQUEST
@@ -55,6 +60,16 @@ private const val HTTP_CLIENT_ERROR_START = 400
 
 val debugModule = module {
     single<KtorPluginProvider> { KtorDebugOverlayPlugin() }
+    single<KtorPluginProvider>(named("logging")) { KtorInstallLoggingPlugin() }
+}
+
+class KtorInstallLoggingPlugin : KtorPluginProvider {
+    override fun install(config: HttpClientConfig<*>) {
+        config.install(Logging) {
+            logger = Logger.ANDROID
+            level = LogLevel.ALL
+        }
+    }
 }
 
 @OptIn(InternalDebugOverlayApi::class)

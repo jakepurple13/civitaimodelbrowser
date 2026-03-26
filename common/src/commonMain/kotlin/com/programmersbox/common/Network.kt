@@ -9,9 +9,9 @@ import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.client.plugins.defaultRequest
 import io.ktor.client.request.bearerAuth
 import io.ktor.client.request.get
+import io.ktor.client.request.parameter
 import io.ktor.http.ContentType
 import io.ktor.http.contentType
-import io.ktor.http.encodeURLQueryComponent
 import io.ktor.serialization.kotlinx.json.json
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -49,7 +49,10 @@ class Network(
 
     val client: HttpClient by lazy {
         HttpClient {
-            plugins.forEach { it.install(this) }
+            plugins.forEach {
+                println("Loading in plugin: ${it::class.simpleName}")
+                it.install(this)
+            }
             install(ContentNegotiation) { json(json) }
             install(HttpTimeout) {
                 requestTimeoutMillis = 10000
@@ -79,8 +82,12 @@ class Network(
         includeNsfw: Boolean = true,
         sort: CivitSort = CivitSort.Newest,
     ) = runCatching {
-        client.get("models?page=$page&sort=${sort.value}&limit=$perPage&nsfw=$includeNsfw")
-            .body<CivitAi>()
+        client.get("models") {
+            parameter("page", page)
+            parameter("sort", sort.value)
+            parameter("limit", perPage)
+            parameter("nsfw", includeNsfw)
+        }.body<CivitAi>()
     }
 
     suspend fun getModels(
@@ -89,8 +96,12 @@ class Network(
         perPage: Int = PAGE_LIMIT,
         includeNsfw: Boolean = true,
     ) = runCatching {
-        client.get("models?page=$page&sort=Newest&limit=$perPage&nsfw=$includeNsfw&username=$creatorUsername")
-            .body<CivitAi>()
+        client.get("models") {
+            parameter("page", page)
+            parameter("creatorUsername", creatorUsername)
+            parameter("limit", perPage)
+            parameter("nsfw", includeNsfw)
+        }.body<CivitAi>()
     }
 
     suspend fun searchModels(
@@ -99,8 +110,11 @@ class Network(
         perPage: Int = PAGE_LIMIT,
         includeNsfw: Boolean = true,
     ) = runCatching {
-        client.get("models?&sort=Newest&limit=$perPage&nsfw=$includeNsfw&query=$searchQuery".encodeURLQueryComponent())
-            .body<CivitAi>()
+        client.get("models?&sort=Newest") {
+            parameter("query", searchQuery)
+            parameter("limit", perPage)
+            parameter("nsfw", includeNsfw)
+        }.body<CivitAi>()
     }
 
     suspend fun fetchModel(id: String) = runCatching {
@@ -113,16 +127,22 @@ class Network(
         page: Int,
         perPage: Int = PAGE_LIMIT,
         includeNsfw: Boolean = true,
-
-        ) = runCatching {
-        client.get("images?limit=$perPage&page=$page&modelId=$modelId${if (!includeNsfw) "&nsfw=None" else ""}")
-            .body<CivitAiCustomImages>()
+    ) = runCatching {
+        client.get("images") {
+            parameter("limit", perPage)
+            parameter("page", page)
+            parameter("modelId", modelId)
+            parameter("sort", "Newest")
+            if (!includeNsfw) parameter("nsfw", "None")
+        }.body<CivitAiCustomImages>()
     }
 
     suspend fun fetchAllImages(
         includeNsfw: Boolean = true,
     ) = runCatching {
-        client.get("images?nsfw=$includeNsfw&sort=Newest")
-            .body<CivitAiCustomImages>()
+        client.get("images") {
+            parameter("nsfw", if (includeNsfw) includeNsfw else "None")
+            parameter("sort", "Newest")
+        }.body<CivitAiCustomImages>()
     }
 }

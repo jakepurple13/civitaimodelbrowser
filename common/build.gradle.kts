@@ -62,6 +62,7 @@ kotlin {
             api(libs.material3)
             api(compose.components.resources)
             api(libs.ktor.core)
+            api(libs.ktor.logging)
             api(libs.ktor.content.negotiation)
             api(libs.ktor.serialization)
             api(libs.datastore.core)

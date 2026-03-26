@@ -60,6 +60,7 @@ import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.ColorMatrix
 import androidx.compose.ui.unit.dp
 import chaintech.videoplayer.host.MediaPlayerHost
+import chaintech.videoplayer.model.ScreenResize
 import chaintech.videoplayer.model.VideoPlayerConfig
 import chaintech.videoplayer.ui.video.VideoPlayerComposable
 import com.programmersbox.common.DownloadHandler
@@ -323,7 +324,6 @@ private fun VideoSheetContent(
     moreInfo: @Composable () -> Unit = {},
 ) {
     val downloadHandler = koinInject<DownloadHandler>()
-    val scope = rememberCoroutineScope()
     val actions = LocalActions.current
     SelectionContainer(
         modifier = Modifier.navigationBarsPadding()
@@ -440,25 +440,22 @@ private fun VideoSheetContent(
             },
             containerColor = BottomSheetDefaults.ContainerColor
         ) { padding ->
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(padding)
-            ) {
-                val playerHost = remember {
-                    MediaPlayerHost(
-                        mediaUrl = video
-                    )
-                }
-
-                VideoPlayerComposable(
-                    playerHost = playerHost,
-                    playerConfig = VideoPlayerConfig(
-                        isGestureVolumeControlEnabled = false
-                    ),
-                    modifier = Modifier.fillMaxSize(),
+            val playerHost = remember {
+                MediaPlayerHost(
+                    mediaUrl = video,
+                    initialVideoFitMode = ScreenResize.FIT
                 )
             }
+
+            VideoPlayerComposable(
+                playerHost = playerHost,
+                playerConfig = VideoPlayerConfig(
+                    isGestureVolumeControlEnabled = false
+                ),
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(padding),
+            )
         }
     }
 }

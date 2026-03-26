@@ -17,6 +17,6 @@ internal object BiometricAuthenticatorFactory {
 
 internal class FallbackBiometricAuthenticator : PlatformBiometricAuthenticator {
     override fun authenticateBlocking(title: String, subtitle: String): BiometricResult =
-        BiometricResult.Success
+        BiometricResult.Error("Unsupported OS: ${System.getProperty("os.name")}")
 }
 

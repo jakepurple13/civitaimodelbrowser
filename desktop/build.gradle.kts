@@ -86,6 +86,12 @@ compose.desktop {
             macOS {
                 iconFile.set(project.file("src/jvmMain/resources/files/civitmaclogo.icns"))
                 dockName = "CivitAi Model Browser"
+                infoPlist {
+                    extraKeysRawXml = """
+                        <key>NSFaceIDUsageDescription</key>
+                        <string>Authenticate to view protected content</string>
+                    """
+                }
             }
             windows {
                 iconFile.set(iconFile("ico"))

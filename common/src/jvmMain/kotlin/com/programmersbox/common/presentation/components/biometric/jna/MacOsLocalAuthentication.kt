@@ -28,9 +28,9 @@ internal interface ObjCRuntime : Library {
             Native.load("objc", ObjCRuntime::class.java)
         }
 
-        /** Address of _NSConcreteGlobalBlock — used as the `isa` field in block structs. */
-        val nsConcreteGlobalBlock: Pointer by lazy {
-            NativeLibrary.getInstance("objc").getGlobalVariableAddress("_NSConcreteGlobalBlock")
+        /** Address of _NSConcreteMallocBlock — used as the `isa` field for heap-allocated block structs. */
+        val nsConcreteMallocBlock: Pointer by lazy {
+            NativeLibrary.getInstance("objc").getGlobalVariableAddress("_NSConcreteMallocBlock")
         }
 
         // LAContext policy constants

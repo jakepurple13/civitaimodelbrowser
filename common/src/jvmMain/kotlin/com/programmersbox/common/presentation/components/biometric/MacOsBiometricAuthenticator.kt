@@ -71,7 +71,7 @@ internal class MacOsBiometricAuthenticator : PlatformBiometricAuthenticator {
         descriptor.setLong(8, 32L)  // size of block struct
 
         val block = Memory(32L)
-        block.setPointer(0, ObjCRuntime.nsConcreteGlobalBlock) // isa
+        block.setPointer(0, ObjCRuntime.nsConcreteMallocBlock) // isa
         block.setInt(8, 0)                                      // flags
         block.setInt(12, 0)                                     // reserved
         block.setPointer(16, fnPtr)                             // invoke
@@ -86,7 +86,7 @@ internal class MacOsBiometricAuthenticator : PlatformBiometricAuthenticator {
             block
         )
 
-        latch.await(30, TimeUnit.SECONDS)
+        val completed = latch.await(30, TimeUnit.SECONDS)
 
         // Keep JNA-managed objects alive until after await to prevent premature GC.
         // Reference.reachabilityFence (Java 9+) is the correct idiom for this.
@@ -94,6 +94,7 @@ internal class MacOsBiometricAuthenticator : PlatformBiometricAuthenticator {
         java.lang.ref.Reference.reachabilityFence(block)
         java.lang.ref.Reference.reachabilityFence(descriptor)
 
+        if (!completed) return BiometricResult.Error("Authentication timed out")
         return result
     }
 }

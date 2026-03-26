@@ -205,6 +205,10 @@ dependencies {
     add("kspIosArm64", libs.androidx.room.compiler)
 }
 
+koinCompiler {
+    compileSafety = false
+}
+
 compose.resources {
     publicResClass = true
     packageOfResClass = "com.programmersbox.resources"

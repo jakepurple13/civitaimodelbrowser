@@ -1,0 +1,37 @@
+package com.programmersbox.common.presentation.components.biometric
+
+internal object BiometricAuthenticatorFactory {
+
+    fun create(): PlatformBiometricAuthenticator = createForOs(System.getProperty("os.name"))
+
+    internal fun createForOs(osName: String): PlatformBiometricAuthenticator {
+        val os = osName.lowercase()
+        return when {
+            os.contains("mac") || os.contains("darwin") -> MacOsBiometricAuthenticator()
+            os.contains("win") -> WindowsBiometricAuthenticator()
+            os.contains("nux") || os.contains("nix") || os.contains("aix") -> LinuxBiometricAuthenticator()
+            else -> FallbackBiometricAuthenticator()
+        }
+    }
+}
+
+internal class FallbackBiometricAuthenticator : PlatformBiometricAuthenticator {
+    override fun authenticateBlocking(title: String, subtitle: String): BiometricResult =
+        BiometricResult.Success
+}
+
+// Stub declarations — replaced in Tasks 5, 7, 9
+internal class MacOsBiometricAuthenticator : PlatformBiometricAuthenticator {
+    override fun authenticateBlocking(title: String, subtitle: String): BiometricResult =
+        BiometricResult.Success
+}
+
+internal class WindowsBiometricAuthenticator : PlatformBiometricAuthenticator {
+    override fun authenticateBlocking(title: String, subtitle: String): BiometricResult =
+        BiometricResult.Success
+}
+
+internal class LinuxBiometricAuthenticator : PlatformBiometricAuthenticator {
+    override fun authenticateBlocking(title: String, subtitle: String): BiometricResult =
+        BiometricResult.Success
+}

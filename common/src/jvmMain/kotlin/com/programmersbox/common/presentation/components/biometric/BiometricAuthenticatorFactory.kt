@@ -20,12 +20,6 @@ internal class FallbackBiometricAuthenticator : PlatformBiometricAuthenticator {
         BiometricResult.Success
 }
 
-// Stub declarations — replaced in Tasks 5, 7, 9
-internal class MacOsBiometricAuthenticator : PlatformBiometricAuthenticator {
-    override fun authenticateBlocking(title: String, subtitle: String): BiometricResult =
-        BiometricResult.Success
-}
-
 internal class WindowsBiometricAuthenticator : PlatformBiometricAuthenticator {
     override fun authenticateBlocking(title: String, subtitle: String): BiometricResult =
         BiometricResult.Success

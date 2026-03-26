@@ -130,6 +130,11 @@ kotlin {
             implementation(kotlin("test"))
         }
 
+        jvmTest.dependencies {
+            implementation(kotlin("test"))
+            implementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.10.2")
+        }
+
         androidMain.dependencies {
             api(libs.androidx.appcompat)
             api(libs.androidx.core)

@@ -172,7 +172,6 @@ kotlin {
             implementation(libs.camerak)
             implementation(libs.kashif.mehmood.km.qr.scanner.plugin)
             implementation(libs.jna)
-            implementation(libs.jna.platform)
         }
 
         iosMain.dependencies {

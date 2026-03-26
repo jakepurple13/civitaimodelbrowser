@@ -130,6 +130,11 @@ kotlin {
             implementation(kotlin("test"))
         }
 
+        jvmTest.dependencies {
+            implementation(kotlin("test"))
+            implementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.10.2")
+        }
+
         androidMain.dependencies {
             api(libs.androidx.appcompat)
             api(libs.androidx.core)
@@ -166,6 +171,7 @@ kotlin {
 
             implementation(libs.camerak)
             implementation(libs.kashif.mehmood.km.qr.scanner.plugin)
+            implementation(libs.jna)
         }
 
         iosMain.dependencies {
@@ -201,6 +207,10 @@ dependencies {
     add("kspJvm", libs.androidx.room.compiler)
     add("kspIosSimulatorArm64", libs.androidx.room.compiler)
     add("kspIosArm64", libs.androidx.room.compiler)
+}
+
+koinCompiler {
+    compileSafety = false
 }
 
 compose.resources {

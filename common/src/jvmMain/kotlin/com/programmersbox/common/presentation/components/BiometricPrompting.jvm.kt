@@ -1,35 +1,50 @@
 package com.programmersbox.common.presentation.components
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
-import androidx.compose.material3.MaterialExpressiveTheme
-import androidx.compose.material3.MotionScheme
-import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
-import androidx.compose.material3.darkColorScheme
-import androidx.compose.material3.expressiveLightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.awt.ComposePanel
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalWindowInfo
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
-import javax.swing.JFrame
+import com.programmersbox.common.presentation.components.biometric.BiometricAuthenticatorFactory
+import com.programmersbox.common.presentation.components.biometric.BiometricResult
+import com.programmersbox.common.presentation.components.biometric.PlatformBiometricAuthenticator
+import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
-actual class BiometricPrompting(
-    private val useStrongSecurity: Boolean,
-    private val useDeviceCredentials: Boolean,
-    private val onAuthenticationSucceeded: () -> Unit,
-    private val onAuthenticationFailed: () -> Unit,
+actual class BiometricPrompting internal constructor(
+    private val useStrongSecurity: Boolean = false,
+    private val useDeviceCredentials: Boolean = true,
+    private val onAuthenticationSucceeded: () -> Unit = {},
+    private val onAuthenticationFailed: () -> Unit = {},
+    internal val authenticator: PlatformBiometricAuthenticator = BiometricAuthenticatorFactory.create(),
+    internal val ioDispatcher: CoroutineDispatcher = Dispatchers.IO,
 ) {
+    constructor(
+        useStrongSecurity: Boolean = false,
+        useDeviceCredentials: Boolean = true,
+        onAuthenticationSucceeded: () -> Unit = {},
+        onAuthenticationFailed: () -> Unit = {},
+    ) : this(
+        useStrongSecurity = useStrongSecurity,
+        useDeviceCredentials = useDeviceCredentials,
+        onAuthenticationSucceeded = onAuthenticationSucceeded,
+        onAuthenticationFailed = onAuthenticationFailed,
+        authenticator = BiometricAuthenticatorFactory.create(),
+        ioDispatcher = Dispatchers.IO,
+    )
+
+    private val scope = CoroutineScope(ioDispatcher + SupervisorJob())
+
     actual fun authenticate(
         onAuthenticationSucceeded: () -> Unit,
         onAuthenticationFailed: () -> Unit,
@@ -42,44 +57,24 @@ actual class BiometricPrompting(
             onAuthenticationFailed = onAuthenticationFailed,
             title = title,
             subtitle = subtitle,
-            negativeButtonText = negativeButtonText
+            negativeButtonText = negativeButtonText,
         )
     )
 
-    @OptIn(ExperimentalMaterial3ExpressiveApi::class)
     actual fun authenticate(promptInfo: PromptCallback) {
-        //promptInfo.onAuthenticationSucceeded()
-        val window = JFrame()
-        window.contentPane = ComposePanel().apply {
-            setContent {
-                MaterialExpressiveTheme(
-                    colorScheme = if (isSystemInDarkTheme()) darkColorScheme() else expressiveLightColorScheme(),
-                    motionScheme = MotionScheme.expressive(),
-                ) {
-                    //TODO: Need to set up proper ui
-                    Surface(
-                        modifier = Modifier.fillMaxSize()
-                    ) {
-                        Column {
-                            Text(promptInfo.title)
-                            Button(
-                                onClick = {
-                                    promptInfo.onAuthenticationSucceeded()
-                                    window.isVisible = false
-                                    window.dispose()
-                                }
-                            ) {
-                                Text("Authenticate")
-                            }
-                        }
-                    }
+        scope.launch {
+            val result = authenticator.authenticateBlocking(
+                title = promptInfo.title,
+                subtitle = promptInfo.subtitle,
+            )
+            withContext(Dispatchers.Main) {
+                when (result) {
+                    is BiometricResult.Success -> promptInfo.onAuthenticationSucceeded()
+                    is BiometricResult.Failure -> promptInfo.onAuthenticationFailed()
+                    is BiometricResult.Error -> promptInfo.onAuthenticationFailed()
                 }
             }
         }
-        window.isAlwaysOnTop = true
-        window.setSize(800, 600)
-        window.isVisible = true
-        window.toFront()
     }
 }
 
@@ -88,17 +83,13 @@ actual fun rememberBiometricPrompting(
     title: String,
     onAuthenticationSucceeded: () -> Unit,
     onAuthenticationFailed: () -> Unit,
-): BiometricPrompting {
-    val biometricPrompt = remember {
-        BiometricPrompting(
-            useStrongSecurity = false,
-            useDeviceCredentials = true,
-            onAuthenticationSucceeded = onAuthenticationSucceeded,
-            onAuthenticationFailed = onAuthenticationFailed,
-        )
-    }
-
-    return biometricPrompt
+): BiometricPrompting = remember {
+    BiometricPrompting(
+        useStrongSecurity = false,
+        useDeviceCredentials = true,
+        onAuthenticationSucceeded = onAuthenticationSucceeded,
+        onAuthenticationFailed = onAuthenticationFailed,
+    )
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -114,7 +105,7 @@ actual fun HideScreen(shouldHide: Boolean) {
                     dismissOnBackPress = false,
                     dismissOnClickOutside = false,
                     usePlatformInsets = false,
-                    useSoftwareKeyboardInset = false
+                    useSoftwareKeyboardInset = false,
                 )
             ) {
                 Box(

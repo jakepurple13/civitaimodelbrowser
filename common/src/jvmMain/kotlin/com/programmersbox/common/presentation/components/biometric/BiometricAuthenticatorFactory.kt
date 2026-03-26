@@ -20,7 +20,3 @@ internal class FallbackBiometricAuthenticator : PlatformBiometricAuthenticator {
         BiometricResult.Success
 }
 
-internal class LinuxBiometricAuthenticator : PlatformBiometricAuthenticator {
-    override fun authenticateBlocking(title: String, subtitle: String): BiometricResult =
-        BiometricResult.Success
-}

@@ -12,6 +12,7 @@ plugins {
     alias(libs.plugins.room)
     alias(libs.plugins.aboutLibraries)
     kotlin("native.cocoapods")
+    alias(libs.plugins.koin.compiler)
 }
 
 group = "com.programmersbox"
@@ -91,6 +92,7 @@ kotlin {
             api(project.dependencies.platform(libs.koin.bom))
             api(libs.koin.core)
             api(libs.koin.compose)
+            api(libs.koin.coroutines)
             implementation(libs.koin.viewmodel)
             implementation(libs.koin.nav3)
             api(libs.qrose)

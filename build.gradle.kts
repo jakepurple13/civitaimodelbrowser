@@ -14,4 +14,5 @@ plugins {
     alias(libs.plugins.google.firebase.crashlytics) apply false
     alias(libs.plugins.google.firebase.performance) apply false
     alias(libs.plugins.hotswan.compiler) apply false
+    alias(libs.plugins.koin.compiler) apply false
 }

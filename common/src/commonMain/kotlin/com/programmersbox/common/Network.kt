@@ -110,7 +110,7 @@ class Network(
         perPage: Int = PAGE_LIMIT,
         includeNsfw: Boolean = true,
     ) = runCatching {
-        client.get("models?&sort=Newest") {
+        client.get("models") {
             parameter("query", searchQuery)
             parameter("limit", perPage)
             parameter("nsfw", includeNsfw)

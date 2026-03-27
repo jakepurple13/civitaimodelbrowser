@@ -16,15 +16,17 @@ import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
-import androidx.compose.foundation.lazy.grid.GridItemSpan
-import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
-import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.foundation.lazy.staggeredgrid.LazyVerticalStaggeredGrid
+import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridCells
+import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridItemSpan
+import androidx.compose.foundation.lazy.staggeredgrid.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.PlaylistAdd
@@ -97,12 +99,10 @@ import androidx.compose.ui.zIndex
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.compose.dropUnlessResumed
 import com.programmersbox.common.BackButton
-import com.programmersbox.common.ComposableUtils
 import com.programmersbox.common.ContextMenu
 import com.programmersbox.common.DataStore
 import com.programmersbox.common.ModelImage
 import com.programmersbox.common.ModelVersion
-import com.programmersbox.common.adaptiveGridCell
 import com.programmersbox.common.db.BlacklistedItemRoom
 import com.programmersbox.common.db.FavoriteType
 import com.programmersbox.common.db.FavoritesDao
@@ -341,17 +341,17 @@ fun CivitAiDetailScreen(
                     onCollapse = { toolBarExpanded = false }
                 )
             ) { paddingValues ->
-                LazyVerticalGrid(
-                    columns = adaptiveGridCell(),
+                LazyVerticalStaggeredGrid(
+                    columns = StaggeredGridCells.Fixed(2),
                     contentPadding = paddingValues,
-                    verticalArrangement = Arrangement.spacedBy(12.dp),
-                    horizontalArrangement = Arrangement.spacedBy(12.dp),
+                    verticalItemSpacing = 4.dp,
+                    horizontalArrangement = Arrangement.spacedBy(4.dp),
                     modifier = Modifier
                         .setBlurKindSource(blurKindState)
                         .fillMaxSize()
                 ) {
                     item(
-                        span = { GridItemSpan(maxLineSpan) },
+                        span = StaggeredGridItemSpan.FullLine,
                         contentType = "title"
                     ) {
                         Surface(
@@ -368,7 +368,7 @@ fun CivitAiDetailScreen(
 
                     if (model.models.tags.isNotEmpty()) {
                         item(
-                            span = { GridItemSpan(maxLineSpan) },
+                            span = StaggeredGridItemSpan.FullLine,
                             contentType = "tags"
                         ) {
                             TagList(model)
@@ -376,7 +376,7 @@ fun CivitAiDetailScreen(
                     }
 
                     item(
-                        span = { GridItemSpan(maxLineSpan) },
+                        span = StaggeredGridItemSpan.FullLine,
                         contentType = "description"
                     ) {
                         Description(model)
@@ -384,7 +384,7 @@ fun CivitAiDetailScreen(
 
                     model.models.modelVersions.forEach { version ->
                         item(
-                            span = { GridItemSpan(maxLineSpan) },
+                            span = StaggeredGridItemSpan.FullLine,
                             contentType = "version"
                         ) {
                             Version(
@@ -537,9 +537,13 @@ private fun ImageCard(
             else -> null
         },
         modifier = modifier
-            .size(
-                width = ComposableUtils.IMAGE_WIDTH,
-                height = ComposableUtils.IMAGE_HEIGHT
+            .fillMaxWidth()
+            .aspectRatio(
+                if (images.width > 0 && images.height > 0) {
+                    images.width.toFloat() / images.height.toFloat()
+                } else {
+                    1f
+                }
             )
             .clip(MaterialTheme.shapes.medium)
             .combinedClickable(

@@ -49,7 +49,8 @@ fun rememberBlurKindState(
     return remember(
         blurKind,
         showBlur,
-        blurKindLiquidState
+        blurKindLiquidState,
+        blurKindHazeState
     ) {
         BlurKindState(
             blurKind = blurKind,

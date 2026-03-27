@@ -10,23 +10,21 @@ import dev.chrisbanes.haze.HazeStyle
 import dev.chrisbanes.haze.rememberHazeState
 import org.koin.compose.koinInject
 
-
 @Composable
 fun rememberBlurKindHazeState(
     showBlur: Boolean,
     dataStore: DataStore = koinInject(),
 ): BlurKindHazeState {
     val useProgressive by dataStore.rememberUseProgressive()
-
     val blurType by dataStore.rememberBlurType()
-
-    val hazeState = rememberHazeState(showBlur)
     val hazeStyle = blurType.toHazeStyle()
+    val hazeState = rememberHazeState(showBlur)
 
     return remember(
         hazeState,
         hazeStyle,
         showBlur,
+        useProgressive
     ) {
         BlurKindHazeState(
             hazeState = hazeState,

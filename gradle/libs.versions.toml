@@ -54,7 +54,7 @@ filekit = "0.13.0"
 qrose = "1.1.2"
 scanner = "0.7.1"
 javase = "3.5.4"
-jna = "5.15.0"
+jna = "5.18.1"
 coreVersion = "3.5.4"
 barcodeScanning = "17.3.0"
 

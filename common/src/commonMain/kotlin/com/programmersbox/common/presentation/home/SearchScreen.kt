@@ -37,6 +37,7 @@ import androidx.compose.material3.ListItem
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SearchBarDefaults
 import androidx.compose.material3.SearchBarValue
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.rememberSearchBarState
@@ -272,14 +273,18 @@ private fun SearchAppBar(
         )
     }
 
-    AppBarWithSearch(
-        state = searchBarState,
-        inputField = inputField,
-        navigationIcon = { BackButton() },
-        actions = { Text("(${animateIntAsState(searchCount).value})") },
-        colors = appBarWithSearchColors,
+    Surface(
+        color = if (showBlur) Color.Transparent else MaterialTheme.colorScheme.surface,
         modifier = modifier
-    )
+    ) {
+        AppBarWithSearch(
+            state = searchBarState,
+            inputField = inputField,
+            navigationIcon = { BackButton() },
+            actions = { Text("(${animateIntAsState(searchCount).value})") },
+            colors = appBarWithSearchColors,
+        )
+    }
 
     ExpandedFullScreenSearchBar(
         state = searchBarState,

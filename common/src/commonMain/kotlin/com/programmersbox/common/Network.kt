@@ -98,7 +98,7 @@ class Network(
     ) = runCatching {
         client.get("models") {
             parameter("page", page)
-            parameter("creatorUsername", creatorUsername)
+            parameter("username", creatorUsername)
             parameter("limit", perPage)
             parameter("nsfw", includeNsfw)
         }.body<CivitAi>()

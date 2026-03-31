@@ -75,6 +75,7 @@ import com.programmersbox.common.db.FavoriteRoom
 import com.programmersbox.common.db.FavoriteType
 import com.programmersbox.common.db.FavoritesDao
 import com.programmersbox.common.db.ListRepository
+import com.programmersbox.common.db.NotesDao
 import com.programmersbox.common.db.SearchHistoryDao
 import com.programmersbox.resources.Res
 import com.programmersbox.resources.blacklisted
@@ -108,6 +109,7 @@ fun StatsScreen() {
     val favoritesDao = koinInject<FavoritesDao>()
     val listRepository = koinInject<ListRepository>()
     val searchHistoryDao = koinInject<SearchHistoryDao>()
+    val notesDao = koinInject<NotesDao>()
 
     val favoritesCount by favoritesDao
         .getTypeCounts()
@@ -123,6 +125,13 @@ fun StatsScreen() {
     val listCount by animateIntAsState(
         listRepository
             .getAllListsCount()
+            .collectAsStateWithLifecycle(0)
+            .value
+    )
+
+    val notesCount by animateIntAsState(
+        notesDao
+            .getNotesCount()
             .collectAsStateWithLifecycle(0)
             .value
     )
@@ -172,6 +181,7 @@ fun StatsScreen() {
                     blacklistedCount = blacklistedCount,
                     listCount = listCount,
                     searchCount = searchCount,
+                    notesCount = notesCount,
                     modifier = Modifier.animateItem()
                 )
             }
@@ -547,6 +557,7 @@ private fun GlobalStats(
     blacklistedCount: Int,
     listCount: Int,
     searchCount: Int,
+    notesCount: Int,
     modifier: Modifier = Modifier,
 ) {
     Column(
@@ -587,6 +598,12 @@ private fun GlobalStats(
                 title = stringResource(Res.string.searches),
                 value = searchCount,
                 color = MaterialTheme.colorScheme.surfaceContainerHighest,
+                modifier = Modifier.weight(1f)
+            )
+            GlobalStatItem(
+                title = "Notes",
+                value = notesCount,
+                color = MaterialTheme.colorScheme.surfaceContainerLowest,
                 modifier = Modifier.weight(1f)
             )
         }

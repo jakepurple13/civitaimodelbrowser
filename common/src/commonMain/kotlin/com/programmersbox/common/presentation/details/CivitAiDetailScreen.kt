@@ -1,6 +1,8 @@
 package com.programmersbox.common.presentation.details
 
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.SharedTransitionLayout
+import androidx.compose.animation.SharedTransitionScope
 import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.BorderStroke
@@ -14,37 +16,52 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
+import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.lazy.staggeredgrid.LazyVerticalStaggeredGrid
 import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridCells
 import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridItemSpan
 import androidx.compose.foundation.lazy.staggeredgrid.items
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.text.input.TextFieldState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.PlaylistAdd
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.filled.ArrowUpward
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.ContentCopy
+import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Error
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material.icons.filled.Image
 import androidx.compose.material.icons.filled.OpenInBrowser
 import androidx.compose.material.icons.filled.PlayArrow
+import androidx.compose.material.icons.filled.Save
 import androidx.compose.material.icons.filled.Share
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.AppBarRow
 import androidx.compose.material3.AssistChipDefaults
 import androidx.compose.material3.BottomAppBar
 import androidx.compose.material3.BottomAppBarDefaults
+import androidx.compose.material3.Button
+import androidx.compose.material3.Card
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.CircularWavyProgressIndicator
 import androidx.compose.material3.ElevatedAssistChip
@@ -66,15 +83,19 @@ import androidx.compose.material3.ListItemDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.NavigationBarItem
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SuggestionChip
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -91,6 +112,7 @@ import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -107,6 +129,7 @@ import com.programmersbox.common.db.BlacklistedItemRoom
 import com.programmersbox.common.db.FavoriteType
 import com.programmersbox.common.db.FavoritesDao
 import com.programmersbox.common.db.ListRepository
+import com.programmersbox.common.db.Notes
 import com.programmersbox.common.presentation.components.DiagonalWipeIcon
 import com.programmersbox.common.presentation.components.ImageSheet
 import com.programmersbox.common.presentation.components.ListChoiceScreen
@@ -380,6 +403,18 @@ fun CivitAiDetailScreen(
                         contentType = "description"
                     ) {
                         Description(model)
+                    }
+
+                    item(
+                        span = StaggeredGridItemSpan.FullLine,
+                        contentType = "notes"
+                    ) {
+                        NotesRow(
+                            notes = viewModel.notesList,
+                            onAddNote = viewModel::addNote,
+                            onNoteUpdate = viewModel::updateNote,
+                            onDeleteNote = viewModel::deleteNote
+                        )
                     }
 
                     model.models.modelVersions.forEach { version ->
@@ -1220,5 +1255,254 @@ fun DetailFloatingActionButton(
                 )
             }
         }
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun NotesRow(
+    notes: List<Notes>,
+    onAddNote: (String) -> Unit,
+    onNoteUpdate: (Notes, String) -> Unit,
+    onDeleteNote: (Notes) -> Unit
+) {
+    var showNote by remember { mutableStateOf<Notes?>(null) }
+    val scope = rememberCoroutineScope()
+
+    val lazyState = rememberLazyListState()
+
+    LaunchedEffect(notes) {
+        lazyState.animateScrollToItem(0)
+    }
+
+    showNote?.let {
+        val textState = remember(it) { TextFieldState(it.note) }
+        val state = rememberModalBottomSheetState(true)
+        ModalBottomSheet(
+            onDismissRequest = { showNote = null },
+            sheetGesturesEnabled = false,
+            sheetState = state,
+            containerColor = MaterialTheme.colorScheme.surface,
+        ) {
+            var showDeleteDialog by remember { mutableStateOf(false) }
+
+            if (showDeleteDialog) {
+                AlertDialog(
+                    onDismissRequest = { showDeleteDialog = false },
+                    confirmButton = {
+                        TextButton(
+                            onClick = {
+                                scope.launch { state.hide() }
+                                    .invokeOnCompletion { _ ->
+                                        onDeleteNote(it)
+                                        showDeleteDialog = false
+                                    }
+                            }
+                        ) { Text("Delete") }
+                    },
+                    dismissButton = {
+                        TextButton(
+                            onClick = { showDeleteDialog = false }
+                        ) { Text("Cancel") }
+                    },
+                    title = { Text("Delete note") },
+                    text = { Text("Are you sure you want to delete this note?") }
+                )
+            }
+
+            Scaffold(
+                topBar = {
+                    TopAppBar(
+                        title = { Text("Edit Note") },
+                        navigationIcon = {
+                            IconButton(
+                                onClick = { showNote = null }
+                            ) { Icon(Icons.Default.Close, null) }
+                        },
+                        actions = {
+                            IconButton(
+                                onClick = { showDeleteDialog = true }
+                            ) { Icon(Icons.Default.Delete, null) }
+                        }
+                    )
+                },
+                floatingActionButton = {
+                    FloatingActionButton(
+                        onClick = {
+                            onNoteUpdate(it, textState.text.toString())
+                            scope.launch { state.hide() }
+                                .invokeOnCompletion { showNote = null }
+                        },
+                    ) { Icon(Icons.Default.Save, null) }
+                }
+            ) { padding ->
+                OutlinedTextField(
+                    state = textState,
+                    label = { Text("Note") },
+                    modifier = Modifier
+                        .padding(padding)
+                        .fillMaxSize()
+                )
+            }
+        }
+    }
+
+    var addNote by remember { mutableStateOf(false) }
+
+    if (addNote) {
+        val textState = remember { TextFieldState() }
+        val state = rememberModalBottomSheetState(true)
+        ModalBottomSheet(
+            onDismissRequest = { addNote = false },
+            sheetGesturesEnabled = false,
+            sheetState = state,
+            containerColor = MaterialTheme.colorScheme.surface,
+        ) {
+            Scaffold(
+                topBar = {
+                    TopAppBar(
+                        title = { Text("Add Note") },
+                        navigationIcon = {
+                            IconButton(
+                                onClick = { addNote = false }
+                            ) { Icon(Icons.Default.Close, null) }
+                        },
+                    )
+                },
+                floatingActionButton = {
+                    FloatingActionButton(
+                        onClick = {
+                            onAddNote(textState.text.toString())
+                            scope.launch { state.hide() }
+                                .invokeOnCompletion { addNote = false }
+                        },
+                    ) { Icon(Icons.Default.Save, null) }
+                }
+            ) { padding ->
+                OutlinedTextField(
+                    state = textState,
+                    label = { Text("New Note") },
+                    modifier = Modifier
+                        .padding(padding)
+                        .fillMaxSize()
+                )
+            }
+        }
+    }
+
+    var showAllNotes by remember { mutableStateOf(false) }
+    val allNotesState = rememberModalBottomSheetState(true)
+
+    if (showAllNotes) {
+        ModalBottomSheet(
+            onDismissRequest = { showAllNotes = false },
+            sheetState = allNotesState,
+            containerColor = MaterialTheme.colorScheme.surface,
+        ) {
+            LazyVerticalGrid(
+                columns = GridCells.Fixed(2),
+                contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
+                verticalArrangement = Arrangement.spacedBy(4.dp),
+                horizontalArrangement = Arrangement.spacedBy(4.dp),
+                modifier = Modifier.fillMaxSize()
+            ) {
+                items(notes) { note ->
+                    NoteItem(
+                        note = note,
+                        onClick = { showNote = note },
+                    )
+                }
+            }
+        }
+    }
+
+    Surface(
+        tonalElevation = 1.dp,
+        shape = MaterialTheme.shapes.medium,
+        onClick = { showAllNotes = true }
+    ) {
+        Column(
+            modifier = Modifier.padding(12.dp)
+        ) {
+            Row(
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(bottom = 8.dp),
+            ) {
+                Text(
+                    "Notes",
+                    style = MaterialTheme.typography.labelMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+
+                Text(
+                    "(${notes.size})",
+                    style = MaterialTheme.typography.labelMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+            }
+
+            TextButton(
+                onClick = { showAllNotes = true }
+            ) { Text("View All Notes") }
+
+            LazyRow(
+                horizontalArrangement = Arrangement.spacedBy(4.dp),
+                state = lazyState,
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                items(
+                    notes,
+                    key = { it.uuid },
+                    contentType = { "notes" }
+                ) {
+                    NoteItem(
+                        note = it,
+                        onClick = { showNote = it },
+                        modifier = Modifier.animateItem()
+                    )
+                }
+
+                item(
+                    key = "add-note",
+                    contentType = "add-note"
+                ) {
+                    Card(
+                        onClick = { addNote = true },
+                        modifier = Modifier.size(120.dp)
+                    ) {
+                        Box(
+                            contentAlignment = Alignment.Center,
+                            modifier = Modifier.fillMaxSize(),
+                        ) {
+                            Icon(
+                                Icons.Default.Add,
+                                contentDescription = null,
+                            )
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun NoteItem(
+    note: Notes,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    Card(
+        onClick = onClick,
+        modifier = modifier.size(120.dp)
+    ) {
+        Text(
+            text = note.note,
+            style = MaterialTheme.typography.bodySmall,
+            modifier = Modifier.padding(8.dp)
+        )
     }
 }

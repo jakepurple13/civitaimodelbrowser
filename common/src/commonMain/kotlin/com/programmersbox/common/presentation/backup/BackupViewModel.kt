@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import com.programmersbox.common.analyticsEvent
 import com.programmersbox.common.db.FavoritesDao
 import com.programmersbox.common.db.ListDao
+import com.programmersbox.common.db.NotesDao
 import com.programmersbox.common.db.SearchHistoryDao
 import com.programmersbox.common.di.NavigationHandler
 import com.programmersbox.common.presentation.components.ToastType
@@ -25,6 +26,7 @@ class BackupViewModel(
     favoriteDao: FavoritesDao,
     listDao: ListDao,
     searchHistoryDao: SearchHistoryDao,
+    notesDao: NotesDao,
     private val navigationHandler: NavigationHandler,
     private val toasterState: ToasterState,
 ) : ViewModel() {
@@ -32,6 +34,7 @@ class BackupViewModel(
     val blacklistedCount = favoriteDao.getBlacklistCount()
     val lists = listDao.getAllLists()
     val searchHistoryCount = searchHistoryDao.getSearchCount()
+    val notesCount = notesDao.getNotesCount()
 
     val backupItems: StateFlow<BackupItemsState>
         field = MutableStateFlow(
@@ -40,6 +43,7 @@ class BackupViewModel(
                 includeBlacklisted = true,
                 includeSettings = true,
                 includeSearchHistory = true,
+                includeNotes = true,
                 listsToInclude = persistentListOf()
             )
         )
@@ -99,6 +103,10 @@ class BackupViewModel(
         backupItems.value = backupItems.value.copy(includeSearchHistory = includeSearchHistory)
     }
 
+    fun includeNotes(includeNotes: Boolean) {
+        backupItems.value = backupItems.value.copy(includeNotes = includeNotes)
+    }
+
     fun backup(
         platformFile: PlatformFile,
     ) {
@@ -109,6 +117,7 @@ class BackupViewModel(
                 "includeBlacklisted" to backupItems.value.includeBlacklisted,
                 "includeSettings" to backupItems.value.includeSettings,
                 "includeSearchHistory" to backupItems.value.includeSearchHistory,
+                "includeNotes" to backupItems.value.includeNotes,
                 "listsToInclude" to backupItems.value.listsToInclude.size
             )
         )
@@ -128,6 +137,7 @@ class BackupViewModel(
                     includeBlacklisted = backupItems.value.includeBlacklisted,
                     includeSettings = backupItems.value.includeSettings,
                     includeSearchHistory = backupItems.value.includeSearchHistory,
+                    includeNotes = backupItems.value.includeNotes,
                     listItemsByUuid = backupItems.value.listsToInclude
                 )
             }
@@ -157,6 +167,7 @@ data class BackupItemsState(
     val includeBlacklisted: Boolean,
     val includeSettings: Boolean,
     val includeSearchHistory: Boolean,
+    val includeNotes: Boolean,
     val listsToInclude: ImmutableList<String>,
 )
 

@@ -240,6 +240,7 @@ actual class BackupRestoreHandler(
         includeBlacklisted: Boolean,
         includeSettings: Boolean,
         includeSearchHistory: Boolean,
+        includeNotes: Boolean,
         listItemsByUuid: List<String>
     ) {
         scope.launch {
@@ -250,6 +251,7 @@ actual class BackupRestoreHandler(
                     includeFavorites = includeFavorites,
                     includeBlacklisted = includeBlacklisted,
                     includeSearchHistory = includeSearchHistory,
+                    includeNotes = includeNotes,
                 )
             }
             println("Restored in $duration")

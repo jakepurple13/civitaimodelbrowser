@@ -68,9 +68,12 @@ fun BackupAndRestoreList(
     onIncludeSettings: (Boolean) -> Unit,
     includeSearchHistory: Boolean,
     onIncludeSearchHistory: (Boolean) -> Unit,
+    includeNotes: Boolean,
+    onIncludeNotes: (Boolean) -> Unit,
     searchHistoryCount: Int?,
     favoritesCount: Int?,
     blacklistedCount: Int?,
+    notesCount: Int?,
     settingsExtraContent: @Composable ColumnScope.() -> Unit = {},
 ) {
     LazyColumn(
@@ -118,6 +121,18 @@ fun BackupAndRestoreList(
                     checked = includeSearchHistory,
                     onCheckedChange = onIncludeSearchHistory,
                     searchHistoryCount = it,
+                    modifier = Modifier.padding(horizontal = 8.dp)
+                )
+            }
+        }
+        notesCount?.let {
+            item(
+                contentType = "notes"
+            ) {
+                NotesSwitch(
+                    checked = includeNotes,
+                    notesCount = it,
+                    onCheckedChange = onIncludeNotes,
                     modifier = Modifier.padding(horizontal = 8.dp)
                 )
             }
@@ -253,6 +268,24 @@ private fun SettingsSwitch(
         },
         checked = checked,
         onCheckedChange = onCheckedChange,
+        modifier = modifier
+    )
+}
+
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
+@Composable
+private fun NotesSwitch(
+    notesCount: Int,
+    checked: Boolean,
+    onCheckedChange: (Boolean) -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    ListItem(
+        content = { Text("Notes ($notesCount)") },
+        trailingContent = { Switch(checked = checked, onCheckedChange = null) },
+        supportingContent = { Text("Saved Notes") },
+        onCheckedChange = onCheckedChange,
+        checked = checked,
         modifier = modifier
     )
 }

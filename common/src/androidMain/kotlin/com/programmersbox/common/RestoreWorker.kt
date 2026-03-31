@@ -30,6 +30,7 @@ class RestoreWorker(
         val includeBlacklisted = inputData.getBoolean("includeBlacklisted", false)
         val includeSettings = inputData.getBoolean("includeSettings", false)
         val includeSearchHistory = inputData.getBoolean("includeSearchHistory", false)
+        val includeNotes = inputData.getBoolean("includeNotes", false)
         val listsToInclude = inputData.getStringArray("listsToInclude")?.toList() ?: emptyList()
 
         println("Will restore $includeFavorites $includeBlacklisted $includeSettings $includeSearchHistory")
@@ -45,6 +46,7 @@ class RestoreWorker(
                 includeFavorites = includeFavorites,
                 includeBlacklisted = includeBlacklisted,
                 includeSearchHistory = includeSearchHistory,
+                includeNotes = includeNotes
             )
         }
         println("Restored in $duration")

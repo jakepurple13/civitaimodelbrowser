@@ -14,6 +14,8 @@ import com.programmersbox.common.db.CustomList
 import com.programmersbox.common.db.FavoriteModel
 import com.programmersbox.common.db.FavoritesDao
 import com.programmersbox.common.db.ListDao
+import com.programmersbox.common.db.Notes
+import com.programmersbox.common.db.NotesDao
 import com.programmersbox.common.db.SearchHistoryDao
 import com.programmersbox.common.db.SearchHistoryItem
 import com.programmersbox.common.logToFirebase
@@ -32,6 +34,7 @@ class BackupRepository(
     private val favoritesDao: FavoritesDao,
     private val listDao: ListDao,
     private val searchHistoryDao: SearchHistoryDao,
+    private val notesDao: NotesDao,
     private val dataStore: DataStore,
     private val zipper: Zipper,
     private val backupRestoreHandler: BackupRestoreHandler,
@@ -50,6 +53,7 @@ class BackupRepository(
         includeBlacklisted: Boolean,
         includeSettings: Boolean,
         includeSearchHistory: Boolean,
+        includeNotes: Boolean,
         listItemsByUuid: List<String>,
     ) {
         val itemsToZip = buildMap<String, String> {
@@ -64,6 +68,13 @@ class BackupRepository(
                 put(
                     "blacklisted.json",
                     json.encodeToString(favoritesDao.exportBlacklisted())
+                )
+            }
+
+            if (includeNotes) {
+                put(
+                    "notes.json",
+                    json.encodeToString(notesDao.getAllNotes())
                 )
             }
 
@@ -140,6 +151,7 @@ class BackupRepository(
         includeFavorites: Boolean,
         includeBlacklisted: Boolean,
         includeSearchHistory: Boolean,
+        includeNotes: Boolean,
         listItemsByUuid: List<String>,
     ) {
         backupRestoreHandler.restore(
@@ -149,6 +161,7 @@ class BackupRepository(
             includeBlacklisted = includeBlacklisted,
             includeSettings = includeSettings,
             includeSearchHistory = includeSearchHistory,
+            includeNotes = includeNotes,
             listItemsByUuid = listItemsByUuid,
         )
     }
@@ -159,6 +172,7 @@ class BackupRepository(
         includeFavorites: Boolean,
         includeBlacklisted: Boolean,
         includeSearchHistory: Boolean,
+        includeNotes: Boolean,
     ) {
         coroutineScope {
             performanceTrace("restoreItems") {
@@ -202,6 +216,16 @@ class BackupRepository(
                     val listCount = backupItems.lists?.size ?: 0
                     val itemCount = backupItems.lists?.sumOf { it.list.size } ?: 0
                     logToFirebase("Restored $listCount lists with $itemCount items in $duration")
+                }
+                if (includeNotes) {
+                    launch(Dispatchers.IO) {
+                        val duration = measureTime {
+                            backupItems
+                                .notes
+                                ?.forEach { notesDao.insert(it) }
+                        }
+                        logToFirebase("Restored ${backupItems.notes?.size ?: 0} notes in $duration")
+                    }
                 }
                 if (includeSearchHistory) {
                     launch(Dispatchers.IO) {
@@ -259,6 +283,7 @@ class BackupRepository(
         var lists: List<CustomList>? = null
         var settings: BackupSettings? = null
         var searchHistory: List<SearchHistoryItem>? = null
+        var notes: List<Notes>? = null
         zipper.unzip(
             platformFile,
             onInfo = { fileName, jsonString ->
@@ -269,10 +294,12 @@ class BackupRepository(
                     "settings.json" -> settings = json.decodeFromString<BackupSettings>(jsonString)
                     "search_history.json" -> searchHistory =
                         json.decodeFromString<List<SearchHistoryItem>>(jsonString)
+
+                    "notes.json" -> notes = json.decodeFromString<List<Notes>>(jsonString)
                 }
             }
         )
-        return BackupItems(favorites, blacklisted, lists, settings, searchHistory)
+        return BackupItems(favorites, blacklisted, lists, settings, searchHistory, notes)
     }
 }
 
@@ -282,6 +309,7 @@ data class BackupItems(
     val lists: List<CustomList>?,
     val settings: BackupSettings?,
     val searchHistory: List<SearchHistoryItem>?,
+    val notes: List<Notes>?,
 )
 
 expect class Zipper {
@@ -304,6 +332,7 @@ expect class BackupRestoreHandler {
         includeBlacklisted: Boolean,
         includeSettings: Boolean,
         includeSearchHistory: Boolean,
+        includeNotes: Boolean,
         listItemsByUuid: List<String>,
     )
 }

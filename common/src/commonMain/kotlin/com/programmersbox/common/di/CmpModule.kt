@@ -26,6 +26,7 @@ fun cmpModules() = module {
     single { get<AppDatabase>().getDao() }
     single { get<AppDatabase>().getListDao() }
     single { get<AppDatabase>().getSearchHistoryDao() }
+    single { get<AppDatabase>().getNotesDao() }
     single { ToasterState(CoroutineScope(Dispatchers.Main)) }
 
     singleOf(::KtorVideoThumbnailUrlResolver) bind VideoThumbnailUrlResolver::class

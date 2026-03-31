@@ -78,6 +78,7 @@ fun BackupScreen(
             includeBlacklisted = backupItems.includeBlacklisted,
             includeSettings = backupItems.includeSettings,
             includeSearchHistory = backupItems.includeSearchHistory,
+            includeNotes = backupItems.includeNotes,
             headline = "Include in Backup",
             listDialogTitle = "Select Lists to Backup",
             listsToInclude = backupItems.listsToInclude,
@@ -92,6 +93,7 @@ fun BackupScreen(
             onIncludeBlacklisted = viewModel::includeBlacklisted,
             onIncludeSettings = viewModel::includeSettings,
             onIncludeSearchHistory = viewModel::includeSearchHistory,
+            onIncludeNotes = viewModel::includeNotes,
             searchHistoryCount = viewModel
                 .searchHistoryCount
                 .collectAsStateWithLifecycle(0)
@@ -104,6 +106,10 @@ fun BackupScreen(
                 .blacklistedCount
                 .collectAsStateWithLifecycle(0)
                 .value,
+            notesCount = viewModel
+                .notesCount
+                .collectAsStateWithLifecycle(0)
+                .value
         )
     }
 }

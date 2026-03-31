@@ -34,8 +34,9 @@ import kotlinx.serialization.json.Json
         CustomListItemFts::class,
         CustomListInfoFts::class,
         FavoriteRoomFts::class,
+        Notes::class
     ],
-    version = 17,
+    version = 18,
     autoMigrations = [
         AutoMigration(from = 1, to = 2),
         AutoMigration(from = 2, to = 3),
@@ -49,6 +50,7 @@ import kotlinx.serialization.json.Json
         AutoMigration(from = 10, to = 11),
         AutoMigration(from = 14, to = 15),
         AutoMigration(from = 15, to = 16),
+        AutoMigration(from = 17, to = 18),
     ]
 )
 
@@ -57,6 +59,7 @@ abstract class AppDatabase : RoomDatabase() {
     abstract fun getDao(): FavoritesDao
     abstract fun getListDao(): ListDao
     abstract fun getSearchHistoryDao(): SearchHistoryDao
+    abstract fun getNotesDao(): NotesDao
 }
 
 @Suppress("NO_ACTUAL_FOR_EXPECT", "KotlinNoActualForExpect")

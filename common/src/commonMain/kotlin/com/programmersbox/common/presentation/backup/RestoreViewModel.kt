@@ -25,6 +25,7 @@ class RestoreViewModel(
     var includeBlacklisted by mutableStateOf(true)
     var includeSettings by mutableStateOf(true)
     var includeSearchHistory by mutableStateOf(true)
+    var includeNotes by mutableStateOf(true)
     val listsToInclude = mutableStateListOf<String>()
     private var platformFile: PlatformFile? = null
 
@@ -59,6 +60,7 @@ class RestoreViewModel(
                 "includeBlacklisted" to includeBlacklisted,
                 "includeSettings" to includeSettings,
                 "includeSearchHistory" to includeSearchHistory,
+                "includeNotes" to includeNotes,
                 "listsToInclude" to listsToInclude.size
             )
         )
@@ -72,6 +74,7 @@ class RestoreViewModel(
                 includeSettings = includeSettings,
                 includeSearchHistory = includeSearchHistory,
                 listItemsByUuid = listsToInclude,
+                includeNotes = includeNotes
             )
             delay(1000)
             toasterState.show(

@@ -97,6 +97,7 @@ actual class BackupRestoreHandler(
         includeBlacklisted: Boolean,
         includeSettings: Boolean,
         includeSearchHistory: Boolean,
+        includeNotes: Boolean,
         listItemsByUuid: List<String>
     ) {
         WorkManager
@@ -114,6 +115,7 @@ actual class BackupRestoreHandler(
                             "includeBlacklisted" to includeBlacklisted,
                             "includeSettings" to includeSettings,
                             "includeSearchHistory" to includeSearchHistory,
+                            "includeNotes" to includeNotes,
                             "listsToInclude" to listItemsByUuid.toTypedArray()
                         )
                     )

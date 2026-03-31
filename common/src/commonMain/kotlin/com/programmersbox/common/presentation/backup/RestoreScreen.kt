@@ -111,6 +111,7 @@ fun RestoreScreen(
                 includeBlacklisted = viewModel.includeBlacklisted,
                 includeSettings = viewModel.includeSettings,
                 includeSearchHistory = viewModel.includeSearchHistory,
+                includeNotes = viewModel.includeNotes,
                 headline = "Select items to Restore",
                 listDialogTitle = "Select Lists to Restore",
                 listsToInclude = viewModel.listsToInclude,
@@ -122,9 +123,11 @@ fun RestoreScreen(
                 onIncludeBlacklisted = { viewModel.includeBlacklisted = it },
                 onIncludeSettings = { viewModel.includeSettings = it },
                 onIncludeSearchHistory = { viewModel.includeSearchHistory = it },
+                onIncludeNotes = { viewModel.includeNotes = it },
                 favoritesCount = backupItems.favorites?.size,
                 blacklistedCount = backupItems.blacklisted?.size,
                 searchHistoryCount = backupItems.searchHistory?.size,
+                notesCount = backupItems.notes?.size,
                 settingsExtraContent = {
                     backupItems.settings?.let { settings ->
                         HorizontalDivider()

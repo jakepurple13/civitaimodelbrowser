@@ -2,6 +2,7 @@ package com.programmersbox.common.presentation.details
 
 import androidx.compose.runtime.Stable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -13,24 +14,40 @@ import com.programmersbox.common.Models
 import com.programmersbox.common.Network
 import com.programmersbox.common.db.FavoriteType
 import com.programmersbox.common.db.FavoritesDao
+import com.programmersbox.common.db.Notes
+import com.programmersbox.common.db.NotesDao
 import com.programmersbox.common.db.toDb
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.IO
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 import okio.Path.Companion.toPath
 import kotlin.random.Random
+import kotlin.uuid.ExperimentalUuidApi
+import kotlin.uuid.Uuid
 
 class CivitAiDetailViewModel(
     private val network: Network,
     private val id: String?,
     private val database: FavoritesDao,
+    private val notesDao: NotesDao
 ) : ViewModel() {
     val modelUrl = "${Consts.CIVITAI_MODELS_URL}$id"
     var models by mutableStateOf<DetailViewState>(DetailViewState.Loading)
+    val notesList = mutableStateListOf<Notes>()
     val showMoreInfo = mutableStateMapOf<Long, Boolean>()
 
     init {
         loadData()
+
+        notesDao
+            .getNotes(modelUrl)
+            .onEach {
+                notesList.clear()
+                notesList.addAll(it)
+            }
+            .launchIn(viewModelScope)
     }
 
     fun loadData() {
@@ -94,6 +111,37 @@ class CivitAiDetailViewModel(
                     ?: modelImage.id?.toLongOrNull()
                     ?: Random.nextLong()
             )
+        }
+    }
+
+    @OptIn(ExperimentalUuidApi::class)
+    fun addNote(note: String) {
+        viewModelScope.launch {
+            notesDao.insert(
+                Notes(
+                    modelUrl = modelUrl,
+                    modelId = id ?: return@launch,
+                    note = note,
+                    uuid = Uuid.random().toString()
+                )
+            )
+        }
+    }
+
+    fun updateNote(
+        notes: Notes,
+        note: String
+    ) {
+        viewModelScope.launch {
+            notesDao.insert(
+                notes.copy(note = note)
+            )
+        }
+    }
+
+    fun deleteNote(notes: Notes) {
+        viewModelScope.launch {
+            notesDao.delete(notes)
         }
     }
 

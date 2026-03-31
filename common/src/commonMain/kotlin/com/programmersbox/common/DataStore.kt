@@ -146,7 +146,7 @@ class DataStore private constructor(
     @Composable
     fun rememberDoubleClickBehavior(): MutableState<DoubleClickBehavior> = rememberPreferenceType(
         key = stringPreferencesKey("double_click_behavior"),
-        defaultValue = DoubleClickBehavior.Blacklist,
+        defaultValue = DoubleClickBehavior.DoNothing,
         mapToValue = { json.decodeFromString<DoubleClickBehavior>(it) },
         mapToString = { json.encodeToString(it) }
     )

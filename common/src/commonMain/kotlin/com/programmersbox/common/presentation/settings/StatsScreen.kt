@@ -603,7 +603,7 @@ private fun GlobalStats(
             GlobalStatItem(
                 title = "Notes",
                 value = notesCount,
-                color = MaterialTheme.colorScheme.surfaceContainerLowest,
+                color = MaterialTheme.colorScheme.primary,
                 modifier = Modifier.weight(1f)
             )
         }

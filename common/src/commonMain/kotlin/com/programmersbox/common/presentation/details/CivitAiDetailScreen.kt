@@ -415,7 +415,8 @@ fun CivitAiDetailScreen(
                             notes = viewModel.notesList,
                             onAddNote = viewModel::addNote,
                             onNoteUpdate = viewModel::updateNote,
-                            onDeleteNote = viewModel::deleteNote
+                            onDeleteNote = viewModel::deleteNote,
+                            modelName = model.models.name,
                         )
                     }
 
@@ -1264,6 +1265,7 @@ fun DetailFloatingActionButton(
 @Composable
 private fun NotesRow(
     notes: List<Notes>,
+    modelName: String,
     onAddNote: (String) -> Unit,
     onNoteUpdate: (Notes, String) -> Unit,
     onDeleteNote: (Notes) -> Unit
@@ -1401,18 +1403,34 @@ private fun NotesRow(
             sheetState = allNotesState,
             containerColor = MaterialTheme.colorScheme.surface,
         ) {
-            LazyVerticalGrid(
-                columns = GridCells.Fixed(2),
-                contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
-                verticalArrangement = Arrangement.spacedBy(4.dp),
-                horizontalArrangement = Arrangement.spacedBy(4.dp),
-                modifier = Modifier.fillMaxSize()
-            ) {
-                items(notes) { note ->
-                    NoteItem(
-                        note = note,
-                        onClick = { showNote = note },
+            Scaffold(
+                topBar = {
+                    CenterAlignedTopAppBar(
+                        title = { Text("$modelName Notes") },
+                        actions = {
+                            IconButton(
+                                onClick = {
+                                    scope.launch { allNotesState.hide() }
+                                        .invokeOnCompletion { showAllNotes = false }
+                                }
+                            ) { Icon(Icons.Default.Close, null) }
+                        }
                     )
+                }
+            ) { padding ->
+                LazyVerticalGrid(
+                    columns = GridCells.Fixed(2),
+                    contentPadding = padding,
+                    verticalArrangement = Arrangement.spacedBy(4.dp),
+                    horizontalArrangement = Arrangement.spacedBy(4.dp),
+                    modifier = Modifier.fillMaxSize()
+                ) {
+                    items(notes) { note ->
+                        NoteItem(
+                            note = note,
+                            onClick = { showNote = note },
+                        )
+                    }
                 }
             }
         }

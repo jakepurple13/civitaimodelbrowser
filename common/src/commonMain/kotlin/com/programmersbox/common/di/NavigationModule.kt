@@ -187,9 +187,7 @@ private fun Module.details() {
         )
     }
 
-    navigation<Screen.User>(
-        metadata = SupportingPaneSceneStrategy.extraPane(sceneKey = "detail")
-    ) {
+    navigation<Screen.User> {
         val backStack = koinInject<NavigationHandler>().backStack
         CivitAiUserScreen(
             viewModel = koinViewModel { parametersOf(it.username) },

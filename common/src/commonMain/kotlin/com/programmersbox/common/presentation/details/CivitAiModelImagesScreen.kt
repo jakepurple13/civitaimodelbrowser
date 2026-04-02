@@ -54,6 +54,7 @@ import com.programmersbox.common.BackButton
 import com.programmersbox.common.ContextMenu
 import com.programmersbox.common.CustomModelImage
 import com.programmersbox.common.DataStore
+import com.programmersbox.common.db.FavoriteType
 import com.programmersbox.common.db.FavoritesDao
 import com.programmersbox.common.presentation.components.ImageSheet
 import com.programmersbox.common.presentation.components.LoadingImage
@@ -65,6 +66,7 @@ import com.programmersbox.common.presentation.home.BlacklistHandling
 import dev.chrisbanes.haze.HazeProgressive
 import org.koin.compose.koinInject
 import org.koin.compose.viewmodel.koinViewModel
+import kotlin.random.Random
 
 @OptIn(
     ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class,
@@ -99,6 +101,12 @@ fun CivitAiModelImagesScreen(
             onRemoveFromFavorite = { viewModel.removeImageFromFavorites(sheetModel) },
             onDismiss = { sheetDetails = null },
             nsfwText = sheetModel.nsfwLevel.name,
+            id = sheetModel.postId ?: remember { Random.nextLong() },
+            name = "",
+            type = FavoriteType.Image.name,
+            description = viewModel.modelDetailsImage.modelId,
+            hash = sheetModel.hash,
+            creator = sheetModel.username,
             moreInfo = {
                 sheetModel.meta?.let { meta ->
                     Column(

@@ -29,7 +29,7 @@ import kotlinx.coroutines.launch
 import kotlin.random.Random
 
 class CivitAiModelImagesViewModel(
-    private val modelDetailsImage: Screen.DetailsImage,
+    val modelDetailsImage: Screen.DetailsImage,
     dataStore: DataStore,
     network: Network,
     private val database: FavoritesDao,

@@ -1,8 +1,6 @@
 package com.programmersbox.common.presentation.details
 
 import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.SharedTransitionLayout
-import androidx.compose.animation.SharedTransitionScope
 import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.BorderStroke
@@ -22,7 +20,6 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -60,7 +57,6 @@ import androidx.compose.material3.AppBarRow
 import androidx.compose.material3.AssistChipDefaults
 import androidx.compose.material3.BottomAppBar
 import androidx.compose.material3.BottomAppBarDefaults
-import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.CircularWavyProgressIndicator
@@ -95,7 +91,6 @@ import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -112,7 +107,6 @@ import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -151,6 +145,7 @@ import dev.chrisbanes.haze.HazeProgressive
 import kotlinx.coroutines.launch
 import org.koin.compose.koinInject
 import org.koin.compose.viewmodel.koinViewModel
+import kotlin.random.Random
 import kotlin.time.Instant
 
 @OptIn(
@@ -219,6 +214,13 @@ fun CivitAiDetailScreen(
                     onRemoveFromFavorite = { viewModel.removeImageFromFavorites(sheetModel) },
                     onDismiss = { sheetDetails = null },
                     nsfwText = sheetModel.nsfw.name,
+                    id = sheetModel.id?.toLongOrNull() ?: remember { Random.nextLong() },
+                    name = "",
+                    type = FavoriteType.Image.name,
+                    description = model.models.id.toString(),
+                    hash = sheetModel.hash,
+                    creator = model.models.creator?.username,
+                    creatorImage = model.models.creator?.image,
                     moreInfo = {
                         sheetModel.meta?.let { meta ->
                             Column(
@@ -1419,7 +1421,9 @@ private fun NotesRow(
     Surface(
         tonalElevation = 1.dp,
         shape = MaterialTheme.shapes.medium,
-        onClick = { showAllNotes = true }
+        onClick = { showAllNotes = true },
+        enabled = notes.isNotEmpty(),
+        modifier = Modifier.animateContentSize()
     ) {
         Column(
             modifier = Modifier.padding(12.dp)
@@ -1444,13 +1448,16 @@ private fun NotesRow(
                 )
             }
 
-            TextButton(
-                onClick = { showAllNotes = true }
-            ) { Text("View All Notes") }
+            AnimatedVisibility(notes.isNotEmpty()) {
+                TextButton(
+                    onClick = { showAllNotes = true },
+                ) { Text("View All Notes") }
+            }
 
             LazyRow(
                 horizontalArrangement = Arrangement.spacedBy(4.dp),
                 state = lazyState,
+                userScrollEnabled = notes.isNotEmpty(),
                 modifier = Modifier.fillMaxWidth()
             ) {
                 items(

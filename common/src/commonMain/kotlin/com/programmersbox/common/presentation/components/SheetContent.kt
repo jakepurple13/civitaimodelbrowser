@@ -23,6 +23,8 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.PlaylistAdd
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Download
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.FavoriteBorder
@@ -40,12 +42,14 @@ import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -66,10 +70,13 @@ import chaintech.videoplayer.ui.video.VideoPlayerComposable
 import com.programmersbox.common.DownloadHandler
 import com.programmersbox.common.LocalActions
 import com.programmersbox.common.SheetDetails
+import com.programmersbox.common.db.FavoriteType
+import com.programmersbox.common.db.ListRepository
 import com.programmersbox.common.presentation.details.blurGradient
 import com.programmersbox.common.rememberSROState
 import com.programmersbox.common.scaleRotateOffsetReset
 import com.programmersbox.resources.Res
+import com.programmersbox.resources.add_to_list
 import com.programmersbox.resources.done
 import com.programmersbox.resources.download
 import com.programmersbox.resources.info
@@ -83,6 +90,7 @@ import okio.Path.Companion.toPath
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.koinInject
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ImageSheet(
     url: String,
@@ -92,9 +100,57 @@ fun ImageSheet(
     onRemoveFromFavorite: () -> Unit,
     onDismiss: () -> Unit,
     nsfwText: String,
+    id: Long,
+    name: String,
+    type: String,
+    description: String? = null,
+    hash: String? = null,
+    creator: String? = null,
+    creatorImage: String? = null,
+    showFavorite: Boolean = true,
     actions: @Composable RowScope.() -> Unit = {},
     moreInfo: @Composable () -> Unit = {},
 ) {
+    val scope = rememberCoroutineScope()
+    var showLists by remember { mutableStateOf(false) }
+    val listState = rememberModalBottomSheetState(true)
+
+    if (showLists) {
+        val listRepository = koinInject<ListRepository>()
+        ModalBottomSheet(
+            onDismissRequest = { showLists = false },
+            containerColor = MaterialTheme.colorScheme.surface,
+            sheetState = listState
+        ) {
+            ListChoiceScreen(
+                id = id,
+                onAdd = { selectedLists ->
+                    scope.launch {
+                        listRepository.addToMultipleLists(
+                            selectedLists = selectedLists,
+                            id = id,
+                            name = name,
+                            description = description,
+                            type = type,
+                            nsfw = isNsfw,
+                            imageUrl = url,
+                            favoriteType = FavoriteType.Image,
+                            hash = hash,
+                            creatorName = creator,
+                            creatorImage = creatorImage,
+                        )
+                        listState.hide()
+                    }.invokeOnCompletion { showLists = false }
+                },
+                navigationIcon = {
+                    IconButton(
+                        onClick = { showLists = false }
+                    ) { Icon(Icons.Default.Close, null) }
+                },
+            )
+        }
+    }
+
     SheetDetails(
         onDismiss = onDismiss,
         content = {
@@ -105,6 +161,8 @@ fun ImageSheet(
                     isFavorite = isFavorite,
                     onFavorite = onFavorite,
                     onRemoveFromFavorite = onRemoveFromFavorite,
+                    showFavorite = showFavorite,
+                    onListClick = { showLists = true },
                     nsfwText = nsfwText,
                     actions = actions,
                     moreInfo = moreInfo,
@@ -116,6 +174,8 @@ fun ImageSheet(
                     isFavorite = isFavorite,
                     onFavorite = onFavorite,
                     onRemoveFromFavorite = onRemoveFromFavorite,
+                    showFavorite = showFavorite,
+                    onListClick = { showLists = true },
                     nsfwText = nsfwText,
                     moreInfo = moreInfo,
                     actions = actions,
@@ -137,6 +197,8 @@ private fun SheetContent(
     isFavorite: Boolean,
     onFavorite: () -> Unit,
     onRemoveFromFavorite: () -> Unit,
+    showFavorite: Boolean,
+    onListClick: () -> Unit = {},
     actions: @Composable RowScope.() -> Unit = {},
     moreInfo: @Composable () -> Unit = {},
 ) {
@@ -218,19 +280,21 @@ private fun SheetContent(
                     },
                     actions = {
                         actions()
-                        IconButton(
-                            onClick = {
-                                if (isFavorite) {
-                                    onRemoveFromFavorite()
-                                } else {
-                                    onFavorite()
+                        if (showFavorite) {
+                            IconButton(
+                                onClick = {
+                                    if (isFavorite) {
+                                        onRemoveFromFavorite()
+                                    } else {
+                                        onFavorite()
+                                    }
                                 }
+                            ) {
+                                Icon(
+                                    if (isFavorite) Icons.Default.Favorite else Icons.Default.FavoriteBorder,
+                                    null
+                                )
                             }
-                        ) {
-                            Icon(
-                                if (isFavorite) Icons.Default.Favorite else Icons.Default.FavoriteBorder,
-                                null
-                            )
                         }
                     }
                 )
@@ -261,6 +325,12 @@ private fun SheetContent(
                         },
                         icon = { Icon(Icons.Default.Download, null) },
                         label = { Text(stringResource(Res.string.download)) },
+                    )
+                    NavigationBarItem(
+                        selected = false,
+                        onClick = onListClick,
+                        icon = { Icon(Icons.AutoMirrored.Filled.PlaylistAdd, null) },
+                        label = { Text(stringResource(Res.string.add_to_list)) },
                     )
                 }
             },
@@ -320,6 +390,8 @@ private fun VideoSheetContent(
     isFavorite: Boolean,
     onFavorite: () -> Unit,
     onRemoveFromFavorite: () -> Unit,
+    showFavorite: Boolean,
+    onListClick: () -> Unit = {},
     actions: @Composable RowScope.() -> Unit = {},
     moreInfo: @Composable () -> Unit = {},
 ) {
@@ -398,19 +470,21 @@ private fun VideoSheetContent(
                     },
                     actions = {
                         actions()
-                        IconButton(
-                            onClick = {
-                                if (isFavorite) {
-                                    onRemoveFromFavorite()
-                                } else {
-                                    onFavorite()
+                        if (showFavorite) {
+                            IconButton(
+                                onClick = {
+                                    if (isFavorite) {
+                                        onRemoveFromFavorite()
+                                    } else {
+                                        onFavorite()
+                                    }
                                 }
+                            ) {
+                                Icon(
+                                    if (isFavorite) Icons.Default.Favorite else Icons.Default.FavoriteBorder,
+                                    null
+                                )
                             }
-                        ) {
-                            Icon(
-                                if (isFavorite) Icons.Default.Favorite else Icons.Default.FavoriteBorder,
-                                null
-                            )
                         }
                     }
                 )
@@ -435,6 +509,12 @@ private fun VideoSheetContent(
                         },
                         icon = { Icon(Icons.Default.Download, null) },
                         label = { Text(stringResource(Res.string.download)) },
+                    )
+                    NavigationBarItem(
+                        selected = false,
+                        onClick = onListClick,
+                        icon = { Icon(Icons.AutoMirrored.Filled.PlaylistAdd, null) },
+                        label = { Text(stringResource(Res.string.add_to_list)) },
                     )
                 }
             },
@@ -510,6 +590,7 @@ fun MultipleImageSheet(
                             isFavorite = false,
                             onFavorite = {},
                             onRemoveFromFavorite = {},
+                            showFavorite = false,
                             nsfwText = "",
                             actions = actions,
                             moreInfo = moreInfo,
@@ -521,6 +602,7 @@ fun MultipleImageSheet(
                             isFavorite = false,
                             onFavorite = {},
                             onRemoveFromFavorite = {},
+                            showFavorite = false,
                             nsfwText = "",
                             moreInfo = moreInfo,
                             actions = actions,

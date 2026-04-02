@@ -445,6 +445,11 @@ fun FavoritesUI(
                                         Icon(Icons.AutoMirrored.Filled.ArrowRightAlt, null)
                                     }
                                 },
+                                id = sheetModel.id,
+                                name = "",
+                                type = FavoriteType.Image.name,
+                                description = sheetModel.modelId.toString(),
+                                hash = sheetModel.hash,
                                 moreInfo = {
                                     sheetModel.imageMetaDb?.let { meta ->
                                         Column(

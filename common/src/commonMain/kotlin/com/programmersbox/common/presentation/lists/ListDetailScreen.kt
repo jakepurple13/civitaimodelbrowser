@@ -124,7 +124,6 @@ import com.programmersbox.resources.remove_items
 import com.programmersbox.resources.remove_items_message
 import com.programmersbox.resources.rename_list
 import com.programmersbox.resources.rename_list_message
-import com.programmersbox.resources.search
 import com.programmersbox.resources.use_biometrics_to_view
 import com.programmersbox.resources.view_model
 import com.programmersbox.resources.yes
@@ -242,7 +241,7 @@ fun ListDetailScreen(
                     placeholder = {
                         Text(
                             modifier = Modifier.fillMaxWidth(),
-                            text = stringResource(Res.string.search),
+                            text = "Search ${list?.item?.name ?: "List"}",
                             textAlign = TextAlign.Center,
                         )
                     },
@@ -335,14 +334,23 @@ fun ListDetailScreen(
                                     TextButton(
                                         onClick = {
                                             sheetDetails = false
-                                            onNavigateToDetail(item.modelId.toString())
+                                            onNavigateToDetail(
+                                                item.description ?: item.modelId.toString()
+                                            )
                                         }
                                     ) {
                                         Text(stringResource(Res.string.view_model))
                                         Icon(Icons.AutoMirrored.Filled.ArrowRightAlt, null)
                                     }
                                 },
-                                moreInfo = {}
+                                id = item.id,
+                                name = item.name,
+                                type = item.type,
+                                description = item.description,
+                                hash = item.hash,
+                                creator = item.creatorName,
+                                creatorImage = item.creatorImage,
+                                showFavorite = false
                             )
                         }
                     }

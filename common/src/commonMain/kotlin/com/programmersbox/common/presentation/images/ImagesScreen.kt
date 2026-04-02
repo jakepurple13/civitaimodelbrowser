@@ -50,6 +50,7 @@ import com.programmersbox.common.ComposableUtils
 import com.programmersbox.common.CustomModelImage
 import com.programmersbox.common.DataStore
 import com.programmersbox.common.adaptiveGridCell
+import com.programmersbox.common.db.FavoriteType
 import com.programmersbox.common.db.FavoritesDao
 import com.programmersbox.common.paging.itemKeyIndexed
 import com.programmersbox.common.presentation.components.ImageSheet
@@ -75,6 +76,7 @@ import dev.chrisbanes.haze.HazeProgressive
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.koinInject
 import org.koin.compose.viewmodel.koinViewModel
+import kotlin.random.Random
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -120,6 +122,11 @@ fun CivitAiImagesScreen(
                     ) { Text(creator) }
                 }
             },
+            id = sheetModel.id?.toLongOrNull() ?: remember { Random.nextLong() },
+            name = "",
+            type = FavoriteType.Image.name,
+            hash = sheetModel.hash,
+            creator = sheetModel.username,
             moreInfo = {
                 sheetModel.meta?.let { meta ->
                     Column(

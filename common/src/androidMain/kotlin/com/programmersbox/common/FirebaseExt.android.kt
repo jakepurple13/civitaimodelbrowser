@@ -7,8 +7,10 @@ import com.google.firebase.crashlytics.crashlytics
 import com.google.firebase.perf.performance
 
 actual fun logToFirebase(message: Any) {
-    runCatching { Firebase.crashlytics.log(message.toString()) }
-        .onFailure { println(message) }
+    runCatching {
+        Firebase.crashlytics.log(message.toString())
+        println(message)
+    }.onFailure { println(message) }
 }
 
 actual fun analyticsEvent(name: String, params: Map<String, Any>) {

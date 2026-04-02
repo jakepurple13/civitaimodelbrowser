@@ -222,7 +222,7 @@ class BackupRepository(
                         val duration = measureTime {
                             backupItems
                                 .notes
-                                ?.forEach { notesDao.insert(it) }
+                                ?.let { notesDao.insertNotes(it) }
                         }
                         logToFirebase("Restored ${backupItems.notes?.size ?: 0} notes in $duration")
                     }

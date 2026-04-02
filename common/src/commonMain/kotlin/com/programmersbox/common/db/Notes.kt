@@ -2,7 +2,6 @@ package com.programmersbox.common.db
 
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.Stable
-import androidx.room3.ColumnInfo
 import androidx.room3.Dao
 import androidx.room3.Delete
 import androidx.room3.Entity
@@ -29,6 +28,9 @@ data class Notes(
 interface NotesDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insert(note: Notes)
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertNotes(note: List<Notes>)
 
     @Delete
     suspend fun delete(note: Notes)

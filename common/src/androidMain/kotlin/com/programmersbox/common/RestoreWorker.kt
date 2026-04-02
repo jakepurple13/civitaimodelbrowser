@@ -33,7 +33,11 @@ class RestoreWorker(
         val includeNotes = inputData.getBoolean("includeNotes", false)
         val listsToInclude = inputData.getStringArray("listsToInclude")?.toList() ?: emptyList()
 
-        println("Will restore $includeFavorites $includeBlacklisted $includeSettings $includeSearchHistory")
+        println("Will restore favorites: $includeFavorites")
+        println("Will restore blacklisted: $includeBlacklisted")
+        println("Will restore settings: $includeSettings")
+        println("Will restore search history: $includeSearchHistory")
+        println("Will restore notes: $includeNotes")
         println("Will restore lists: ${listsToInclude.size}")
 
         println("Restoring $file")

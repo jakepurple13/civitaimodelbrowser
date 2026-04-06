@@ -86,7 +86,7 @@ google-gms-google-services = { id = "com.google.gms.google-services", version.re
 google-firebase-crashlytics = { id = "com.google.firebase.crashlytics", version.ref = "googleFirebaseCrashlytics" }
 google-firebase-performance = { id = "com.google.firebase.firebase-perf", version.ref = "googlePerformancePlugin" }
 hotswan-compiler = { id = "com.github.skydoves.compose.hotswan.compiler", version = "1.1.2" }
-koin-compiler = { id = "io.insert-koin.compiler.plugin", version = "0.4.1" }
+koin-compiler = { id = "io.insert-koin.compiler.plugin", version = "0.6.2" }
 
 [libraries]
 alarmee = { module = "io.github.tweener:alarmee", version.ref = "alarmee" }

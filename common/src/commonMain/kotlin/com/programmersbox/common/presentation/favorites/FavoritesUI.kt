@@ -247,7 +247,22 @@ fun FavoritesUI(
                     ExpandedDockedSearchBarWithGap(
                         state = searchBarState,
                         inputField = inputField,
-                    ) {}
+                    ) {
+                        val searchList by remember {
+                            derivedStateOf {
+                                list
+                                    .filter { it.name.isNotEmpty() }
+                                    .take(3)
+                            }
+                        }
+
+                        searchList.forEachIndexed { index, info ->
+                            ListItem(
+                                headlineContent = { Text(info.name) },
+                            )
+                            if (index < searchList.lastIndex) HorizontalDivider()
+                        }
+                    }
 
                     val lazyListState = rememberLazyListState()
                     LaunchedEffect(typeList) {

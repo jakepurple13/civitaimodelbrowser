@@ -67,6 +67,7 @@ import androidx.compose.material3.TextButton
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.material3.rememberSearchBarState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
@@ -285,7 +286,23 @@ fun ListDetailScreen(
             ExpandedDockedSearchBarWithGap(
                 state = searchBarState,
                 inputField = inputField,
-            ) {}
+            ) {
+                val searchList by remember {
+                    derivedStateOf {
+                        viewModel
+                            .searchedList
+                            .filter { it.name.isNotEmpty() }
+                            .take(3)
+                    }
+                }
+
+                searchList.forEachIndexed { index, info ->
+                    ListItem(
+                        headlineContent = { Text(info.name) },
+                    )
+                    if (index < searchList.lastIndex) HorizontalDivider()
+                }
+            }
         }
     ) { padding ->
         LazyVerticalGrid(

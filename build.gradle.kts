@@ -7,7 +7,7 @@ plugins {
     alias(libs.plugins.android.application) apply false
     id("org.jetbrains.compose") version libs.versions.compose.version.get() apply false
     alias(libs.plugins.compose.compiler) apply false
-    id("com.codingfeline.buildkonfig") version "0.17.1" apply false
+    id("com.codingfeline.buildkonfig") version "0.18.0" apply false
     alias(libs.plugins.aboutLibraries) apply false
     alias(libs.plugins.easylauncher) apply false
     alias(libs.plugins.google.gms.google.services) apply false

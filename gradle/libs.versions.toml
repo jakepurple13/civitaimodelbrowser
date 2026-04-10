@@ -85,7 +85,7 @@ easylauncher = { id = "com.starter.easylauncher", version.ref = "easylauncher" }
 google-gms-google-services = { id = "com.google.gms.google-services", version.ref = "googleGmsGoogleServices" }
 google-firebase-crashlytics = { id = "com.google.firebase.crashlytics", version.ref = "googleFirebaseCrashlytics" }
 google-firebase-performance = { id = "com.google.firebase.firebase-perf", version.ref = "googlePerformancePlugin" }
-hotswan-compiler = { id = "com.github.skydoves.compose.hotswan.compiler", version = "1.2.0" }
+hotswan-compiler = { id = "com.github.skydoves.compose.hotswan.compiler", version = "1.2.1" }
 koin-compiler = { id = "io.insert-koin.compiler.plugin", version = "0.6.2" }
 
 [libraries]

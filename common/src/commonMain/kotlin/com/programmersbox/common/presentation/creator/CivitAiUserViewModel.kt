@@ -55,9 +55,7 @@ class CivitAiUserViewModel(
                     .flowOn(Dispatchers.IO)
                     .cachedIn(viewModelScope)
             }
-            .onEach {
-                pager.value = it
-            }
+            .onEach { pager.value = it }
             .launchIn(viewModelScope)
     }
 

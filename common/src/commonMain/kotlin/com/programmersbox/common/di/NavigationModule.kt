@@ -12,7 +12,6 @@ import androidx.compose.runtime.mutableStateListOf
 import androidx.navigation3.runtime.NavKey
 import androidx.navigation3.scene.DialogSceneStrategy
 import androidx.navigation3.ui.NavDisplay
-import com.programmersbox.common.DataStore
 import com.programmersbox.common.Screen
 import com.programmersbox.common.presentation.backup.BackupScreen
 import com.programmersbox.common.presentation.backup.RestoreScreen
@@ -36,7 +35,6 @@ import com.programmersbox.common.presentation.settings.NsfwSettingsScreen
 import com.programmersbox.common.presentation.settings.SettingsScreen
 import com.programmersbox.common.presentation.settings.StatsScreen
 import com.programmersbox.common.presentation.settings.ThemeSettingsScreen
-import kotlinx.coroutines.runBlocking
 import org.koin.compose.koinInject
 import org.koin.compose.viewmodel.koinViewModel
 import org.koin.core.annotation.KoinExperimentalAPI
@@ -273,21 +271,8 @@ private fun slideUpAnimation() = NavDisplay.transitionSpec {
     )
 }
 
-class NavigationHandler(
-    private val dataStore: DataStore
-) {
-    val backStack = mutableStateListOf<NavKey>(
-        Screen.List,
-        *listOfNotNull(
-            runBlocking {
-                if (dataStore.hasGoneThroughOnboarding.get()) {
-                    null
-                } else {
-                    Screen.Onboarding
-                }
-            }
-        ).toTypedArray()
-    )
+class NavigationHandler {
+    val backStack = mutableStateListOf<NavKey>(Screen.List)
 }
 
 expect fun Module.platformSettingsNavigation()

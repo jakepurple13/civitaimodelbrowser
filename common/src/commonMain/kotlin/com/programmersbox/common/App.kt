@@ -36,6 +36,12 @@ internal fun App(
 ) {
     val backStack = koinInject<NavigationHandler>().backStack
     val videoThumbnailFrameLoader = koinInject<VideoThumbnailFrameLoader>()
+    val dataStore = koinInject<DataStore>()
+
+    LaunchedEffect(Unit) {
+        if (!dataStore.hasGoneThroughOnboarding.get())
+            backStack.add(Screen.Onboarding)
+    }
 
     LaunchedEffect(Unit) {
         snapshotFlow { backStack.toList() }
@@ -79,6 +85,7 @@ internal fun App(
                         supportingPaneSceneStrategy,
                         DialogSceneStrategy()
                     ),
+                    sharedTransitionScope = this,
                     entryProvider = koinEntryProvider(),
                     transitionSpec = {
                         // Slide in from right when navigating forward

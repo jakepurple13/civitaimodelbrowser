@@ -20,11 +20,11 @@ version = "1.0-SNAPSHOT"
 
 android {
     namespace = "com.programmersbox.civitaimodelbrowser"
-    compileSdk = 36
+    compileSdk = 37
     defaultConfig {
         applicationId = "com.programmersbox.civitaimodelbrowser"
         minSdk = 28
-        targetSdk = 36
+        targetSdk = 37
         versionCode = 16
         versionName = libs.versions.appVersion.get()
     }

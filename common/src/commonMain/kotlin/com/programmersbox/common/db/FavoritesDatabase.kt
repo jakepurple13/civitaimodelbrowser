@@ -203,6 +203,7 @@ interface FavoritesDao {
         types: List<String>?
     ): Flow<List<FavoriteRoom>>
 
+    // language="RoomSql"
     @Transaction
     @Query(
         """
@@ -232,6 +233,36 @@ interface FavoritesDao {
         includeNsfw: Boolean
     ): Flow<List<FavoriteRoom>>
 
+    // language="RoomSql"
+    @Transaction
+    @Query(
+        """
+        SELECT * FROM favorite_table
+        WHERE 
+          -- 1. NSFW Filter
+          (:includeNsfw = 1 OR nsfw = 0)
+          
+          -- 2. Type Filter (If flag is TRUE, ignore list. If FALSE, check list)
+          AND (:filterAllTypes = 1 OR type IN (:filterTypes))
+          
+          -- 3. Search Filter (Handles Empty vs Search)
+          AND (
+             :query = '' 
+             OR id IN (
+                SELECT rowid FROM FavoriteRoomFts 
+                WHERE FavoriteRoomFts MATCH :query
+             )
+          )
+        ORDER BY RANDOM()
+    """
+    )
+    fun searchRandomFavorites(
+        query: String,
+        filterTypes: List<String>,
+        filterAllTypes: Boolean,
+        includeNsfw: Boolean
+    ): Flow<List<FavoriteRoom>>
+
     @Ignore
     fun ftsFavorites(
         query: String,
@@ -242,13 +273,22 @@ interface FavoritesDao {
         },
         includeNsfw: Boolean,
         type: List<String>,
-    ) = searchFavorites(
-        query = if (query.isBlank()) "" else "$query*",
-        includeNsfw = includeNsfw,
-        filterTypes = type,
-        filterAllTypes = type.isEmpty(),
-    )
-        .map { value -> value.map { favorite -> favorite.toModel(json) } }
+        isRandomSearch: Boolean = false
+    ) = if (isRandomSearch) {
+        searchRandomFavorites(
+            query = if (query.isBlank()) "" else "$query*",
+            includeNsfw = includeNsfw,
+            filterTypes = type,
+            filterAllTypes = type.isEmpty(),
+        )
+    } else {
+        searchFavorites(
+            query = if (query.isBlank()) "" else "$query*",
+            includeNsfw = includeNsfw,
+            filterTypes = type,
+            filterAllTypes = type.isEmpty(),
+        )
+    }.map { value -> value.map { favorite -> favorite.toModel(json) } }
 
     @Ignore
     fun searchForFavorites(

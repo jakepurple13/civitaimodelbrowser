@@ -30,7 +30,8 @@ class FavoritesViewModel(
             .ftsFavorites(
                 query = search.text.toString(),
                 type = filterList,
-                includeNsfw = includeNsfw
+                includeNsfw = includeNsfw,
+                isRandomSearch = sortedBy == SortedBy.Random
             )
             .map { list -> sortedBy.sorting(list) }
     }
@@ -71,5 +72,6 @@ enum class SortedBy(
                     .thenBy { it is FavoriteModel.Image }
             )
         }
-    )
+    ),
+    Random({ it })
 }

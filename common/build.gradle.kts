@@ -101,7 +101,6 @@ kotlin {
             api(libs.filekit.dialogs)
             api(libs.filekit.dialogs.compose)
 
-            implementation(libs.blurhash)
             implementation(libs.compose.multiplatform.media.player)
 
             api(libs.material.kolor)

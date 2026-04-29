@@ -40,7 +40,6 @@ fun rememberBlurKindState(
     val blurKind by dataStore.rememberBlurKind()
     val blurKindHazeState = rememberBlurKindHazeState(
         dataStore = dataStore,
-        showBlur = showBlur,
     )
     val blurKindLiquidState = rememberBlurKindLiquidState(
         dataStore = dataStore,

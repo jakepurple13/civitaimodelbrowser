@@ -12,7 +12,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.BlendMode
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.layout.ContentScale
-import com.brys.compose.blurhash.BlurHashImage
 import com.programmersbox.resources.Res
 import com.programmersbox.resources.civitai_logo
 import io.kamel.image.KamelImage

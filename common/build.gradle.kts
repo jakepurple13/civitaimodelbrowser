@@ -80,6 +80,7 @@ kotlin {
             //api(libs.androidx.lifecycle.runtime.compose)
             implementation(libs.ksoup)
             api(libs.haze)
+            api(libs.haze.blur)
             api(libs.haze.materials)
             api(libs.androidx.room.runtime)
             implementation(libs.androidx.sqlite.bundled)

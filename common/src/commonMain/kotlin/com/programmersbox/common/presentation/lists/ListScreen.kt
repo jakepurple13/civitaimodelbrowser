@@ -79,7 +79,7 @@ import com.programmersbox.resources.custom_lists
 import com.programmersbox.resources.last_updated
 import com.programmersbox.resources.list_name
 import com.programmersbox.resources.search_lists
-import dev.chrisbanes.haze.HazeProgressive
+import dev.chrisbanes.haze.blur.HazeProgressive
 import kotlinx.coroutines.launch
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.LocalDateTime

@@ -126,7 +126,7 @@ import com.programmersbox.resources.steps_with_param
 import com.programmersbox.resources.unfavorite
 import com.programmersbox.resources.view_creators_models
 import com.programmersbox.resources.view_model
-import dev.chrisbanes.haze.HazeProgressive
+import dev.chrisbanes.haze.blur.HazeProgressive
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.koinInject

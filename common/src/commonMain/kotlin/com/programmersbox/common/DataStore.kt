@@ -18,9 +18,9 @@ import androidx.datastore.preferences.core.floatPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.programmersbox.common.presentation.components.blurkind.BlurKind
-import dev.chrisbanes.haze.HazeStyle
-import dev.chrisbanes.haze.materials.CupertinoMaterials
-import dev.chrisbanes.haze.materials.HazeMaterials
+import dev.chrisbanes.haze.blur.HazeBlurStyle
+import dev.chrisbanes.haze.blur.materials.CupertinoMaterials
+import dev.chrisbanes.haze.blur.materials.HazeMaterials
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.IO
 import kotlinx.coroutines.SupervisorJob
@@ -350,7 +350,7 @@ enum class HazeBlur(
     };
 
     @Composable
-    abstract fun toHazeStyle(level: HazeLevel): HazeStyle
+    abstract fun toHazeStyle(level: HazeLevel): HazeBlurStyle
 }
 
 @Serializable

@@ -12,7 +12,8 @@ import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.unit.dp
 import com.kyant.backdrop.backdrops.layerBackdrop
 import com.programmersbox.common.DataStore
-import dev.chrisbanes.haze.HazeEffectScope
+import dev.chrisbanes.haze.blur.BlurVisualEffect
+import dev.chrisbanes.haze.blur.blurEffect
 import dev.chrisbanes.haze.hazeEffect
 import dev.chrisbanes.haze.hazeSource
 import kotlinx.serialization.Serializable
@@ -126,14 +127,18 @@ enum class BlurKind {
 fun Modifier.setBlurKind(
     blurKindState: BlurKindState,
     liquidGlassShape: () -> Shape = { RoundedCornerShape(1.dp) },
-    hazeScope: HazeEffectScope.() -> Unit = {}
+    hazeScope: BlurVisualEffect.() -> Unit = {}
 ) = if (blurKindState.showBlur) {
     when (blurKindState.blurKind) {
-        BlurKind.Haze -> hazeEffect(
-            state = blurKindState.hazeState.hazeState,
-            style = blurKindState.hazeState.hazeStyle,
-            block = hazeScope
-        )
+        BlurKind.Haze -> {
+            hazeEffect(state = blurKindState.hazeState.hazeState) {
+                blurEffect {
+                    style = blurKindState.hazeState.hazeStyle
+                    blurEnabled = blurKindState.showBlur
+                    hazeScope()
+                }
+            }
+        }
 
         BlurKind.LiquidGlass -> liquidGlassBlur(
             blurKindState = blurKindState,

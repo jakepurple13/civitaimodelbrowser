@@ -63,7 +63,7 @@ import com.programmersbox.common.presentation.components.blurkind.setBlurKind
 import com.programmersbox.common.presentation.components.blurkind.setBlurKindSource
 import com.programmersbox.common.presentation.components.videoloader.VideoThumbnailLoader
 import com.programmersbox.common.presentation.home.BlacklistHandling
-import dev.chrisbanes.haze.HazeProgressive
+import dev.chrisbanes.haze.blur.HazeProgressive
 import org.koin.compose.koinInject
 import org.koin.compose.viewmodel.koinViewModel
 import kotlin.random.Random

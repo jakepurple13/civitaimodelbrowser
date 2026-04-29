@@ -67,7 +67,7 @@ import com.programmersbox.common.presentation.components.CivitRail
 import com.programmersbox.common.presentation.components.blurkind.rememberBlurKindState
 import com.programmersbox.common.presentation.components.blurkind.setBlurKind
 import com.programmersbox.common.presentation.components.blurkind.setBlurKindSource
-import dev.chrisbanes.haze.HazeProgressive
+import dev.chrisbanes.haze.blur.HazeProgressive
 import kotlinx.collections.immutable.PersistentList
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.coroutines.flow.flowOf

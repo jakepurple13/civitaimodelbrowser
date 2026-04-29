@@ -60,7 +60,7 @@ import com.programmersbox.common.presentation.home.createDoubleClickBehaviorActi
 import com.programmersbox.common.presentation.home.modelItems
 import com.programmersbox.common.presentation.qrcode.QrCodeType
 import com.programmersbox.common.presentation.qrcode.ShareViaQrCode
-import dev.chrisbanes.haze.HazeProgressive
+import dev.chrisbanes.haze.blur.HazeProgressive
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.launch
 import org.koin.compose.koinInject

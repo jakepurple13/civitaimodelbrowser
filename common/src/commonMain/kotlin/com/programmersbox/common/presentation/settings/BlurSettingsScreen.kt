@@ -84,9 +84,9 @@ import com.programmersbox.resources.confirm
 import com.programmersbox.resources.progressive_blur_description
 import com.programmersbox.resources.show_blur
 import com.programmersbox.resources.use_progressive_blur
-import dev.chrisbanes.haze.HazeProgressive
 import dev.chrisbanes.haze.HazeState
-import dev.chrisbanes.haze.HazeStyle
+import dev.chrisbanes.haze.blur.HazeBlurStyle
+import dev.chrisbanes.haze.blur.HazeProgressive
 import dev.chrisbanes.haze.hazeEffect
 import dev.chrisbanes.haze.hazeSource
 import dev.chrisbanes.haze.rememberHazeState
@@ -392,7 +392,7 @@ private fun ColumnScope.HazeOptions(
 private fun MaterialsCard(
     name: String,
     state: HazeState,
-    style: HazeStyle,
+    style: HazeBlurStyle,
     modifier: Modifier = Modifier,
     shape: Shape = MaterialTheme.shapes.medium,
 ) {

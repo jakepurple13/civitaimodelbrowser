@@ -128,7 +128,7 @@ import com.programmersbox.resources.rename_list_message
 import com.programmersbox.resources.use_biometrics_to_view
 import com.programmersbox.resources.view_model
 import com.programmersbox.resources.yes
-import dev.chrisbanes.haze.HazeProgressive
+import dev.chrisbanes.haze.blur.HazeProgressive
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.koinInject

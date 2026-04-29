@@ -110,7 +110,7 @@ import com.programmersbox.common.presentation.components.blurkind.setBlurKind
 import com.programmersbox.common.presentation.components.blurkind.setBlurKindSource
 import com.programmersbox.common.presentation.components.videoloader.VideoThumbnailLoader
 import com.programmersbox.common.showRefreshButton
-import dev.chrisbanes.haze.HazeProgressive
+import dev.chrisbanes.haze.blur.HazeProgressive
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.launch

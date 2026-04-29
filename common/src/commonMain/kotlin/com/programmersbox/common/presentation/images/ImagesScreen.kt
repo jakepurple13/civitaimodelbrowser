@@ -72,7 +72,7 @@ import com.programmersbox.resources.sampler_with_param
 import com.programmersbox.resources.seed_with_param
 import com.programmersbox.resources.size_with_param
 import com.programmersbox.resources.steps_with_param
-import dev.chrisbanes.haze.HazeProgressive
+import dev.chrisbanes.haze.blur.HazeProgressive
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.koinInject
 import org.koin.compose.viewmodel.koinViewModel

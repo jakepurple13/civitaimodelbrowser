@@ -18,7 +18,7 @@ fun rememberBlurKindHazeState(
     val useProgressive by dataStore.rememberUseProgressive()
     val blurType by dataStore.rememberBlurType()
     val hazeStyle = blurType.toHazeStyle()
-    val hazeState = rememberHazeState(showBlur)
+    val hazeState = rememberHazeState()
 
     return remember(
         hazeState,

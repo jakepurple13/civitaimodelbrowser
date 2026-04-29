@@ -140,7 +140,7 @@ import com.programmersbox.common.presentation.lists.createDateTimeFormatItem
 import com.programmersbox.common.presentation.lists.toLocalDateTime
 import com.programmersbox.common.presentation.qrcode.QrCodeType
 import com.programmersbox.common.presentation.qrcode.ShareViaQrCode
-import dev.chrisbanes.haze.HazeProgressive
+import dev.chrisbanes.haze.blur.HazeProgressive
 import kotlinx.coroutines.launch
 import org.koin.compose.koinInject
 import org.koin.compose.viewmodel.koinViewModel

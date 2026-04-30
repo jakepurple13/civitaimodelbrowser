@@ -94,11 +94,11 @@ import com.programmersbox.common.db.CustomListInfo
 import com.programmersbox.common.db.FavoriteType
 import com.programmersbox.common.db.ListRepository
 import com.programmersbox.common.db.toImageHash
-import com.programmersbox.common.presentation.components.HideScreen
 import com.programmersbox.common.presentation.components.ImageSheet
 import com.programmersbox.common.presentation.components.LoadingImage
 import com.programmersbox.common.presentation.components.ModelCard
 import com.programmersbox.common.presentation.components.ModelOptionsSheet
+import com.programmersbox.common.presentation.components.SecureScreenWrapper
 import com.programmersbox.common.presentation.components.blurkind.rememberBlurKindState
 import com.programmersbox.common.presentation.components.blurkind.setBlurKind
 import com.programmersbox.common.presentation.components.blurkind.setBlurKindSource
@@ -150,281 +150,281 @@ fun ListDetailScreen(
 
     val list = viewModel.customList
 
-    list?.let { HideScreen(it.item.useBiometric) }
+    SecureScreenWrapper(list?.item?.useBiometric ?: false) {
+        var showInfo by remember { mutableStateOf(false) }
+        val sheetState = rememberModalBottomSheetState(true)
 
-    var showInfo by remember { mutableStateOf(false) }
-    val sheetState = rememberModalBottomSheetState(true)
+        var showRemoveItems by remember { mutableStateOf(false) }
 
-    var showRemoveItems by remember { mutableStateOf(false) }
+        if (showRemoveItems) {
+            list?.let {
+                ModalBottomSheet(
+                    onDismissRequest = { showRemoveItems = false },
+                    sheetState = rememberModalBottomSheetState(true),
+                    containerColor = MaterialTheme.colorScheme.surface,
+                ) {
+                    RemoveItemsSheet(
+                        customList = it,
+                        showNsfw = showNsfw,
+                        blurStrength = blurStrength.dp,
+                        onDismiss = { showRemoveItems = false },
+                    )
+                }
+            }
+        }
 
-    if (showRemoveItems) {
-        list?.let {
-            ModalBottomSheet(
-                onDismissRequest = { showRemoveItems = false },
-                sheetState = rememberModalBottomSheetState(true),
-                containerColor = MaterialTheme.colorScheme.surface,
-            ) {
-                RemoveItemsSheet(
-                    customList = it,
+        var showDeleteDialog by remember { mutableStateOf(false) }
+
+        if (showDeleteDialog) {
+            AlertDialog(
+                onDismissRequest = { showDeleteDialog = false },
+                title = { Text(stringResource(Res.string.delete_list_title)) },
+                text = { Text(stringResource(Res.string.delete_list_message)) },
+                confirmButton = {
+                    TextButton(
+                        onClick = {
+                            viewModel.deleteAll()
+                            showDeleteDialog = false
+                        }
+                    ) { Text(stringResource(Res.string.yes)) }
+                },
+                dismissButton = {
+                    TextButton(
+                        onClick = { showDeleteDialog = false }
+                    ) { Text(stringResource(Res.string.no)) }
+                }
+            )
+        }
+
+        if (showInfo) {
+            list?.let { list ->
+                InfoSheet(
+                    customItem = list,
+                    sheetState = sheetState,
                     showNsfw = showNsfw,
                     blurStrength = blurStrength.dp,
-                    onDismiss = { showRemoveItems = false },
+                    rename = viewModel::rename,
+                    setBiometric = viewModel::setBiometric,
+                    onDismiss = { showInfo = false },
+                    onDeleteListAction = { showDeleteDialog = true },
+                    onRemoveItemsAction = { showRemoveItems = true },
+                    setNewCoverImage = { url, hash ->
+                        viewModel.setCoverImage(url, hash)
+                    },
+                    setDescription = viewModel::setDescription,
                 )
             }
         }
-    }
 
-    var showDeleteDialog by remember { mutableStateOf(false) }
+        val searchBarState = rememberSearchBarState()
 
-    if (showDeleteDialog) {
-        AlertDialog(
-            onDismissRequest = { showDeleteDialog = false },
-            title = { Text(stringResource(Res.string.delete_list_title)) },
-            text = { Text(stringResource(Res.string.delete_list_message)) },
-            confirmButton = {
-                TextButton(
-                    onClick = {
-                        viewModel.deleteAll()
-                        showDeleteDialog = false
-                    }
-                ) { Text(stringResource(Res.string.yes)) }
-            },
-            dismissButton = {
-                TextButton(
-                    onClick = { showDeleteDialog = false }
-                ) { Text(stringResource(Res.string.no)) }
-            }
-        )
-    }
-
-    if (showInfo) {
-        list?.let { list ->
-            InfoSheet(
-                customItem = list,
-                sheetState = sheetState,
-                showNsfw = showNsfw,
-                blurStrength = blurStrength.dp,
-                rename = viewModel::rename,
-                setBiometric = viewModel::setBiometric,
-                onDismiss = { showInfo = false },
-                onDeleteListAction = { showDeleteDialog = true },
-                onRemoveItemsAction = { showRemoveItems = true },
-                setNewCoverImage = { url, hash ->
-                    viewModel.setCoverImage(url, hash)
-                },
-                setDescription = viewModel::setDescription,
-            )
-        }
-    }
-
-    val searchBarState = rememberSearchBarState()
-
-    Scaffold(
-        topBar = {
-            val appBarWithSearchColors = SearchBarDefaults.appBarWithSearchColors(
-                searchBarColors = SearchBarDefaults.colors(
-                    containerColor = if (blurKindState.showBlur)
+        Scaffold(
+            topBar = {
+                val appBarWithSearchColors = SearchBarDefaults.appBarWithSearchColors(
+                    searchBarColors = SearchBarDefaults.colors(
+                        containerColor = if (blurKindState.showBlur)
+                            Color.Transparent
+                        else
+                            MaterialTheme.colorScheme.surfaceContainerHigh
+                    ),
+                    appBarContainerColor = if (blurKindState.showBlur)
                         Color.Transparent
                     else
-                        MaterialTheme.colorScheme.surfaceContainerHigh
-                ),
-                appBarContainerColor = if (blurKindState.showBlur)
-                    Color.Transparent
-                else
-                    MaterialTheme.colorScheme.surface
-            )
-
-            val inputField = @Composable {
-                SearchBarDefaults.InputField(
-                    searchBarState = searchBarState,
-                    textFieldState = viewModel.search,
-                    onSearch = {},
-                    placeholder = {
-                        Text(
-                            modifier = Modifier.fillMaxWidth(),
-                            text = "Search ${list?.item?.name ?: "List"}",
-                            textAlign = TextAlign.Center,
-                        )
-                    },
-                    trailingIcon = {
-                        AnimatedVisibility(
-                            viewModel.search.text.isNotEmpty(),
-                            enter = slideInHorizontally { it } + fadeIn(),
-                            exit = slideOutHorizontally { it } + fadeOut()
-                        ) {
-                            IconButton(
-                                onClick = { viewModel.search.clearText() }
-                            ) { Icon(Icons.Default.Clear, null) }
-                        }
-                    },
+                        MaterialTheme.colorScheme.surface
                 )
-            }
 
-            AppBarWithSearch(
-                state = searchBarState,
-                inputField = inputField,
-                navigationIcon = { BackButton() },
-                actions = {
-                    Text("(${list?.list?.size ?: 0})")
-                    IconButton(
-                        onClick = { showInfo = true }
-                    ) { Icon(Icons.Default.Info, null) }
-                },
-                colors = appBarWithSearchColors,
-                modifier = Modifier.setBlurKind(blurKindState) {
-                    progressive = if (blurKindState.hazeState.useProgressive)
-                        HazeProgressive.verticalGradient(
-                            startIntensity = 1f,
-                            endIntensity = 0f,
-                            preferPerformance = true
+                val inputField = @Composable {
+                    SearchBarDefaults.InputField(
+                        searchBarState = searchBarState,
+                        textFieldState = viewModel.search,
+                        onSearch = {},
+                        placeholder = {
+                            Text(
+                                modifier = Modifier.fillMaxWidth(),
+                                text = "Search ${list?.item?.name ?: "List"}",
+                                textAlign = TextAlign.Center,
+                            )
+                        },
+                        trailingIcon = {
+                            AnimatedVisibility(
+                                viewModel.search.text.isNotEmpty(),
+                                enter = slideInHorizontally { it } + fadeIn(),
+                                exit = slideOutHorizontally { it } + fadeOut()
+                            ) {
+                                IconButton(
+                                    onClick = { viewModel.search.clearText() }
+                                ) { Icon(Icons.Default.Clear, null) }
+                            }
+                        },
+                    )
+                }
+
+                AppBarWithSearch(
+                    state = searchBarState,
+                    inputField = inputField,
+                    navigationIcon = { BackButton() },
+                    actions = {
+                        Text("(${list?.list?.size ?: 0})")
+                        IconButton(
+                            onClick = { showInfo = true }
+                        ) { Icon(Icons.Default.Info, null) }
+                    },
+                    colors = appBarWithSearchColors,
+                    modifier = Modifier.setBlurKind(blurKindState) {
+                        progressive = if (blurKindState.hazeState.useProgressive)
+                            HazeProgressive.verticalGradient(
+                                startIntensity = 1f,
+                                endIntensity = 0f,
+                                preferPerformance = true
+                            )
+                        else
+                            null
+                    }
+                )
+
+                ExpandedDockedSearchBarWithGap(
+                    state = searchBarState,
+                    inputField = inputField,
+                ) {
+                    val searchList by remember {
+                        derivedStateOf {
+                            viewModel
+                                .searchedList
+                                .filter { it.name.isNotEmpty() }
+                                .take(3)
+                        }
+                    }
+
+                    searchList.forEachIndexed { index, info ->
+                        ListItem(
+                            headlineContent = { Text(info.name) },
                         )
-                    else
-                        null
-                }
-            )
-
-            ExpandedDockedSearchBarWithGap(
-                state = searchBarState,
-                inputField = inputField,
-            ) {
-                val searchList by remember {
-                    derivedStateOf {
-                        viewModel
-                            .searchedList
-                            .filter { it.name.isNotEmpty() }
-                            .take(3)
+                        if (index < searchList.lastIndex) HorizontalDivider()
                     }
-                }
-
-                searchList.forEachIndexed { index, info ->
-                    ListItem(
-                        headlineContent = { Text(info.name) },
-                    )
-                    if (index < searchList.lastIndex) HorizontalDivider()
                 }
             }
-        }
-    ) { padding ->
-        LazyVerticalGrid(
-            contentPadding = padding,
-            verticalArrangement = Arrangement.spacedBy(4.dp),
-            horizontalArrangement = Arrangement.spacedBy(4.dp),
-            columns = adaptiveGridCell(minCount = 3),
-            modifier = Modifier
-                .fillMaxSize()
-                .setBlurKindSource(blurKindState)
-        ) {
-            items(viewModel.searchedList) { item ->
-                var sheetDetails by remember { mutableStateOf(false) }
-                when (item.favoriteType) {
-                    FavoriteType.Model -> {
-                        if (sheetDetails) {
-                            ModelOptionsSheet(
-                                id = item.modelId,
-                                imageUrl = item.imageUrl.orEmpty(),
-                                hash = item.hash,
-                                type = item.type,
-                                name = item.name,
-                                nsfw = item.nsfw,
-                                creatorName = item.creatorName,
-                                creatorImage = item.creatorImage,
-                                description = item.description,
-                                showSheet = sheetDetails,
-                                onDialogDismiss = { sheetDetails = false },
-                                onNavigateToDetail = onNavigateToDetail,
-                                onNavigateToUser = onNavigateToUser,
-                            )
+        ) { padding ->
+            LazyVerticalGrid(
+                contentPadding = padding,
+                verticalArrangement = Arrangement.spacedBy(4.dp),
+                horizontalArrangement = Arrangement.spacedBy(4.dp),
+                columns = adaptiveGridCell(minCount = 3),
+                modifier = Modifier
+                    .fillMaxSize()
+                    .setBlurKindSource(blurKindState)
+            ) {
+                items(viewModel.searchedList) { item ->
+                    var sheetDetails by remember { mutableStateOf(false) }
+                    when (item.favoriteType) {
+                        FavoriteType.Model -> {
+                            if (sheetDetails) {
+                                ModelOptionsSheet(
+                                    id = item.modelId,
+                                    imageUrl = item.imageUrl.orEmpty(),
+                                    hash = item.hash,
+                                    type = item.type,
+                                    name = item.name,
+                                    nsfw = item.nsfw,
+                                    creatorName = item.creatorName,
+                                    creatorImage = item.creatorImage,
+                                    description = item.description,
+                                    showSheet = sheetDetails,
+                                    onDialogDismiss = { sheetDetails = false },
+                                    onNavigateToDetail = onNavigateToDetail,
+                                    onNavigateToUser = onNavigateToUser,
+                                )
+                            }
                         }
-                    }
 
-                    FavoriteType.Image -> {
-                        if (sheetDetails) {
-                            ImageSheet(
-                                url = item.imageUrl.orEmpty(),
-                                isNsfw = item.nsfw,
-                                isFavorite = false,
-                                onFavorite = {},
-                                onRemoveFromFavorite = {},
-                                onDismiss = { sheetDetails = false },
-                                nsfwText = stringResource(Res.string.nsfw),
-                                actions = {
-                                    TextButton(
-                                        onClick = {
-                                            sheetDetails = false
-                                            onNavigateToDetail(
-                                                item.description ?: item.modelId.toString()
-                                            )
+                        FavoriteType.Image -> {
+                            if (sheetDetails) {
+                                ImageSheet(
+                                    url = item.imageUrl.orEmpty(),
+                                    isNsfw = item.nsfw,
+                                    isFavorite = false,
+                                    onFavorite = {},
+                                    onRemoveFromFavorite = {},
+                                    onDismiss = { sheetDetails = false },
+                                    nsfwText = stringResource(Res.string.nsfw),
+                                    actions = {
+                                        TextButton(
+                                            onClick = {
+                                                sheetDetails = false
+                                                onNavigateToDetail(
+                                                    item.description ?: item.modelId.toString()
+                                                )
+                                            }
+                                        ) {
+                                            Text(stringResource(Res.string.view_model))
+                                            Icon(Icons.AutoMirrored.Filled.ArrowRightAlt, null)
                                         }
-                                    ) {
-                                        Text(stringResource(Res.string.view_model))
-                                        Icon(Icons.AutoMirrored.Filled.ArrowRightAlt, null)
-                                    }
-                                },
-                                id = item.id,
-                                name = item.name,
-                                type = item.type,
-                                description = item.description,
-                                hash = item.hash,
-                                creator = item.creatorName,
-                                creatorImage = item.creatorImage,
-                                showFavorite = false
-                            )
+                                    },
+                                    id = item.id,
+                                    name = item.name,
+                                    type = item.type,
+                                    description = item.description,
+                                    hash = item.hash,
+                                    creator = item.creatorName,
+                                    creatorImage = item.creatorImage,
+                                    showFavorite = false
+                                )
+                            }
                         }
+
+                        FavoriteType.Creator -> {}
                     }
 
-                    FavoriteType.Creator -> {}
-                }
+                    if (useNewCardLook) {
+                        ModelCard(
+                            imageUrl = item.imageUrl.orEmpty(),
+                            name = item.name,
+                            type = item.type,
+                            isNsfw = item.nsfw,
+                            creatorImage = item.creatorImage,
+                            showNsfw = showNsfw,
+                            blurStrength = blurStrength.dp,
+                            blurHash = item.hash,
+                            onClick = dropUnlessResumed {
+                                when (item.favoriteType) {
+                                    FavoriteType.Model -> onNavigateToDetail(item.id.toString())
+                                    FavoriteType.Image -> sheetDetails = true
+                                    FavoriteType.Creator -> onNavigateToUser(item.name)
+                                }
+                            },
+                            onLongClick = { sheetDetails = true },
+                            isFavorite = false,
+                            isBlacklisted = false,
+                            modifier = Modifier.animateItem()
+                        )
+                    } else {
+                        CoverCard(
+                            imageUrl = item.imageUrl.orEmpty(),
+                            name = item.name,
+                            type = item.type,
+                            isNsfw = item.nsfw,
+                            creatorImage = item.creatorImage,
+                            showNsfw = showNsfw,
+                            blurStrength = blurStrength.dp,
+                            blurHash = item.hash,
+                            onClick = dropUnlessResumed {
+                                when (item.favoriteType) {
+                                    FavoriteType.Model -> onNavigateToDetail(item.id.toString())
+                                    FavoriteType.Image -> sheetDetails = true
+                                    FavoriteType.Creator -> onNavigateToUser(item.name)
+                                }
+                            },
+                            onLongClick = { sheetDetails = true },
+                            modifier = Modifier
+                                .size(
+                                    width = ComposableUtils.IMAGE_WIDTH,
+                                    height = ComposableUtils.IMAGE_HEIGHT
+                                )
+                                .clip(MaterialTheme.shapes.medium)
+                                .animateItem()
+                        )
+                    }
 
-                if (useNewCardLook) {
-                    ModelCard(
-                        imageUrl = item.imageUrl.orEmpty(),
-                        name = item.name,
-                        type = item.type,
-                        isNsfw = item.nsfw,
-                        creatorImage = item.creatorImage,
-                        showNsfw = showNsfw,
-                        blurStrength = blurStrength.dp,
-                        blurHash = item.hash,
-                        onClick = dropUnlessResumed {
-                            when (item.favoriteType) {
-                                FavoriteType.Model -> onNavigateToDetail(item.id.toString())
-                                FavoriteType.Image -> sheetDetails = true
-                                FavoriteType.Creator -> onNavigateToUser(item.name)
-                            }
-                        },
-                        onLongClick = { sheetDetails = true },
-                        isFavorite = false,
-                        isBlacklisted = false,
-                        modifier = Modifier.animateItem()
-                    )
-                } else {
-                    CoverCard(
-                        imageUrl = item.imageUrl.orEmpty(),
-                        name = item.name,
-                        type = item.type,
-                        isNsfw = item.nsfw,
-                        creatorImage = item.creatorImage,
-                        showNsfw = showNsfw,
-                        blurStrength = blurStrength.dp,
-                        blurHash = item.hash,
-                        onClick = dropUnlessResumed {
-                            when (item.favoriteType) {
-                                FavoriteType.Model -> onNavigateToDetail(item.id.toString())
-                                FavoriteType.Image -> sheetDetails = true
-                                FavoriteType.Creator -> onNavigateToUser(item.name)
-                            }
-                        },
-                        onLongClick = { sheetDetails = true },
-                        modifier = Modifier
-                            .size(
-                                width = ComposableUtils.IMAGE_WIDTH,
-                                height = ComposableUtils.IMAGE_HEIGHT
-                            )
-                            .clip(MaterialTheme.shapes.medium)
-                            .animateItem()
-                    )
                 }
-
             }
         }
     }

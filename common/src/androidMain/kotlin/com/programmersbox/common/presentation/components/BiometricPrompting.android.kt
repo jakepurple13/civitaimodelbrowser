@@ -14,6 +14,7 @@ import androidx.biometric.BiometricManager
 import androidx.biometric.PromptContentItemPlainText
 import androidx.biometric.compose.rememberAuthenticationLauncher
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -23,6 +24,8 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalView
+import androidx.compose.ui.window.DialogWindowProvider
 
 actual class BiometricPrompting(
     private val context: Context,
@@ -153,14 +156,25 @@ private fun AskForBiometricSetup(
     )
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 actual fun HideScreen(shouldHide: Boolean) {
-    val window = LocalActivity.current
+    val activity = LocalActivity.current
+    val view = LocalView.current
 
     DisposableEffect(shouldHide) {
+        val window = (view.parent as? DialogWindowProvider)?.window ?: activity?.window
         if (shouldHide) {
-            window?.window?.addFlags(WindowManager.LayoutParams.FLAG_SECURE)
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                activity?.setRecentsScreenshotEnabled(false)
+            }
+            window?.addFlags(WindowManager.LayoutParams.FLAG_SECURE)
         }
-        onDispose { window?.window?.clearFlags(WindowManager.LayoutParams.FLAG_SECURE) }
+        onDispose {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                activity?.setRecentsScreenshotEnabled(true)
+            }
+            window?.clearFlags(WindowManager.LayoutParams.FLAG_SECURE)
+        }
     }
 }

@@ -210,7 +210,7 @@ dependencies {
 }
 
 koinCompiler {
-    compileSafety = false
+    compileSafety = true
 }
 
 compose.resources {

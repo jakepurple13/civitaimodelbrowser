@@ -6,49 +6,49 @@ biometricauth = "1.1.0"
 biometricVersion = "1.4.0-alpha07"
 browser = "1.10.0"
 camerak = "0.4"
-chromaDial = "1.0.0-Alpha8"
+chromaDial = "1.0.0-Alpha10"
 composeMultiplatformMediaPlayerVersion = "1.0.53"
 composewebview = "1.0.0-beta-02"
-debugoverlay = "2.2.1"
+debugoverlay = "2.5.0"
 ffmpegPlatform = "8.0.1-1.5.13"
 gitlive = "2.4.0"
-haze = "2.0.0-alpha01"
+haze = "2.0.0-alpha02"
 javacv = "1.5.13"
 kmpIo = "0.3.0"
 kotlin-version = "2.3.21"
-agp-version = "9.1.1"
-compose-version = "1.11.0-rc01"
+agp-version = "9.2.1"
+compose-version = "1.11.0"
 kotlinMultiplatformAppdirsVersion = "2.0.0"
 kotlinNativeZxing = "3.0.2"
 kotlinxCollectionsImmutableVersion = "0.4.0"
 ksoup = "0.2.6"
 ktor-version = "3.4.3"
-kotlinx-datetime = "0.7.1"
-datastore-version = "1.3.0-alpha08"
-ktorMonitorLogging = "1.11.2"
+kotlinx-datetime = "0.8.0"
+datastore-version = "1.3.0-alpha09"
+ktorMonitorLogging = "1.13.0"
 material3Version = "1.11.0-alpha07"
-lifecycleViewmodelCompose = "2.11.0-alpha03"
+lifecycleViewmodelCompose = "2.11.0-beta01"
 materialKolorVersion = "5.0.0-alpha07"
 multiplatformMarkdownRenderer = "0.40.2"
 okio = "3.17.0"
-paging-version = "3.5.0-rc01"
+paging-version = "3.5.0"
 kamel-image = "1.0.9"
-kotlinx-coroutines-core = "1.10.2"
-androidx-material = "1.13.0"
+kotlinx-coroutines-core = "1.11.0"
+androidx-material = "1.14.0"
 
 ksp = "2.3.7"
-androidx-room = "3.0.0-alpha03"
+androidx-room = "3.0.0-alpha04"
 permissions = "0.20.1"
 sqlite = "2.6.2"
 
 cmp-nav3 = "1.1.1"
-cmp-navevent = "1.1.0-rc01"
+cmp-navevent = "1.1.0"
 cmpLifecycle = "2.11.0-beta01"
 cmp-nav3-material3 = "1.3.0-alpha07"
 
 koin = "4.2.1"
 
-filekit = "0.13.0"
+filekit = "0.14.1"
 
 qrose = "1.1.2"
 scanner = "0.7.1"
@@ -59,7 +59,7 @@ barcodeScanning = "17.3.0"
 
 connectivity = "2.4.1"
 
-aboutLibraries = "14.0.1"
+aboutLibraries = "14.2.0"
 workRuntimeKtx = "2.11.2"
 
 easylauncher = "6.4.1"
@@ -67,7 +67,7 @@ easylauncher = "6.4.1"
 googleGmsGoogleServices = "4.4.4"
 googleFirebaseCrashlytics = "3.0.7"
 googlePerformancePlugin = "2.0.2"
-firebaseBom = "34.12.0"
+firebaseBom = "34.13.0"
 firebase-cocoapods = "11.8.0"
 
 material3WindowSizeClassVersion = "1.9.0"
@@ -84,7 +84,7 @@ easylauncher = { id = "com.starter.easylauncher", version.ref = "easylauncher" }
 google-gms-google-services = { id = "com.google.gms.google-services", version.ref = "googleGmsGoogleServices" }
 google-firebase-crashlytics = { id = "com.google.firebase.crashlytics", version.ref = "googleFirebaseCrashlytics" }
 google-firebase-performance = { id = "com.google.firebase.firebase-perf", version.ref = "googlePerformancePlugin" }
-hotswan-compiler = { id = "com.github.skydoves.compose.hotswan.compiler", version = "1.2.9" }
+hotswan-compiler = { id = "com.github.skydoves.compose.hotswan.compiler", version = "1.3.2" }
 koin-compiler = { id = "io.insert-koin.compiler.plugin", version = "1.0.0-RC2" }
 
 [libraries]

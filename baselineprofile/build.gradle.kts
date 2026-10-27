@@ -18,7 +18,7 @@ android {
     }
 
     testOptions.managedDevices.allDevices {
-        // Used in CI. ATD images can't collect profiles, so use the full AOSP image
+        // ATD images can't collect profiles, so use the full AOSP image
         create<ManagedVirtualDevice>("pixel6Api34") {
             device = "Pixel 6"
             apiLevel = 34
@@ -32,11 +32,13 @@ android {
     }
 }
 
-val isCi = System.getenv("CI") != null
+// Pass -PuseManagedDevice to generate on the pixel6Api34 Gradle Managed Device instead of a
+// connected device or running emulator
+val useManagedDevice = providers.gradleProperty("useManagedDevice").isPresent
 
 baselineProfile {
-    if (isCi) managedDevices += "pixel6Api34"
-    useConnectedDevices = !isCi
+    if (useManagedDevice) managedDevices += "pixel6Api34"
+    useConnectedDevices = !useManagedDevice
 }
 
 dependencies {

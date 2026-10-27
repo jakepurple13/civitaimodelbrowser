@@ -55,16 +55,24 @@ jobs:
           sudo udevadm control --reload-rules
           sudo udevadm trigger --name-match=kvm
 
-      # Runs on the pixel6Api34 Gradle Managed Device (x86_64), so include the emulator ABI.
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v4
+
+      # The emulator is x86_64, so include the emulator ABI for this job only.
       # Release builds below don't pass this flag and stay arm64-only.
       - name: Generate Baseline and Startup Profiles
-        uses: gradle/gradle-build-action@v2
+        uses: reactivecircus/android-emulator-runner@v2
         with:
-          gradle-version: current
-          arguments: >-
-            :android:generateReleaseBaselineProfile
-            -PincludeEmulatorAbis
-            -Pandroid.testoptions.manageddevices.emulator.gpu=swiftshader_indirect
+          api-level: 34
+          target: google_apis
+          arch: x86_64
+          ram-size: 4096M
+          cores: 4
+          disk-size: 6000M
+          disable-animations: true
+          emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none
+          # Each script line runs in its own shell, so logcat and Gradle share one line
+          script: adb logcat -c && (adb logcat -v threadtime > logcat.txt &) && ./gradlew :android:generateReleaseBaselineProfile -PincludeEmulatorAbis --console=plain
 
       - uses: actions/upload-artifact@v4
         with:
@@ -75,7 +83,9 @@ jobs:
         if: failure()
         with:
           name: baseline-profile-test-results
-          path: baselineprofile/build/outputs/
+          path: |
+            baselineprofile/build/outputs/
+            logcat.txt
 
   aab:
     name: Generate AAB

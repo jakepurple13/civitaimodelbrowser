@@ -67,6 +67,11 @@ jobs:
           pkill -f KotlinCompileDaemon || true
           free -m
 
+      # The runner image ships emulator 37.2.12, which died mid-test with the swiftshader GLES
+      # renderer; the same journey passes on 37.3.x with swangle
+      - name: Update Android Emulator
+        run: yes | "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" --install emulator > /dev/null
+
       # The emulator is x86_64, so include the emulator ABI for this job only.
       # Release builds below don't pass this flag and stay arm64-only.
       - name: Generate Baseline and Startup Profiles
@@ -79,7 +84,7 @@ jobs:
           cores: 4
           disk-size: 6000M
           disable-animations: true
-          emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none
+          emulator-options: -no-window -gpu swangle_indirect -noaudio -no-boot-anim -camera-back none
           # Each script line runs in its own shell, so logcat and Gradle share one line
           script: adb logcat -c && (adb logcat -v threadtime > logcat.txt &) && ./gradlew :android:generateReleaseBaselineProfile -PincludeEmulatorAbis --console=plain
 

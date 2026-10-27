@@ -86,8 +86,9 @@ import com.programmersbox.resources.show_blur
 import com.programmersbox.resources.use_progressive_blur
 import dev.chrisbanes.haze.HazeState
 import dev.chrisbanes.haze.blur.HazeBlurStyle
-import dev.chrisbanes.haze.blur.HazeProgressive
-import dev.chrisbanes.haze.hazeEffect
+import dev.chrisbanes.haze.HazeProgressive
+import dev.chrisbanes.haze.HazeInput
+import dev.chrisbanes.haze.blur.hazeBlur
 import dev.chrisbanes.haze.hazeSource
 import dev.chrisbanes.haze.rememberHazeState
 import org.jetbrains.compose.resources.painterResource
@@ -264,14 +265,13 @@ fun BlurSettings(
                                 showBlur = true,
                                 bottomBarScrollBehavior = null,
                                 modifier = Modifier.setBlurKind(blurKindState) {
-                                    progressive = if (blurKindState.hazeState.useProgressive)
+                                    progressive(if (blurKindState.hazeState.useProgressive)
                                         HazeProgressive.verticalGradient(
                                             startIntensity = 0f,
-                                            endIntensity = 1f,
-                                            preferPerformance = true
+                                            endIntensity = 1f
                                         )
                                     else
-                                        null
+                                        null)
                                 }
                             )
                         }
@@ -407,7 +407,7 @@ private fun MaterialsCard(
         Box(
             Modifier
                 .fillMaxSize()
-                .hazeEffect(state = state, style = style)
+                .hazeBlur(input = HazeInput.Sources(state), style = style)
                 .padding(16.dp),
         ) {
             Text(name)

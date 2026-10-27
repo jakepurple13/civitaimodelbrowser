@@ -30,14 +30,71 @@ env:
   API_KEY: ${{ secrets.API_KEY }}
 
 jobs:
-  aab:
-    name: Generate AAB
+  baselineProfile:
+    name: Generate Baseline Profiles
     timeout-minutes: 60
-    continue-on-error: true
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
         uses: actions/checkout@v5
+
+      - run: |
+          echo $CIVIT_SERVICES > android/google-services.json
+        env:
+          CIVIT_SERVICES: ${{ secrets.CIVIT_SERVICES }}
+
+      - name: Setup JDK
+        uses: actions/setup-java@v5
+        with:
+          distribution: adopt
+          java-version: 21
+
+      - name: Enable KVM
+        run: |
+          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
+          sudo udevadm control --reload-rules
+          sudo udevadm trigger --name-match=kvm
+
+      # Runs on the pixel6Api34 Gradle Managed Device (x86_64), so include the emulator ABI.
+      # Release builds below don't pass this flag and stay arm64-only.
+      - name: Generate Baseline and Startup Profiles
+        uses: gradle/gradle-build-action@v2
+        with:
+          gradle-version: current
+          arguments: >-
+            :android:generateReleaseBaselineProfile
+            -PincludeEmulatorAbis
+            -Pandroid.testoptions.manageddevices.emulator.gpu=swiftshader_indirect
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: baseline-profiles
+          path: android/src/release/generated/baselineProfiles/
+
+      - uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: baseline-profile-test-results
+          path: baselineprofile/build/outputs/
+
+  aab:
+    name: Generate AAB
+    timeout-minutes: 60
+    continue-on-error: true
+    needs: baselineProfile
+    # Still build when profile generation fails; the committed profiles are used instead
+    if: ${{ !cancelled() }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+
+      - name: Download Baseline Profiles
+        uses: actions/download-artifact@v4
+        continue-on-error: true
+        with:
+          name: baseline-profiles
+          path: android/src/release/generated/baselineProfiles/
 
       - run: |
           echo $CIVIT_SERVICES > android/google-services.json
@@ -95,10 +152,20 @@ jobs:
     name: Generate Minified AAB
     timeout-minutes: 60
     continue-on-error: true
+    needs: baselineProfile
+    # Still build when profile generation fails; the committed profiles are used instead
+    if: ${{ !cancelled() }}
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
         uses: actions/checkout@v5
+
+      - name: Download Baseline Profiles
+        uses: actions/download-artifact@v4
+        continue-on-error: true
+        with:
+          name: baseline-profiles
+          path: android/src/release/generated/baselineProfiles/
 
       - run: |
           echo $CIVIT_SERVICES > android/google-services.json
@@ -157,10 +224,20 @@ jobs:
     name: Generate Apk
     timeout-minutes: 60
     continue-on-error: true
+    needs: baselineProfile
+    # Still build when profile generation fails; the committed profiles are used instead
+    if: ${{ !cancelled() }}
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
         uses: actions/checkout@v5
+
+      - name: Download Baseline Profiles
+        uses: actions/download-artifact@v4
+        continue-on-error: true
+        with:
+          name: baseline-profiles
+          path: android/src/release/generated/baselineProfiles/
 
       - run: |
           echo $CIVIT_SERVICES > android/google-services.json
@@ -221,10 +298,20 @@ jobs:
     name: Generate Minified Apk
     timeout-minutes: 60
     continue-on-error: true
+    needs: baselineProfile
+    # Still build when profile generation fails; the committed profiles are used instead
+    if: ${{ !cancelled() }}
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
         uses: actions/checkout@v5
+
+      - name: Download Baseline Profiles
+        uses: actions/download-artifact@v4
+        continue-on-error: true
+        with:
+          name: baseline-profiles
+          path: android/src/release/generated/baselineProfiles/
 
       - run: |
           echo $CIVIT_SERVICES > android/google-services.json

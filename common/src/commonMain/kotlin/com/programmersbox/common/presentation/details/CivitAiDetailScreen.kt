@@ -140,7 +140,7 @@ import com.programmersbox.common.presentation.lists.createDateTimeFormatItem
 import com.programmersbox.common.presentation.lists.toLocalDateTime
 import com.programmersbox.common.presentation.qrcode.QrCodeType
 import com.programmersbox.common.presentation.qrcode.ShareViaQrCode
-import dev.chrisbanes.haze.blur.HazeProgressive
+import dev.chrisbanes.haze.HazeProgressive
 import kotlinx.coroutines.launch
 import org.koin.compose.koinInject
 import org.koin.compose.viewmodel.koinViewModel
@@ -318,14 +318,13 @@ fun CivitAiDetailScreen(
                         else
                             TopAppBarDefaults.topAppBarColors(),
                         modifier = Modifier.setBlurKind(blurKindState) {
-                            progressive = if (blurKindState.hazeState.useProgressive)
+                            progressive(if (blurKindState.hazeState.useProgressive)
                                 HazeProgressive.verticalGradient(
                                     startIntensity = 1f,
-                                    endIntensity = 0f,
-                                    preferPerformance = true
+                                    endIntensity = 0f
                                 )
                             else
-                                null
+                                null)
                         }
                     )
                 },
@@ -902,14 +901,13 @@ private fun BottomBarContent(
         },
         containerColor = if (blurKindState.showBlur) Color.Transparent else BottomAppBarDefaults.containerColor,
         modifier = Modifier.setBlurKind(blurKindState) {
-            progressive = if (blurKindState.hazeState.useProgressive)
+            progressive(if (blurKindState.hazeState.useProgressive)
                 HazeProgressive.verticalGradient(
                     startIntensity = 0f,
-                    endIntensity = 1f,
-                    preferPerformance = true
+                    endIntensity = 1f
                 )
             else
-                null
+                null)
         }
     )
 }

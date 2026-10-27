@@ -41,3 +41,4 @@ rootProject.name = "civitaimodelbrowser"
 include(":android")
 include(":desktop")
 include(":common")
+include(":baselineprofile")

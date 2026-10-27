@@ -79,7 +79,7 @@ import com.programmersbox.resources.custom_lists
 import com.programmersbox.resources.last_updated
 import com.programmersbox.resources.list_name
 import com.programmersbox.resources.search_lists
-import dev.chrisbanes.haze.blur.HazeProgressive
+import dev.chrisbanes.haze.HazeProgressive
 import kotlinx.coroutines.launch
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.LocalDateTime
@@ -179,14 +179,13 @@ fun ListScreen(
                 )
                 else TopAppBarDefaults.topAppBarColors(),
                 modifier = Modifier.setBlurKind(blurKindState) {
-                    progressive = if (blurKindState.hazeState.useProgressive)
+                    progressive(if (blurKindState.hazeState.useProgressive)
                         HazeProgressive.verticalGradient(
                             startIntensity = 1f,
-                            endIntensity = 0f,
-                            preferPerformance = true
+                            endIntensity = 0f
                         )
                     else
-                        null
+                        null)
                 }
             )
         },
@@ -196,14 +195,13 @@ fun ListScreen(
                 showBlur = blurKindState.showBlur,
                 bottomBarScrollBehavior = bottomBarScrollBehavior,
                 modifier = Modifier.setBlurKind(blurKindState) {
-                    progressive = if (blurKindState.hazeState.useProgressive)
+                    progressive(if (blurKindState.hazeState.useProgressive)
                         HazeProgressive.verticalGradient(
                             startIntensity = 0f,
-                            endIntensity = 1f,
-                            preferPerformance = true
+                            endIntensity = 1f
                         )
                     else
-                        null
+                        null)
                 }
             )
         },

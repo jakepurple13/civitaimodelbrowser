@@ -38,7 +38,7 @@ actual fun BlurHashImage(hash: String, contentDescription: String, modifier: Mod
 @Composable
 fun ShaderBasedBlurhash(hash: String, contentDescription: String, modifier: Modifier) {
     val compositeRuntimeEffect = RuntimeShader(blurhashComposeSKSL)
-    val computedMatrix = remember { calculateColorMatrix(hash) } ?: return
+    val computedMatrix = remember(hash) { calculateColorMatrix(hash) } ?: return
     compositeRuntimeEffect.setFloatUniform(
         "num",
         computedMatrix.size.width.toFloat(),
@@ -70,10 +70,11 @@ fun ShaderBasedBlurhash(hash: String, contentDescription: String, modifier: Modi
 
 @Composable
 fun BitmapBasedBlurhash(hash: String, contentDescription: String, modifier: Modifier) {
-    val bitmap = remember { BlurHashDecoder.decode(hash, 32, 32) }
+    // Invalid or empty hashes can't be decoded, so draw nothing rather than crash
+    val bitmap = remember(hash) { BlurHashDecoder.decode(hash, 32, 32)?.asImageBitmap() } ?: return
 
     Image(
-        bitmap = bitmap?.asImageBitmap()!!,
+        bitmap = bitmap,
         contentDescription = contentDescription,
         modifier = modifier,
         // Consider making this configurable later on

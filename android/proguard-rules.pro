@@ -7,12 +7,6 @@
 # For more details, see
 #   http://developer.android.com/guide/developing/tools/proguard.html
 
-# Koin
--keep class org.koin.** { *; }
-
-# Ktor
--keep class io.ktor.** { *; }
-
 # Kotlinx Serialization
 -keepattributes *Annotation*, Enums
 -keepclassmembers class ** {
@@ -26,21 +20,6 @@
 -keep class * extends androidx.room3.RoomDatabase
 -keep class * extends androidx.room3.Entity
 -keep class * extends androidx.room3.Dao
-
-# Compose
--keep class androidx.compose.runtime.** { *; }
-
-# Firebase (if used and not already covered by its own rules)
--keep class com.google.firebase.** { *; }
-
-# Ksoup
--keep class com.fleeksoft.ksoup.** { *; }
-
-# Kamel
--keep class io.kamel.** { *; }
-
-# Datastore
--keep class androidx.datastore.** { *; }
 
 # Keep generic signatures and line numbers for better crash reports
 -keepattributes Signature

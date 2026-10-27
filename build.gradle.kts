@@ -7,7 +7,7 @@ plugins {
     alias(libs.plugins.android.application) apply false
     id("org.jetbrains.compose") version libs.versions.compose.version.get() apply false
     alias(libs.plugins.compose.compiler) apply false
-    id("com.codingfeline.buildkonfig") version "0.20.0" apply false
+    id("com.codingfeline.buildkonfig") version "0.23.0" apply false
     alias(libs.plugins.aboutLibraries) apply false
     alias(libs.plugins.easylauncher) apply false
     alias(libs.plugins.google.gms.google.services) apply false
@@ -15,4 +15,6 @@ plugins {
     alias(libs.plugins.google.firebase.performance) apply false
     alias(libs.plugins.hotswan.compiler) apply false
     alias(libs.plugins.koin.compiler) apply false
+    alias(libs.plugins.android.test) apply false
+    alias(libs.plugins.androidx.baselineprofile) apply false
 }

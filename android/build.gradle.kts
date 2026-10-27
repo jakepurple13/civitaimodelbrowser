@@ -6,6 +6,7 @@ plugins {
     alias(libs.plugins.compose.compiler)
     alias(libs.plugins.easylauncher)
     alias(libs.plugins.hotswan.compiler)
+    alias(libs.plugins.androidx.baselineprofile)
 }
 
 if (file("google-services.json").exists()) {
@@ -13,6 +14,23 @@ if (file("google-services.json").exists()) {
     apply(plugin = libs.plugins.google.gms.google.services.get().pluginId)
     apply(plugin = libs.plugins.google.firebase.crashlytics.get().pluginId)
     apply(plugin = libs.plugins.google.firebase.performance.get().pluginId)
+}
+
+baselineProfile {
+    // Keep generated profiles in src/<variant>/generated/baselineProfiles so they are committed
+    saveInSrc = true
+    // Regenerate manually with ./gradlew :android:generateReleaseBaselineProfile
+    automaticGenerationDuringBuild = false
+    // Also collects startup-prof.txt for R8 startup DEX layout optimization
+    dexLayoutOptimization = true
+    // Only run the generator; the macrobenchmarks are skipped during generation anyway
+    filter { include("com.programmersbox.civitaimodelbrowser.baselineprofile.BaselineProfileGenerator") }
+}
+
+// Profiles are generated on x86_64 emulators in CI, so pass -PincludeEmulatorAbis there
+val releaseAbis = buildList {
+    add("arm64-v8a")
+    if (providers.gradleProperty("includeEmulatorAbis").isPresent) add("x86_64")
 }
 
 group = "com.programmersbox"
@@ -61,17 +79,41 @@ android {
         }
 
         getByName("release") {
-            isMinifyEnabled = false
-        }
-
-        create("releaseMinified") {
             isMinifyEnabled = true
+            // Only ship 64-bit ARM native libs; x86/x86_64 are emulator-only and 32-bit adds ~4 MB
+            ndk { abiFilters += releaseAbis }
             isShrinkResources = true
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
         }
+
+        create("releaseMinified") {
+            isMinifyEnabled = true
+            // Only ship 64-bit ARM native libs; x86/x86_64 are emulator-only and 32-bit adds ~4 MB
+            ndk { abiFilters += releaseAbis }
+            isShrinkResources = true
+            proguardFiles(
+                getDefaultProguardFile("proguard-android-optimize.txt"),
+                "proguard-rules.pro"
+            )
+        }
+    }
+    sourceSets {
+        // releaseMinified matches release, so reuse the profiles generated for release
+        getByName("releaseMinified").baselineProfiles.directories.add("src/release/generated/baselineProfiles")
+    }
+}
+
+androidComponents {
+    // Release has no signing config (CI signs it), so sign the baseline profile / benchmark
+    // variants with the debug key so they can be installed on a device
+    onVariants(selector().withBuildType("nonMinifiedRelease")) {
+        it.signingConfig.from(android.signingConfigs.getByName("debug"))
+    }
+    onVariants(selector().withBuildType("benchmarkRelease")) {
+        it.signingConfig.from(android.signingConfigs.getByName("debug"))
     }
 }
 
@@ -89,5 +131,7 @@ dependencies {
     implementation(libs.androidx.material)
     implementation(project.dependencies.platform(libs.koin.bom))
     implementation(libs.koin.core)
+    implementation(libs.androidx.profileinstaller)
+    baselineProfile(project(":baselineprofile"))
     debugImplementation(libs.debugoverlay)
 }

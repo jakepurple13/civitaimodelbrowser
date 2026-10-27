@@ -128,7 +128,7 @@ import com.programmersbox.resources.rename_list_message
 import com.programmersbox.resources.use_biometrics_to_view
 import com.programmersbox.resources.view_model
 import com.programmersbox.resources.yes
-import dev.chrisbanes.haze.blur.HazeProgressive
+import dev.chrisbanes.haze.HazeProgressive
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.koinInject
@@ -271,14 +271,13 @@ fun ListDetailScreen(
                     },
                     colors = appBarWithSearchColors,
                     modifier = Modifier.setBlurKind(blurKindState) {
-                        progressive = if (blurKindState.hazeState.useProgressive)
+                        progressive(if (blurKindState.hazeState.useProgressive)
                             HazeProgressive.verticalGradient(
                                 startIntensity = 1f,
-                                endIntensity = 0f,
-                                preferPerformance = true
+                                endIntensity = 0f
                             )
                         else
-                            null
+                            null)
                     }
                 )
 

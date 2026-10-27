@@ -12,9 +12,10 @@ import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.unit.dp
 import com.kyant.backdrop.backdrops.layerBackdrop
 import com.programmersbox.common.DataStore
-import dev.chrisbanes.haze.blur.BlurVisualEffect
-import dev.chrisbanes.haze.blur.blurEffect
-import dev.chrisbanes.haze.hazeEffect
+import dev.chrisbanes.haze.HazeInput
+import dev.chrisbanes.haze.HazePerformanceMode
+import dev.chrisbanes.haze.blur.HazeBlurStyleScope
+import dev.chrisbanes.haze.blur.hazeBlur
 import dev.chrisbanes.haze.hazeSource
 import kotlinx.serialization.Serializable
 import org.koin.compose.koinInject
@@ -126,17 +127,21 @@ enum class BlurKind {
 fun Modifier.setBlurKind(
     blurKindState: BlurKindState,
     liquidGlassShape: () -> Shape = { RoundedCornerShape(1.dp) },
-    hazeScope: BlurVisualEffect.() -> Unit = {}
+    hazeScope: HazeBlurStyleScope.() -> Unit = {}
 ) = if (blurKindState.showBlur) {
     when (blurKindState.blurKind) {
         BlurKind.Haze -> {
-            hazeEffect(state = blurKindState.hazeState.hazeState) {
-                blurEffect {
-                    style = blurKindState.hazeState.hazeStyle
-                    blurEnabled = blurKindState.showBlur
+            hazeBlur(
+                input = HazeInput.Sources(blurKindState.hazeState.hazeState),
+                style = blurKindState.hazeState.hazeStyle.then {
+                    blurEnabled(blurKindState.showBlur)
                     hazeScope()
-                }
-            }
+                },
+                performanceMode = if (blurKindState.hazeState.useProgressive)
+                    HazePerformanceMode.Performance
+                else
+                    null
+            )
         }
 
         BlurKind.LiquidGlass -> liquidGlassBlur(

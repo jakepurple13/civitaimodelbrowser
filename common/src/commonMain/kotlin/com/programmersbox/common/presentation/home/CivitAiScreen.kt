@@ -110,7 +110,7 @@ import com.programmersbox.common.presentation.components.blurkind.setBlurKind
 import com.programmersbox.common.presentation.components.blurkind.setBlurKindSource
 import com.programmersbox.common.presentation.components.videoloader.VideoThumbnailLoader
 import com.programmersbox.common.showRefreshButton
-import dev.chrisbanes.haze.blur.HazeProgressive
+import dev.chrisbanes.haze.HazeProgressive
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.launch
@@ -181,14 +181,13 @@ fun CivitAiScreen(
                 onSortChange = { viewModel.sort = it },
                 onRefresh = lazyPagingItems::refresh,
                 modifier = Modifier.setBlurKind(blurKindState) {
-                    progressive = if (blurKindState.hazeState.useProgressive)
+                    progressive(if (blurKindState.hazeState.useProgressive)
                         HazeProgressive.verticalGradient(
                             startIntensity = 1f,
-                            endIntensity = 0f,
-                            preferPerformance = true
+                            endIntensity = 0f
                         )
                     else
-                        null
+                        null)
                 }
             )
         },
@@ -198,14 +197,13 @@ fun CivitAiScreen(
                 showBlur = blurKindState.showBlur,
                 bottomBarScrollBehavior = bottomBarScrollBehavior,
                 modifier = Modifier.setBlurKind(blurKindState) {
-                    progressive = if (blurKindState.hazeState.useProgressive)
+                    progressive(if (blurKindState.hazeState.useProgressive)
                         HazeProgressive.verticalGradient(
                             startIntensity = 0f,
-                            endIntensity = 1f,
-                            preferPerformance = true
+                            endIntensity = 1f
                         )
                     else
-                        null
+                        null)
                 }
             )
         },

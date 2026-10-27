@@ -19,6 +19,7 @@ import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.unit.dp
 import com.mikepenz.aboutlibraries.ui.compose.m3.LibrariesContainer
 import com.mikepenz.aboutlibraries.ui.compose.produceLibraries
+import com.mikepenz.aboutlibraries.ui.compose.variant.LibraryBadges
 import com.programmersbox.common.ApplicationInfo
 import com.programmersbox.common.BackButton
 import com.programmersbox.common.getPlatformName
@@ -55,7 +56,7 @@ fun AboutScreen() {
         LibrariesContainer(
             libraries = libraries,
             contentPadding = padding,
-            showDescription = true,
+            badges = LibraryBadges(description = true),
             header = {
                 item {
                     Column(

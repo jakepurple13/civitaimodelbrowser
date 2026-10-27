@@ -63,7 +63,7 @@ import com.programmersbox.common.presentation.components.blurkind.setBlurKind
 import com.programmersbox.common.presentation.components.blurkind.setBlurKindSource
 import com.programmersbox.common.presentation.components.videoloader.VideoThumbnailLoader
 import com.programmersbox.common.presentation.home.BlacklistHandling
-import dev.chrisbanes.haze.blur.HazeProgressive
+import dev.chrisbanes.haze.HazeProgressive
 import org.koin.compose.koinInject
 import org.koin.compose.viewmodel.koinViewModel
 import kotlin.random.Random
@@ -152,14 +152,13 @@ fun CivitAiModelImagesScreen(
                 )
                 else TopAppBarDefaults.topAppBarColors(),
                 modifier = Modifier.setBlurKind(blurKindState) {
-                    progressive = if (blurKindState.hazeState.useProgressive)
+                    progressive(if (blurKindState.hazeState.useProgressive)
                         HazeProgressive.verticalGradient(
                             startIntensity = 1f,
-                            endIntensity = 0f,
-                            preferPerformance = true
+                            endIntensity = 0f
                         )
                     else
-                        null
+                        null)
                 }
             )
         },

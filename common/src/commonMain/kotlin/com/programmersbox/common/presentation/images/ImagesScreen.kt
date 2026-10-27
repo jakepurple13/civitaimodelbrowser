@@ -72,7 +72,7 @@ import com.programmersbox.resources.sampler_with_param
 import com.programmersbox.resources.seed_with_param
 import com.programmersbox.resources.size_with_param
 import com.programmersbox.resources.steps_with_param
-import dev.chrisbanes.haze.blur.HazeProgressive
+import dev.chrisbanes.haze.HazeProgressive
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.koinInject
 import org.koin.compose.viewmodel.koinViewModel
@@ -225,14 +225,13 @@ fun CivitAiImagesScreen(
                 else
                     TopAppBarDefaults.topAppBarColors(),
                 modifier = Modifier.setBlurKind(blurKindState) {
-                    progressive = if (blurKindState.hazeState.useProgressive)
+                    progressive(if (blurKindState.hazeState.useProgressive)
                         HazeProgressive.verticalGradient(
                             startIntensity = 1f,
-                            endIntensity = 0f,
-                            preferPerformance = true
+                            endIntensity = 0f
                         )
                     else
-                        null
+                        null)
                 }
             )
         },

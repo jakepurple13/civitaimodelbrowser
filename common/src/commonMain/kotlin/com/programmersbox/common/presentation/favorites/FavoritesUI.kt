@@ -126,7 +126,7 @@ import com.programmersbox.resources.steps_with_param
 import com.programmersbox.resources.unfavorite
 import com.programmersbox.resources.view_creators_models
 import com.programmersbox.resources.view_model
-import dev.chrisbanes.haze.blur.HazeProgressive
+import dev.chrisbanes.haze.HazeProgressive
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.koinInject
@@ -179,14 +179,13 @@ fun FavoritesUI(
             ) {
                 Column(
                     modifier = Modifier.setBlurKind(blurKindState) {
-                        progressive = if (blurKindState.hazeState.useProgressive)
+                        progressive(if (blurKindState.hazeState.useProgressive)
                             HazeProgressive.verticalGradient(
                                 startIntensity = 1f,
-                                endIntensity = 0f,
-                                preferPerformance = true
+                                endIntensity = 0f
                             )
                         else
-                            null
+                            null)
                     }
                 ) {
                     val appBarWithSearchColors = SearchBarDefaults.appBarWithSearchColors(
@@ -372,14 +371,13 @@ fun FavoritesUI(
                 showBlur = blurKindState.showBlur,
                 bottomBarScrollBehavior = bottomBarScrollBehavior,
                 modifier = Modifier.setBlurKind(blurKindState) {
-                    progressive = if (blurKindState.hazeState.useProgressive)
+                    progressive(if (blurKindState.hazeState.useProgressive)
                         HazeProgressive.verticalGradient(
                             startIntensity = 0f,
-                            endIntensity = 1f,
-                            preferPerformance = true
+                            endIntensity = 1f
                         )
                     else
-                        null
+                        null)
                 }
             )
         },

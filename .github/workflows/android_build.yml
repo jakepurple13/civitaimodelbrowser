@@ -58,6 +58,15 @@ jobs:
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v4
 
+      # Build both APKs before the emulator boots, then stop the Gradle and Kotlin daemons so
+      # they don't compete with the emulator for memory (the emulator was being killed mid-test)
+      - name: Build Profile APKs
+        run: |
+          ./gradlew :android:assembleNonMinifiedRelease :baselineprofile:assembleNonMinifiedRelease -PincludeEmulatorAbis --console=plain
+          ./gradlew --stop
+          pkill -f KotlinCompileDaemon || true
+          free -m
+
       # The emulator is x86_64, so include the emulator ABI for this job only.
       # Release builds below don't pass this flag and stay arm64-only.
       - name: Generate Baseline and Startup Profiles
@@ -78,6 +87,12 @@ jobs:
         with:
           name: baseline-profiles
           path: android/src/release/generated/baselineProfiles/
+
+      - name: Check for OOM kills
+        if: failure()
+        run: |
+          free -m
+          sudo dmesg | grep -iE 'out of memory|oom|killed process' || echo "No OOM kills found"
 
       - uses: actions/upload-artifact@v4
         if: failure()

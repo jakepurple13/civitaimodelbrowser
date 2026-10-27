@@ -23,8 +23,6 @@ baselineProfile {
     automaticGenerationDuringBuild = false
     // Also collects startup-prof.txt for R8 startup DEX layout optimization
     dexLayoutOptimization = true
-    // Only run the generator; the macrobenchmarks are skipped during generation anyway
-    filter { include("com.programmersbox.civitaimodelbrowser.baselineprofile.BaselineProfileGenerator") }
 }
 
 // Profiles are generated on x86_64 emulators in CI, so pass -PincludeEmulatorAbis there
